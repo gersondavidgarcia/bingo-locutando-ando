@@ -5,20 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Pro - Bingo Locutando</title>
     <style>
-        :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; }
+        :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
         /* Header y Branding */
         .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; }
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 10px; }
-        .brand-text { color: var(--oro); font-size: 14px; letter-spacing: 1px; font-weight: bold; }
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 15px; }
+        
+        .brand-text { 
+            color: #ffffff; 
+            font-size: 20px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
         
         input#nombreUser { 
             padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
             font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
         }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 8px 0; font-weight: bold; min-height: 20px; }
-        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; }
 
         /* Panel Admin */
         #adminPanel { 
@@ -27,15 +35,19 @@
         }
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; display: flex; align-items: center; gap: 5px; }
         .btn-blue { background: #007bff; color: white; }
-        .btn-lock.abierto { background: #28a745; color: white; } 
+        
+        /* Verdes Diferenciados */
+        .btn-lock.abierto { background: var(--verde-claro); color: #000; } 
         .btn-lock.cerrado { background: #dc3545; color: white; } 
+        .btn-pagar { background: #28a745; color: white; }
+        
         .btn-reiniciar { background: #ff4444; color: white; }
-        .btn-undo { background: #6f42c1; color: white; } /* Color para Deshacer */
+        .btn-undo { background: #6f42c1; color: white; }
         .btn-grey { background: #444; color: white; border: 1px solid #666; }
 
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* Tablero y Separaciones */
+        /* Tablero */
         .tablero { 
             display: grid; grid-template-columns: repeat(var(--columnas), 1fr); 
             gap: 15px; padding: 15px; width: 100%; box-sizing: border-box;
@@ -45,34 +57,27 @@
         .carton { 
             background: #fff; border-radius: 4px; border: 2px solid #000; 
             overflow: hidden; display: flex; flex-direction: column;
-            box-shadow: 0 0 5px rgba(255,255,255,0.1);
         }
-        .carton-h { background: #222; color: var(--oro); font-size: 18px; padding: 5px; font-weight: bold; text-align: center; border-bottom: 2px solid #000; }
+        /* Texto de números de cartones en gris claro */
+        .carton-h { background: #333; color: #e0e0e0; font-size: 18px; padding: 5px; font-weight: bold; text-align: center; border-bottom: 2px solid #000; }
         
         .linea { 
             height: 48px; display: flex; align-items: center; justify-content: center; 
             font-size: 14px; font-weight: 900; cursor: pointer; 
-            border-bottom: 2px solid #000; /* Línea divisoria más oscura */
+            border-bottom: 2px solid #000; 
             padding: 0 8px; width: 100%; box-sizing: border-box; margin: 0;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            color: #000; /* Texto de nombres en negro sobre fondo claro */
+            color: #000;
         }
         .linea:last-child { border-bottom: none; }
 
-        /* Palabra LIBRE en tono claro */
-        .libre { color: #bbb !important; font-weight: normal; font-size: 12px; }
-
+        .libre { color: #ccc !important; font-weight: normal; font-size: 12px; }
         .nombre-largo { justify-content: flex-start !important; padding-left: 10px !important; }
 
         /* Estados */
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
-        .pagado { background-color: #4caf50 !important; color: #fff !important; }
+        .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
-
-        /* MODO CAPTURA */
-        .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
-        .modo-captura .tablero { transform: scale(0.55); transform-origin: top center; width: 180%; margin-left: -40%; gap: 6px; }
-        #btnVolver { display: none; position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: var(--oro); color: #000; padding: 10px 20px; z-index: 9999; border-radius: 30px; font-weight: bold; cursor: pointer; border: 2px solid #000; font-size: 12px; }
 
         @media (max-width: 700px) { :root { --columnas: 2; } }
     </style>
@@ -86,8 +91,8 @@
             <span id="msgLineas"></span>
         </div>
         <div class="brand-container">
-            <span class="brand-text">BINGO LOCUTANDO</span>
-            <button class="btn" style="background:var(--oro); margin-left: 15px;" onclick="toggleAdmin()">⚙️ ADMIN</button>
+            <span class="brand-text">🎰 BINGO LOCUTANDO</span>
+            <button class="btn" style="background:var(--oro)" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
     </div>
 
@@ -103,13 +108,12 @@
         <button class="btn btn-undo" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn btn-reiniciar" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
         <button class="btn" style="background:#6c757d; color:white" onclick="deseleccionarTodo()">🧹 LIMPIAR</button>
-        <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
-        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">🔓 LIBERAR</button>
+        <button class="btn btn-pagar" onclick="marcarAccion('pagado')">💰 PAGAR</button>
+        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">🔄 LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
     </div>
 
     <div class="tablero" id="tablero"></div>
-    <button id="btnVolver" onclick="desactivarCaptura()">⬅️ VOLVER</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -129,7 +133,7 @@
         const docRef = doc(db, "bingo", "tablero");
 
         let datos = [];
-        let historial = []; // Para el Deshacer
+        let historial = [];
         let seleccionados = [];
         let config = { admin: false, autoSel: false, bloqueado: false };
 
@@ -171,7 +175,7 @@
 
         async function guardarHistorial() {
             historial.push(JSON.parse(JSON.stringify(datos)));
-            if(historial.length > 10) historial.shift(); // Guardar solo los últimos 10 cambios
+            if(historial.length > 10) historial.shift();
         }
 
         window.deshacerAccion = async () => {
@@ -179,15 +183,12 @@
                 datos = historial.pop();
                 await updateDoc(docRef, { cartones: datos });
                 deseleccionarTodo();
-            } else {
-                alert("Nada que deshacer.");
-            }
+            } else alert("Nada que deshacer.");
         };
 
         async function manejarClick(c, l) {
             if(config.admin) {
                 const nombreClick = datos[c].lineas[l].nombre;
-                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
                 if (config.autoSel && nombreClick && nombreClick !== "") {
                     seleccionados = [];
                     datos.forEach((carton, ci) => {
@@ -195,8 +196,8 @@
                             if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
                         });
                     });
-                    document.getElementById("msgLineas").innerText = `| ${nombreClick} tiene ${seleccionados.length} líneas`;
                 } else {
+                    const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
                     if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
                     else seleccionados.push({c, l});
                 }
@@ -277,18 +278,7 @@
 
         window.deseleccionarTodo = () => {
             seleccionados = [];
-            document.getElementById("msgLineas").innerText = "";
             dibujar();
-        };
-
-        window.activarCaptura = () => {
-            document.body.classList.add("modo-captura");
-            document.getElementById("btnVolver").style.display = "block";
-        };
-
-        window.desactivarCaptura = () => {
-            document.body.classList.remove("modo-captura");
-            document.getElementById("btnVolver").style.display = "none";
         };
 
         function actualizarStats() {
