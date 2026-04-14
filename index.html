@@ -3,23 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Pro - Bingo Locutando</title>
+    <title>Bingo Pro - Iconos Finales</title>
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
-        /* Header y Branding */
         .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; }
         .brand-container { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 15px; }
         
         .brand-text { 
-            color: #ffffff; 
-            font-size: 20px; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 900;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #ffffff; font-size: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
         }
         
         input#nombreUser { 
@@ -27,54 +21,38 @@
             font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
         }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 8px 0; font-weight: bold; min-height: 20px; }
+        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        /* Panel Admin */
         #adminPanel { 
             background: #1a1a1a; padding: 10px; display: none; 
             justify-content: center; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #333;
         }
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; display: flex; align-items: center; gap: 5px; }
-        .btn-blue { background: #007bff; color: white; }
         
-        /* Verdes Diferenciados */
+        .btn-blue { background: #007bff; color: white; }
         .btn-lock.abierto { background: var(--verde-claro); color: #000; } 
         .btn-lock.cerrado { background: #dc3545; color: white; } 
         .btn-pagar { background: #28a745; color: white; }
-        
         .btn-reiniciar { background: #ff4444; color: white; }
         .btn-undo { background: #6f42c1; color: white; }
         .btn-grey { background: #444; color: white; border: 1px solid #666; }
 
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* Tablero */
-        .tablero { 
-            display: grid; grid-template-columns: repeat(var(--columnas), 1fr); 
-            gap: 15px; padding: 15px; width: 100%; box-sizing: border-box;
-        }
+        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; }
 
-        /* Cartones */
-        .carton { 
-            background: #fff; border-radius: 4px; border: 2px solid #000; 
-            overflow: hidden; display: flex; flex-direction: column;
-        }
-        /* Texto de números de cartones en gris claro */
+        .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
         .carton-h { background: #333; color: #e0e0e0; font-size: 18px; padding: 5px; font-weight: bold; text-align: center; border-bottom: 2px solid #000; }
         
         .linea { 
             height: 48px; display: flex; align-items: center; justify-content: center; 
-            font-size: 14px; font-weight: 900; cursor: pointer; 
-            border-bottom: 2px solid #000; 
-            padding: 0 8px; width: 100%; box-sizing: border-box; margin: 0;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            color: #000;
+            font-size: 14px; font-weight: 900; cursor: pointer; border-bottom: 2px solid #000; 
+            padding: 0 8px; width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000;
         }
         .linea:last-child { border-bottom: none; }
-
         .libre { color: #ccc !important; font-weight: normal; font-size: 12px; }
         .nombre-largo { justify-content: flex-start !important; padding-left: 10px !important; }
 
-        /* Estados */
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
@@ -107,17 +85,17 @@
         
         <button class="btn btn-undo" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn btn-reiniciar" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
+        
         <button class="btn" style="background:#6c757d; color:white" onclick="deseleccionarTodo()">🧹 LIMPIAR</button>
         <button class="btn btn-pagar" onclick="marcarAccion('pagado')">💰 PAGAR</button>
-        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">🔄 LIBERAR</button>
-        <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
+        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
     </div>
 
     <div class="tablero" id="tablero"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
@@ -166,7 +144,7 @@
                     if(texto.length > 13) lDiv.classList.add("nombre-largo");
                     if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                     lDiv.innerText = texto;
-                    lDiv.onclick = () => manejarClick(cIdx, lIdx);
+                    lDiv.onclick = () => manejarClick(cIdx, lDiv); // Pequeña corrección para enviar el elemento
                     div.appendChild(lDiv);
                 });
                 container.appendChild(div);
@@ -186,9 +164,16 @@
             } else alert("Nada que deshacer.");
         };
 
-        async function manejarClick(c, l) {
+        // Corrección ligera para manejarClick
+        async function manejarClick(c, lElemento) {
+            // Obtener el índice de la línea basado en su posición en el cartón
+            const lineas = lElemento.parentNode.querySelectorAll('.linea');
+            const l = Array.from(lineas).indexOf(lElemento);
+            
             if(config.admin) {
                 const nombreClick = datos[c].lineas[l].nombre;
+                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
+
                 if (config.autoSel && nombreClick && nombreClick !== "") {
                     seleccionados = [];
                     datos.forEach((carton, ci) => {
@@ -196,10 +181,11 @@
                             if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
                         });
                     });
+                    document.getElementById("msgLineas").innerText = `| ${nombreClick} tiene ${seleccionados.length} líneas`;
                 } else {
-                    const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
                     if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
                     else seleccionados.push({c, l});
+                    document.getElementById("msgLineas").innerText = ""; 
                 }
                 dibujar();
             } else {
@@ -214,11 +200,17 @@
             }
         }
 
-        window.toggleAdmin = () => {
+        window.toggleAdmin = async () => {
             if(!config.admin) {
-                if(prompt("Clave Admin:") === "1234") {
+                const passInput = prompt("Clave Admin:");
+                const snap = await getDoc(docRef);
+                const passDb = snap.data().pass; 
+
+                if(passInput === passDb) {
                     config.admin = true;
                     document.getElementById("adminPanel").style.display = "flex";
+                } else {
+                    alert("Clave incorrecta.");
                 }
             } else {
                 config.admin = false;
@@ -278,6 +270,7 @@
 
         window.deseleccionarTodo = () => {
             seleccionados = [];
+            document.getElementById("msgLineas").innerText = "";
             dibujar();
         };
 
