@@ -5,42 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Locutando Ando</title>
 
-<meta property="og:url" content="https://gersondavidgarcia.github.io/bingo-locutando-ando/">
-<meta property="og:title" content="🎰 BINGO LOCUTANDO ANDO">
-<meta property="og:image" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
-<meta property="og:image:secure_url" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="500">
-<meta property="og:image:height" content="500">
+    <meta property="og:url" content="https://gersondavidgarcia.github.io/bingo-locutando-ando/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🎰 BINGO LOCUTANDO ANDO">
+    <meta property="og:description" content="¡Reserva tus números en tiempo real!">
+    <meta property="og:image" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
+    <meta property="og:image:type" content="image/png">
 
-<link rel="icon" type="image/png" href="logo-locutando.png">
+    <link rel="icon" type="image/png" href="logo-locutando.png">
 
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER */
+        /* HEADER - Ajustado para alinear todo en una línea horizontal */
         .header { background: #111; padding: 5px 15px 0px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
         
         input#nombreUser { 
             padding: 10px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
-            font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
+            font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center; margin-bottom: 5px;
         }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 10px; padding-bottom: 5px; margin: 0; flex-wrap: wrap; }
-        .brand-logo-img { height: 70px; width: auto; display: block; }
-        .brand-text { color: #ffffff; font-size: 18px; text-transform: uppercase; font-weight: 900; }
+        .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 5px; margin: 0; }
+        .brand-logo-img { height: 60px; width: auto; display: block; }
+        .brand-text { color: #ffffff; font-size: 18px; text-transform: uppercase; font-weight: 900; margin: 0; white-space: nowrap; }
 
         .separador-oro { border-bottom: 4px solid var(--oro); width: 100%; margin: 0; }
 
-        /* BOTÓN VERIFICAR */
+        /* ICONO VERIFICAR - Sin texto, solo iconos */
         .btn-verificar { 
-            background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; 
-            font-weight: bold; cursor: pointer; font-size: 10px; text-transform: uppercase;
+            background: transparent; color: white; border: none; padding: 5px; border-radius: 5px; 
+            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-        .btn-verificar.activo { background: #28a745; }
+        .btn-verificar.activo { background: transparent; }
 
         /* PANEL ADMIN */
         #adminPanel { 
@@ -79,7 +80,15 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        @media (max-width: 700px) { :root { --columnas: 2; } .brand-text { font-size: 14px; } .brand-logo-img { height: 50px; } }
+        /* Ajustes Responsive para Móviles */
+        @media (max-width: 700px) { 
+            :root { --columnas: 2; } 
+            .brand-text { font-size: 12px; } /* Texto más pequeño en móvil para que quepa */
+            .brand-logo-img { height: 40px; } /* Logo más pequeño en móvil */
+            .btn { font-size: 8px; padding: 6px 10px; } /* Botones más pequeños */
+            .btn-verificar { font-size: 16px; padding: 3px; } /* Icono de verificar más pequeño */
+            .brand-container { gap: 5px; } /* Menos espacio entre elementos */
+        }
     </style>
 </head>
 <body>
@@ -93,7 +102,7 @@
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
-            <button id="btnVerificarManual" class="btn-verificar" onclick="toggleVerificar()">🔍 VERIFICAR</button>
+            <button id="btnVerificarManual" class="btn-verificar" onclick="toggleVerificar()" title="Verificar">🔍</button>
             <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
         <div class="separador-oro"></div>
@@ -124,18 +133,19 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Configuración de Firebase (asegúrate de que coincida con tu proyecto)
         const firebaseConfig = {
-            apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
-            authDomain: "bingo-locutando-ando.firebaseapp.com",
-            projectId: "bingo-locutando-ando",
-            storageBucket: "bingo-locutando-ando.firebasestorage.app",
-            messagingSenderId: "547896039173",
-            appId: "1:547896039173:web:e7f5389dde11af9078096c"
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROJECT_ID.firebaseapp.com",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_PROJECT_ID.appspot.com",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const docRef = doc(db, "bingo", "tablero");
+        const docRef = doc(db, "bingo", "tablero"); // Asegúrate de tener esta estructura en Firestore
 
         let datos = [];
         let historial = [];
@@ -143,6 +153,7 @@
         let config = { admin: false, autoSel: false, bloqueado: false };
         let modoVerificar = false;
 
+        // Escuchar cambios en la base de datos
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
                 const d = snap.data();
@@ -157,9 +168,14 @@
             }
         });
 
+        // Dibujar el tablero y los cartones
         function dibujar() {
             const container = document.getElementById("tablero");
             container.innerHTML = "";
+            if (!datos || datos.length === 0) {
+                container.innerHTML = "<p>Esperando datos o cargando...</p>";
+                return;
+            }
             datos.forEach((carton, cIdx) => {
                 const div = document.createElement("div");
                 div.className = "carton";
@@ -178,28 +194,33 @@
             });
         }
 
+        // Historial para deshacer acciones
         async function guardarHistorial() {
             historial.push(JSON.parse(JSON.stringify(datos)));
-            if(historial.length > 10) historial.shift();
+            if(historial.length > 10) historial.shift(); // Limitar historial
         }
 
+        // Activar/Desactivar modo verificar (solo iconos, sin texto)
         window.toggleVerificar = () => {
             modoVerificar = !modoVerificar;
             const btn = document.getElementById("btnVerificarManual");
-            btn.innerText = modoVerificar ? "✅ LISTO" : "🔍 VERIFICAR";
+            // Cambiar solo el icono
+            btn.innerText = modoVerificar ? "✅" : "🔍"; 
             btn.classList.toggle("activo");
             if(!modoVerificar) {
                 seleccionados = [];
-                document.getElementById("msgLineas").innerText = "";
+                document.getElementById("msgLineas").innerText = ""; // Limpiar mensaje de líneas
                 dibujar();
             }
         };
 
+        // Manejar clics en las líneas de los cartones
         async function manejarClick(c, lElemento) {
             const lineas = lElemento.parentNode.querySelectorAll('.linea');
             const l = Array.from(lineas).indexOf(lElemento);
             const nombreClick = datos[c].lineas[l].nombre;
 
+            // Modo Verificar (Usuario normal)
             if(modoVerificar && nombreClick && nombreClick !== "") {
                 seleccionados = [];
                 let listaCartones = [];
@@ -207,19 +228,22 @@
                     carton.lineas.forEach((linea, li) => {
                         if(linea.nombre === nombreClick) {
                             seleccionados.push({c: ci, l: li});
-                            listaCartones.push(ci + 1); // Añade el número del cartón cada vez que encuentre el nombre
+                            listaCartones.push(ci + 1); // Número del cartón
                         }
                     });
                 });
-                // Formato exacto: DAVID lleva 4 en cartones: 6, 6, 12, 12
-                document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartones.join(", ")}`;
+                // Mensaje detallado: DAVID lleva X líneas en cartones: Y, Y, Z...
+                document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} líneas en cartones: ${listaCartones.join(", ")}`;
                 dibujar();
                 return; 
             }
 
+            // Modo Admin
             if(config.admin) {
                 const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
+                
                 if (config.autoSel && nombreClick && nombreClick !== "") {
+                    // Autoselección de todas las líneas de la misma persona
                     seleccionados = [];
                     let listaCartonesAdmin = [];
                     datos.forEach((carton, ci) => {
@@ -230,50 +254,63 @@
                             }
                         });
                     });
-                    document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartonesAdmin.join(", ")}`;
+                    document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} líneas en cartones: ${listaCartonesAdmin.join(", ")}`;
                 } else {
+                    // Selección manual
                     if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
                     else seleccionados.push({c, l});
-                    document.getElementById("msgLineas").innerText = ""; 
+                    document.getElementById("msgLineas").innerText = ""; // Limpiar mensaje si selección manual
                 }
                 dibujar();
             } else {
-                if(config.bloqueado) return;
+                // Modo Usuario (Reservar línea)
+                if(config.bloqueado) return; // Bingo cerrado
                 const n = document.getElementById("nombreUser").value.trim().toUpperCase();
-                if(!n) return alert("ESCRIBE TU NOMBRE.");
+                if(!n) return alert("Por favor, ESCRIBE TU NOMBRE primero.");
                 if(datos[c].lineas[l].estado === "libre") {
-                    guardarHistorial();
-                    datos[c].lineas[l] = { nombre: n, estado: "reservado" };
-                    await updateDoc(docRef, { cartones: datos });
+                    await guardarHistorial(); // Guardar estado para deshacer
+                    datos[c].lineas[l] = { nombre: n, estado: "reservado" }; // Reservar
+                    await updateDoc(docRef, { cartones: datos }); // Actualizar base de datos
                 }
             }
         }
 
+        // --- Lógica del Panel de Administración ---
+
+        // Acceder al modo administrador
         window.toggleAdmin = async () => {
             if(!config.admin) {
-                const pass = prompt("Clave:");
+                const pass = prompt("Clave de Administrador:");
                 const snap = await getDoc(docRef);
-                if(pass === snap.data().pass) {
+                const passDb = snap.exists() ? snap.data().pass : ""; // Asegúrate de tener 'pass' en Firestore
+
+                if(pass === passDb) {
                     config.admin = true;
                     document.getElementById("adminPanel").style.display = "flex";
+                } else {
+                    alert("Clave incorrecta.");
                 }
             } else {
                 config.admin = false;
                 document.getElementById("adminPanel").style.display = "none";
-                seleccionados = [];
+                seleccionados = []; // Limpiar selecciones
+                document.getElementById("msgLineas").innerText = ""; // Limpiar mensaje de líneas
                 dibujar();
             }
         };
 
+        // Autoselección en Modo Admin
         window.toggleAutoSel = () => {
             config.autoSel = !config.autoSel;
             const btn = document.getElementById("btnAutoSel");
             btn.innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF";
             btn.style.background = config.autoSel ? "#28a745" : "#007bff";
-            if(config.autoSel) seleccionados = []; 
+            if(config.autoSel) seleccionados = []; // Limpiar selecciones manuales al activar
+            document.getElementById("msgLineas").innerText = ""; // Limpiar mensaje
             dibujar();
         };
 
+        // Activar/Desactivar Modo Captura (Zoom para pantallazos)
         window.activarCaptura = () => {
             document.body.classList.add('modo-captura');
             document.getElementById('volverArea').style.display = 'flex';
@@ -284,54 +321,93 @@
             document.getElementById('volverArea').style.display = 'none';
         };
 
+        // Acciones sobre líneas seleccionadas (Pagar/Liberar)
         window.marcarAccion = async (est) => {
-            if(seleccionados.length === 0) return;
-            guardarHistorial();
+            if(seleccionados.length === 0) return alert("Primero SELECCIONA líneas en los cartones.");
+            if (!confirm(`¿Estás seguro de marcar como '${est.toUpperCase()}' las ${seleccionados.length} líneas seleccionadas?`)) return;
+            
+            await guardarHistorial();
             seleccionados.forEach(s => {
                 datos[s.c].lineas[s.l].estado = est;
-                if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
+                if(est === 'libre') datos[s.c].lineas[s.l].nombre = ""; // Limpiar nombre si se libera
             });
-            seleccionados = [];
+            seleccionados = []; // Limpiar selecciones tras acción
+            document.getElementById("msgLineas").innerText = ""; // Limpiar mensaje
             await updateDoc(docRef, { cartones: datos });
         };
 
+        // Deshacer última acción (basado en historial)
         window.deshacerAccion = async () => {
             if(historial.length > 0) {
+                if (!confirm("¿Deshacer la última acción?")) return;
                 datos = historial.pop();
                 await updateDoc(docRef, { cartones: datos });
                 seleccionados = [];
+                document.getElementById("msgLineas").innerText = ""; 
                 dibujar();
+            } else {
+                alert("No hay acciones para deshacer.");
             }
         };
 
+        // Reiniciar todo el bingo (limpiar cartones)
         window.reiniciarBingo = async () => { 
-            if(confirm("¿ESTÁS SEGURO? Se borrarán todos los nombres.")) { 
-                guardarHistorial(); 
-                datos.forEach(carton => { carton.lineas.forEach(linea => { linea.nombre = ""; linea.estado = "libre"; }); }); 
+            if(confirm("⚠️ ¿ESTÁS SEGURO? Se borrarán TODOS los nombres y estados de reserva/pago. Esta acción NO se puede deshacer de forma sencilla.")) { 
+                await guardarHistorial(); 
+                datos.forEach(carton => { 
+                    carton.lineas.forEach(linea => { 
+                        linea.nombre = ""; 
+                        linea.estado = "libre"; 
+                    }); 
+                }); 
                 seleccionados = [];
+                document.getElementById("msgLineas").innerText = ""; 
                 await updateDoc(docRef, { cartones: datos }); 
+                alert("Bingo reiniciado correctamente.");
             } 
         };
 
-        window.toggleBloqueo = async () => await updateDoc(docRef, { bloqueado: !config.bloqueado });
+        // Bloquear/Desbloquear el bingo (permitir o no reservas)
+        window.toggleBloqueo = async () => {
+            if (!confirm(`¿${config.bloqueado ? 'ABRIR' : 'CERRAR'} el bingo para reservas de usuarios?`)) return;
+            await updateDoc(docRef, { bloqueado: !config.bloqueado });
+        };
         
+        // --- Gestión de Filas y Columnas ---
+
+        // Añadir/Quitar filas (líneas) por cartón
         window.gestionarFilas = async (cambio) => {
-            guardarHistorial();
+            if (!datos || datos.length === 0) return alert("No hay cartones para modificar.");
+            if (datos[0].lineas.length + cambio < 1) return alert("Debe haber al menos 1 línea por cartón.");
+            
+            if (!confirm(`¿${cambio > 0 ? 'Añadir' : 'Quitar'} una línea a TODOS los cartones?`)) return;
+            
+            await guardarHistorial();
             datos.forEach(c => {
-                if (cambio === 1) c.lineas.push({nombre: "", estado: "libre"});
-                else if (cambio === -1 && c.lineas.length > 1) c.lineas.pop();
+                if (cambio === 1) c.lineas.push({nombre: "", estado: "libre"}); // Añadir
+                else if (cambio === -1 && c.lineas.length > 1) c.lineas.pop(); // Quitar
             });
             await updateDoc(docRef, { cartones: datos });
         };
 
+        // Cambiar número de columnas (cartones por fila) - Visual
         window.cambiarCols = (v) => { 
             document.documentElement.style.setProperty('--columnas', v); 
             document.getElementById("valCol").innerText = v; 
         };
         
+        // --- Estadísticas ---
+
+        // Actualizar la barra de estadísticas (Libres, Reservados, Pagados)
         function actualizarStats() {
             let lib=0, res=0, pag=0;
-            datos.forEach(c => c.lineas.forEach(l => { if(l.estado==='libre') lib++; else if(l.estado==='reservado') res++; else pag++; }));
+            if (datos && datos.length > 0) {
+                datos.forEach(c => c.lineas.forEach(l => { 
+                    if(l.estado==='libre') lib++; 
+                    else if(l.estado==='reservado') res++; 
+                    else if(l.estado==='pagado') pag++; 
+                }));
+            }
             document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`;
         }
     </script>
