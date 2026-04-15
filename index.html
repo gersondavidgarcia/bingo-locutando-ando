@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Pro - Iconos Finales</title>
 
-    <meta property="og:url" content="https://gerson-david-garcia.github.io/bingo/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Bingo Locutando Ando">
     <meta property="og:description" content="¡Participa en nuestro bingo en vivo! Reserva tu lugar ahora.">
     <meta property="og:image" content="https://gerson-david-garcia.github.io/bingo/logo-locutando.png">
+    <meta property="og:image:secure_url" content="https://gerson-david-garcia.github.io/bingo/logo-locutando.png">
     <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="300">
-    <meta property="og:image:height" content="300">
+    <meta property="og:image:width" content="400">
+    <meta property="og:image:height" content="400">
+    <meta property="og:url" content="https://gerson-david-garcia.github.io/bingo/">
 
     <link rel="icon" type="image/png" href="icono-bingo.png">
 
@@ -28,8 +29,8 @@
             text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
         }
 
-        /* 2. LOGO MÁS GRANDE: Aumentado el tamaño del logo en el header */
-        .brand-logo-img { height: 70px; width: auto; }
+        /* 2. LOGO MÁS GRANDE: Aumentado de 70px a 90px */
+        .brand-logo-img { height: 90px; width: auto; }
         
         input#nombreUser { 
             padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
@@ -58,7 +59,7 @@
 
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* 3. SIN LÍNEA AMARILLA: Eliminado el border-bottom amarillo de la cabecera */
+        /* 3. BORDE BLANCO (Arriba y Lados, no abajo): Diseño de cabecera actualizado */
         .carton-h { 
             background: #222222; 
             color: #ffcc00; 
@@ -66,7 +67,11 @@
             padding: 8px; 
             font-weight: bold; 
             text-align: center; 
-            border-bottom: none; /* Línea amarilla eliminada */
+            /* Borde blanco arriba y lados, no abajo */
+            border-top: 2px solid #FFFFFF; 
+            border-left: 2px solid #FFFFFF; 
+            border-right: 2px solid #FFFFFF; 
+            border-bottom: none; 
         }
         
         .linea { 
@@ -82,7 +87,7 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        /* ESTILOS PARA MODO CAPTURA */
+        /* MODO CAPTURA */
         .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
         .modo-captura .tablero { transform: scale(0.7); margin-top: -50px; }
         #capAlert {
@@ -255,7 +260,6 @@
             }
         };
 
-        // 4. FUNCIONES DE CAPTURA: Restauradas las funciones JS para la captura
         window.activarCaptura = () => {
             document.body.classList.add('modo-captura');
             document.getElementById('capAlert').style.display = 'block';
