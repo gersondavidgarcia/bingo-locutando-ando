@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Pro - Zoom & Botón Volver Fijo</title>
+    <title>Bingo Pro - Final</title>
 
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER - Diseño compacto sin espacios muertos */
+        /* HEADER */
         .header { background: #111; padding: 5px 15px 0px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
         
         input#nombreUser { 
@@ -17,13 +17,12 @@
             font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
         }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
+        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        /* BRANDING - Pegado a la línea amarilla */
         .brand-container { display: flex; align-items: center; justify-content: center; gap: 20px; padding-bottom: 5px; margin: 0; }
-        .brand-logo-img { height: 90px; width: auto; display: block; } /* Logo resaltado a 90px */
+        .brand-logo-img { height: 90px; width: auto; display: block; }
         .brand-text { color: #ffffff; font-size: 20px; text-transform: uppercase; font-weight: 900; }
 
-        /* LÍNEA AMARILLA - Subida al máximo, pegada al branding */
         .separador-oro { border-bottom: 4px solid var(--oro); width: 100%; margin: 0; }
 
         /* PANEL ADMIN */
@@ -34,42 +33,37 @@
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* MODO CAPTURA - Limpieza Total y Zoom-Out */
+        /* MODO CAPTURA - Zoom y Botón Volver */
         .btn-volver-container { 
-            width: 100%; 
-            display: none; /* Oculto por defecto */
-            justify-content: center; 
-            padding: 25px 0; 
-            background: var(--fondo); 
-            position: fixed; /* Fijo abajo al estilo referencia */
-            bottom: 0; 
-            left: 0; 
-            z-index: 9999;
+            width: 100%; display: none; justify-content: center; padding: 25px 0; 
+            background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999;
         }
-        .btn-volver { background-color: var(--oro); color: #000; padding: 15px 50px; border-radius: 40px; font-size: 18px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .btn-volver { background-color: var(--oro); color: #000; padding: 15px 50px; border-radius: 40px; font-size: 18px; font-weight: 900; border: none; cursor: pointer; }
 
         .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
+        .modo-captura .btn-volver-container { display: flex !important; }
         
-        /* EL ZOOM: Achica el tablero a la mitad para que quepan todos los cartones */
         .modo-captura .tablero { 
             transform: scale(0.5); 
             transform-origin: top center; 
             width: 200%; 
             margin-left: -50%; 
             padding-top: 30px;
-            padding-bottom: 100px; /* Espacio para el botón de volver */
+            padding-bottom: 120px;
         }
 
         /* TABLERO Y CARTONES */
-        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; transition: transform 0.3s ease; }
+        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* CABECERA CON BORDES BLANCOS */
         .carton-h { 
             background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
             border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; 
         }
+
         .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; }
-        .linea:last-child { border-bottom: none; }
-        .libre { color: #ccc !important; font-weight: normal; font-size: 12px; }
+        .libre { color: #ccc !important; font-weight: normal; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
@@ -81,27 +75,29 @@
 
     <div class="header">
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ">
-        <div class="stats-bar" id="stats">LIBRES: 0 | RESERVADOS: 0 | PAGADOS: 0</div>
-        
+        <div class="stats-bar">
+            <span id="stats">LIBRES: 0 | RESERVADOS: 0 | PAGADOS: 0</span>
+            <span id="msgLineas"></span>
+        </div>
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
-            <button class="btn" style="background:var(--oro); margin-left: 10px; color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
+            <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
         <div class="separador-oro"></div>
     </div>
 
     <div id="adminPanel">
-        <button class="btn" style="background:#444; color:#fff" onclick="gestionarFilas(1)">+ FILA</button>
-        <button class="btn" style="background:#444; color:#fff" onclick="gestionarFilas(-1)">- FILA</button>
+        <button class="btn" style="background:#444; color:white" onclick="gestionarFilas(1)">+ FILA</button>
+        <button class="btn" style="background:#444; color:white" onclick="gestionarFilas(-1)">- FILA</button>
         <div class="col-control">
-            COL <input type="range" min="2" max="10" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
+            COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
         </div>
-        <button id="btnAutoSel" class="btn" style="background:#007bff; color:#fff" onclick="toggleAutoSel()">AUTO: OFF</button>
+        <button id="btnAutoSel" class="btn" style="background:#007bff; color:white" onclick="toggleAutoSel()">AUTOSELECCION: OFF</button>
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
-        <button class="btn" style="background:#6f42c1; color:#fff" onclick="deshacerAccion()">↩️ DESHACER</button>
-        <button class="btn" style="background:#28a745; color:#fff" onclick="marcarAccion('pagado')">💰 PAGAR</button>
-        <button class="btn" style="background:#dc3545; color:#fff" onclick="marcarAccion('libre')">❌ LIBERAR</button>
+        <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
+        <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
+        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
     </div>
 
@@ -183,11 +179,26 @@
         };
 
         async function manejarClick(c, lElemento) {
-            const l = Array.from(lElemento.parentNode.querySelectorAll('.linea')).indexOf(lElemento);
+            const lineas = lElemento.parentNode.querySelectorAll('.linea');
+            const l = Array.from(lineas).indexOf(lElemento);
+            
             if(config.admin) {
-                const ya = seleccionados.some(s => s.c === c && s.l === l);
-                if (ya) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
-                else seleccionados.push({c, l});
+                const nombreClick = datos[c].lineas[l].nombre;
+                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
+
+                if (config.autoSel && nombreClick && nombreClick !== "") {
+                    seleccionados = [];
+                    datos.forEach((carton, ci) => {
+                        carton.lineas.forEach((linea, li) => {
+                            if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
+                        });
+                    });
+                    document.getElementById("msgLineas").innerText = `| ${nombreClick} tiene ${seleccionados.length} líneas`;
+                } else {
+                    if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
+                    else seleccionados.push({c, l});
+                    document.getElementById("msgLineas").innerText = ""; 
+                }
                 dibujar();
             } else {
                 if(config.bloqueado) return;
@@ -219,21 +230,25 @@
 
         window.toggleAutoSel = () => {
             config.autoSel = !config.autoSel;
-            document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTO: ON" : "AUTO: OFF";
-            document.getElementById("btnAutoSel").style.background = config.autoSel ? "#28a745" : "#007bff";
+            const btn = document.getElementById("btnAutoSel");
+            btn.innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF";
+            btn.style.background = config.autoSel ? "#28a745" : "#007bff";
+            if(config.autoSel) seleccionados = []; 
+            dibujar();
         };
 
-        // CORRECCIÓN: Funciones de captura para mostrar/ocultar el botón
         window.activarCaptura = () => {
             document.body.classList.add('modo-captura');
-            document.getElementById('volverArea').style.display = 'flex'; // Muestra el botón
+            document.getElementById('volverArea').style.display = 'flex';
         };
+
         window.desactivarCaptura = () => {
             document.body.classList.remove('modo-captura');
-            document.getElementById('volverArea').style.display = 'none'; // Oculta el botón
+            document.getElementById('volverArea').style.display = 'none';
         };
 
         window.marcarAccion = async (est) => {
+            if(seleccionados.length === 0) return;
             guardarHistorial();
             seleccionados.forEach(s => {
                 datos[s.c].lineas[s.l].estado = est;
