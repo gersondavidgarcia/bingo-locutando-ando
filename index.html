@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Pro - Locutando Ando</title>
+    <title>Bingo Pro - Iconos Finales</title>
 
     <meta property="og:title" content="Bingo Locutando Ando">
     <meta property="og:description" content="¡Participa en nuestro bingo en vivo! Reserva tu lugar ahora.">
-    <meta property="og:image" content="https://gerson-david-garcia.github.io/bingo/logo-locutando.png">
+    <meta property="og:image" content="logo-locutando.png">
     <meta property="og:url" content="https://gerson-david-garcia.github.io/bingo/">
     <meta property="og:type" content="website">
 
@@ -17,39 +17,24 @@
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
-        /* Header y Branding */
-        .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; transition: 0.3s; }
-        
-        .brand-container { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 15px; 
-            margin-top: 15px; 
-            padding-right: 20px; 
-        }
+        .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; }
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 15px; }
         
         .brand-text { 
-            color: #ffffff; 
-            font-size: 20px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-            font-weight: 900;
-            margin-left: -20px; 
+            color: #ffffff; font-size: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
         }
 
-        .brand-logo-img {
-            height: 50px;
-            width: auto;
-        }
+        /* Ajuste para el logo en el header */
+        .brand-logo-img { height: 45px; width: auto; }
         
         input#nombreUser { 
             padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
             font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
         }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 8px 0; font-weight: bold; min-height: 20px; }
+        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        /* Panel Admin */
         #adminPanel { 
             background: #1a1a1a; padding: 10px; display: none; 
             justify-content: center; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #333;
@@ -64,14 +49,16 @@
         .btn-undo { background: #6f42c1; color: white; }
         .btn-grey { background: #444; color: white; border: 1px solid #666; }
 
+        .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
+
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; }
 
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* CABECERA: Fondo oscuro con número amarillo corregido */
+        /* CABECERA DE CARTÓN CORREGIDA: Fondo oscuro con número amarillo */
         .carton-h { 
             background: #222222; 
-            color: #ffcc00;      
+            color: #ffcc00; 
             font-size: 22px; 
             padding: 8px; 
             font-weight: bold; 
@@ -82,35 +69,47 @@
         .linea { 
             height: 48px; display: flex; align-items: center; justify-content: center; 
             font-size: 14px; font-weight: 900; cursor: pointer; border-bottom: 2px solid #000; 
-            padding: 0 8px; width: 100%; box-sizing: border-box; color: #000;
+            padding: 0 8px; width: 100%; box-sizing: border-box; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #000;
         }
+        .linea:last-child { border-bottom: none; }
         .libre { color: #ccc !important; font-weight: normal; font-size: 12px; }
+        .nombre-largo { justify-content: flex-start !important; padding-left: 10px !important; }
+
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
-        .sel { box-shadow: inset 0 0 0 5px #007bff !important; }
+        .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
+        @media (max-width: 700px) { :root { --columnas: 2; } }
     </style>
 </head>
 <body>
 
-    <div class="header" id="mainHeader">
+    <div class="header">
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ">
         <div class="stats-bar">
             <span id="stats">LIBRES: 0 | RESERVADOS: 0 | PAGADOS: 0</span>
+            <span id="msgLineas"></span>
         </div>
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
-            <button class="btn" style="background:var(--oro); margin-left: 10px;" onclick="toggleAdmin()">⚙️ ADMIN</button>
+            <button class="btn" style="background:var(--oro)" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
     </div>
 
     <div id="adminPanel">
         <button class="btn btn-grey" onclick="gestionarFilas(1)">+ FILA</button>
         <button class="btn btn-grey" onclick="gestionarFilas(-1)">- FILA</button>
+        <div class="col-control">
+            COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
+        </div>
+        <button id="btnAutoSel" class="btn btn-blue" onclick="toggleAutoSel()">AUTOSELECCION: OFF</button>
         <button id="btnBloqueo" class="btn btn-lock" onclick="toggleBloqueo()">🔓 ABIERTO</button>
+        
+        <button class="btn btn-undo" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn btn-reiniciar" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
+        
+        <button class="btn" style="background:#6c757d; color:white" onclick="deseleccionarTodo()">🧹 LIMPIAR</button>
         <button class="btn btn-pagar" onclick="marcarAccion('pagado')">💰 PAGAR</button>
         <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
     </div>
@@ -135,8 +134,9 @@
         const docRef = doc(db, "bingo", "tablero");
 
         let datos = [];
+        let historial = [];
         let seleccionados = [];
-        let config = { admin: false, bloqueado: false };
+        let config = { admin: false, autoSel: false, bloqueado: false };
 
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
@@ -164,6 +164,7 @@
                     const texto = linea.nombre || "LIBRE";
                     lDiv.className = `linea ${linea.estado}`;
                     if(texto === "LIBRE") lDiv.classList.add("libre");
+                    if(texto.length > 13) lDiv.classList.add("nombre-largo");
                     if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                     lDiv.innerText = texto;
                     lDiv.onclick = () => manejarClick(cIdx, lDiv);
@@ -173,19 +174,47 @@
             });
         }
 
+        async function guardarHistorial() {
+            historial.push(JSON.parse(JSON.stringify(datos)));
+            if(historial.length > 10) historial.shift();
+        }
+
+        window.deshacerAccion = async () => {
+            if(historial.length > 0) {
+                datos = historial.pop();
+                await updateDoc(docRef, { cartones: datos });
+                deseleccionarTodo();
+            } else alert("Nada que deshacer.");
+        };
+
         async function manejarClick(c, lElemento) {
             const lineas = lElemento.parentNode.querySelectorAll('.linea');
             const l = Array.from(lineas).indexOf(lElemento);
+            
             if(config.admin) {
+                const nombreClick = datos[c].lineas[l].nombre;
                 const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
-                if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
-                else seleccionados.push({c, l});
+
+                if (config.autoSel && nombreClick && nombreClick !== "") {
+                    seleccionados = [];
+                    datos.forEach((carton, ci) => {
+                        carton.lineas.forEach((linea, li) => {
+                            if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
+                        });
+                    });
+                    document.getElementById("msgLineas").innerText = `| ${nombreClick} tiene ${seleccionados.length} líneas`;
+                } else {
+                    if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
+                    else seleccionados.push({c, l});
+                    document.getElementById("msgLineas").innerText = ""; 
+                }
                 dibujar();
             } else {
                 if(config.bloqueado) return;
                 const n = document.getElementById("nombreUser").value.trim().toUpperCase();
                 if(!n) return alert("ESCRIBE TU NOMBRE.");
                 if(datos[c].lineas[l].estado === "libre") {
+                    guardarHistorial();
                     datos[c].lineas[l] = { nombre: n, estado: "reservado" };
                     await updateDoc(docRef, { cartones: datos });
                 }
@@ -196,21 +225,85 @@
             if(!config.admin) {
                 const passInput = prompt("Clave Admin:");
                 const snap = await getDoc(docRef);
-                if(passInput === snap.data().pass) {
+                const passDb = snap.data().pass; 
+
+                if(passInput === passDb) {
                     config.admin = true;
                     document.getElementById("adminPanel").style.display = "flex";
+                } else {
+                    alert("Clave incorrecta.");
                 }
             } else {
                 config.admin = false;
                 document.getElementById("adminPanel").style.display = "none";
-                seleccionados = [];
-                dibujar();
+                deseleccionarTodo();
             }
         };
 
-        window.reiniciarBingo = async () => { if(confirm("¿REINICIAR?")) { datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); await updateDoc(docRef, { cartones: datos }); } };
-        window.marcarAccion = async (est) => { seleccionados.forEach(s => { datos[s.c].lineas[s.l].estado = est; if(est==='libre') datos[s.c].lineas[s.l].nombre=""; }); seleccionados = []; await updateDoc(docRef, { cartones: datos }); };
-        function actualizarStats() { let lib=0, res=0, pag=0; datos.forEach(c => c.lineas.forEach(l => { if(l.estado==='libre') lib++; else if(l.estado==='reservado') res++; else pag++; })); document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`; }
+        window.reiniciarBingo = async () => {
+            if(confirm("¿REINICIAR TODO EL BINGO?")) {
+                guardarHistorial();
+                datos.forEach(carton => {
+                    carton.lineas.forEach(linea => {
+                        linea.nombre = "";
+                        linea.estado = "libre";
+                    });
+                });
+                deseleccionarTodo();
+                await updateDoc(docRef, { cartones: datos });
+            }
+        };
+
+        window.marcarAccion = async (est) => {
+            if(seleccionados.length === 0) return;
+            guardarHistorial();
+            seleccionados.forEach(s => {
+                datos[s.c].lineas[s.l].estado = est;
+                if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
+            });
+            deseleccionarTodo();
+            await updateDoc(docRef, { cartones: datos });
+        };
+
+        window.toggleAutoSel = () => {
+            config.autoSel = !config.autoSel;
+            document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF";
+            document.getElementById("btnAutoSel").style.background = config.autoSel ? "#28a745" : "#007bff";
+        };
+
+        window.toggleBloqueo = async () => {
+            await updateDoc(docRef, { bloqueado: !config.bloqueado });
+        };
+
+        window.gestionarFilas = async (cambio) => {
+            guardarHistorial();
+            datos.forEach(carton => {
+                if (cambio === 1) carton.lineas.push({nombre: "", estado: "libre"});
+                else if (cambio === -1 && carton.lineas.length > 1) carton.lineas.pop();
+            });
+            await updateDoc(docRef, { cartones: datos });
+        };
+
+        window.cambiarCols = (v) => {
+            document.documentElement.style.setProperty('--columnas', v);
+            document.getElementById("valCol").innerText = v;
+        };
+
+        window.deseleccionarTodo = () => {
+            seleccionados = [];
+            document.getElementById("msgLineas").innerText = "";
+            dibujar();
+        };
+
+        function actualizarStats() {
+            let lib = 0, res = 0, pag = 0;
+            datos.forEach(c => c.lineas.forEach(l => {
+                if(l.estado === 'libre') lib++;
+                else if(l.estado === 'reservado') res++;
+                else pag++;
+            }));
+            document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`;
+        }
     </script>
 </body>
 </html>
