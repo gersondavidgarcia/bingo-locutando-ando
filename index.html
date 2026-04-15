@@ -15,8 +15,6 @@
 
 <link rel="icon" type="image/png" href="logo-locutando.png">
 
-
-
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
@@ -31,11 +29,18 @@
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 20px; padding-bottom: 5px; margin: 0; }
-        .brand-logo-img { height: 90px; width: auto; display: block; }
-        .brand-text { color: #ffffff; font-size: 20px; text-transform: uppercase; font-weight: 900; }
+        .brand-container { display: flex; align-items: center; justify-content: center; gap: 10px; padding-bottom: 5px; margin: 0; flex-wrap: wrap; }
+        .brand-logo-img { height: 70px; width: auto; display: block; }
+        .brand-text { color: #ffffff; font-size: 18px; text-transform: uppercase; font-weight: 900; }
 
         .separador-oro { border-bottom: 4px solid var(--oro); width: 100%; margin: 0; }
+
+        /* BOTÓN VERIFICAR */
+        .btn-verificar { 
+            background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; 
+            font-weight: bold; cursor: pointer; font-size: 10px; text-transform: uppercase;
+        }
+        .btn-verificar.activo { background: #28a745; }
 
         /* PANEL ADMIN */
         #adminPanel { 
@@ -45,31 +50,24 @@
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* MODO CAPTURA - Zoom y Botón Volver */
+        /* MODO CAPTURA */
         .btn-volver-container { 
             width: 100%; display: none; justify-content: center; padding: 25px 0; 
             background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999;
         }
-        .btn-volver { background-color: var(--oro); color: #000; padding: 7px 40px; border-radius: 40px; font-size: 13px; font-weight: 900; border: none; cursor: pointer; }
+        .btn-volver { background-color: var(--oro); color: #000; padding: 10px 40px; border-radius: 40px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; }
 
         .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
         .modo-captura .btn-volver-container { display: flex !important; }
         
         .modo-captura .tablero { 
-            transform: scale(0.5); 
-            transform-origin: top center; 
-            width: 200%; 
-            margin-left: -50%; 
-            padding-top: 20px;
-            padding-bottom: 150px;
-            gap: 5px; 
+            transform: scale(0.5); transform-origin: top center; width: 200%; 
+            margin-left: -50%; padding-top: 20px; padding-bottom: 150px; gap: 5px; 
         }
 
-        /* TABLERO Y CARTONES */
+        /* TABLERO */
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 13px; padding: 15px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* CABECERA CON BORDES BLANCOS */
         .carton-h { 
             background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
             border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; 
@@ -81,7 +79,7 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        @media (max-width: 700px) { :root { --columnas: 2; } }
+        @media (max-width: 700px) { :root { --columnas: 2; } .brand-text { font-size: 14px; } .brand-logo-img { height: 50px; } }
     </style>
 </head>
 <body>
@@ -95,6 +93,7 @@
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
+            <button id="btnVerificarManual" class="btn-verificar" onclick="toggleVerificar()">🔍 VERIFICAR</button>
             <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
         <div class="separador-oro"></div>
@@ -109,9 +108,7 @@
         <button id="btnAutoSel" class="btn" style="background:#007bff; color:white" onclick="toggleAutoSel()">AUTOSELECCION: OFF</button>
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
-        
         <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
-        
         <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
         <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
@@ -144,6 +141,7 @@
         let historial = [];
         let seleccionados = [];
         let config = { admin: false, autoSel: false, bloqueado: false };
+        let modoVerificar = false;
 
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
@@ -185,46 +183,54 @@
             if(historial.length > 10) historial.shift();
         }
 
-        window.deshacerAccion = async () => {
-            if(historial.length > 0) {
-                datos = historial.pop();
-                await updateDoc(docRef, { cartones: datos });
+        window.toggleVerificar = () => {
+            modoVerificar = !modoVerificar;
+            const btn = document.getElementById("btnVerificarManual");
+            btn.innerText = modoVerificar ? "✅ LISTO" : "🔍 VERIFICAR";
+            btn.classList.toggle("activo");
+            if(!modoVerificar) {
                 seleccionados = [];
+                document.getElementById("msgLineas").innerText = "";
                 dibujar();
             }
-        };
-
-        // FUNCIÓN REINICIAR
-        window.reiniciarBingo = async () => { 
-            if(confirm("¿ESTÁS SEGURO DE REINICIAR TODO EL BINGO? Se borrarán todos los nombres.")) { 
-                guardarHistorial(); 
-                datos.forEach(carton => { 
-                    carton.lineas.forEach(linea => { 
-                        linea.nombre = ""; 
-                        linea.estado = "libre"; 
-                    }); 
-                }); 
-                seleccionados = [];
-                await updateDoc(docRef, { cartones: datos }); 
-            } 
         };
 
         async function manejarClick(c, lElemento) {
             const lineas = lElemento.parentNode.querySelectorAll('.linea');
             const l = Array.from(lineas).indexOf(lElemento);
-            
-            if(config.admin) {
-                const nombreClick = datos[c].lineas[l].nombre;
-                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
+            const nombreClick = datos[c].lineas[l].nombre;
 
+            if(modoVerificar && nombreClick && nombreClick !== "") {
+                seleccionados = [];
+                let listaCartones = [];
+                datos.forEach((carton, ci) => {
+                    carton.lineas.forEach((linea, li) => {
+                        if(linea.nombre === nombreClick) {
+                            seleccionados.push({c: ci, l: li});
+                            listaCartones.push(ci + 1); // Añade el número del cartón cada vez que encuentre el nombre
+                        }
+                    });
+                });
+                // Formato exacto: DAVID lleva 4 en cartones: 6, 6, 12, 12
+                document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartones.join(", ")}`;
+                dibujar();
+                return; 
+            }
+
+            if(config.admin) {
+                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
                 if (config.autoSel && nombreClick && nombreClick !== "") {
                     seleccionados = [];
+                    let listaCartonesAdmin = [];
                     datos.forEach((carton, ci) => {
                         carton.lineas.forEach((linea, li) => {
-                            if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
+                            if(linea.nombre === nombreClick) {
+                                seleccionados.push({c: ci, l: li});
+                                listaCartonesAdmin.push(ci + 1);
+                            }
                         });
                     });
-                    document.getElementById("msgLineas").innerText = `| ${nombreClick} tiene ${seleccionados.length} líneas`;
+                    document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartonesAdmin.join(", ")}`;
                 } else {
                     if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
                     else seleccionados.push({c, l});
@@ -287,6 +293,24 @@
             });
             seleccionados = [];
             await updateDoc(docRef, { cartones: datos });
+        };
+
+        window.deshacerAccion = async () => {
+            if(historial.length > 0) {
+                datos = historial.pop();
+                await updateDoc(docRef, { cartones: datos });
+                seleccionados = [];
+                dibujar();
+            }
+        };
+
+        window.reiniciarBingo = async () => { 
+            if(confirm("¿ESTÁS SEGURO? Se borrarán todos los nombres.")) { 
+                guardarHistorial(); 
+                datos.forEach(carton => { carton.lineas.forEach(linea => { linea.nombre = ""; linea.estado = "libre"; }); }); 
+                seleccionados = [];
+                await updateDoc(docRef, { cartones: datos }); 
+            } 
         };
 
         window.toggleBloqueo = async () => await updateDoc(docRef, { bloqueado: !config.bloqueado });
