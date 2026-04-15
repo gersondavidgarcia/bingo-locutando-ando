@@ -50,7 +50,7 @@
             margin-left: -50%; 
             padding-top: 20px;
             padding-bottom: 150px;
-            gap: 5px; /* <--- Bajamos el espacio para que los cartones queden bien pegaditos */
+            gap: 5px; 
         }
 
         /* TABLERO Y CARTONES */
@@ -97,6 +97,9 @@
         <button id="btnAutoSel" class="btn" style="background:#007bff; color:white" onclick="toggleAutoSel()">AUTOSELECCION: OFF</button>
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
+        
+        <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
+        
         <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
         <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
@@ -177,6 +180,21 @@
                 seleccionados = [];
                 dibujar();
             }
+        };
+
+        // FUNCIÓN REINICIAR
+        window.reiniciarBingo = async () => { 
+            if(confirm("¿ESTÁS SEGURO DE REINICIAR TODO EL BINGO? Se borrarán todos los nombres.")) { 
+                guardarHistorial(); 
+                datos.forEach(carton => { 
+                    carton.lineas.forEach(linea => { 
+                        linea.nombre = ""; 
+                        linea.estado = "libre"; 
+                    }); 
+                }); 
+                seleccionados = [];
+                await updateDoc(docRef, { cartones: datos }); 
+            } 
         };
 
         async function manejarClick(c, lElemento) {
