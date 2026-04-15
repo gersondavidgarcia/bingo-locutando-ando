@@ -76,15 +76,19 @@
             cursor: pointer;
             padding: 0 6px;
             box-sizing: border-box;
-            
+   	    text-align: center;
+  	    line-height: 1.1; /* Ajusta el espacio entre los dos renglones */
+
             /* Fuerza a que el texto sea una sola línea */
-            white-space: nowrap; 
+            word-break: break-word; 
+  	    overflow: hidden;
             overflow: hidden; 
             text-overflow: ellipsis; 
         }
 
         /* Esta clase se aplica vía JS si el nombre es largo */
         .nombre-largo {
+    	    font-size: 13px !important;
             justify-content: flex-start !important; 
             text-align: left !important;
         }
@@ -125,7 +129,7 @@
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
         <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
-        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
+        <button class="btn" style="background:#d9d7d7; color:black" onclick="marcarAccion('libre')">❌ LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
     </div>
 
@@ -202,7 +206,7 @@
             const btn = document.getElementById("btnDual");
             if (modoVerificacion) {
                 btn.innerText = "✅ LISTO";
-                btn.style.background = "#28a745";
+                btn.style.background = "#38D400";
             } else {
                 btn.innerText = "🔍 VERIFICAR";
                 btn.style.background = "#007bff";
@@ -218,13 +222,14 @@
                     let listaCartones = [];
                     datos.forEach((carton, ci) => {
                         carton.lineas.forEach((linea, li) => {
-                            if(linea.nombre === nombreClick) {
-                                seleccionados.push({c: ci, l: li});
-                                if(!listaCartones.includes(ci + 1)) listaCartones.push(ci + 1);
+                          if(linea.nombre === nombreClick) {
+                		seleccionados.push({c: ci, l: li});
+               			 // Esto guarda el número de cartón (ci + 1)
+              			  listaCartones.push(ci + 1);
                             }
                         });
                     });
-                    document.getElementById("msgLineas").innerText = `| ${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
+                    document.getElementById("msgLineas").innerText = `${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
                 } 
                 else {
                     const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
