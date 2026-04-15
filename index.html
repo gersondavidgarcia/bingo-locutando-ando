@@ -3,73 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Pro - Locutando Ando</title>
-
-    <meta property="og:title" content="Bingo Locutando Ando">
-    <meta property="og:image" content="https://gerson-david-garcia.github.io/bingo/logo-locutando.png">
-    <meta property="og:url" content="https://gerson-david-garcia.github.io/bingo/">
-    <meta property="og:type" content="website">
-
-    <link rel="icon" type="image/png" href="https://gerson-david-garcia.github.io/bingo/icono-bingo.png">
+    <title>Bingo Pro - Ajuste Final</title>
 
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER Y BRANDING */
-        .header { background: #111; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
+        /* HEADER - Ajuste para eliminar espacios muertos */
+        .header { background: #111; padding: 5px 15px 0px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
         
         input#nombreUser { 
-            padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
+            padding: 10px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
             font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center;
         }
-        .stats-bar { color: var(--oro); font-size: 14px; margin: 8px 0; font-weight: bold; }
+        .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
 
-        /* LÍNEA AMARILLA SUBIDA */
-        .separador-oro { border-bottom: 3px solid var(--oro); width: 100%; margin: 10px 0; }
+        /* BRANDING - Pegado a la línea amarilla */
+        .brand-container { 
+            display: flex; align-items: center; justify-content: center; 
+            gap: 20px; 
+            padding-bottom: 5px; /* Espacio mínimo antes de la línea */
+            margin-bottom: 0; 
+        }
+        .brand-logo-img { height: 90px; width: auto; display: block; }
+        .brand-text { color: #ffffff; font-size: 20px; text-transform: uppercase; font-weight: 900; }
 
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 20px; padding: 5px 0; }
-        .brand-logo-img { height: 90px; width: auto; }
-        .brand-text { color: #ffffff; font-size: 22px; text-transform: uppercase; font-weight: 900; }
+        /* LA LÍNEA AMARILLA - Ahora bien arriba */
+        .separador-oro { 
+            border-bottom: 4px solid var(--oro); 
+            width: 100%; 
+            margin: 0; /* Cero margen para que no se separe */
+        }
 
         /* PANEL ADMIN */
         #adminPanel { 
             background: #1a1a1a; padding: 10px; display: none; 
             justify-content: center; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #333;
         }
-        .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; display: flex; align-items: center; gap: 5px; }
-        .btn-blue { background: #007bff; color: white; }
-        .btn-lock.abierto { background: var(--verde-claro); color: #000; } 
-        .btn-lock.cerrado { background: #dc3545; color: white; } 
-        .btn-pagar { background: #28a745; color: white; }
-        .btn-reiniciar { background: #ff4444; color: white; }
-        .btn-undo { background: #6f42c1; color: white; }
-        .btn-grey { background: #444; color: white; border: 1px solid #666; }
-        .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
-
-        /* MODO CAPTURA Y BOTÓN VOLVER */
-        .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 30px 0; margin-top: auto; }
-        .btn-volver { background-color: var(--oro); color: #000; padding: 15px 60px; border-radius: 40px; font-size: 18px; font-weight: 900; border: none; cursor: pointer; text-transform: uppercase; }
+        .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
+        
+        /* MODO CAPTURA - Limpieza total para pantallazo */
+        .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 25px 0; }
+        .btn-volver { background-color: var(--oro); color: #000; padding: 15px 50px; border-radius: 40px; font-size: 18px; font-weight: 900; border: none; cursor: pointer; }
 
         .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
         .modo-captura .btn-volver-container { display: flex !important; }
-        .modo-captura .tablero { transform: scale(0.95); transform-origin: top center; padding-top: 20px; }
+        .modo-captura .tablero { padding-top: 30px; }
 
-        /* TABLERO Y CARTONES */
+        /* CARTONES - Gris oscuro y bordes blancos */
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
-        
         .carton-h { 
-            background: #222222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
+            background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
             border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; 
         }
-        
-        .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; padding: 0 5px; }
-        .linea:last-child { border-bottom: none; }
-        .libre { color: #ccc !important; font-weight: normal; font-size: 12px; }
-        .reservado { background-color: #ffeb3b !important; color: #000 !important; }
+        .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border-bottom: 2px solid #000; color: #000; }
+        .libre { color: #ccc !important; font-weight: normal; }
+        .reservado { background-color: #ffeb3b !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
-        .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
+        .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; }
 
         @media (max-width: 700px) { :root { --columnas: 2; } }
     </style>
@@ -80,27 +72,22 @@
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ">
         <div class="stats-bar" id="stats">LIBRES: 0 | RESERVADOS: 0 | PAGADOS: 0</div>
         
-        <div class="separador-oro"></div>
-
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
-            <button class="btn" style="background:var(--oro); margin-left: 10px;" onclick="toggleAdmin()">⚙️ ADMIN</button>
+            <button class="btn" style="background:var(--oro); margin-left: 10px; color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
+        
+        <div class="separador-oro"></div>
     </div>
 
     <div id="adminPanel">
-        <button class="btn btn-grey" onclick="gestionarFilas(1)">+ FILA</button>
-        <button class="btn btn-grey" onclick="gestionarFilas(-1)">- FILA</button>
-        <div class="col-control">
-            COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
-        </div>
-        <button id="btnAutoSel" class="btn btn-blue" onclick="toggleAutoSel()">AUTO-SEL: OFF</button>
-        <button id="btnBloqueo" class="btn btn-lock" onclick="toggleBloqueo()">🔓 ABIERTO</button>
-        <button class="btn btn-undo" onclick="deshacerAccion()">↩️ DESHACER</button>
-        <button class="btn btn-reiniciar" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
-        <button class="btn btn-pagar" onclick="marcarAccion('pagado')">💰 PAGAR</button>
-        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
+        <button class="btn" style="background:#444; color:#fff" onclick="gestionarFilas(1)">+ FILA</button>
+        <button class="btn" style="background:#444; color:#fff" onclick="gestionarFilas(-1)">- FILA</button>
+        <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
+        <button class="btn" style="background:#6f42c1; color:#fff" onclick="deshacerAccion()">↩️ DESHACER</button>
+        <button class="btn" style="background:#28a745; color:#fff" onclick="marcarAccion('pagado')">💰 PAGAR</button>
+        <button class="btn" style="background:#dc3545; color:#fff" onclick="marcarAccion('libre')">❌ LIBERAR</button>
         <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
     </div>
 
@@ -130,7 +117,7 @@
         let datos = [];
         let historial = [];
         let seleccionados = [];
-        let config = { admin: false, autoSel: false, bloqueado: false };
+        let config = { admin: false, bloqueado: false };
 
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
@@ -140,7 +127,7 @@
                 document.getElementById("nombreUser").disabled = config.bloqueado;
                 const btnB = document.getElementById("btnBloqueo");
                 btnB.innerText = config.bloqueado ? "🔒 CERRADO" : "🔓 ABIERTO";
-                btnB.className = config.bloqueado ? "btn btn-lock cerrado" : "btn btn-lock abierto";
+                btnB.style.background = config.bloqueado ? "#dc3545" : "#00ff88";
                 dibujar();
                 actualizarStats();
             }
@@ -167,20 +154,6 @@
             });
         }
 
-        async function guardarHistorial() {
-            historial.push(JSON.parse(JSON.stringify(datos)));
-            if(historial.length > 10) historial.shift();
-        }
-
-        window.deshacerAccion = async () => {
-            if(historial.length > 0) {
-                datos = historial.pop();
-                await updateDoc(docRef, { cartones: datos });
-                seleccionados = [];
-                dibujar();
-            }
-        };
-
         async function manejarClick(c, lElemento) {
             const l = Array.from(lElemento.parentNode.querySelectorAll('.linea')).indexOf(lElemento);
             if(config.admin) {
@@ -193,7 +166,6 @@
                 const n = document.getElementById("nombreUser").value.trim().toUpperCase();
                 if(!n) return alert("ESCRIBE TU NOMBRE.");
                 if(datos[c].lineas[l].estado === "libre") {
-                    guardarHistorial();
                     datos[c].lineas[l] = { nombre: n, estado: "reservado" };
                     await updateDoc(docRef, { cartones: datos });
                 }
@@ -220,8 +192,6 @@
         window.desactivarCaptura = () => document.body.classList.remove('modo-captura');
 
         window.marcarAccion = async (est) => {
-            if(seleccionados.length === 0) return;
-            guardarHistorial();
             seleccionados.forEach(s => {
                 datos[s.c].lineas[s.l].estado = est;
                 if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
@@ -230,32 +200,15 @@
             await updateDoc(docRef, { cartones: datos });
         };
 
-        window.reiniciarBingo = async () => {
-            if(confirm("¿REINICIAR TODO?")) {
-                guardarHistorial();
-                datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; }));
-                await updateDoc(docRef, { cartones: datos });
-            }
-        };
-
-        window.toggleAutoSel = () => {
-            config.autoSel = !config.autoSel;
-            document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTO-SEL: ON" : "AUTO-SEL: OFF";
-        };
-
         window.toggleBloqueo = async () => await updateDoc(docRef, { bloqueado: !config.bloqueado });
         window.gestionarFilas = async (cambio) => {
-            guardarHistorial();
             datos.forEach(c => {
                 if (cambio === 1) c.lineas.push({nombre: "", estado: "libre"});
                 else if (cambio === -1 && c.lineas.length > 1) c.lineas.pop();
             });
             await updateDoc(docRef, { cartones: datos });
         };
-        window.cambiarCols = (v) => {
-            document.documentElement.style.setProperty('--columnas', v);
-            document.getElementById("valCol").innerText = v;
-        };
+        
         function actualizarStats() {
             let lib=0, res=0, pag=0;
             datos.forEach(c => c.lineas.forEach(l => { if(l.estado==='libre') lib++; else if(l.estado==='reservado') res++; else pag++; }));
