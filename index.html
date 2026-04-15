@@ -58,12 +58,12 @@
 
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 13px; padding: 15px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
-        .carton-h { background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; border-top: 2px solid #fff; 
-    border-left: 2px solid #fff; 
-    border-right: 2px solid #fff; 
-    border-bottom: none; }
+        .carton-h { 
+            background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
+            border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; border-bottom: none; 
+        }
 
-        .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; }
+        .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; }
         .libre { color: #ccc !important; font-weight: normal; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
@@ -131,6 +131,7 @@
         let historial = [];
         let seleccionados = [];
         let config = { admin: false, bloqueado: false };
+        let modoVerificacion = false; 
 
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
@@ -167,7 +168,7 @@
             });
             
             const btn = document.getElementById("btnDual");
-            if (seleccionados.length > 0) {
+            if (modoVerificacion) {
                 btn.innerText = "✅ LISTO";
                 btn.style.background = "#28a745";
             } else {
@@ -179,7 +180,9 @@
         async function manejarClick(c, l) {
             if(config.admin) {
                 const nombreClick = datos[c].lineas[l].nombre;
-                if (nombreClick && nombreClick !== "") {
+
+                // SI ESTÁ EL MODO VERIFICAR ACTIVO: selecciona a todos con ese nombre
+                if (modoVerificacion && nombreClick && nombreClick !== "") {
                     seleccionados = [];
                     let listaCartones = [];
                     datos.forEach((carton, ci) => {
@@ -191,10 +194,15 @@
                         });
                     });
                     document.getElementById("msgLineas").innerText = `| ${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
-                } else {
+                    // NO desactivamos el modoVerificacion aquí para que puedas seguir tocando otros nombres si quieres
+                } 
+                // SI NO ESTÁ EL MODO VERIFICAR: selecciona uno por uno
+                else {
                     const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
                     if (idx > -1) seleccionados.splice(idx, 1);
                     else seleccionados.push({c, l});
+                    // Si seleccionas a mano, limpiamos el mensaje de arriba
+                    if (!modoVerificacion) document.getElementById("msgLineas").innerText = "";
                 }
                 dibujar();
             } else {
@@ -210,8 +218,15 @@
         }
 
         window.manejarBotonDual = () => {
-            seleccionados = [];
-            document.getElementById("msgLineas").innerText = "";
+            if (!modoVerificacion) {
+                // ACTIVAR modo de búsqueda masiva
+                modoVerificacion = true;
+            } else {
+                // DESACTIVAR y limpiar todo
+                modoVerificacion = false;
+                seleccionados = [];
+                document.getElementById("msgLineas").innerText = "";
+            }
             dibujar();
         };
 
@@ -229,7 +244,10 @@
             } else {
                 config.admin = false;
                 document.getElementById("adminPanel").style.display = "none";
-                manejarBotonDual();
+                modoVerificacion = false;
+                seleccionados = [];
+                document.getElementById("msgLineas").innerText = "";
+                dibujar();
             }
         };
 
@@ -245,7 +263,9 @@
                 datos[s.c].lineas[s.l].estado = est;
                 if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
             });
-            manejarBotonDual();
+            // Al hacer una acción de pago/liberar, limpiamos la selección para seguridad
+            seleccionados = [];
+            document.getElementById("msgLineas").innerText = "";
             await updateDoc(docRef, { cartones: datos });
         };
 
@@ -253,7 +273,9 @@
             if(historial.length > 0) {
                 datos = historial.pop();
                 await updateDoc(docRef, { cartones: datos });
-                manejarBotonDual();
+                seleccionados = [];
+                document.getElementById("msgLineas").innerText = "";
+                dibujar();
             }
         };
 
@@ -261,7 +283,8 @@
             if(confirm("¿BORRAR TODO?")) { 
                 guardarHistorial(); 
                 datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
-                manejarBotonDual();
+                seleccionados = [];
+                document.getElementById("msgLineas").innerText = "";
                 await updateDoc(docRef, { cartones: datos }); 
             } 
         };
