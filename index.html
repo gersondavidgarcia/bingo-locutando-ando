@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Pro - Iconos Finales</title>
 
-    <meta property="og:title" content="Bingo Locutando Ando">
-    <meta property="og:description" content="¡Participa en nuestro bingo en vivo! Reserva tu lugar ahora.">
-    <meta property="og:image" content="logo-locutando.png">
     <meta property="og:url" content="https://gerson-david-garcia.github.io/bingo/">
     <meta property="og:type" content="website">
+    <meta property="og:title" content="Bingo Locutando Ando">
+    <meta property="og:description" content="¡Participa en nuestro bingo en vivo! Reserva tu lugar ahora.">
+    <meta property="og:image" content="https://gerson-david-garcia.github.io/bingo/logo-locutando.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="300">
+    <meta property="og:image:height" content="300">
 
     <link rel="icon" type="image/png" href="icono-bingo.png">
 
@@ -17,7 +20,7 @@
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
-        .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; }
+        .header { background: #111; padding: 15px; border-bottom: 3px solid var(--oro); text-align: center; position: sticky; top: 0; z-index: 1000; transition: 0.3s; }
         .brand-container { display: flex; align-items: center; justify-content: center; gap: 25px; margin-top: 15px; }
         
         .brand-text { 
@@ -25,8 +28,8 @@
             text-transform: uppercase; letter-spacing: 2px; font-weight: 900;
         }
 
-        /* Ajuste para el logo en el header */
-        .brand-logo-img { height: 45px; width: auto; }
+        /* 2. LOGO MÁS GRANDE: Aumentado el tamaño del logo en el header */
+        .brand-logo-img { height: 70px; width: auto; }
         
         input#nombreUser { 
             padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 600px;
@@ -51,11 +54,11 @@
 
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; }
+        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; transition: 0.3s; transform-origin: top center; }
 
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* CABECERA DE CARTÓN CORREGIDA: Fondo oscuro con número amarillo */
+        /* 3. SIN LÍNEA AMARILLA: Eliminado el border-bottom amarillo de la cabecera */
         .carton-h { 
             background: #222222; 
             color: #ffcc00; 
@@ -63,7 +66,7 @@
             padding: 8px; 
             font-weight: bold; 
             text-align: center; 
-            border-bottom: 3px solid #ffcc00; 
+            border-bottom: none; /* Línea amarilla eliminada */
         }
         
         .linea { 
@@ -78,6 +81,15 @@
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
+
+        /* ESTILOS PARA MODO CAPTURA */
+        .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
+        .modo-captura .tablero { transform: scale(0.7); margin-top: -50px; }
+        #capAlert {
+            display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: var(--oro); color: #000; padding: 10px 20px; border-radius: 8px;
+            font-weight: bold; z-index: 10000; cursor: pointer; border: 2px solid #000;
+        }
 
         @media (max-width: 700px) { :root { --columnas: 2; } }
     </style>
@@ -97,6 +109,8 @@
         </div>
     </div>
 
+    <div id="capAlert" onclick="desactivarCaptura()">⚠️ MODO CAPTURA ACTIVO. Toca aquí para volver.</div>
+
     <div id="adminPanel">
         <button class="btn btn-grey" onclick="gestionarFilas(1)">+ FILA</button>
         <button class="btn btn-grey" onclick="gestionarFilas(-1)">- FILA</button>
@@ -112,6 +126,7 @@
         <button class="btn" style="background:#6c757d; color:white" onclick="deseleccionarTodo()">🧹 LIMPIAR</button>
         <button class="btn btn-pagar" onclick="marcarAccion('pagado')">💰 PAGAR</button>
         <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
+        <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
     </div>
 
     <div class="tablero" id="tablero"></div>
@@ -240,70 +255,26 @@
             }
         };
 
-        window.reiniciarBingo = async () => {
-            if(confirm("¿REINICIAR TODO EL BINGO?")) {
-                guardarHistorial();
-                datos.forEach(carton => {
-                    carton.lineas.forEach(linea => {
-                        linea.nombre = "";
-                        linea.estado = "libre";
-                    });
-                });
-                deseleccionarTodo();
-                await updateDoc(docRef, { cartones: datos });
-            }
+        // 4. FUNCIONES DE CAPTURA: Restauradas las funciones JS para la captura
+        window.activarCaptura = () => {
+            document.body.classList.add('modo-captura');
+            document.getElementById('capAlert').style.display = 'block';
         };
 
-        window.marcarAccion = async (est) => {
-            if(seleccionados.length === 0) return;
-            guardarHistorial();
-            seleccionados.forEach(s => {
-                datos[s.c].lineas[s.l].estado = est;
-                if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
-            });
-            deseleccionarTodo();
-            await updateDoc(docRef, { cartones: datos });
+        window.desactivarCaptura = () => {
+            document.body.classList.remove('modo-captura');
+            document.getElementById('capAlert').style.display = 'none';
         };
 
-        window.toggleAutoSel = () => {
-            config.autoSel = !config.autoSel;
-            document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF";
-            document.getElementById("btnAutoSel").style.background = config.autoSel ? "#28a745" : "#007bff";
-        };
-
-        window.toggleBloqueo = async () => {
-            await updateDoc(docRef, { bloqueado: !config.bloqueado });
-        };
-
-        window.gestionarFilas = async (cambio) => {
-            guardarHistorial();
-            datos.forEach(carton => {
-                if (cambio === 1) carton.lineas.push({nombre: "", estado: "libre"});
-                else if (cambio === -1 && carton.lineas.length > 1) carton.lineas.pop();
-            });
-            await updateDoc(docRef, { cartones: datos });
-        };
-
-        window.cambiarCols = (v) => {
-            document.documentElement.style.setProperty('--columnas', v);
-            document.getElementById("valCol").innerText = v;
-        };
-
-        window.deseleccionarTodo = () => {
-            seleccionados = [];
-            document.getElementById("msgLineas").innerText = "";
-            dibujar();
-        };
-
-        function actualizarStats() {
-            let lib = 0, res = 0, pag = 0;
-            datos.forEach(c => c.lineas.forEach(l => {
-                if(l.estado === 'libre') lib++;
-                else if(l.estado === 'reservado') res++;
-                else pag++;
-            }));
-            document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`;
-        }
+        // Resto de funciones originales intactas
+        window.reiniciarBingo = async () => { if(confirm("¿REINICIAR TODO EL BINGO?")) { guardarHistorial(); datos.forEach(carton => { carton.lineas.forEach(linea => { linea.nombre = ""; linea.estado = "libre"; }); }); deseleccionarTodo(); await updateDoc(docRef, { cartones: datos }); } };
+        window.marcarAccion = async (est) => { if(seleccionados.length === 0) return; guardarHistorial(); seleccionados.forEach(s => { datos[s.c].lineas[s.l].estado = est; if(est === 'libre') datos[s.c].lineas[s.l].nombre = ""; }); deseleccionarTodo(); await updateDoc(docRef, { cartones: datos }); };
+        window.toggleAutoSel = () => { config.autoSel = !config.autoSel; document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF"; document.getElementById("btnAutoSel").style.background = config.autoSel ? "#28a745" : "#007bff"; };
+        window.toggleBloqueo = async () => { await updateDoc(docRef, { bloqueado: !config.bloqueado }); };
+        window.gestionarFilas = async (cambio) => { guardarHistorial(); datos.forEach(carton => { if (cambio === 1) carton.lineas.push({nombre: "", estado: "libre"}); else if (cambio === -1 && carton.lineas.length > 1) carton.lineas.pop(); }); await updateDoc(docRef, { cartones: datos }); };
+        window.cambiarCols = (v) => { document.documentElement.style.setProperty('--columnas', v); document.getElementById("valCol").innerText = v; };
+        window.deseleccionarTodo = () => { seleccionados = []; document.getElementById("msgLineas").innerText = ""; dibujar(); };
+        function actualizarStats() { let lib = 0, res = 0, pag = 0; datos.forEach(c => c.lineas.forEach(l => { if(l.estado === 'libre') lib++; else if(l.estado === 'reservado') res++; else pag++; })); document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`; }
     </script>
 </body>
 </html>
