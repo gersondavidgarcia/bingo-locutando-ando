@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Locutando Ando</title>
 
-<meta property="og:url" content="https://gersondavidgarcia.github.io/bingo-locutando-ando/">
-<meta property="og:title" content="🎰 BINGO LOCUTANDO ANDO">
-<meta property="og:image" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
-<meta property="og:image:secure_url" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
-<meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="500">
-<meta property="og:image:height" content="500">
+    <meta property="og:url" content="https://gersondavidgarcia.github.io/bingo-locutando-ando/">
+    <meta property="og:title" content="🎰 BINGO LOCUTANDO ANDO">
+    <meta property="og:image" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
+    <meta property="og:image:secure_url" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/logo-locutando.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="500">
+    <meta property="og:image:height" content="500">
 
-<link rel="icon" type="image/png" href="logo-locutando.png">
+    <link rel="icon" type="image/png" href="logo-locutando.png">
 
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* HEADER - Ajustado para una sola línea horizontal */
+        /* HEADER */
         .header { background: #111; padding: 5px 10px 0px 10px; text-align: center; position: sticky; top: 0; z-index: 1000; }
         
         input#nombreUser { 
@@ -29,57 +29,60 @@
         .stats-bar { color: var(--oro); font-size: 13px; margin: 2px 0; font-weight: bold; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding-bottom: 5px; margin: 0; }
-        .brand-logo-img { height: 50px; width: auto; display: block; }
-        .brand-text { color: #ffffff; font-size: 15px; text-transform: uppercase; font-weight: 900; white-space: nowrap; }
+        /* BRAND CONTAINER - Una sola línea */
+        .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 5px; padding-bottom: 5px; }
+        .brand-logo-img { height: 55px; width: auto; display: block; }
+        
+        /* Texto en dos líneas */
+        .brand-text { 
+            color: #ffffff; 
+            font-size: 15px; 
+            text-transform: uppercase; 
+            font-weight: 900; 
+            display: flex; 
+            flex-direction: column; 
+            line-height: 0.9; 
+            text-align: left;
+        }
 
         /* Lupa con fondo azul */
         .btn-verificar { 
-            background: #007bff; color: white; border: none; width: 38px; height: 38px; border-radius: 5px; 
-            font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            background: #007bff; color: white; border: none; width: 40px; height: 40px; border-radius: 5px; 
+            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .btn-verificar.activo { background: #28a745; }
 
         .separador-oro { border-bottom: 4px solid var(--oro); width: 100%; margin: 0; }
 
-        /* PANEL ADMIN */
-        #adminPanel { 
-            background: #1a1a1a; padding: 10px; display: none; 
-            justify-content: center; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #333;
+        /* Botón ADMIN más grande */
+        .btn-admin-head { 
+            background: var(--oro); color: #000; border: none; padding: 10px 15px; 
+            border-radius: 5px; font-weight: 900; cursor: pointer; font-size: 14px; text-transform: uppercase;
         }
+
+        /* PANEL ADMIN */
+        #adminPanel { background: #1a1a1a; padding: 10px; display: none; justify-content: center; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid #333; }
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
         /* MODO CAPTURA */
-        .btn-volver-container { 
-            width: 100%; display: none; justify-content: center; padding: 25px 0; 
-            background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999;
-        }
+        .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 25px 0; background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999; }
         .btn-volver { background-color: var(--oro); color: #000; padding: 10px 40px; border-radius: 40px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; }
-
         .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
         .modo-captura .btn-volver-container { display: flex !important; }
-        
-        .modo-captura .tablero { 
-            transform: scale(0.5); transform-origin: top center; width: 200%; 
-            margin-left: -50%; padding-top: 20px; padding-bottom: 150px; gap: 5px; 
-        }
+        .modo-captura .tablero { transform: scale(0.5); transform-origin: top center; width: 200%; margin-left: -50%; padding-top: 20px; padding-bottom: 150px; gap: 5px; }
 
         /* TABLERO */
-        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 13px; padding: 15px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
+        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 13px; padding: 15px; width: 100%; box-sizing: border-box; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
-        .carton-h { 
-            background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; 
-            border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; 
-        }
-
+        .carton-h { background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; border: 1px solid #fff; }
         .linea { height: 48px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; }
         .libre { color: #ccc !important; font-weight: normal; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        @media (max-width: 700px) { :root { --columnas: 2; } .brand-text { font-size: 13px; } .brand-logo-img { height: 40px; } }
+        @media (max-width: 600px) { :root { --columnas: 2; } .brand-text { font-size: 13px; } .brand-logo-img { height: 45px; } .btn-verificar { width: 36px; height: 36px; } .btn-admin-head { font-size: 12px; padding: 8px 12px; } }
     </style>
 </head>
 <body>
@@ -91,10 +94,13 @@
             <span id="msgLineas"></span>
         </div>
         <div class="brand-container">
-            <span class="brand-text">🎰 BINGO LOCUTANDO</span>
+            <span class="brand-text">
+                <span>🎰 BINGO</span>
+                <span>LOCUTANDO</span>
+            </span>
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
             <button id="btnVerificarManual" class="btn-verificar" onclick="toggleVerificar()">🔍</button>
-            <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
+            <button class="btn-admin-head" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
         <div class="separador-oro"></div>
     </div>
@@ -105,7 +111,7 @@
         <div class="col-control">
             COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
         </div>
-        <button id="btnAutoSel" class="btn" style="background:#007bff; color:white" onclick="toggleAutoSel()">AUTOSELECCION: OFF</button>
+        <button id="btnAutoSel" class="btn" style="background:#007bff; color:white" onclick="toggleAutoSel()">AUTO: OFF</button>
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
@@ -137,11 +143,8 @@
         const db = getFirestore(app);
         const docRef = doc(db, "bingo", "tablero");
 
-        let datos = [];
-        let historial = [];
-        let seleccionados = [];
+        let datos = [], historial = [], seleccionados = [], modoVerificar = false;
         let config = { admin: false, autoSel: false, bloqueado: false };
-        let modoVerificar = false;
 
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
@@ -160,18 +163,17 @@
         function dibujar() {
             const container = document.getElementById("tablero");
             container.innerHTML = "";
-            datos.forEach((carton, cIdx) => {
+            datos.forEach((carton, ci) => {
                 const div = document.createElement("div");
                 div.className = "carton";
-                div.innerHTML = `<div class="carton-h">${cIdx + 1}</div>`;
-                carton.lineas.forEach((linea, lIdx) => {
+                div.innerHTML = `<div class="carton-h">${ci + 1}</div>`;
+                carton.lineas.forEach((linea, li) => {
                     const lDiv = document.createElement("div");
                     const texto = linea.nombre || "LIBRE";
-                    lDiv.className = `linea ${linea.estado}`;
+                    lDiv.className = `linea ${linea.estado} ${seleccionados.some(s => s.c === ci && s.l === li) ? 'sel' : ''}`;
                     if(texto === "LIBRE") lDiv.classList.add("libre");
-                    if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                     lDiv.innerText = texto;
-                    lDiv.onclick = () => manejarClick(cIdx, lDiv);
+                    lDiv.onclick = () => manejarClick(ci, li);
                     div.appendChild(lDiv);
                 });
                 container.appendChild(div);
@@ -188,52 +190,32 @@
             const btn = document.getElementById("btnVerificarManual");
             btn.innerText = modoVerificar ? "✅" : "🔍";
             btn.classList.toggle("activo");
-            if(!modoVerificar) {
-                seleccionados = [];
-                document.getElementById("msgLineas").innerText = "";
-                dibujar();
-            }
+            if(!modoVerificar) { seleccionados = []; document.getElementById("msgLineas").innerText = ""; dibujar(); }
         };
 
-        async function manejarClick(c, lElemento) {
-            const lineas = lElemento.parentNode.querySelectorAll('.linea');
-            const l = Array.from(lineas).indexOf(lElemento);
+        async function manejarClick(c, l) {
             const nombreClick = datos[c].lineas[l].nombre;
 
             if(modoVerificar && nombreClick && nombreClick !== "") {
                 seleccionados = [];
-                let listaCartones = [];
-                datos.forEach((carton, ci) => {
-                    carton.lineas.forEach((linea, li) => {
-                        if(linea.nombre === nombreClick) {
-                            seleccionados.push({c: ci, l: li});
-                            listaCartones.push(ci + 1);
-                        }
-                    });
-                });
-                document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartones.join(", ")}`;
+                let lista = [];
+                datos.forEach((carton, ci) => carton.lineas.forEach((linea, li) => {
+                    if(linea.nombre === nombreClick) { seleccionados.push({c: ci, l: li}); lista.push(ci + 1); }
+                }));
+                document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${lista.join(", ")}`;
                 dibujar();
-                return; 
+                return;
             }
 
             if(config.admin) {
-                const yaEstaSel = seleccionados.some(s => s.c === c && s.l === l);
-                if (config.autoSel && nombreClick && nombreClick !== "") {
+                if(config.autoSel && nombreClick) {
                     seleccionados = [];
-                    let listaCartonesAdmin = [];
-                    datos.forEach((carton, ci) => {
-                        carton.lineas.forEach((linea, li) => {
-                            if(linea.nombre === nombreClick) {
-                                seleccionados.push({c: ci, l: li});
-                                listaCartonesAdmin.push(ci + 1);
-                            }
-                        });
-                    });
-                    document.getElementById("msgLineas").innerText = `| ${nombreClick} lleva ${seleccionados.length} en cartones: ${listaCartonesAdmin.join(", ")}`;
+                    datos.forEach((carton, ci) => carton.lineas.forEach((linea, li) => {
+                        if(linea.nombre === nombreClick) seleccionados.push({c: ci, l: li});
+                    }));
                 } else {
-                    if (yaEstaSel) seleccionados = seleccionados.filter(s => !(s.c === c && s.l === l));
-                    else seleccionados.push({c, l});
-                    document.getElementById("msgLineas").innerText = ""; 
+                    const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
+                    if(idx > -1) seleccionados.splice(idx, 1); else seleccionados.push({c, l});
                 }
                 dibujar();
             } else {
@@ -241,7 +223,7 @@
                 const n = document.getElementById("nombreUser").value.trim().toUpperCase();
                 if(!n) return alert("ESCRIBE TU NOMBRE.");
                 if(datos[c].lineas[l].estado === "libre") {
-                    guardarHistorial();
+                    await guardarHistorial();
                     datos[c].lineas[l] = { nombre: n, estado: "reservado" };
                     await updateDoc(docRef, { cartones: datos });
                 }
@@ -257,65 +239,42 @@
                     document.getElementById("adminPanel").style.display = "flex";
                 }
             } else {
-                config.admin = false;
-                document.getElementById("adminPanel").style.display = "none";
-                seleccionados = [];
-                dibujar();
+                config.admin = false; document.getElementById("adminPanel").style.display = "none"; seleccionados = []; dibujar();
             }
         };
 
         window.toggleAutoSel = () => {
             config.autoSel = !config.autoSel;
-            const btn = document.getElementById("btnAutoSel");
-            btn.innerText = config.autoSel ? "AUTOSELECCION: ON" : "AUTOSELECCION: OFF";
-            btn.style.background = config.autoSel ? "#28a745" : "#007bff";
-            if(config.autoSel) seleccionados = []; 
-            dibujar();
+            document.getElementById("btnAutoSel").innerText = config.autoSel ? "AUTO: ON" : "AUTO: OFF";
+            seleccionados = []; dibujar();
         };
 
-        window.activarCaptura = () => {
-            document.body.classList.add('modo-captura');
-            document.getElementById('volverArea').style.display = 'flex';
-        };
-
-        window.desactivarCaptura = () => {
-            document.body.classList.remove('modo-captura');
-            document.getElementById('volverArea').style.display = 'none';
-        };
+        window.activarCaptura = () => { document.body.classList.add('modo-captura'); document.getElementById('volverArea').style.display = 'flex'; };
+        window.desactivarCaptura = () => { document.body.classList.remove('modo-captura'); document.getElementById('volverArea').style.display = 'none'; };
 
         window.marcarAccion = async (est) => {
-            if(seleccionados.length === 0) return;
-            guardarHistorial();
-            seleccionados.forEach(s => {
-                datos[s.c].lineas[s.l].estado = est;
-                if(est === 'libre') datos[s.c].lineas[s.l].nombre = "";
-            });
-            seleccionados = [];
-            await updateDoc(docRef, { cartones: datos });
+            if(!seleccionados.length) return;
+            await guardarHistorial();
+            seleccionados.forEach(s => { datos[s.c].lineas[s.l].estado = est; if(est==='libre') datos[s.c].lineas[s.l].nombre=""; });
+            seleccionados = []; await updateDoc(docRef, { cartones: datos });
         };
 
         window.deshacerAccion = async () => {
-            if(historial.length > 0) {
-                datos = historial.pop();
+            if(historial.length > 0) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); }
+        };
+
+        window.reiniciarBingo = async () => {
+            if(confirm("¿REINICIAR TODO?")) {
+                await guardarHistorial();
+                datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; }));
                 await updateDoc(docRef, { cartones: datos });
-                seleccionados = [];
-                dibujar();
             }
         };
 
-        window.reiniciarBingo = async () => { 
-            if(confirm("¿ESTÁS SEGURO? Se borrarán todos los nombres.")) { 
-                guardarHistorial(); 
-                datos.forEach(carton => { carton.lineas.forEach(linea => { linea.nombre = ""; linea.estado = "libre"; }); }); 
-                seleccionados = [];
-                await updateDoc(docRef, { cartones: datos }); 
-            } 
-        };
-
         window.toggleBloqueo = async () => await updateDoc(docRef, { bloqueado: !config.bloqueado });
-        
+
         window.gestionarFilas = async (cambio) => {
-            guardarHistorial();
+            await guardarHistorial();
             datos.forEach(c => {
                 if (cambio === 1) c.lineas.push({nombre: "", estado: "libre"});
                 else if (cambio === -1 && c.lineas.length > 1) c.lineas.pop();
@@ -323,11 +282,8 @@
             await updateDoc(docRef, { cartones: datos });
         };
 
-        window.cambiarCols = (v) => { 
-            document.documentElement.style.setProperty('--columnas', v); 
-            document.getElementById("valCol").innerText = v; 
-        };
-        
+        window.cambiarCols = (v) => { document.documentElement.style.setProperty('--columnas', v); document.getElementById("valCol").innerText = v; };
+
         function actualizarStats() {
             let lib=0, res=0, pag=0;
             datos.forEach(c => c.lineas.forEach(l => { if(l.estado==='libre') lib++; else if(l.estado==='reservado') res++; else pag++; }));
