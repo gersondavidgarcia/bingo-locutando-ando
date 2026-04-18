@@ -65,7 +65,7 @@
 
         /* --- AJUSTES DE LÍNEA Y TEXTO --- */
         .linea { 
-            height: 52px; 
+            min-height: 48px; 
             display: flex; 
             align-items: center; 
             justify-content: center; /* Por defecto centrado */
@@ -98,7 +98,7 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
 
-        @media (max-width: 700px) { :root { --columnas: 2; } }
+        @media (max-width: 700px) { :root { --columnas: 3; } }
     </style>
 </head>
 <body>
@@ -185,7 +185,7 @@
                 div.innerHTML = `<div class="carton-h">${cIdx + 1}</div>`;
                 carton.lineas.forEach((linea, lIdx) => {
                     const lDiv = document.createElement("div");
-                    const texto = linea.nombre || "LIBRE";
+                    const texto = linea.nombre || "(lIdx + 1)";
                     lDiv.className = `linea ${linea.estado}`;
                     
                     // Lógica para alinear a la izquierda si el nombre es largo
