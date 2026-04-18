@@ -65,7 +65,7 @@
 
         /* --- AJUSTES DE LÍNEA Y TEXTO --- */
         .linea { 
-            min-height: 48px; 
+            height: 48px; 
             display: flex; 
             align-items: center; 
             justify-content: center; /* Por defecto centrado */
@@ -80,7 +80,7 @@
   	    line-height: 1.1; /* Ajusta el espacio entre los dos renglones */
 
             /* Fuerza a que el texto sea una sola línea */
-            word-break: break-word; 
+            word-break: break-all; 
   	    overflow: hidden;
             overflow: hidden; 
             text-overflow: ellipsis; 
@@ -93,7 +93,7 @@
             text-align: left !important;
         }
 
-        .libre { color: #ccc !important; font-weight: normal; font-size: 14px; }
+        .libre { color: #ccc !important; font-size: 12px !important; opacity: 0.6;}
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
