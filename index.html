@@ -28,7 +28,6 @@
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        /* Ajuste del contenedor para que quepa la lupa */
         .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 5px; margin: 0; }
         .brand-logo-img { height: 75px; width: auto; display: block; }
         .brand-text { color: #ffffff; font-size: 17px; text-transform: uppercase; font-weight: 900; flex-shrink: 1; margin-right: -5px; }
@@ -42,7 +41,6 @@
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* ESTILOS CAPTURA OPTIMIZADOS */
         .btn-volver-container { 
             width: 100%; display: none; justify-content: center; padding: 25px 0; 
             background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999;
@@ -65,7 +63,7 @@
         }
 
         .linea { 
-            height: 52px; /* Altura fija para que no deforme la captura */
+            height: 52px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -109,7 +107,7 @@
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
             
-            <button id="btnLupaExterna" class="btn" style="background:#007bff; color:white; font-size: 20px; padding: 5px 10px; display: none;" onclick="manejarBotonDual()">🔍</button>
+            <button id="btnLupaExterna" class="btn" style="background:#007bff; color:white; font-size: 20px; padding: 5px 10px;" onclick="manejarBotonDual()">🔍</button>
             
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
             <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
@@ -123,9 +121,6 @@
         <div class="col-control">
             COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
         </div>
-        
-        <button id="btnDual" class="btn" style="display:none" onclick="manejarBotonDual()"></button>
-        
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
@@ -214,30 +209,30 @@
         }
 
         async function manejarClick(c, l) {
-            if(config.admin) {
-                const nombreClick = datos[c].lineas[l].nombre;
+            // La lógica de verificación ahora funciona para todos los usuarios
+            const nombreClick = datos[c].lineas[l].nombre;
 
-                if (modoVerificacion && nombreClick && nombreClick !== "") {
-                    seleccionados = [];
-                    let listaCartones = [];
-                    datos.forEach((carton, ci) => {
-                        carton.lineas.forEach((linea, li) => {
-                          if(linea.nombre === nombreClick) {
-                		seleccionados.push({c: ci, l: li});
-              			  listaCartones.push(ci + 1);
-                            }
-                        });
+            if (modoVerificacion && nombreClick && nombreClick !== "") {
+                seleccionados = [];
+                let listaCartones = [];
+                datos.forEach((carton, ci) => {
+                    carton.lineas.forEach((linea, li) => {
+                      if(linea.nombre === nombreClick) {
+                            seleccionados.push({c: ci, l: li});
+                            listaCartones.push(ci + 1);
+                        }
                     });
-                    document.getElementById("msgLineas").innerText = `${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
-                } 
-                else {
-                    const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
-                    if (idx > -1) seleccionados.splice(idx, 1);
-                    else seleccionados.push({c, l});
-                    if (!modoVerificacion) document.getElementById("msgLineas").innerText = "";
-                }
+                });
+                document.getElementById("msgLineas").innerText = `${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
+                dibujar();
+            } else if (config.admin) {
+                // Selección múltiple solo para admin
+                const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
+                if (idx > -1) seleccionados.splice(idx, 1);
+                else seleccionados.push({c, l});
                 dibujar();
             } else {
+                // Registro normal de usuario
                 if(config.bloqueado) return;
                 const n = document.getElementById("nombreUser").value.trim().toUpperCase();
                 if(!n) return;
@@ -268,12 +263,10 @@
                 if(pass === snap.data().pass) {
                     config.admin = true;
                     document.getElementById("adminPanel").style.display = "flex";
-                    document.getElementById("btnLupaExterna").style.display = "block";
                 }
             } else {
                 config.admin = false;
                 document.getElementById("adminPanel").style.display = "none";
-                document.getElementById("btnLupaExterna").style.display = "none";
                 modoVerificacion = false;
                 seleccionados = [];
                 document.getElementById("msgLineas").innerText = "";
