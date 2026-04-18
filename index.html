@@ -28,9 +28,10 @@
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
 
-        .brand-container { display: flex; align-items: center; justify-content: center; gap: 20px; padding-bottom: 5px; margin: 0; }
-        .brand-logo-img { height: 90px; width: auto; display: block; }
-        .brand-text { color: #ffffff; font-size: 20px; text-transform: uppercase; font-weight: 900; }
+        /* Ajuste del contenedor para que quepa la lupa */
+        .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 5px; margin: 0; }
+        .brand-logo-img { height: 75px; width: auto; display: block; }
+        .brand-text { color: #ffffff; font-size: 17px; text-transform: uppercase; font-weight: 900; flex-shrink: 1; margin-right: -5px; }
 
         .separador-oro { border-bottom: 4px solid var(--oro); width: 100%; margin: 0; }
 
@@ -41,7 +42,7 @@
         .btn { padding: 8px 12px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 10px; }
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
 
-        /* ESTILOS CAPTURA */
+        /* ESTILOS CAPTURA OPTIMIZADOS */
         .btn-volver-container { 
             width: 100%; display: none; justify-content: center; padding: 25px 0; 
             background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999;
@@ -52,8 +53,8 @@
         .modo-captura .btn-volver-container { display: flex !important; }
         
         .modo-captura .tablero { 
-            transform: scale(0.5); transform-origin: top center; width: 200%; 
-            margin-left: -50%; padding-top: 20px; padding-bottom: 150px; gap: 5px; 
+            transform: scale(0.4); transform-origin: top center; width: 250%; 
+            margin-left: -75%; padding-top: 10px; padding-bottom: 200px; gap: 4px; 
         }
 
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 13px; padding: 15px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
@@ -63,36 +64,33 @@
             border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; border-bottom: none; 
         }
 
-        /* --- AJUSTES DE LÍNEA Y TEXTO --- */
         .linea { 
-            height: 48px; 
+            height: 52px; /* Altura fija para que no deforme la captura */
             display: flex; 
             align-items: center; 
-            justify-content: center; /* Por defecto centrado */
+            justify-content: center; 
             font-size: 15px; 
             font-weight: 900; 
             border-bottom: 2px solid #000; 
             color: #000; 
             cursor: pointer;
-            padding: 0 6px;
+            padding: 0 4px;
             box-sizing: border-box;
-   	    text-align: center;
-  	    line-height: 1.1;
-	    word-break: normal; 
-	    overflow-wrap: break-word; 
-    	    overflow: hidden;
-            text-overflow: ellipsis; 
+            text-align: center;
+            line-height: 1.1;
+            word-break: normal; 
+            overflow-wrap: break-word; 
+            overflow: hidden;
         }
 
-        /* Esta clase se aplica vía JS si el nombre es largo */
         .nombre-largo {
-    	    font-size: 12px !important;
-	    letter-spacing: -0.5px;
-            justify-content: flex-start !important; 
-            text-align: left !important;
+            font-size: 12px !important;
+            letter-spacing: -0.5px;
+            justify-content: center !important; 
+            text-align: center !important;
         }
 
-        .libre { color: #ccc !important; font-size: 18px !important; opacity: 0.7;}
+        .libre { color: #bbbbbb !important; font-size: 24px !important; opacity: 0.5; font-weight: 900;}
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
@@ -110,6 +108,9 @@
         </div>
         <div class="brand-container">
             <span class="brand-text">🎰 BINGO LOCUTANDO</span>
+            
+            <button id="btnLupaExterna" class="btn" style="background:#007bff; color:white; font-size: 20px; padding: 5px 10px; display: none;" onclick="manejarBotonDual()">🔍</button>
+            
             <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
             <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
         </div>
@@ -123,7 +124,8 @@
             COL <input type="range" min="3" max="9" value="6" id="rangeCol" oninput="cambiarCols(this.value)"> <span id="valCol">6</span>
         </div>
         
-        <button id="btnDual" class="btn" style="background:#007bff; color:white" onclick="manejarBotonDual()">🔍 VERIFICAR</button>
+        <button id="btnDual" class="btn" style="display:none" onclick="manejarBotonDual()"></button>
+        
         <button id="btnBloqueo" class="btn" onclick="toggleBloqueo()">🔓 ABIERTO</button>
         <button class="btn" style="background:#6f42c1; color:white" onclick="deshacerAccion()">↩️ DESHACER</button>
         <button class="btn" style="background:#ff4444; color:white" onclick="reiniciarBingo()">⚠️ REINICIAR</button>
@@ -187,12 +189,11 @@
                     const texto = linea.nombre || (cIdx + 1);
                     lDiv.className = `linea ${linea.estado}`;
                     
-                    // Lógica para alinear a la izquierda si el nombre es largo
                     if(texto !== "LIBRE" && texto.length >= 16) {
                         lDiv.classList.add("nombre-largo");
                     }
 
-                    if(texto === "LIBRE") lDiv.classList.add("libre");
+                    if(!linea.nombre) lDiv.classList.add("libre");
                     if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                     
                     lDiv.innerText = texto;
@@ -202,13 +203,13 @@
                 container.appendChild(div);
             });
             
-            const btn = document.getElementById("btnDual");
+            const btnLupa = document.getElementById("btnLupaExterna");
             if (modoVerificacion) {
-                btn.innerText = "✅ LISTO";
-                btn.style.background = "#38D400";
+                btnLupa.innerText = "✅";
+                btnLupa.style.background = "#38D400";
             } else {
-                btn.innerText = "🔍 VERIFICAR";
-                btn.style.background = "#007bff";
+                btnLupa.innerText = "🔍";
+                btnLupa.style.background = "#007bff";
             }
         }
 
@@ -223,7 +224,6 @@
                         carton.lineas.forEach((linea, li) => {
                           if(linea.nombre === nombreClick) {
                 		seleccionados.push({c: ci, l: li});
-               			 // Esto guarda el número de cartón (ci + 1)
               			  listaCartones.push(ci + 1);
                             }
                         });
@@ -250,10 +250,8 @@
         }
 
         window.manejarBotonDual = () => {
+            modoVerificacion = !modoVerificacion;
             if (!modoVerificacion) {
-                modoVerificacion = true;
-            } else {
-                modoVerificacion = false;
                 seleccionados = [];
                 document.getElementById("msgLineas").innerText = "";
             }
@@ -270,10 +268,12 @@
                 if(pass === snap.data().pass) {
                     config.admin = true;
                     document.getElementById("adminPanel").style.display = "flex";
+                    document.getElementById("btnLupaExterna").style.display = "block";
                 }
             } else {
                 config.admin = false;
                 document.getElementById("adminPanel").style.display = "none";
+                document.getElementById("btnLupaExterna").style.display = "none";
                 modoVerificacion = false;
                 seleccionados = [];
                 document.getElementById("msgLineas").innerText = "";
