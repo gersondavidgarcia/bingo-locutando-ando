@@ -69,7 +69,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center; /* Por defecto centrado */
-            font-size: 14px; 
+            font-size: 15px; 
             font-weight: 900; 
             border-bottom: 2px solid #000; 
             color: #000; 
@@ -77,19 +77,18 @@
             padding: 0 6px;
             box-sizing: border-box;
    	    text-align: center;
-  	    line-height: 1.1; /* Ajusta el espacio entre los dos renglones */
-
-            /* Fuerza a que el texto sea una sola línea */
-            word-break: break-all; 
-  	    overflow: hidden;
-            overflow: hidden; 
+  	    line-height: 1.1;
+	    word-break: normal; 
+	    overflow-wrap: break-word; 
+    	    overflow: hidden;
             text-overflow: ellipsis; 
         }
 
         /* Esta clase se aplica vía JS si el nombre es largo */
         .nombre-largo {
-    	    font-size: 13px !important;
-            justify-content: flex-start !important; 
+    	    font-size: 12px !important;
+	    letter-spacing: -0.5px;
+            justify-content: center !important; 
             text-align: left !important;
         }
 
