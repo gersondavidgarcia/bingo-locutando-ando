@@ -16,7 +16,7 @@
     <link rel="icon" type="image/png" href="logo-locutando.png">
 
     <style>
-        :root { --oro: #ffcc00; --fondo: #000; --columnas: 6; --verde-claro: #00ff88; }
+        :root { --oro: #ffcc00; --fondo: #000; --columnas: 5; --verde-claro: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         
         .header { background: #111; padding: 5px 15px 0px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
@@ -161,7 +161,7 @@
         onSnapshot(docRef, (snap) => {
             if (snap.exists()) {
                 const d = snap.data();
-                datos = d.cartones || [];
+                datos = (d.cartones || []).slice(0, 15);
                 config.bloqueado = d.bloqueado || false;
                 document.getElementById("nombreUser").disabled = config.bloqueado;
                 const btnB = document.getElementById("btnBloqueo");
