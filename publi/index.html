@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-    <!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1651697909471565');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
-    
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1651697909471565');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
+    /></noscript>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bingo Locutando - Grupo Exclusivo</title>
@@ -107,9 +103,8 @@ src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
 
         @keyframes heartbeat { 0%, 28%, 70% { transform: scale(1); } 14%, 42% { transform: scale(1.03); } }
 
-        /* --- NUEVO CUADRO DE BENEFICIOS --- */
         .features-container {
-            background: rgba(249, 242, 149, 0.08); /* Amarillo suave con transparencia */
+            background: rgba(249, 242, 149, 0.08);
             border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 15px;
             padding: 15px 25px;
@@ -128,7 +123,6 @@ src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
         }
         .feature-item::before { content: '✔'; margin-right: 12px; color: #d4af37; font-weight: bold; }
 
-        /* Contenedor de reglas */
         .rules-container {
             background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 15px; padding: 25px; margin: 10px 0 20px 0; max-width: 500px; width: 90%; text-align: left;
@@ -156,7 +150,7 @@ src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
             <div class="locutando-subtitle">LOCUTANDO</div>
         </div>
 
-        <a href="../entrar/" class="btn-custom" class="btn-custom">
+        <a href="../entrar/" class="btn-custom" onclick="fbq('track', 'Contact');">
             UNIRME AL GRUPO
         </a>
 
@@ -176,7 +170,8 @@ src="https://www.facebook.com/tr?id=1651697909471565&ev=PageView&noscript=1"
 
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div style="font-size: 0.9rem; color: #f1e5ac; text-transform: uppercase; margin-bottom: 0px;">¡Cupos limitados!</div>
-            <a href="../entrar/" class="btn-custom" class="btn-custom">
+            
+            <a href="../entrar/" class="btn-custom" onclick="fbq('track', 'Contact');">
                 UNIRME AL GRUPO
             </a>
         </div>
