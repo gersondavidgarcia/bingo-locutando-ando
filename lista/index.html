@@ -19,11 +19,11 @@
         }
         .btn-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #444; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 1; }
 
-        /* Tablero */
+        /* Tablero - Alto reducido a 75px */
         .tablero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px; max-width: 600px; margin: auto; }
         .carton { background: #fff; border-radius: 8px; border: 2px solid #333; overflow: hidden; display: flex; flex-direction: column; height: 90px; transition: 0.2s; }
         .carton-h { background: #222; color: var(--oro); padding: 4px; font-weight: bold; text-align: center; font-size: 18px; }
-        .linea { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #000; cursor: pointer; text-align: center; padding: 5px; box-sizing: border-box; text-transform: uppercase; }
+        .linea { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; color: #000; cursor: pointer; text-align: center; padding: 2px; box-sizing: border-box; text-transform: uppercase; }
         
         .libre { color: #ccc !important; font-size: 24px !important; opacity: 0.4; }
         .reservado { background-color: #ffeb3b !important; }
@@ -43,7 +43,7 @@
         .btn-copiar-caja { background: #ffcc00; color: #000; width: 100%; font-size: 16px; padding: 15px; margin-top: 10px; border: 2px solid #000; border-radius: 8px; }
 
         textarea { width: 100%; background: #000; color: var(--oro); border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
-        .stats { text-align: center; color: var(--oro); margin-bottom: 15px; font-size: 14px; }
+        .stats { text-align: center; color: var(--oro); margin-bottom: 15px; font-size: 14px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -101,15 +101,13 @@
     let datos = [];
     let seleccionados = [];
     let modoLupa = false;
-    let cajaTexto = "";
     let infoBusqueda = "";
 
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
             datos = (d.cartones || []).slice(0, 15);
-            cajaTexto = d.notas_caja || "";
-            document.getElementById('notas-caja').value = cajaTexto.toUpperCase();
+            document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
             dibujar();
             actualizarStats();
         }
@@ -133,29 +131,6 @@
             container.appendChild(div);
         });
     }
-
-    window.filtrarSugerencias = (valor) => {
-        const input = valor.toUpperCase();
-        document.getElementById("nombreUser").value = input;
-        const datalist = document.getElementById("sugerenciasCaja");
-        datalist.innerHTML = "";
-        if (input.length === 0) return;
-        const lineasCaja = document.getElementById("notas-caja").value.split('\n');
-        lineasCaja.forEach(linea => {
-            const nombreCaja = linea.split(':')[0].trim();
-            if (nombreCaja && nombreCaja.startsWith(input)) {
-                const opt = document.createElement("option");
-                opt.value = nombreCaja;
-                datalist.appendChild(opt);
-            }
-        });
-    };
-
-    window.limpiarNombre = () => {
-        document.getElementById("nombreUser").value = "";
-        document.getElementById("sugerenciasCaja").innerHTML = "";
-        document.getElementById("nombreUser").focus();
-    };
 
     window.clickCasilla = async (idx) => {
         const info = datos[idx].lineas[0];
@@ -191,39 +166,6 @@
         dibujar();
     }
 
-    window.accionAdmin = async (nuevoEstado) => {
-        if (seleccionados.length === 0) return;
-        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
-        seleccionados.forEach(idx => {
-            const nombre = datos[idx].lineas[0].nombre;
-            const estadoAnterior = datos[idx].lineas[0].estado;
-            if (nuevoEstado === 'pagado' && estadoAnterior !== 'pagado' && nombre) {
-                let lineas = nuevaCaja.split('\n');
-                let lineasProcesadas = [];
-                lineas.forEach(l => {
-                    if (l.toUpperCase().startsWith(nombre.toUpperCase() + ":")) {
-                        let partes = l.split(':');
-                        let valor = parseInt(partes[1]) - 1;
-                        if (valor > 0) lineasProcesadas.push(`${partes[0].trim()}: ${valor}`);
-                    } else if (l.trim() !== "") {
-                        lineasProcesadas.push(l.trim());
-                    }
-                });
-                nuevaCaja = lineasProcesadas.join('\n');
-            }
-            datos[idx].lineas[0].estado = nuevoEstado;
-            if (nuevoEstado === 'libre') datos[idx].lineas[0].nombre = "";
-        });
-        await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
-        seleccionados = [];
-    };
-
-    window.guardarCaja = async () => {
-        const txt = document.getElementById("notas-caja").value.toUpperCase();
-        await updateDoc(docRef, { notas_caja: txt });
-        alert("Caja guardada ✅");
-    };
-
     window.toggleLupa = () => {
         modoLupa = !modoLupa;
         seleccionados = [];
@@ -234,29 +176,86 @@
         actualizarStats();
     };
 
+    window.accionAdmin = async (nuevoEstado) => {
+        if (seleccionados.length === 0) return;
+        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
+        seleccionados.forEach(idx => {
+            const nombre = datos[idx].lineas[0].nombre;
+            if (nuevoEstado === 'pagado' && datos[idx].lineas[0].estado !== 'pagado' && nombre) {
+                let lineas = nuevaCaja.split('\n');
+                let procesadas = lineas.map(l => {
+                    if (l.startsWith(nombre + ":")) {
+                        let v = parseInt(l.split(':')[1]) - 1;
+                        return v > 0 ? `${nombre}: ${v}` : null;
+                    }
+                    return l;
+                }).filter(l => l !== null);
+                nuevaCaja = procesadas.join('\n');
+            }
+            datos[idx].lineas[0].estado = nuevoEstado;
+            if (nuevoEstado === 'libre') datos[idx].lineas[0].nombre = "";
+        });
+        seleccionados = [];
+        infoBusqueda = "";
+        await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
+    };
+
     window.copiarListaBingo = () => {
         let txt = "*🎰 LISTADO BINGO LINEAL*\n\n";
-        txt += "*Precio:* $1.000\n";
-        txt += "*Premio:* $10.000\n\n";
+        
+        // --- PREMIOS RESUMIDOS ---
+        txt += "🏆 *BINGO:* $10.000💰\n";
+        txt += "🎰 *RULETA:* $10.000 Extra💰\n";
+        txt += "🎯 *APROX:* $1.000 x pepa💰\n";
+        txt += "⚡ *FLASH:* $3.000 Extra💰\n";
+        txt += "───────────────\n";
+        txt += "*💵 Valor:* $1.000\n\n";
+
         datos.forEach(c => {
             const i = c.lineas[0];
             txt += `${c.id} 🍀 ${i.nombre ? i.nombre : ""}${i.estado === "pagado" ? " ✅" : ""}\n`;
         });
         txt += "\n✅ *Nequi: 3169461962*";
         navigator.clipboard.writeText(txt);
-        alert("Lista copiada");
+        alert("Lista copiada con Premios ✅");
+    };
+
+    window.filtrarSugerencias = (valor) => {
+        const input = valor.toUpperCase();
+        document.getElementById("nombreUser").value = input;
+        const datalist = document.getElementById("sugerenciasCaja");
+        datalist.innerHTML = "";
+        if (input.length === 0) return;
+        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
+            const nombre = linea.split(':')[0].trim();
+            if (nombre && nombre.startsWith(input)) {
+                const opt = document.createElement("option");
+                opt.value = nombre;
+                datalist.appendChild(opt);
+            }
+        });
+    };
+
+    window.limpiarNombre = () => {
+        document.getElementById("nombreUser").value = "";
+        document.getElementById("sugerenciasCaja").innerHTML = "";
+        document.getElementById("nombreUser").focus();
+    };
+
+    window.guardarCaja = async () => {
+        await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() });
+        alert("Caja guardada ✅");
     };
 
     window.copiarSoloCaja = () => {
         const caja = document.getElementById("notas-caja").value;
-        if(!caja.trim()) { alert("La caja está vacía"); return; }
-        let txt = "*📓 SALDOS DE CAJA*\n\n" + caja;
-        navigator.clipboard.writeText(txt);
+        if(!caja.trim()) return;
+        navigator.clipboard.writeText("*📓 SALDOS DE CAJA*\n\n" + caja);
         alert("Saldos copiados");
     };
 
     window.reiniciarTablero = async () => {
-        if (confirm("¿Limpiar solo el tablero?")) {
+        if (confirm("¿Limpiar tablero?")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             await updateDoc(docRef, { cartones: datos });
             seleccionados = [];
