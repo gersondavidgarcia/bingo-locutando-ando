@@ -9,7 +9,6 @@
         :root { --oro: #ffcc00; --fondo: #000; --verde: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
-        /* Encabezado */
         .header { background: #111; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 4px solid var(--oro); }
         .input-wrapper { position: relative; width: 90%; max-width: 500px; margin: auto; }
         input#nombreUser { 
@@ -19,7 +18,6 @@
         }
         .btn-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #444; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 1; }
 
-        /* Tablero */
         .tablero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px; max-width: 600px; margin: auto; }
         .carton { background: #fff; border-radius: 8px; border: 2px solid #333; overflow: hidden; display: flex; flex-direction: column; height: 90px; transition: 0.2s; }
         .carton-h { background: #222; color: var(--oro); padding: 4px; font-weight: bold; text-align: center; font-size: 18px; }
@@ -30,7 +28,6 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { outline: 5px solid #007bff; z-index: 5; transform: scale(1.02); }
 
-        /* Panel inferior */
         .panel-inferior { background: #111; padding: 20px; border-top: 4px solid var(--oro); margin-top: 20px; }
         .controles-admin { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
         
@@ -44,17 +41,7 @@
 
         textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
 
-        .stats { 
-            text-align: center; 
-            color: #fff; 
-            background: #222; 
-            padding: 12px; 
-            border-radius: 6px; 
-            margin-bottom: 15px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            border: 1px solid #444; 
-        }
+        .stats { text-align: center; color: #fff; background: #222; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 1px solid #444; }
     </style>
 </head>
 <body>
@@ -86,7 +73,7 @@
             <textarea id="notas-caja" rows="5" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
 
-        <button class="btn btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
+        <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn btn-copiar-caja" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
         
         <button class="btn btn-rojo" style="width:100%; margin-top:25px;" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
@@ -135,11 +122,7 @@
             const div = document.createElement("div");
             div.className = `carton ${isSelected ? 'sel' : ''}`;
             div.onclick = () => clickCasilla(idx);
-            div.innerHTML = `
-                <div class="carton-h">${carton.id}</div>
-                <div class="linea ${info.estado} ${!tieneNombre ? 'libre' : ''}">
-                    ${tieneNombre ? info.nombre : carton.id}
-                </div>`;
+            div.innerHTML = `<div class="carton-h">${carton.id}</div><div class="linea ${info.estado} ${!tieneNombre ? 'libre' : ''}">${tieneNombre ? info.nombre : carton.id}</div>`;
             container.appendChild(div);
         });
     }
@@ -151,7 +134,7 @@
             const buscar = info.nombre;
             seleccionados = [];
             datos.forEach((c, i) => { if(c.lineas[0].nombre === buscar) seleccionados.push(i); });
-            infoBusqueda = `${buscar}: ${seleccionados.length} líneas en: ${seleccionados.map(i => i + 1).join(', ')}`;
+            infoBusqueda = `${buscar}: ${seleccionados.length} líneas`;
             dibujar();
             actualizarStats();
         } else {
@@ -171,12 +154,9 @@
     }
 
     window.toggleLupa = () => {
-        modoLupa = !modoLupa;
-        seleccionados = [];
-        infoBusqueda = "";
+        modoLupa = !modoLupa; seleccionados = []; infoBusqueda = "";
         document.getElementById("btnLupa").innerText = modoLupa ? "✅ BUSCANDO" : "🔍 BUSCAR";
-        dibujar();
-        actualizarStats();
+        dibujar(); actualizarStats();
     };
 
     window.accionAdmin = async (nuevoEstado) => {
@@ -199,30 +179,49 @@
             if (nuevoEstado === 'libre') datos[idx].lineas[0].nombre = "";
         });
         seleccionados = [];
-        infoBusqueda = "";
         await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
     };
 
     window.copiarListaBingo = () => {
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣"];
-        let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        // Ajustado: Solo "Ronda" + emoji
-        txt += `*Ronda ${emojisRonda[numeroRonda]}*\n\n`;
-        
-        txt += "*💵 Valor:* $1.000\n";
-        txt += "───────\n"; 
-        txt += "🏆 *BINGO:* $10.000💰\n";
-        txt += "🎰 *Ruleta:* $10.000 Extra\n";
-        txt += "🎯 *Aproximado:* $1.000 x pepa\n";
-        txt += "⚡ *Flash:* $3.000 Extra\n\n";
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+        let txt = "";
+
+        if (numeroRonda === 5) {
+            txt = "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
+            txt += "*💵 Valor:* $1.000\n───────\n"; 
+            txt += "🏆 *BINGO:* $10.000💰\n";
+            txt += "Aproximado: $2.000 x pepa💰\n";
+            txt += "Ruleta Premiada: $1.000 x pepa💰\n";
+            txt += "Bingo Total: $25.000💰\n\n";
+            txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
+        } else {
+            txt = "*🎰 LISTADO BINGO LINEAL*\n";
+            txt += `*Ronda ${emojisRonda[numeroRonda]}*\n\n`;
+            txt += "*💵 Valor:* $1.000\n───────\n"; 
+            txt += "🏆 *BINGO:* $10.000💰\n";
+            txt += "🎰 *Ruleta:* $10.000 Extra\n";
+            txt += "🎯 *Aproximado:* $1.000 x pepa\n";
+            txt += "⚡ *Flash:* $3.000 Extra\n\n";
+            txt += "⚠️ *REGLA:* Si en la partida cae Flash y Ruleta, solo se paga el premio extra de la Ruleta.\n\n";
+        }
 
         datos.forEach(c => {
             const i = c.lineas[0];
             txt += `${c.id} 🍀 ${i.nombre ? i.nombre : ""}${i.estado === "pagado" ? " ✅" : ""}\n`;
         });
+        
         txt += "\n✅ *Nequi: 3169461962*";
+        
+        // Regla dinámica de la Ronda Especial y mensaje de responsabilidad
+        if (numeroRonda < 5) {
+            txt += "\n✅ *Cada 5 Rondas se juega una ronda ESPECIAL*";
+            txt += "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
+        } else {
+            txt += "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
+        }
+        
         navigator.clipboard.writeText(txt);
-        alert(`Ronda ${numeroRonda} copiada`);
+        alert(numeroRonda === 5 ? "¡Lista ESPECIAL copiada! 🔥" : `Ronda ${numeroRonda} copiada`);
     };
 
     window.filtrarSugerencias = (valor) => {
@@ -241,30 +240,27 @@
         });
     };
 
-    window.limpiarNombre = () => {
-        document.getElementById("nombreUser").value = "";
-        document.getElementById("sugerenciasCaja").innerHTML = "";
-        document.getElementById("nombreUser").focus();
-    };
-
-    window.guardarCaja = async () => {
-        await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() });
-        alert("Caja guardada ✅");
-    };
+    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
+    window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
 
     window.copiarSoloCaja = () => {
-        const caja = document.getElementById("notas-caja").value;
-        if(!caja.trim()) return;
-        navigator.clipboard.writeText("*📓 SALDOS DE CAJA*\\n\\n" + caja);
+        const cajaRaw = document.getElementById("notas-caja").value.trim();
+        if(!cajaRaw) return;
+        let txt = "📦*CAJA :*\n- El premio se asigna a caja para agilizar\n- Pueden pedir sus cajas cuando gusten\n\n";
+        cajaRaw.split('\n').forEach(l => {
+            if(l.includes(':')) {
+                let partes = l.split(':');
+                txt += `${partes[0].trim()}: ${partes[1].trim()}.000\n`;
+            } else { txt += l + "\n"; }
+        });
+        navigator.clipboard.writeText(txt.trim());
         alert("Saldos copiados");
     };
 
     window.reiniciarTablero = async () => {
         if (confirm("¿Limpiar tablero?")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
-            
-            if (numeroRonda < 4) { numeroRonda++; } else { numeroRonda = 1; }
-
+            if (numeroRonda < 5) { numeroRonda++; } else { numeroRonda = 1; }
             await updateDoc(docRef, { cartones: datos });
             seleccionados = [];
             actualizarStats();
@@ -277,8 +273,15 @@
             const e = c.lineas[0].estado;
             if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
         });
-        const statsBase = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`;
-        document.getElementById("stats").innerHTML = `${statsBase} <br> <span style="color: #007bff; font-style: italic;">${infoBusqueda}</span>`;
+        const btnVerde = document.getElementById("btnCopiarPrincipal");
+        if (numeroRonda === 5) {
+            btnVerde.innerText = "📋 COPIAR LISTA ESPECIAL";
+            btnVerde.style.background = "#ffcc00"; 
+        } else {
+            btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
+            btnVerde.style.background = "#25D366"; 
+        }
+        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} <br> <span style="color: #007bff;">${infoBusqueda}</span>`;
     }
 </script>
 </body>
