@@ -3,25 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Lineal Gerson</title>
+    <title>Control Bingo 15 - Gerson</title>
     <style>
         body { font-family: sans-serif; background: #000; color: #fff; padding: 10px; }
         .card { background: #111; padding: 15px; border-radius: 12px; max-width: 450px; margin: auto; border: 2px solid #ffcc00; }
-        h2 { color: #00ff88; text-align: center; margin-top: 0; }
+        h2 { color: #00ff88; text-align: center; margin-bottom: 10px; }
+        
         .input-group { display: flex; align-items: center; background: #222; margin-bottom: 5px; border-radius: 8px; padding: 5px; border: 1px solid #333; }
         .num { width: 30px; font-weight: bold; color: #ffcc00; text-align: center; }
         input { background: transparent; border: none; color: white; width: 100%; padding: 8px; font-size: 16px; outline: none; }
+        
         .btn-pago { background: #444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; filter: grayscale(1); font-size: 1.2rem; }
         .btn-pago.pagado { filter: grayscale(0); background: #28a745; }
-        .btn-copiar { width: 100%; background: #25D366; color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; }
+
+        .caja-gastos { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #444; }
+        textarea { width: 100%; background: #000; color: #ffcc00; border: 1px solid #333; border-radius: 5px; padding: 10px; font-family: monospace; resize: none; box-sizing: border-box; font-size: 15px; }
+
+        .btn-copiar { width: 100%; background: #25D366; color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; font-size: 1rem; }
+        .btn-reset { width: 100%; background: #dc3545; color: #fff; border: none; padding: 10px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🎰 CONTROL LINEAL</h2>
-    <div id="lista-inputs">Conectando...</div>
+    <h2>🎰 CONTROL LINEAL (15)</h2>
+    
+    <div id="lista-inputs">Cargando...</div>
+
+    <div class="caja-gastos">
+        <h3 style="margin:0 0 10px 0; font-size: 1rem; color: #00ff88;">📓 SALDOS DE CAJA</h3>
+        <textarea id="notas-caja" rows="5" placeholder="David: 12" onchange="guardarNotas(this.value)"></textarea>
+    </div>
+
     <button class="btn-copiar" onclick="copiarWhatsApp()">📋 COPIAR WHATSAPP</button>
+    <button class="btn-reset" onclick="reiniciarTablero()">♻️ REINICIAR LISTA</button>
 </div>
 
 <script type="module">
@@ -39,16 +54,19 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const docRef = doc(db, "bingo", "lineal"); // Ruta exacta de image_62a8b4.png
+    const docRef = doc(db, "bingo", "lineal");
 
     let cartonesLocal = [];
+    let saldoTextoActual = "";
 
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
-            cartonesLocal = snap.data().cartones || [];
+            const data = snap.data();
+            // Filtramos para que siempre sean solo los primeros 15
+            cartonesLocal = (data.cartones || []).slice(0, 15); 
+            saldoTextoActual = data.notas_caja || "";
+            document.getElementById('notas-caja').value = saldoTextoActual;
             render();
-        } else {
-            document.getElementById('lista-inputs').innerText = "No se encontró el documento 'bingo/lineal'";
         }
     });
 
@@ -63,46 +81,81 @@
                     <span class="num">${carton.id}</span>
                     <input type="text" value="${info.nombre || ''}" 
                            onchange="actualizarFB(${index}, this.value)" 
-                           placeholder="Vacio">
+                           placeholder="VACÍO">
                     <button class="btn-pago ${pagado ? 'pagado' : ''}" 
-                            onclick="window.togglePago(${index})">💵</button>
+                            onclick="window.togglePago(${index}, '${info.nombre}')">💵</button>
                 </div>`;
         });
     }
 
+    window.guardarNotas = async (texto) => {
+        await updateDoc(docRef, { notas_caja: texto });
+    };
+
     window.actualizarFB = async (index, valor) => {
-        const nombreLimpio = valor.trim().toUpperCase();
+        const nombreMayus = valor.trim().toUpperCase();
         let nuevoEstado = cartonesLocal[index].lineas[0].estado;
         
-        if (nombreLimpio !== "" && nuevoEstado === "libre") nuevoEstado = "reservado";
-        if (nombreLimpio === "") nuevoEstado = "libre";
+        if (nombreMayus !== "" && nuevoEstado === "libre") nuevoEstado = "reservado";
+        if (nombreMayus === "") nuevoEstado = "libre";
 
-        cartonesLocal[index].lineas[0].nombre = nombreLimpio;
+        cartonesLocal[index].lineas[0].nombre = nombreMayus;
         cartonesLocal[index].lineas[0].estado = nuevoEstado;
         
         await updateDoc(docRef, { cartones: cartonesLocal });
     };
 
-    window.togglePago = async (index) => {
+    window.togglePago = async (index, nombre) => {
         const estadoActual = cartonesLocal[index].lineas[0].estado;
-        cartonesLocal[index].lineas[0].estado = (estadoActual === "pagado") ? "reservado" : "pagado";
+        const nuevoEstado = (estadoActual === "pagado") ? "reservado" : "pagado";
         
-        await updateDoc(docRef, { cartones: cartonesLocal });
+        cartonesLocal[index].lineas[0].estado = nuevoEstado;
+
+        if (nuevoEstado === "pagado" && nombre) {
+            let lineasCaja = saldoTextoActual.split('\n');
+            let nuevaCaja = lineasCaja.map(linea => {
+                if (linea.toUpperCase().includes(nombre.toUpperCase())) {
+                    return linea.replace(/\d+/, (n) => Math.max(0, parseInt(n) - 1));
+                }
+                return linea;
+            });
+            saldoTextoActual = nuevaCaja.join('\n');
+        }
+
+        await updateDoc(docRef, { 
+            cartones: cartonesLocal,
+            notas_caja: saldoTextoActual 
+        });
+    };
+
+    window.reiniciarTablero = async () => {
+        if (confirm("¿Estás seguro de limpiar toda la lista? Los saldos de caja NO se borrarán.")) {
+            const cartonesLimpios = cartonesLocal.map(c => ({
+                id: c.id,
+                lineas: [{ nombre: "", estado: "libre" }]
+            }));
+            await updateDoc(docRef, { cartones: cartonesLimpios });
+        }
     };
 
     window.copiarWhatsApp = () => {
-        let txt = "*Listado Bingo*\n\n";
-        txt += "*Precio: $1.000 💵*\n*Premio: $10.000 pesos*\n\n";
-        
+        let txt = "*Listado Bingo Lineal*\n\n";
         cartonesLocal.forEach(c => {
             const i = c.lineas[0];
-            const pago = i.estado === "pagado" ? " 💵" : "";
-            txt += `${c.id} 🍀${i.nombre || ""}${pago}\n`;
+            txt += `${c.id} 🍀${i.nombre || ""}${i.estado === "pagado" ? " 💵" : ""}\n`;
         });
 
+        if(saldoTextoActual.trim() !== "") {
+            txt += `\n*Saldos Disponibles:*\n`;
+            saldoTextoActual.split('\n').forEach(linea => {
+                if(linea.trim() !== "") txt += `• ${linea.replace(/(\d+)/, "$1mil")}\n`;
+            });
+        }
+
+        txt += `\n*Premios:* \n🏆 Línea $10k | Ruleta $10k\n✨ Aprox $1k | Flash $3k\n`;
         txt += "\n✅ *Nequi: 3169461962*";
         navigator.clipboard.writeText(txt);
-        alert("¡Copiado para WhatsApp!");
+        alert("¡Lista copiada!");
     };
 </script>
 </body>
