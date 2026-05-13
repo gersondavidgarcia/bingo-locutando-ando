@@ -3,115 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Bingo - Gerson</title>
+    <title>Control Lineal Gerson</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: white; padding: 10px; margin: 0; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 10px; max-width: 450px; margin: auto; }
-        h2 { color: #25D366; text-align: center; font-size: 1.2rem; margin-top: 0; }
-        
-        .input-group { display: flex; align-items: center; background: #2a2a2a; margin-bottom: 5px; border-radius: 5px; padding: 2px 10px; }
-        .num { width: 25px; font-weight: bold; color: #888; font-size: 0.9rem; }
-        input { background: transparent; border: none; color: white; width: 100%; padding: 10px; font-size: 16px; outline: none; }
-        
-        .btn-pago { 
-            background: #444; border: none; border-radius: 5px; 
-            padding: 5px 8px; cursor: pointer; filter: grayscale(1); transition: 0.2s;
-        }
-        .btn-pago.pagado { filter: grayscale(0); background: #25D366; }
-
-        .btn-float { 
-            position: sticky; bottom: 10px; width: 100%; 
-            background: #25D366; color: black; border: none; 
-            padding: 15px; font-weight: bold; border-radius: 8px; 
-            font-size: 1rem; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .btn-clear { background: #444; color: white; margin-bottom: 10px; width: 100%; border: none; padding: 8px; border-radius: 5px; cursor: pointer; }
-        
-        .premios-info { background: #2a2a2a; padding: 10px; border-radius: 5px; font-size: 0.8rem; color: #aaa; margin-bottom: 10px; }
+        body { font-family: sans-serif; background: #000; color: #fff; padding: 10px; }
+        .card { background: #111; padding: 15px; border-radius: 12px; max-width: 450px; margin: auto; border: 2px solid #ffcc00; }
+        h2 { color: #00ff88; text-align: center; margin-top: 0; }
+        .input-group { display: flex; align-items: center; background: #222; margin-bottom: 5px; border-radius: 8px; padding: 5px; border: 1px solid #333; }
+        .num { width: 30px; font-weight: bold; color: #ffcc00; text-align: center; }
+        input { background: transparent; border: none; color: white; width: 100%; padding: 8px; font-size: 16px; outline: none; }
+        .btn-pago { background: #444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; filter: grayscale(1); font-size: 1.2rem; }
+        .btn-pago.pagado { filter: grayscale(0); background: #28a745; }
+        .btn-copiar { width: 100%; background: #25D366; color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>🎰 Listado Bingo</h2>
-    
-    <div class="premios-info">
-        Premios fijos: Ruleta $10k | Aprox $1k | Flash $3k
-    </div>
-
-    <button class="btn-clear" onclick="limpiarTodo()">🗑️ Reiniciar Lista</button>
-
-    <div id="lista-inputs"></div>
-
-    <button class="btn-float" onclick="generarParaWhatsApp()">📋 COPIAR PARA WHATSAPP</button>
+    <h2>🎰 CONTROL LINEAL</h2>
+    <div id="lista-inputs">Conectando...</div>
+    <button class="btn-copiar" onclick="copiarWhatsApp()">📋 COPIAR WHATSAPP</button>
 </div>
 
-<script>
-    const contenedor = document.getElementById('lista-inputs');
-    
-    for (let i = 1; i <= 15; i++) {
-        contenedor.innerHTML += `
-            <div class="input-group">
-                <span class="num">${i}</span>
-                <span>🍀</span>
-                <input type="text" class="nombre-jugador" placeholder="Vacío" onkeydown="checkEnter(event, ${i})">
-                <button class="btn-pago" id="pago-${i}" onclick="togglePago(${i})">💵</button>
-            </div>
-        `;
-    }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    function togglePago(id) {
-        document.getElementById(`pago-${id}`).classList.toggle('pagado');
-    }
+    const firebaseConfig = {
+        apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
+        authDomain: "bingo-locutando-ando.firebaseapp.com",
+        projectId: "bingo-locutando-ando",
+        storageBucket: "bingo-locutando-ando.firebasestorage.app",
+        messagingSenderId: "547896039173",
+        appId: "1:547896039173:web:e7f5389dde11af9078096c"
+    };
 
-    function checkEnter(event, index) {
-        if (event.key === "Enter") {
-            const inputs = document.querySelectorAll('.nombre-jugador');
-            if (inputs[index]) inputs[index].focus();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const docRef = doc(db, "bingo", "lineal"); // Ruta exacta de image_62a8b4.png
+
+    let cartonesLocal = [];
+
+    onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+            cartonesLocal = snap.data().cartones || [];
+            render();
+        } else {
+            document.getElementById('lista-inputs').innerText = "No se encontró el documento 'bingo/lineal'";
         }
+    });
+
+    function render() {
+        const cont = document.getElementById('lista-inputs');
+        cont.innerHTML = "";
+        cartonesLocal.forEach((carton, index) => {
+            const info = carton.lineas[0];
+            const pagado = info.estado === "pagado";
+            cont.innerHTML += `
+                <div class="input-group">
+                    <span class="num">${carton.id}</span>
+                    <input type="text" value="${info.nombre || ''}" 
+                           onchange="actualizarFB(${index}, this.value)" 
+                           placeholder="Vacio">
+                    <button class="btn-pago ${pagado ? 'pagado' : ''}" 
+                            onclick="window.togglePago(${index})">💵</button>
+                </div>`;
+        });
     }
 
-    function generarParaWhatsApp() {
-        const inputs = document.querySelectorAll('.nombre-jugador');
-        const botonesPago = document.querySelectorAll('.btn-pago');
+    window.actualizarFB = async (index, valor) => {
+        const nombreLimpio = valor.trim().toUpperCase();
+        let nuevoEstado = cartonesLocal[index].lineas[0].estado;
         
-        let texto = `*Listado Bingo*\n\n`;
-        texto += `*Precio: $1.000 💵*\n`;
-        texto += `*Premio: $10.000 pesos*\n`;
-        texto += `*Ruleta:* $10.000\n`;
-        texto += `*Aproximado:* $1.000 por pepa\n`;
-        texto += `*Bingo Flash:* $3.000\n\n`;
-        texto += `Compites solo con 15 personas ☘️💵\n\n`;
+        if (nombreLimpio !== "" && nuevoEstado === "libre") nuevoEstado = "reservado";
+        if (nombreLimpio === "") nuevoEstado = "libre";
 
-        inputs.forEach((input, i) => {
-            const nombre = input.value.trim();
-            const estaPagado = botonesPago[i].classList.contains('pagado');
-            const emojiPago = estaPagado ? " 💵" : "";
-            texto += `${i + 1} 🍀${nombre}${emojiPago}\n`;
+        cartonesLocal[index].lineas[0].nombre = nombreLimpio;
+        cartonesLocal[index].lineas[0].estado = nuevoEstado;
+        
+        await updateDoc(docRef, { cartones: cartonesLocal });
+    };
+
+    window.togglePago = async (index) => {
+        const estadoActual = cartonesLocal[index].lineas[0].estado;
+        cartonesLocal[index].lineas[0].estado = (estadoActual === "pagado") ? "reservado" : "pagado";
+        
+        await updateDoc(docRef, { cartones: cartonesLocal });
+    };
+
+    window.copiarWhatsApp = () => {
+        let txt = "*Listado Bingo*\n\n";
+        txt += "*Precio: $1.000 💵*\n*Premio: $10.000 pesos*\n\n";
+        
+        cartonesLocal.forEach(c => {
+            const i = c.lineas[0];
+            const pago = i.estado === "pagado" ? " 💵" : "";
+            txt += `${c.id} 🍀${i.nombre || ""}${pago}\n`;
         });
 
-        texto += `\n- Para acumulado debe cumplir las reglas y están en el perfil\n`;
-        texto += `. Después de jugada la lista si hubo un error no se puede hacer nada\n\n`;
-        texto += `✅ *Métodos de pago:* \nNequi: 3169461962`;
-
-        navigator.clipboard.writeText(texto).then(() => {
-            const btn = document.querySelector('.btn-float');
-            btn.innerText = "✅ ¡LISTO PARA PEGAR!";
-            btn.style.background = "#fff";
-            setTimeout(() => {
-                btn.innerText = "📋 COPIAR PARA WHATSAPP";
-                btn.style.background = "#25D366";
-            }, 2000);
-        });
-    }
-
-    function limpiarTodo() {
-        if(confirm("¿Deseas limpiar nombres y pagos?")) {
-            document.querySelectorAll('.nombre-jugador').forEach(i => i.value = "");
-            document.querySelectorAll('.btn-pago').forEach(b => b.classList.remove('pagado'));
-        }
-    }
+        txt += "\n✅ *Nequi: 3169461962*";
+        navigator.clipboard.writeText(txt);
+        alert("¡Copiado para WhatsApp!");
+    };
 </script>
-
 </body>
 </html>
