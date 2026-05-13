@@ -246,20 +246,18 @@
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
         
-        let txt = "📦*CAJA :*\n";
+        // Encabezado con emoji, dos saltos de línea para el espacio solicitado
+        let txt = "📦*CAJA :*\n\n";
         
-        // Primero agregamos los nombres y saldos
+        // Agregamos nombres y saldos en mayúsculas
         cajaRaw.split('\n').forEach(l => {
             if(l.includes(':')) {
                 let partes = l.split(':');
-                txt += `${partes[0].trim()}: ${partes[1].trim()}.000\n`;
-            } else { 
-                txt += l + "\n"; 
+                txt += `${partes[0].trim().toUpperCase()}: ${partes[1].trim()}.000\n`;
+            } else if (l.trim() !== "") { 
+                txt += l.toUpperCase() + "\n"; 
             }
         });
-        
-        // Al final agregamos la explicación solicitada
-        txt += "\n- El premio se asigna a caja para agilizar\n- Pueden pedir sus cajas cuando gusten";
         
         navigator.clipboard.writeText(txt.trim());
         alert("Saldos copiados");
