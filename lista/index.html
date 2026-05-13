@@ -212,7 +212,6 @@
         
         txt += "\n✅ *Nequi: 3169461962*";
         
-        // Regla dinámica de la Ronda Especial y mensaje de responsabilidad
         if (numeroRonda < 5) {
             txt += "\n✅ *Cada 5 Rondas se juega una ronda ESPECIAL*";
             txt += "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
@@ -246,13 +245,22 @@
     window.copiarSoloCaja = () => {
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
-        let txt = "📦*CAJA :*\n- El premio se asigna a caja para agilizar\n- Pueden pedir sus cajas cuando gusten\n\n";
+        
+        let txt = "📦*CAJA :*\n";
+        
+        // Primero agregamos los nombres y saldos
         cajaRaw.split('\n').forEach(l => {
             if(l.includes(':')) {
                 let partes = l.split(':');
                 txt += `${partes[0].trim()}: ${partes[1].trim()}.000\n`;
-            } else { txt += l + "\n"; }
+            } else { 
+                txt += l + "\n"; 
+            }
         });
+        
+        // Al final agregamos la explicación solicitada
+        txt += "\n- El premio se asigna a caja para agilizar\n- Pueden pedir sus cajas cuando gusten";
+        
         navigator.clipboard.writeText(txt.trim());
         alert("Saldos copiados");
     };
