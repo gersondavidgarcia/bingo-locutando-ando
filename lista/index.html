@@ -3,160 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Bingo 15 - Gerson</title>
+    <title>Bingo Lineal - Locutando Ando</title>
+    <link rel="icon" type="image/png" href="logo-locutando.png">
+
     <style>
-        body { font-family: sans-serif; background: #000; color: #fff; padding: 10px; }
-        .card { background: #111; padding: 15px; border-radius: 12px; max-width: 450px; margin: auto; border: 2px solid #ffcc00; }
-        h2 { color: #00ff88; text-align: center; margin-bottom: 10px; }
+        :root { --oro: #ffcc00; --fondo: #000; --verde-claro: #00ff88; }
+        body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; }
         
-        .input-group { display: flex; align-items: center; background: #222; margin-bottom: 5px; border-radius: 8px; padding: 5px; border: 1px solid #333; }
-        .num { width: 30px; font-weight: bold; color: #ffcc00; text-align: center; }
-        input { background: transparent; border: none; color: white; width: 100%; padding: 8px; font-size: 16px; outline: none; }
+        .header { background: #111; padding: 10px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 4px solid var(--oro); }
         
-        .btn-pago { background: #444; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; filter: grayscale(1); font-size: 1.2rem; }
-        .btn-pago.pagado { filter: grayscale(0); background: #28a745; }
+        input#nombreUser { 
+            padding: 12px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 500px;
+            font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center; margin-bottom: 10px;
+        }
+        .stats-bar { color: var(--oro); font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+        #msgLineas { color: #2196f3; display: block; margin-top: 5px; font-size: 12px; }
 
-        .caja-gastos { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-top: 20px; border: 1px solid #444; }
-        textarea { width: 100%; background: #000; color: #ffcc00; border: 1px solid #333; border-radius: 5px; padding: 10px; font-family: monospace; resize: none; box-sizing: border-box; font-size: 15px; }
+        .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .brand-logo-img { height: 60px; width: auto; }
+        .brand-text { color: #fff; font-size: 16px; font-weight: 900; }
 
-        .btn-copiar { width: 100%; background: #25D366; color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 20px; font-size: 1rem; }
-        .btn-reset { width: 100%; background: #dc3545; color: #fff; border: none; padding: 10px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 10px; font-size: 0.9rem; opacity: 0.8; }
+        #adminPanel { 
+            background: #1a1a1a; padding: 10px; display: none; 
+            justify-content: center; gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #333;
+        }
+        .btn { padding: 8px 15px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; }
+
+        /* Estilo de Cartones Lineales */
+        .tablero { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding: 15px; }
+        .carton { background: #fff; border-radius: 6px; border: 2px solid #333; overflow: hidden; display: flex; flex-direction: column; }
+        .carton-h { background: #222; color: var(--oro); padding: 5px; font-weight: bold; text-align: center; font-size: 18px; }
+
+        .linea { 
+            height: 50px; display: flex; align-items: center; justify-content: center; 
+            font-size: 14px; font-weight: 900; color: #000; cursor: pointer;
+            text-align: center; padding: 4px; box-sizing: border-box;
+        }
+
+        .libre { color: #ccc !important; font-size: 20px !important; opacity: 0.4; }
+        .reservado { background-color: #ffeb3b !important; }
+        .pagado { background-color: #28a745 !important; color: #fff !important; }
+        .sel { box-shadow: inset 0 0 0 4px #007bff !important; position: relative; }
+
+        @media (max-width: 400px) { .tablero { grid-template-columns: repeat(3, 1fr); } }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>🎰 CONTROL LINEAL (15)</h2>
-    
-    <div id="lista-inputs">Cargando...</div>
-
-    <div class="caja-gastos">
-        <h3 style="margin:0 0 10px 0; font-size: 1rem; color: #00ff88;">📓 SALDOS DE CAJA</h3>
-        <textarea id="notas-caja" rows="5" placeholder="David: 12" onchange="guardarNotas(this.value)"></textarea>
+    <div class="header">
+        <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE">
+        <div class="stats-bar">
+            <span id="stats">CARGANDO...</span>
+            <span id="msgLineas"></span>
+        </div>
+        <div class="brand-container">
+            <button id="btnLupa" class="btn" style="background:#007bff; color:white; font-size: 18px;" onclick="toggleModoBusqueda()">🔍</button>
+            <span class="brand-text">BINGO LINEAL</span>
+            <img src="logo-locutando.png" class="brand-logo-img">
+            <button class="btn" style="background:var(--oro);" onclick="toggleAdmin()">⚙️</button>
+        </div>
     </div>
 
-    <button class="btn-copiar" onclick="copiarWhatsApp()">📋 COPIAR WHATSAPP</button>
-    <button class="btn-reset" onclick="reiniciarTablero()">♻️ REINICIAR LISTA</button>
-</div>
+    <div id="adminPanel">
+        <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
+        <button class="btn" style="background:#dc3545; color:white" onclick="marcarAccion('libre')">❌ LIBERAR</button>
+        <button class="btn" style="background:#6f42c1; color:white" onclick="reiniciarTodo()">⚠️ REINICIAR</button>
+    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div class="tablero" id="tablero"></div>
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
-        authDomain: "bingo-locutando-ando.firebaseapp.com",
-        projectId: "bingo-locutando-ando",
-        storageBucket: "bingo-locutando-ando.firebasestorage.app",
-        messagingSenderId: "547896039173",
-        appId: "1:547896039173:web:e7f5389dde11af9078096c"
-    };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "bingo", "lineal");
+        const firebaseConfig = {
+            apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
+            authDomain: "bingo-locutando-ando.firebaseapp.com",
+            projectId: "bingo-locutando-ando",
+            storageBucket: "bingo-locutando-ando.firebasestorage.app",
+            messagingSenderId: "547896039173",
+            appId: "1:547896039173:web:e7f5389dde11af9078096c"
+        };
 
-    let cartonesLocal = [];
-    let saldoTextoActual = "";
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const docRef = doc(db, "bingo", "lineal");
 
-    onSnapshot(docRef, (snap) => {
-        if (snap.exists()) {
-            const data = snap.data();
-            // Filtramos para que siempre sean solo los primeros 15
-            cartonesLocal = (data.cartones || []).slice(0, 15); 
-            saldoTextoActual = data.notas_caja || "";
-            document.getElementById('notas-caja').value = saldoTextoActual;
-            render();
-        }
-    });
+        let datos = [];
+        let seleccionados = [];
+        let esAdmin = false;
+        let modoLupa = false;
 
-    function render() {
-        const cont = document.getElementById('lista-inputs');
-        cont.innerHTML = "";
-        cartonesLocal.forEach((carton, index) => {
-            const info = carton.lineas[0];
-            const pagado = info.estado === "pagado";
-            cont.innerHTML += `
-                <div class="input-group">
-                    <span class="num">${carton.id}</span>
-                    <input type="text" value="${info.nombre || ''}" 
-                           onchange="actualizarFB(${index}, this.value)" 
-                           placeholder="VACÍO">
-                    <button class="btn-pago ${pagado ? 'pagado' : ''}" 
-                            onclick="window.togglePago(${index}, '${info.nombre}')">💵</button>
-                </div>`;
+        onSnapshot(docRef, (snap) => {
+            if (snap.exists()) {
+                const d = snap.data();
+                datos = (d.cartones || []).slice(0, 15);
+                dibujar();
+                actualizarStats();
+            }
         });
-    }
 
-    window.guardarNotas = async (texto) => {
-        await updateDoc(docRef, { notas_caja: texto });
-    };
+        function dibujar() {
+            const container = document.getElementById("tablero");
+            container.innerHTML = "";
+            datos.forEach((carton, idx) => {
+                const info = carton.lineas[0];
+                const div = document.createElement("div");
+                div.className = "carton";
+                
+                const isSelected = seleccionados.includes(idx);
+                const tieneNombre = info.nombre && info.nombre !== "";
 
-    window.actualizarFB = async (index, valor) => {
-        const nombreMayus = valor.trim().toUpperCase();
-        let nuevoEstado = cartonesLocal[index].lineas[0].estado;
-        
-        if (nombreMayus !== "" && nuevoEstado === "libre") nuevoEstado = "reservado";
-        if (nombreMayus === "") nuevoEstado = "libre";
+                div.innerHTML = `
+                    <div class="carton-h">${carton.id}</div>
+                    <div class="linea ${info.estado} ${isSelected ? 'sel' : ''} ${!tieneNombre ? 'libre' : ''}" 
+                         onclick="manejarClick(${idx})">
+                        ${tieneNombre ? info.nombre : carton.id}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
 
-        cartonesLocal[index].lineas[0].nombre = nombreMayus;
-        cartonesLocal[index].lineas[0].estado = nuevoEstado;
-        
-        await updateDoc(docRef, { cartones: cartonesLocal });
-    };
+        async function manejarClick(idx) {
+            const info = datos[idx].lineas[0];
 
-    window.togglePago = async (index, nombre) => {
-        const estadoActual = cartonesLocal[index].lineas[0].estado;
-        const nuevoEstado = (estadoActual === "pagado") ? "reservado" : "pagado";
-        
-        cartonesLocal[index].lineas[0].estado = nuevoEstado;
-
-        if (nuevoEstado === "pagado" && nombre) {
-            let lineasCaja = saldoTextoActual.split('\n');
-            let nuevaCaja = lineasCaja.map(linea => {
-                if (linea.toUpperCase().includes(nombre.toUpperCase())) {
-                    return linea.replace(/\d+/, (n) => Math.max(0, parseInt(n) - 1));
+            if (modoLupa && info.nombre) {
+                const nombreBuscado = info.nombre;
+                seleccionados = [];
+                let numeros = [];
+                datos.forEach((c, i) => {
+                    if(c.lineas[0].nombre === nombreBuscado) {
+                        seleccionados.push(i);
+                        numeros.push(c.id);
+                    }
+                });
+                document.getElementById("msgLineas").innerText = `${nombreBuscado}: ${seleccionados.length} líneas (${numeros.join(", ")})`;
+                dibujar();
+            } else if (esAdmin) {
+                const sIdx = seleccionados.indexOf(idx);
+                if (sIdx > -1) seleccionados.splice(sIdx, 1);
+                else seleccionados.push(idx);
+                dibujar();
+            } else {
+                const nombre = document.getElementById("nombreUser").value.trim().toUpperCase();
+                if (!nombre) { alert("Escribe tu nombre primero"); return; }
+                if (info.estado === "libre") {
+                    datos[idx].lineas[0] = { nombre: nombre, estado: "reservado" };
+                    await updateDoc(docRef, { cartones: datos });
                 }
-                return linea;
+            }
+        }
+
+        window.toggleModoBusqueda = () => {
+            modoLupa = !modoLupa;
+            seleccionados = [];
+            document.getElementById("msgLineas").innerText = "";
+            document.getElementById("btnLupa").style.background = modoLupa ? "#00ff88" : "#007bff";
+            dibujar();
+        };
+
+        window.toggleAdmin = async () => {
+            if(!esAdmin) {
+                const pass = prompt("Clave:");
+                if(pass === "1234") { // Cambia la clave si lo deseas
+                    esAdmin = true;
+                    document.getElementById("adminPanel").style.display = "flex";
+                }
+            } else {
+                esAdmin = false;
+                document.getElementById("adminPanel").style.display = "none";
+                seleccionados = [];
+                dibujar();
+            }
+        };
+
+        window.marcarAccion = async (estado) => {
+            if (seleccionados.length === 0) return;
+            seleccionados.forEach(idx => {
+                datos[idx].lineas[0].estado = estado;
+                if (estado === 'libre') datos[idx].lineas[0].nombre = "";
             });
-            saldoTextoActual = nuevaCaja.join('\n');
-        }
+            await updateDoc(docRef, { cartones: datos });
+            seleccionados = [];
+            dibujar();
+        };
 
-        await updateDoc(docRef, { 
-            cartones: cartonesLocal,
-            notas_caja: saldoTextoActual 
-        });
-    };
+        window.reiniciarTodo = async () => {
+            if(confirm("¿Limpiar todos los nombres?")) {
+                datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
+                await updateDoc(docRef, { cartones: datos });
+            }
+        };
 
-    window.reiniciarTablero = async () => {
-        if (confirm("¿Estás seguro de limpiar toda la lista? Los saldos de caja NO se borrarán.")) {
-            const cartonesLimpios = cartonesLocal.map(c => ({
-                id: c.id,
-                lineas: [{ nombre: "", estado: "libre" }]
-            }));
-            await updateDoc(docRef, { cartones: cartonesLimpios });
-        }
-    };
-
-    window.copiarWhatsApp = () => {
-        let txt = "*Listado Bingo Lineal*\n\n";
-        cartonesLocal.forEach(c => {
-            const i = c.lineas[0];
-            txt += `${c.id} 🍀${i.nombre || ""}${i.estado === "pagado" ? " 💵" : ""}\n`;
-        });
-
-        if(saldoTextoActual.trim() !== "") {
-            txt += `\n*Saldos Disponibles:*\n`;
-            saldoTextoActual.split('\n').forEach(linea => {
-                if(linea.trim() !== "") txt += `• ${linea.replace(/(\d+)/, "$1mil")}\n`;
+        function actualizarStats() {
+            let lib = 0, res = 0, pag = 0;
+            datos.forEach(c => {
+                const e = c.lineas[0].estado;
+                if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
             });
+            document.getElementById("stats").innerText = `LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag}`;
         }
-
-        txt += `\n*Premios:* \n🏆 Línea $10k | Ruleta $10k\n✨ Aprox $1k | Flash $3k\n`;
-        txt += "\n✅ *Nequi: 3169461962*";
-        navigator.clipboard.writeText(txt);
-        alert("¡Lista copiada!");
-    };
-</script>
+    </script>
 </body>
 </html>
