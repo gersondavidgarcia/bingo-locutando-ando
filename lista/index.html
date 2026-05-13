@@ -9,12 +9,17 @@
         :root { --oro: #ffcc00; --fondo: #000; --verde: #00ff88; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; }
         
+        /* Encabezado con buscador estricto */
         .header { background: #111; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 1000; border-bottom: 4px solid var(--oro); }
+        .input-wrapper { position: relative; width: 90%; max-width: 500px; margin: auto; }
         input#nombreUser { 
-            padding: 15px; border-radius: 8px; border: 2px solid #444; width: 90%; max-width: 500px;
+            padding: 15px; border-radius: 8px; border: 2px solid #444; width: 100%;
             font-size: 20px; font-weight: bold; text-transform: uppercase; text-align: center; background: #222; color: var(--verde);
+            box-sizing: border-box; padding-right: 45px;
         }
+        .btn-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #444; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 1; }
 
+        /* Estilos del Tablero */
         .tablero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px; max-width: 600px; margin: auto; }
         .carton { background: #fff; border-radius: 8px; border: 2px solid #333; overflow: hidden; display: flex; flex-direction: column; height: 90px; transition: 0.2s; }
         .carton-h { background: #222; color: var(--oro); padding: 4px; font-weight: bold; text-align: center; font-size: 18px; }
@@ -34,15 +39,18 @@
         .btn-azul { background: #007bff; color: #fff; }
         .btn-copiar { background: #25D366; color: #000; width: 100%; font-size: 16px; margin-top: 10px; }
 
-        .caja-gastos { margin-top: 20px; }
-        textarea { width: 100%; background: #000; color: var(--oro); border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; }
+        textarea { width: 100%; background: #000; color: var(--oro); border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
         .stats { text-align: center; color: var(--oro); margin-bottom: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <input type="text" id="nombreUser" placeholder="ESCRIBE NOMBRE AQUÍ">
+        <div class="input-wrapper">
+            <input type="text" id="nombreUser" list="sugerenciasCaja" placeholder="ESCRIBE NOMBRE AQUÍ" oninput="filtrarSugerencias(this.value)">
+            <datalist id="sugerenciasCaja"></datalist>
+            <button class="btn-clear" onclick="limpiarNombre()">✕</button>
+        </div>
     </div>
 
     <div class="tablero" id="tablero"></div>
@@ -61,11 +69,11 @@
                 <label style="color: var(--verde); font-weight: bold;">📓 SALDOS DE CAJA</label>
                 <button class="btn btn-verde" style="padding: 5px 10px;" onclick="guardarCaja()">💾 GUARDAR CAJA</button>
             </div>
-            <textarea id="notas-caja" rows="5" placeholder="DAVID: 10"></textarea>
+            <textarea id="notas-caja" rows="5" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
 
         <button class="btn btn-copiar" onclick="copiarLista()">📋 COPIAR LISTA WHATSAPP</button>
-        <button class="btn" style="background:#444; color:#fff; width:100%; margin-top:10px;" onclick="reiniciarBingo()">♻️ REINICIAR TODO</button>
+        <button class="btn btn-rojo" style="width:100%; margin-top:25px;" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
     </div>
 
 <script type="module">
@@ -95,7 +103,7 @@
             const d = snap.data();
             datos = (d.cartones || []).slice(0, 15);
             cajaTexto = d.notas_caja || "";
-            document.getElementById('notas-caja').value = cajaTexto;
+            document.getElementById('notas-caja').value = cajaTexto.toUpperCase();
             dibujar();
             actualizarStats();
         }
@@ -122,6 +130,34 @@
         });
     }
 
+    // Filtro de sugerencias que solo se activa al escribir y busca por la primera letra
+    window.filtrarSugerencias = (valor) => {
+        const input = valor.toUpperCase();
+        document.getElementById("nombreUser").value = input;
+        const datalist = document.getElementById("sugerenciasCaja");
+        datalist.innerHTML = "";
+
+        if (input.length === 0) return; // No mostrar nada si está vacío
+
+        const lineasCaja = document.getElementById("notas-caja").value.split('\n');
+        
+        lineasCaja.forEach(linea => {
+            const nombreCaja = linea.split(':')[0].trim();
+            // Solo sugiere si el nombre empieza con lo que escribiste
+            if (nombreCaja && nombreCaja.startsWith(input)) {
+                const opt = document.createElement("option");
+                opt.value = nombreCaja;
+                datalist.appendChild(opt);
+            }
+        });
+    };
+
+    window.limpiarNombre = () => {
+        document.getElementById("nombreUser").value = "";
+        document.getElementById("sugerenciasCaja").innerHTML = "";
+        document.getElementById("nombreUser").focus();
+    };
+
     window.clickCasilla = async (idx) => {
         const info = datos[idx].lineas[0];
         const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
@@ -132,20 +168,14 @@
             datos.forEach((c, i) => { if(c.lineas[0].nombre === buscar) seleccionados.push(i); });
             dibujar();
         } else {
-            // Si tiene nombre o está pagado, NO permite escribir encima
             if (info.estado !== 'libre' && nombreInput !== "") {
-                // Solo permitimos seleccionar para marcar pago o liberar
                 toggleSel(idx);
                 return;
             }
-
-            // Si está libre y hay nombre arriba, lo asigna
             if (info.estado === 'libre' && nombreInput !== "") {
                 datos[idx].lineas[0] = { nombre: nombreInput, estado: "reservado" };
                 await updateDoc(docRef, { cartones: datos });
-                document.getElementById("nombreUser").value = ""; // Limpia al asignar
             } else {
-                // Selección normal de una en una
                 toggleSel(idx);
             }
         }
@@ -160,23 +190,28 @@
 
     window.accionAdmin = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
-        
-        let nuevaCaja = cajaTexto;
+        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
 
         seleccionados.forEach(idx => {
             const nombre = datos[idx].lineas[0].nombre;
             const estadoAnterior = datos[idx].lineas[0].estado;
 
-            // Lógica de descuento de caja (Solo si pasa a PAGADO y antes no lo estaba)
             if (nuevoEstado === 'pagado' && estadoAnterior !== 'pagado' && nombre) {
                 let lineas = nuevaCaja.split('\n');
-                lineas = lineas.map(l => {
-                    if (l.toUpperCase().includes(nombre.toUpperCase())) {
-                        return l.replace(/\d+/, (n) => Math.max(0, parseInt(n) - 1));
+                let lineasProcesadas = [];
+                
+                lineas.forEach(l => {
+                    if (l.toUpperCase().startsWith(nombre.toUpperCase() + ":")) {
+                        let partes = l.split(':');
+                        let valor = parseInt(partes[1]) - 1;
+                        if (valor > 0) {
+                            lineasProcesadas.push(`${partes[0].trim()}: ${valor}`);
+                        }
+                    } else if (l.trim() !== "") {
+                        lineasProcesadas.push(l.trim());
                     }
-                    return l;
                 });
-                nuevaCaja = lineas.join('\n');
+                nuevaCaja = lineasProcesadas.join('\n');
             }
 
             datos[idx].lineas[0].estado = nuevoEstado;
@@ -188,7 +223,7 @@
     };
 
     window.guardarCaja = async () => {
-        const txt = document.getElementById("notas-caja").value;
+        const txt = document.getElementById("notas-caja").value.toUpperCase();
         await updateDoc(docRef, { notas_caja: txt });
         alert("Caja guardada ✅");
     };
@@ -204,16 +239,16 @@
         let txt = "*🎰 LISTADO BINGO LINEAL*\n\n";
         datos.forEach(c => {
             const i = c.lineas[0];
-            txt += `${c.id} 🍀 ${i.nombre || "VACÍO"}${i.estado === "pagado" ? " ✅" : ""}\n`;
+            txt += `${c.id} 🍀 ${i.nombre ? i.nombre : ""}${i.estado === "pagado" ? " ✅" : ""}\n`;
         });
-        txt += `\n*Saldos:* \n${cajaTexto}\n`;
+        txt += `\n*Saldos:* \n${document.getElementById("notas-caja").value}\n`;
         txt += "\n✅ *Nequi: 3169461962*";
         navigator.clipboard.writeText(txt);
         alert("¡Lista copiada!");
     };
 
-    window.reiniciarBingo = async () => {
-        if (confirm("¿Limpiar todo el tablero?")) {
+    window.reiniciarTablero = async () => {
+        if (confirm("¿Limpiar solo el tablero? (La caja se mantiene)")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             await updateDoc(docRef, { cartones: datos });
             seleccionados = [];
