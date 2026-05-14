@@ -107,6 +107,10 @@
             const d = snap.data();
             datos = (d.cartones || []).slice(0, 15);
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
+            
+            // SINCRONIZACIÓN DE RONDA
+            numeroRonda = d.numero_ronda || 1; 
+            
             dibujar();
             actualizarStats();
         }
@@ -168,7 +172,8 @@
                 let lineas = nuevaCaja.split('\n');
                 let procesadas = lineas.map(l => {
                     if (l.startsWith(nombre + ":")) {
-                        let v = parseInt(l.split(':')[1]) - 1;
+                        let partes = l.split(':');
+                        let v = parseInt(partes[1].trim()) - 1;
                         return v > 0 ? `${nombre}: ${v}` : null;
                     }
                     return l;
@@ -245,11 +250,7 @@
     window.copiarSoloCaja = () => {
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
-        
-        // Encabezado con emoji, dos saltos de línea para el espacio solicitado
         let txt = "📦*CAJA :*\n\n";
-        
-        // Agregamos nombres y saldos en mayúsculas
         cajaRaw.split('\n').forEach(l => {
             if(l.includes(':')) {
                 let partes = l.split(':');
@@ -258,7 +259,6 @@
                 txt += l.toUpperCase() + "\n"; 
             }
         });
-        
         navigator.clipboard.writeText(txt.trim());
         alert("Saldos copiados");
     };
@@ -266,8 +266,15 @@
     window.reiniciarTablero = async () => {
         if (confirm("¿Limpiar tablero?")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
-            if (numeroRonda < 5) { numeroRonda++; } else { numeroRonda = 1; }
-            await updateDoc(docRef, { cartones: datos });
+            
+            // Lógica de avance de ronda automática
+            let proximaRonda = numeroRonda < 5 ? numeroRonda + 1 : 1;
+            
+            await updateDoc(docRef, { 
+                cartones: datos,
+                numero_ronda: proximaRonda
+            });
+            
             seleccionados = [];
             actualizarStats();
         }
