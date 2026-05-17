@@ -42,6 +42,15 @@
         textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
 
         .stats { text-align: center; color: #fff; background: #222; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 1px solid #444; }
+
+        /* SECCIÓN NUEVA PARA EL CONTROL DE PREMIOS EN DIRECTO */
+        .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; }
+        .ganador-inputs { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .ganador-inputs input { width: 80px; padding: 10px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 6px; border: 1px solid #555; background: #000; color: #fff; }
+        .ganador-extras { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
+        .ganador-extras label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .ganador-extras input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -63,6 +72,20 @@
             <button class="btn btn-verde" onclick="accionAdmin('pagado')">💰 MARCAR PAGO</button>
             <button class="btn btn-rojo" onclick="accionAdmin('libre')">❌ LIBERAR</button>
             <button class="btn btn-azul" onclick="toggleLupa()" id="btnLupa">🔍 BUSCAR</button>
+        </div>
+
+        <div class="seccion-ganador">
+            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 14px;">🏆 CONTROL DE GANADORES</div>
+            <div class="ganador-inputs">
+                <label>NÚMERO CARTÓN:</label>
+                <input type="number" id="numGanador" min="1" max="15" placeholder="#">
+            </div>
+            <div class="ganador-extras">
+                <label id="lblFlash"><input type="checkbox" id="chkFlash"> ⚡ FLASH</label>
+                <label><input type="checkbox" id="chkRuleta"> 🎰 RULETA</label>
+                <label><input type="checkbox" id="chkAprox"> 🎯 APROX</label>
+            </div>
+            <button class="btn-ganador-enviar" onclick="generarMensajeGanador()">📋 COPIAR MENSAJE GANADOR</button>
         </div>
 
         <div class="caja-gastos">
@@ -102,10 +125,26 @@
     let infoBusqueda = "";
     let numeroRonda = 1;
 
-    onSnapshot(docRef, (snap) => {
+    onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
             const d = snap.data();
-            datos = (d.cartones || []).slice(0, 15);
+            
+            // BLINDAJE ANTIFALLOS: Si 'cartones' no viene o está vacío en Firebase, lo auto-generamos del 1 al 15
+            if (!d.cartones || d.cartones.length === 0) {
+                let estructuraBase = [];
+                for (let i = 1; i <= 15; i++) {
+                    estructuraBase.push({
+                        id: String(i).padStart(2, '0'),
+                        lineas: [{ estado: "libre", nombre: "" }]
+                    });
+                }
+                datos = estructuraBase;
+                // Subimos de inmediato la estructura a Firebase para reparar la base de datos en caliente
+                await updateDoc(docRef, { cartones: datos });
+            } else {
+                datos = d.cartones.slice(0, 15);
+            }
+
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
             
             // SINCRONIZACIÓN DE RONDA
@@ -195,9 +234,9 @@
             txt = "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
             txt += "*💵 Valor:* $1.000\n───────\n"; 
             txt += "🏆 *BINGO:* $10.000💰\n";
-            txt += "🎯Aproximado: $10.000\n";
-            txt += "🎰Ruleta PREM: $5.000 \n";
-            txt += "🤑Bingo Total: $25.000\n\n";
+            txt += "🎯 *Aproximado:* $10.000\n";
+            txt += "🎰 *Ruleta PREM:* $5.000\n";
+            txt += "🤑 *Bingo Total:* $25.000\n\n";
             txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
         } else {
             txt = "*🎰 LISTADO BINGO LINEAL*\n";
@@ -263,6 +302,64 @@
         alert("Saldos copiados");
     };
 
+    // GENERADOR AUTOMÁTICO DE MENSAJES DE GANADORES ACTUALIZADO (RONDAS NORMALES Y RONDA 5)
+    window.generarMensajeGanador = () => {
+        const numInput = document.getElementById("numGanador").value;
+        if (!numInput || numInput < 1 || numInput > 15) {
+            alert("Por favor ingresa un número de cartón válido (1 al 15)");
+            return;
+        }
+
+        const idx = parseInt(numInput) - 1;
+        const cartonRef = datos[idx];
+        if (!cartonRef || !cartonRef.lineas[0].nombre) {
+            alert(`El número #${numInput} actualmente está libre o no tiene nombre.`);
+            return;
+        }
+
+        const nombreGanador = cartonRef.lineas[0].nombre.toUpperCase();
+        let valorBingo = 10; // El premio base del bingo siempre son 10mil
+        let totalAcumulado = valorBingo;
+        let txtExtras = "";
+        
+        // Si es Ronda 5, el Flash se desactiva por regla
+        if (numeroRonda !== 5 && document.getElementById("chkFlash").checked) {
+            txtExtras += "⚡ *Bingo flash 25:* $3.000 extra\n";
+            totalAcumulado += 3;
+        }
+        
+        if (document.getElementById("chkRuleta").checked) {
+            let valorRuleta = (numeroRonda === 5) ? 5 : 10; // 5mil en R5, 10mil normales
+            txtExtras += `🎰 *Ruleta${numeroRonda === 5 ? ' PREM' : ''}:* $${valorRuleta}.000 extra\n`;
+            totalAcumulado += valorRuleta;
+        }
+        
+        if (document.getElementById("chkAprox").checked) {
+            let valorAprox = (numeroRonda === 5) ? 10 : 5; // 10mil en R5, 5mil normales
+            txtExtras += `🎯 *Aproximado:* $${valorAprox}.000 extra\n`;
+            totalAcumulado += valorAprox;
+        }
+
+        // Estructura exacta para pegar directo en WhatsApp
+        let mensaje = `🏆 *GANADOR BINGO LINEAL* 🏆\n\n`;
+        mensaje += `🎰 *Ganador bingo #${String(numInput).padStart(2, '0')}*\n`;
+        mensaje += `👤 *${nombreGanador}* gana ${valorBingo}mil\n`;
+        
+        if (txtExtras !== "") {
+            mensaje += txtExtras + `\n`;
+            mensaje += `💵 *Total:* ${totalAcumulado}mil`;
+        }
+
+        navigator.clipboard.writeText(mensaje.trim());
+        alert(`¡Mensaje del cartón #${numInput} (${nombreGanador}) copiado!`);
+        
+        // Limpiar panel para la próxima jugada
+        document.getElementById("numGanador").value = "";
+        document.getElementById("chkFlash").checked = false;
+        document.getElementById("chkRuleta").checked = false;
+        document.getElementById("chkAprox").checked = false;
+    };
+
     window.reiniciarTablero = async () => {
         if (confirm("¿Limpiar tablero?")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
@@ -286,14 +383,20 @@
             const e = c.lineas[0].estado;
             if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
         });
+        
         const btnVerde = document.getElementById("btnCopiarPrincipal");
+        const lblFlash = document.getElementById("lblFlash");
+        
         if (numeroRonda === 5) {
             btnVerde.innerText = "📋 COPIAR LISTA ESPECIAL";
             btnVerde.style.background = "#ffcc00"; 
+            lblFlash.style.display = "none"; // Ocultar checkbox Flash en ronda 5 por regla
         } else {
             btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
             btnVerde.style.background = "#25D366"; 
+            lblFlash.style.display = "flex"; // Mostrar en rondas normales
         }
+        
         document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} <br> <span style="color: #007bff;">${infoBusqueda}</span>`;
     }
 </script>
