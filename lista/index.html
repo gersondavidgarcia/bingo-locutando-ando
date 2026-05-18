@@ -219,7 +219,6 @@
         dibujar(); actualizarStats();
     };
 
-    // ACCIONES ADMINISTRATIVAS CON PROTECCIÓN EN EL BOTÓN LIBERAR
     window.accionAdmin = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
@@ -304,7 +303,6 @@
                 }
             }
         } else if (nuevoEstado === 'libre') {
-            // ADVERTENCIA AÑADIDA PARA EVITAR EQUIVOCACIONES EN VIVO
             let confirmarLiberar = confirm("⚠️ ¿Seguro que deseas LIBERAR y borrar el nombre de los cartones seleccionados?");
             if (!confirmarLiberar) return;
 
@@ -330,9 +328,9 @@
             txt = "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
             txt += "*💵 Valor:* $1.000\n───────\n"; 
             txt += "🏆 *BINGO:* $10.000💰\n";
-            txt += "🎯 *Aproximado VIP:* $10.000\n";
-            txt += "🎰 *Ruleta PREM:* $5.000\n";
-            txt += "🤑 *Bingo Total:* $25.000\n\n";
+            txt += "🎯💎 *Aproximado VIP:* $10.000\n";
+            txt += "🎰💎 *Ruleta PREM:* $5.000\n";
+            txt += "🤑🤑 *Bingo Total:* $25.000\n\n";
             txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
         } else {
             txt = "*🎰 LISTADO BINGO LINEAL*\n";
@@ -392,7 +390,7 @@
         alert("Saldos copiados");
     };
 
-    // GENERADOR DE MENSAJES DE WHATSAPP REFORMADO (SIN MIX DE TOTAL CON APROXIMADOS)
+    // GENERADOR DE MENSAJES DE WHATSAPP CON NUEVA ESTRUCTURA Y ELIMINACIÓN DE "EXTRA" EN APROXIMADOS
     window.generarMensajeGanador = () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -415,22 +413,27 @@
         const cartonRuleta = datos[idxRuleta];
         const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "SIN ASIGNAR";
 
-        let mensaje = `🏆 *GANADOR BINGO LINEAL* 🏆\n \n`;
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+        let mensaje = "";
 
         if (numeroRonda === 5) {
+            mensaje += `⭐🔥⭐🔥⭐🔥\nRONDA ESPECIAL\n`;
+            
             if (numBingo === numRuleta) {
-                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n🎰 *Ruleta # ${numRuleta}*\n👤 *${nombreBingo}*\n \n🤑 *BINGO TOTAL:* *${nombreBingo}* gana 25mil`;
+                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n🎰 *Ruleta # ${numRuleta}*\n👤 *${nombreBingo}*\n \n🤑 *BINGO TOTAL:* *${nombreBingo}* gana 25mil`;
             } else if (esAproximado) {
-                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎯 *Aproximado VIP # ${numRuleta}*\n👤 *${nombreRuleta}* gana 10mil extra`;
+                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎯💎 *Aproximado VIP # ${numRuleta}*\n👤 *${nombreRuleta}* gana 10mil`;
             } else {
-                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
+                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
             }
         } else {
+            mensaje += `*Ronda ${emojisRonda[numeroRonda]}*\n \n`;
+            
             let totalAcumulado = 10;
             let esRuletaMismoNumero = (numBingo === numRuleta);
             let aplicarFlash = document.getElementById("chkFlash").checked && !esRuletaMismoNumero;
 
-            mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n`;
+            mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n`;
 
             if (aplicarFlash) {
                 mensaje += `⚡ *Bingo flash 25:* 3mil extra\n`;
@@ -442,13 +445,12 @@
                 totalAcumulado += 10;
                 mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
             } else if (esAproximado) {
-                // AQUÍ CORREGIDO: Se muestra el aproximado limpio, y solo lleva "Total" si hubo Flash antes
-                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
+                // Modificado para no llevar la palabra "extra" ni alterar el Total
+                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil`;
                 if (aplicarFlash) {
                     mensaje += `\n \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
                 }
             } else {
-                // Solo muestra total si de verdad tiene acumulados extras (Flash)
                 if (aplicarFlash) {
                     mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
                 }
