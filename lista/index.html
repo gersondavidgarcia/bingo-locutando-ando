@@ -219,7 +219,7 @@
         dibujar(); actualizarStats();
     };
 
-    // BOTÓN MARCAR PAGO REFORMADO CON COBRO INTELIGENTE Y PARCIAL
+    // ACCIONES ADMINISTRATIVAS CON PROTECCIÓN EN EL BOTÓN LIBERAR
     window.accionAdmin = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
@@ -227,7 +227,6 @@
         let cambiosRealizados = false;
 
         if (nuevoEstado === 'pagado') {
-            // Agrupar los cartones seleccionados por cada nombre
             let cartonesPorNombre = {};
             seleccionados.forEach(idx => {
                 const info = datos[idx].lineas[0];
@@ -237,7 +236,6 @@
                 }
             });
 
-            // Procesar cada jugador de forma aislada
             for (let nombre in cartonesPorNombre) {
                 let indicesSeleccionados = cartonesPorNombre[nombre];
                 let lineasAComprar = indicesSeleccionados.length;
@@ -246,7 +244,6 @@
                 let saldoActual = 0;
                 let indexLinea = -1;
 
-                // Buscar el usuario en la caja
                 lineasCaja.forEach((l, i) => {
                     if (l.startsWith(nombre + ":")) {
                         let partes = l.split(':');
@@ -256,12 +253,11 @@
                 });
 
                 if (indexLinea !== -1 && saldoActual >= lineasAComprar) {
-                    // 1. TIENE SALDO COMPLETO: Descontar todo normalmente
                     let nuevoSaldo = saldoActual - lineasAComprar;
                     if (nuevoSaldo > 0) {
                         lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
                     } else {
-                        lineasCaja.splice(indexLinea, 1); // Se elimina de la caja por completo si llega a 0
+                        lineasCaja.splice(indexLinea, 1); 
                     }
                     nuevaCaja = lineasCaja.join('\n');
 
@@ -271,7 +267,6 @@
                     cambiosRealizados = true;
 
                 } else if (indexLinea !== -1 && saldoActual > 0) {
-                    // 2. SALDO PARCIAL: Ejemplo, tiene 2mil pero seleccionó 4 números
                     let cartonesParaCobrar = indicesSeleccionados.slice(0, saldoActual);
                     let cartonesRestantes = indicesSeleccionados.slice(saldoActual);
                     let lineasFaltantes = cartonesRestantes.length;
@@ -280,7 +275,6 @@
 
                     let confirmarVerde = confirm(mensajeAviso);
                     if (confirmarVerde) {
-                        // SI ACEPTA: Se vacía la caja (se elimina porque llega a 0) y TODO pasa a verde
                         lineasCaja.splice(indexLinea, 1);
                         nuevaCaja = lineasCaja.join('\n');
 
@@ -289,7 +283,6 @@
                         });
                         cambiosRealizados = true;
                     } else {
-                        // SI CANCELA: Solo cobra lo que le alcanza de la caja y pinta esos en verde. Los demás se quedan amarillos.
                         lineasCaja.splice(indexLinea, 1);
                         nuevaCaja = lineasCaja.join('\n');
 
@@ -299,7 +292,6 @@
                         cambiosRealizados = true;
                     }
                 } else {
-                    // 3. NO TIENE SALDO EN ABSOLUTO O NO EXISTE
                     let mensajeAviso = `⚠️ El jugador "${nombre}" NO tiene saldo disponible en la caja.\n\n¿Deseas registrar sus cartones y pasarlos a VERDE (PAGADO) directamente de todos modos?`;
 
                     let confirmarVerde = confirm(mensajeAviso);
@@ -311,11 +303,14 @@
                     }
                 }
             }
-        } else {
-            // Acción de LIBERAR (Borrar nombres y limpiar celdas)
+        } else if (nuevoEstado === 'libre') {
+            // ADVERTENCIA AÑADIDA PARA EVITAR EQUIVOCACIONES EN VIVO
+            let confirmarLiberar = confirm("⚠️ ¿Seguro que deseas LIBERAR y borrar el nombre de los cartones seleccionados?");
+            if (!confirmarLiberar) return;
+
             seleccionados.forEach(idx => {
                 cartonesAActualizar[idx].lineas[0].estado = nuevoEstado;
-                if (nuevoEstado === 'libre') cartonesAActualizar[idx].lineas[0].nombre = "";
+                cartonesAActualizar[idx].lineas[0].nombre = "";
             });
             cambiosRealizados = true;
         }
@@ -368,7 +363,7 @@
         const datalist = document.getElementById("sugerenciasCaja");
         datalist.innerHTML = "";
         if (input.length === 0) return;
-        document.getElementById("notes-caja" || "notas-caja").value.split('\n').forEach(linea => {
+        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
             const nombre = linea.split(':')[0].trim();
             if (nombre && nombre.startsWith(input)) {
                 const opt = document.createElement("option");
@@ -397,6 +392,7 @@
         alert("Saldos copiados");
     };
 
+    // GENERADOR DE MENSAJES DE WHATSAPP REFORMADO (SIN MIX DE TOTAL CON APROXIMADOS)
     window.generarMensajeGanador = () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -446,10 +442,16 @@
                 totalAcumulado += 10;
                 mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
             } else if (esAproximado) {
-                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra\n \n`;
-                mensaje += `Total:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+                // AQUÍ CORREGIDO: Se muestra el aproximado limpio, y solo lleva "Total" si hubo Flash antes
+                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
+                if (aplicarFlash) {
+                    mensaje += `\n \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+                }
             } else {
-                mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+                // Solo muestra total si de verdad tiene acumulados extras (Flash)
+                if (aplicarFlash) {
+                    mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+                }
             }
         }
 
