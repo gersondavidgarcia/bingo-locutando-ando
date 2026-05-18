@@ -198,41 +198,8 @@
         } else {
             if (info.estado !== 'libre' && nombreInput !== "") { toggleSel(idx); return; }
             if (info.estado === 'libre' && nombreInput !== "") {
-                
-                // --- PROCESAR DESCUENTO AUTOMÁTICO DE CAJA ---
-                let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
-                let lineasCaja = nuevaCaja.split('\n');
-                let tieneSaldo = false;
-                let estadoInicial = "reservado";
-
-                let cajaActualizada = lineasCaja.map(linea => {
-                    if (linea.startsWith(nombreInput + ":")) {
-                        let partes = linea.split(':');
-                        let saldoActual = parseInt(partes[1].trim());
-                        if (saldoActual > 0) {
-                            tieneSaldo = true;
-                            let nuevoSaldo = saldoActual - 1;
-                            return `${nombreInput}: ${nuevoSaldo}`;
-                        }
-                    }
-                    return linea;
-                });
-
-                if (tieneSaldo) {
-                    // Si el jugador tenía saldo disponible, se descuenta de inmediato y pasa limpio
-                    nuevaCaja = cajaActualizada.join('\n');
-                } else {
-                    // Advertencia Inteligente: Si no tiene saldo o es nuevo
-                    let confirmarVerde = confirm(`⚠️ El jugador "${nombreInput}" NO tiene saldo en caja.\n\n¿Deseas registrar su cartón y ponerlo en VERDE (PAGADO) directamente de todos modos?`);
-                    if (confirmarVerde) {
-                        estadoInicial = "pagado"; // Pasa a verde al instante
-                    } else {
-                        return; // Cancela la asignación si le da al No
-                    }
-                }
-
-                datos[idx].lineas[0] = { nombre: nombreInput, estado: estadoInicial };
-                await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
+                datos[idx].lineas[0] = { nombre: nombreInput, estado: "reservado" };
+                await updateDoc(docRef, { cartones: datos });
             } else { 
                 toggleSel(idx); 
             }
@@ -252,28 +219,112 @@
         dibujar(); actualizarStats();
     };
 
+    // BOTÓN MARCAR PAGO REFORMADO CON COBRO INTELIGENTE Y PARCIAL
     window.accionAdmin = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
-        seleccionados.forEach(idx => {
-            const nombre = datos[idx].lineas[0].nombre;
-            if (nuevoEstado === 'pagado' && datos[idx].lineas[0].estado !== 'pagado' && nombre) {
-                let lineas = nuevaCaja.split('\n');
-                let procesadas = lineas.map(l => {
+        let cartonesAActualizar = [...datos];
+        let cambiosRealizados = false;
+
+        if (nuevoEstado === 'pagado') {
+            // Agrupar los cartones seleccionados por cada nombre
+            let cartonesPorNombre = {};
+            seleccionados.forEach(idx => {
+                const info = datos[idx].lineas[0];
+                if (info.nombre && info.estado !== 'pagado') {
+                    if (!cartonesPorNombre[info.nombre]) cartonesPorNombre[info.nombre] = [];
+                    cartonesPorNombre[info.nombre].push(idx);
+                }
+            });
+
+            // Procesar cada jugador de forma aislada
+            for (let nombre in cartonesPorNombre) {
+                let indicesSeleccionados = cartonesPorNombre[nombre];
+                let lineasAComprar = indicesSeleccionados.length;
+                
+                let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+                let saldoActual = 0;
+                let indexLinea = -1;
+
+                // Buscar el usuario en la caja
+                lineasCaja.forEach((l, i) => {
                     if (l.startsWith(nombre + ":")) {
                         let partes = l.split(':');
-                        let v = parseInt(partes[1].trim()) - 1;
-                        return v > 0 ? `${nombre}: ${v}` : null;
+                        saldoActual = parseInt(partes[1].trim()) || 0;
+                        indexLinea = i;
                     }
-                    return l;
-                }).filter(l => l !== null);
-                nuevaCaja = procesadas.join('\n');
+                });
+
+                if (indexLinea !== -1 && saldoActual >= lineasAComprar) {
+                    // 1. TIENE SALDO COMPLETO: Descontar todo normalmente
+                    let nuevoSaldo = saldoActual - lineasAComprar;
+                    if (nuevoSaldo > 0) {
+                        lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
+                    } else {
+                        lineasCaja.splice(indexLinea, 1); // Se elimina de la caja por completo si llega a 0
+                    }
+                    nuevaCaja = lineasCaja.join('\n');
+
+                    indicesSeleccionados.forEach(idx => {
+                        cartonesAActualizar[idx].lineas[0].estado = 'pagado';
+                    });
+                    cambiosRealizados = true;
+
+                } else if (indexLinea !== -1 && saldoActual > 0) {
+                    // 2. SALDO PARCIAL: Ejemplo, tiene 2mil pero seleccionó 4 números
+                    let cartonesParaCobrar = indicesSeleccionados.slice(0, saldoActual);
+                    let cartonesRestantes = indicesSeleccionados.slice(saldoActual);
+                    let lineasFaltantes = cartonesRestantes.length;
+
+                    let mensajeAviso = `⚠️ El jugador "${nombre}" sólo tiene saldo para ${saldoActual} línea(s) en caja, pero seleccionaste ${lineasAComprar}.\n\n¿Deseas cobrar las ${saldoActual} línea(s) de la caja y pasar las ${lineasFaltantes} faltantes a VERDE directamente de todos modos?`;
+
+                    let confirmarVerde = confirm(mensajeAviso);
+                    if (confirmarVerde) {
+                        // SI ACEPTA: Se vacía la caja (se elimina porque llega a 0) y TODO pasa a verde
+                        lineasCaja.splice(indexLinea, 1);
+                        nuevaCaja = lineasCaja.join('\n');
+
+                        indicesSeleccionados.forEach(idx => {
+                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
+                        });
+                        cambiosRealizados = true;
+                    } else {
+                        // SI CANCELA: Solo cobra lo que le alcanza de la caja y pinta esos en verde. Los demás se quedan amarillos.
+                        lineasCaja.splice(indexLinea, 1);
+                        nuevaCaja = lineasCaja.join('\n');
+
+                        cartonesParaCobrar.forEach(idx => {
+                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
+                        });
+                        cambiosRealizados = true;
+                    }
+                } else {
+                    // 3. NO TIENE SALDO EN ABSOLUTO O NO EXISTE
+                    let mensajeAviso = `⚠️ El jugador "${nombre}" NO tiene saldo disponible en la caja.\n\n¿Deseas registrar sus cartones y pasarlos a VERDE (PAGADO) directamente de todos modos?`;
+
+                    let confirmarVerde = confirm(mensajeAviso);
+                    if (confirmarVerde) {
+                        indicesSeleccionados.forEach(idx => {
+                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
+                        });
+                        cambiosRealizados = true;
+                    }
+                }
             }
-            datos[idx].lineas[0].estado = nuevoEstado;
-            if (nuevoEstado === 'libre') datos[idx].lineas[0].nombre = "";
-        });
-        seleccionados = [];
-        await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
+        } else {
+            // Acción de LIBERAR (Borrar nombres y limpiar celdas)
+            seleccionados.forEach(idx => {
+                cartonesAActualizar[idx].lineas[0].estado = nuevoEstado;
+                if (nuevoEstado === 'libre') cartonesAActualizar[idx].lineas[0].nombre = "";
+            });
+            cambiosRealizados = true;
+        }
+
+        if (cambiosRealizados) {
+            datos = cartonesAActualizar;
+            seleccionados = [];
+            await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
+        }
     };
 
     window.copiarListaBingo = () => {
@@ -317,7 +368,7 @@
         const datalist = document.getElementById("sugerenciasCaja");
         datalist.innerHTML = "";
         if (input.length === 0) return;
-        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
+        document.getElementById("notes-caja" || "notas-caja").value.split('\n').forEach(linea => {
             const nombre = linea.split(':')[0].trim();
             if (nombre && nombre.startsWith(input)) {
                 const opt = document.createElement("option");
@@ -346,7 +397,6 @@
         alert("Saldos copiados");
     };
 
-    // GENERADOR DE MENSAJES (SÓLO COPIA TEXTO)
     window.generarMensajeGanador = () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -407,7 +457,6 @@
         alert(`¡Mensaje de WhatsApp copiado! 🏆`);
     };
 
-    // FUNCIÓN DE BOTÓN EXCLUSIVO PARA CARGAR GANANCIAS EN CAJA
     window.cargarPremiosACaja = async () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -430,7 +479,6 @@
         const cartonRuleta = datos[idxRuleta];
         const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "";
 
-        // Calcular montos exactos según ronda y casillas
         let premioBingoPrincipal = 10; 
         let premioVecino = 0;
         let premioLejosRuleta = 0;
@@ -449,10 +497,10 @@
         } else {
             let esRuletaMismoNumero = (numBingo === numRuleta);
             if (esRuletaMismoNumero) {
-                premioBingoPrincipal = 20; // 10 base + 10 ruleta (flash anulado por regla)
+                premioBingoPrincipal = 20; 
             } else {
                 if (document.getElementById("chkFlash").checked) {
-                    premioBingoPrincipal = 13; // 10 base + 3 flash
+                    premioBingoPrincipal = 13; 
                 }
                 if (esAproximado) {
                     premioVecino = 5;
@@ -460,11 +508,9 @@
             }
         }
 
-        // Modificar Texto de la caja
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
 
-        // Función interna para inyectar saldo a un nombre
         function agregarSaldo(nombre, cantidad) {
             if (!nombre || nombre === "SIN ASIGNAR" || cantidad === 0) return;
             let encontrado = false;
@@ -482,7 +528,6 @@
             }
         }
 
-        // Ejecutar las sumas correspondientes
         agregarSaldo(nombreBingo, premioBingoPrincipal);
         if (premioVecino > 0 && nombreRuleta) agregarSaldo(nombreRuleta, premioVecino);
         if (premioLejosRuleta > 0 && nombrePremioLejos) agregarSaldo(nombrePremioLejos, premioLejosRuleta);
@@ -490,13 +535,11 @@
         let cajaFinalTexto = lineas.join('\n');
         document.getElementById("notas-caja").value = cajaFinalTexto;
 
-        // Guardar directo en base de datos
         await updateDoc(docRef, { notas_caja: cajaFinalTexto });
         alert(`💰 Premios cargados con éxito en la caja:\n- ${nombreBingo}: +${premioBingoPrincipal}mil` + 
               (premioVecino > 0 ? `\n- Vecino (${nombreRuleta}): +${premioVecino}mil` : '') + 
               (premioLejosRuleta > 0 ? `\n- Ruleta (${nombrePremioLejos}): +${premioLejosRuleta}mil` : ''));
 
-        // Limpiar inputs del panel de ganadores
         document.getElementById("numGanador").value = "";
         document.getElementById("numRuletaFisica").value = "";
         document.getElementById("chkFlash").checked = false;
