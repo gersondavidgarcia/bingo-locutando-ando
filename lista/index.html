@@ -43,14 +43,20 @@
 
         .stats { text-align: center; color: #fff; background: #222; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 1px solid #444; }
 
-        /* SECCIÓN NUEVA PARA EL CONTROL DE PREMIOS EN DIRECTO */
-        .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 15px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; }
-        .ganador-inputs { display: flex; gap: 10px; align-items: center; justify-content: center; margin-bottom: 10px; }
-        .ganador-inputs input { width: 80px; padding: 10px; font-size: 18px; font-weight: bold; text-align: center; border-radius: 6px; border: 1px solid #555; background: #000; color: #fff; }
-        .ganador-extras { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; font-size: 13px; margin-bottom: 10px; }
-        .ganador-extras label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-        .ganador-extras input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-        .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        /* SECCIÓN DEL CONTROL DE PREMIOS EN DIRECTO */
+        .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; }
+        .ganador-inputs { display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .bloque-input { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 280px; }
+        .bloque-input label { font-size: 18px; font-weight: bold; color: #fff; }
+        .bloque-input input { width: 90px; padding: 12px; font-size: 24px; font-weight: bold; text-align: center; border-radius: 8px; border: 2px solid var(--oro); background: #000; color: #fff; }
+        
+        .ganador-extras { display: flex; justify-content: center; gap: 25px; font-size: 16px; margin-bottom: 15px; padding: 5px; }
+        .ganador-extras label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold; }
+        .ganador-extras input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; }
+        
+        .grupo-botones-ganador { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #fff; }
+        .btn-ganador-caja { background: #e0a800; color: black; width: 100%; padding: 14px; font-size: 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #000; }
     </style>
 </head>
 <body>
@@ -75,17 +81,28 @@
         </div>
 
         <div class="seccion-ganador">
-            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 10px; font-size: 14px;">🏆 CONTROL DE GANADORES</div>
+            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px;">🏆 CONTROL DE GANADORES</div>
+            
             <div class="ganador-inputs">
-                <label>NÚMERO CARTÓN:</label>
-                <input type="number" id="numGanador" min="1" max="15" placeholder="#">
+                <div class="bloque-input">
+                    <label>BINGO #:</label>
+                    <input type="number" id="numGanador" min="1" max="15" placeholder="#">
+                </div>
+                
+                <div class="bloque-input">
+                    <label style="color: var(--oro);">RULETA #:</label>
+                    <input type="number" id="numRuletaFisica" min="1" max="15" placeholder="#">
+                </div>
             </div>
+
             <div class="ganador-extras">
                 <label id="lblFlash"><input type="checkbox" id="chkFlash"> ⚡ FLASH</label>
-                <label><input type="checkbox" id="chkRuleta"> 🎰 RULETA</label>
-                <label><input type="checkbox" id="chkAprox"> 🎯 APROX</label>
             </div>
-            <button class="btn-ganador-enviar" onclick="generarMensajeGanador()">📋 COPIAR MENSAJE GANADOR</button>
+            
+            <div class="grupo-botones-ganador">
+                <button class="btn-ganador-enviar" onclick="generarMensajeGanador()">📋 COPIAR MENSAJE GANADOR</button>
+                <button class="btn-ganador-caja" onclick="cargarPremiosACaja()">💰 REGISTRAR PREMIOS EN CAJA</button>
+            </div>
         </div>
 
         <div class="caja-gastos">
@@ -129,25 +146,21 @@
         if (snap.exists()) {
             const d = snap.data();
             
-            // BLINDAJE ANTIFALLOS: Si 'cartones' no viene o está vacío en Firebase, lo auto-generamos del 1 al 15
             if (!d.cartones || d.cartones.length === 0) {
                 let estructuraBase = [];
                 for (let i = 1; i <= 15; i++) {
                     estructuraBase.push({
-                        id: String(i).padStart(2, '0'),
+                        id: String(i), 
                         lineas: [{ estado: "libre", nombre: "" }]
                     });
                 }
                 datos = estructuraBase;
-                // Subimos de inmediato la estructura a Firebase para reparar la base de datos en caliente
                 await updateDoc(docRef, { cartones: datos });
             } else {
                 datos = d.cartones.slice(0, 15);
             }
 
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
-            
-            // SINCRONIZACIÓN DE RONDA
             numeroRonda = d.numero_ronda || 1; 
             
             dibujar();
@@ -165,6 +178,7 @@
             const div = document.createElement("div");
             div.className = `carton ${isSelected ? 'sel' : ''}`;
             div.onclick = () => clickCasilla(idx);
+            
             div.innerHTML = `<div class="carton-h">${carton.id}</div><div class="linea ${info.estado} ${!tieneNombre ? 'libre' : ''}">${tieneNombre ? info.nombre : carton.id}</div>`;
             container.appendChild(div);
         });
@@ -173,6 +187,7 @@
     window.clickCasilla = async (idx) => {
         const info = datos[idx].lineas[0];
         const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
+        
         if (modoLupa && info.nombre) {
             const buscar = info.nombre;
             seleccionados = [];
@@ -183,9 +198,44 @@
         } else {
             if (info.estado !== 'libre' && nombreInput !== "") { toggleSel(idx); return; }
             if (info.estado === 'libre' && nombreInput !== "") {
-                datos[idx].lineas[0] = { nombre: nombreInput, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos });
-            } else { toggleSel(idx); }
+                
+                // --- PROCESAR DESCUENTO AUTOMÁTICO DE CAJA ---
+                let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
+                let lineasCaja = nuevaCaja.split('\n');
+                let tieneSaldo = false;
+                let estadoInicial = "reservado";
+
+                let cajaActualizada = lineasCaja.map(linea => {
+                    if (linea.startsWith(nombreInput + ":")) {
+                        let partes = linea.split(':');
+                        let saldoActual = parseInt(partes[1].trim());
+                        if (saldoActual > 0) {
+                            tieneSaldo = true;
+                            let nuevoSaldo = saldoActual - 1;
+                            return `${nombreInput}: ${nuevoSaldo}`;
+                        }
+                    }
+                    return linea;
+                });
+
+                if (tieneSaldo) {
+                    // Si el jugador tenía saldo disponible, se descuenta de inmediato y pasa limpio
+                    nuevaCaja = cajaActualizada.join('\n');
+                } else {
+                    // Advertencia Inteligente: Si no tiene saldo o es nuevo
+                    let confirmarVerde = confirm(`⚠️ El jugador "${nombreInput}" NO tiene saldo en caja.\n\n¿Deseas registrar su cartón y ponerlo en VERDE (PAGADO) directamente de todos modos?`);
+                    if (confirmarVerde) {
+                        estadoInicial = "pagado"; // Pasa a verde al instante
+                    } else {
+                        return; // Cancela la asignación si le da al No
+                    }
+                }
+
+                datos[idx].lineas[0] = { nombre: nombreInput, estado: estadoInicial };
+                await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
+            } else { 
+                toggleSel(idx); 
+            }
         }
     };
 
@@ -234,7 +284,7 @@
             txt = "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
             txt += "*💵 Valor:* $1.000\n───────\n"; 
             txt += "🏆 *BINGO:* $10.000💰\n";
-            txt += "🎯 *Aproximado:* $10.000\n";
+            txt += "🎯 *Aproximado VIP:* $10.000\n";
             txt += "🎰 *Ruleta PREM:* $5.000\n";
             txt += "🤑 *Bingo Total:* $25.000\n\n";
             txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
@@ -255,13 +305,7 @@
         });
         
         txt += "\n✅ *Nequi: 3169461962*";
-        
-        if (numeroRonda < 5) {
-            txt += "\n✅ *Cada 5 Rondas se juega una ronda ESPECIAL*";
-            txt += "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
-        } else {
-            txt += "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
-        }
+        txt += (numeroRonda < 5) ? "\n✅ *Cada 5 Rondas se juega una ronda ESPECIAL*\n✅ *Juega con responsabilidad y disfruta la dinámica.*" : "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
         
         navigator.clipboard.writeText(txt);
         alert(numeroRonda === 5 ? "¡Lista ESPECIAL copiada! 🔥" : `Ronda ${numeroRonda} copiada`);
@@ -302,69 +346,165 @@
         alert("Saldos copiados");
     };
 
-    // GENERADOR AUTOMÁTICO DE MENSAJES DE GANADORES ACTUALIZADO (RONDAS NORMALES Y RONDA 5)
+    // GENERADOR DE MENSAJES (SÓLO COPIA TEXTO)
     window.generarMensajeGanador = () => {
-        const numInput = document.getElementById("numGanador").value;
-        if (!numInput || numInput < 1 || numInput > 15) {
-            alert("Por favor ingresa un número de cartón válido (1 al 15)");
-            return;
-        }
+        const bInput = document.getElementById("numGanador").value;
+        const rInput = document.getElementById("numRuletaFisica").value;
 
-        const idx = parseInt(numInput) - 1;
-        const cartonRef = datos[idx];
-        if (!cartonRef || !cartonRef.lineas[0].nombre) {
-            alert(`El número #${numInput} actualmente está libre o no tiene nombre.`);
-            return;
-        }
+        if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
 
-        const nombreGanador = cartonRef.lineas[0].nombre.toUpperCase();
-        let valorBingo = 10; // El premio base del bingo siempre son 10mil
-        let totalAcumulado = valorBingo;
-        let txtExtras = "";
-        
-        // Si es Ronda 5, el Flash se desactiva por regla
-        if (numeroRonda !== 5 && document.getElementById("chkFlash").checked) {
-            txtExtras += "⚡ *Bingo flash 25:* $3.000 extra\n";
-            totalAcumulado += 3;
-        }
-        
-        if (document.getElementById("chkRuleta").checked) {
-            let valorRuleta = (numeroRonda === 5) ? 5 : 10; // 5mil en R5, 10mil normales
-            txtExtras += `🎰 *Ruleta${numeroRonda === 5 ? ' PREM' : ''}:* $${valorRuleta}.000 extra\n`;
-            totalAcumulado += valorRuleta;
-        }
-        
-        if (document.getElementById("chkAprox").checked) {
-            let valorAprox = (numeroRonda === 5) ? 10 : 5; // 10mil en R5, 5mil normales
-            txtExtras += `🎯 *Aproximado:* $${valorAprox}.000 extra\n`;
-            totalAcumulado += valorAprox;
-        }
+        const numBingo = parseInt(bInput);
+        const numRuleta = parseInt(rInput);
+        const idxBingo = numBingo - 1;
+        const cartonBingo = datos[idxBingo];
 
-        // Estructura exacta para pegar directo en WhatsApp
-        let mensaje = `🏆 *GANADOR BINGO LINEAL* 🏆\n\n`;
-        mensaje += `🎰 *Ganador bingo #${String(numInput).padStart(2, '0')}*\n`;
-        mensaje += `👤 *${nombreGanador}* gana ${valorBingo}mil\n`;
-        
-        if (txtExtras !== "") {
-            mensaje += txtExtras + `\n`;
-            mensaje += `💵 *Total:* ${totalAcumulado}mil`;
+        if (!cartonBingo || !cartonBingo.lineas[0].nombre) { alert("Cartón libre o sin nombre"); return; }
+        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+
+        let vecinoAnterior = numBingo === 1 ? 15 : numBingo - 1;
+        let vecinoPosterior = numBingo === 15 ? 1 : numBingo + 1;
+        let esAproximado = (numRuleta === vecinoAnterior || numRuleta === vecinoPosterior);
+
+        const idxRuleta = numRuleta - 1;
+        const cartonRuleta = datos[idxRuleta];
+        const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "SIN ASIGNAR";
+
+        let mensaje = `🏆 *GANADOR BINGO LINEAL* 🏆\n \n`;
+
+        if (numeroRonda === 5) {
+            if (numBingo === numRuleta) {
+                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n🎰 *Ruleta # ${numRuleta}*\n👤 *${nombreBingo}*\n \n🤑 *BINGO TOTAL:* *${nombreBingo}* gana 25mil`;
+            } else if (esAproximado) {
+                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎯 *Aproximado VIP # ${numRuleta}*\n👤 *${nombreRuleta}* gana 10mil extra`;
+            } else {
+                mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
+            }
+        } else {
+            let totalAcumulado = 10;
+            let esRuletaMismoNumero = (numBingo === numRuleta);
+            let aplicarFlash = document.getElementById("chkFlash").checked && !esRuletaMismoNumero;
+
+            mensaje += `🎰 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n`;
+
+            if (aplicarFlash) {
+                mensaje += `⚡ *Bingo flash 25:* 3mil extra\n`;
+                totalAcumulado += 3;
+            }
+
+            if (esRuletaMismoNumero) {
+                mensaje += `🎰 *Ruleta # ${numRuleta}* gana 10mil extra\n`;
+                totalAcumulado += 10;
+                mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+            } else if (esAproximado) {
+                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra\n \n`;
+                mensaje += `Total:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+            } else {
+                mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
+            }
         }
 
         navigator.clipboard.writeText(mensaje.trim());
-        alert(`¡Mensaje del cartón #${numInput} (${nombreGanador}) copiado!`);
-        
-        // Limpiar panel para la próxima jugada
+        alert(`¡Mensaje de WhatsApp copiado! 🏆`);
+    };
+
+    // FUNCIÓN DE BOTÓN EXCLUSIVO PARA CARGAR GANANCIAS EN CAJA
+    window.cargarPremiosACaja = async () => {
+        const bInput = document.getElementById("numGanador").value;
+        const rInput = document.getElementById("numRuletaFisica").value;
+
+        if (!bInput || !rInput) { alert("Ingresa los números de Bingo y Ruleta para calcular saldos."); return; }
+
+        const numBingo = parseInt(bInput);
+        const numRuleta = parseInt(rInput);
+        const idxBingo = numBingo - 1;
+        const cartonBingo = datos[idxBingo];
+
+        if (!cartonBingo || !cartonBingo.lineas[0].nombre) { alert("El cartón no tiene un ganador."); return; }
+        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+
+        let vecinoAnterior = numBingo === 1 ? 15 : numBingo - 1;
+        let vecinoPosterior = numBingo === 15 ? 1 : numBingo + 1;
+        let esAproximado = (numRuleta === vecinoAnterior || numRuleta === vecinoPosterior);
+
+        const idxRuleta = numRuleta - 1;
+        const cartonRuleta = datos[idxRuleta];
+        const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "";
+
+        // Calcular montos exactos según ronda y casillas
+        let premioBingoPrincipal = 10; 
+        let premioVecino = 0;
+        let premioLejosRuleta = 0;
+        let nombrePremioLejos = nombreRuleta;
+
+        if (numeroRonda === 5) {
+            if (numBingo === numRuleta) {
+                premioBingoPrincipal = 25; 
+            } else if (esAproximado) {
+                premioBingoPrincipal = 10;
+                premioVecino = 10;
+            } else {
+                premioBingoPrincipal = 10;
+                premioLejosRuleta = 5;
+            }
+        } else {
+            let esRuletaMismoNumero = (numBingo === numRuleta);
+            if (esRuletaMismoNumero) {
+                premioBingoPrincipal = 20; // 10 base + 10 ruleta (flash anulado por regla)
+            } else {
+                if (document.getElementById("chkFlash").checked) {
+                    premioBingoPrincipal = 13; // 10 base + 3 flash
+                }
+                if (esAproximado) {
+                    premioVecino = 5;
+                }
+            }
+        }
+
+        // Modificar Texto de la caja
+        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
+        let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+
+        // Función interna para inyectar saldo a un nombre
+        function agregarSaldo(nombre, cantidad) {
+            if (!nombre || nombre === "SIN ASIGNAR" || cantidad === 0) return;
+            let encontrado = false;
+            lineas = lineas.map(l => {
+                if (l.startsWith(nombre + ":")) {
+                    encontrado = true;
+                    let partes = l.split(':');
+                    let nuevoValor = parseInt(partes[1].trim()) + cantidad;
+                    return `${nombre}: ${nuevoValor}`;
+                }
+                return l;
+            });
+            if (!encontrado) {
+                lineas.push(`${nombre}: ${cantidad}`);
+            }
+        }
+
+        // Ejecutar las sumas correspondientes
+        agregarSaldo(nombreBingo, premioBingoPrincipal);
+        if (premioVecino > 0 && nombreRuleta) agregarSaldo(nombreRuleta, premioVecino);
+        if (premioLejosRuleta > 0 && nombrePremioLejos) agregarSaldo(nombrePremioLejos, premioLejosRuleta);
+
+        let cajaFinalTexto = lineas.join('\n');
+        document.getElementById("notas-caja").value = cajaFinalTexto;
+
+        // Guardar directo en base de datos
+        await updateDoc(docRef, { notas_caja: cajaFinalTexto });
+        alert(`💰 Premios cargados con éxito en la caja:\n- ${nombreBingo}: +${premioBingoPrincipal}mil` + 
+              (premioVecino > 0 ? `\n- Vecino (${nombreRuleta}): +${premioVecino}mil` : '') + 
+              (premioLejosRuleta > 0 ? `\n- Ruleta (${nombrePremioLejos}): +${premioLejosRuleta}mil` : ''));
+
+        // Limpiar inputs del panel de ganadores
         document.getElementById("numGanador").value = "";
+        document.getElementById("numRuletaFisica").value = "";
         document.getElementById("chkFlash").checked = false;
-        document.getElementById("chkRuleta").checked = false;
-        document.getElementById("chkAprox").checked = false;
     };
 
     window.reiniciarTablero = async () => {
         if (confirm("¿Limpiar tablero?")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
-            
-            // Lógica de avance de ronda automática
             let proximaRonda = numeroRonda < 5 ? numeroRonda + 1 : 1;
             
             await updateDoc(docRef, { 
@@ -390,11 +530,11 @@
         if (numeroRonda === 5) {
             btnVerde.innerText = "📋 COPIAR LISTA ESPECIAL";
             btnVerde.style.background = "#ffcc00"; 
-            lblFlash.style.display = "none"; // Ocultar checkbox Flash en ronda 5 por regla
+            lblFlash.style.display = "none"; 
         } else {
             btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
             btnVerde.style.background = "#25D366"; 
-            lblFlash.style.display = "flex"; // Mostrar en rondas normales
+            lblFlash.style.display = "flex"; 
         }
         
         document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} <br> <span style="color: #007bff;">${infoBusqueda}</span>`;
