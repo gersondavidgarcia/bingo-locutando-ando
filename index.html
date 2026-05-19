@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Bingo Total - Locutando Ando | Multi Línea + Acumulado</title>
-    <meta property="og:title" content="🎰 BINGO LOCUTANDO ANDO - MULTI ACUMULADO">
+    <title>Bingo Locutando Ando | Multi Línea + Link</title>
+    
+    <!-- Metaetiquetas para previsualización en WhatsApp -->
+    <meta property="og:title" content="🎰 BINGO LOCUTANDO">
+    <meta property="og:description" content="Juega al bingo en línea con amigos. Premios especiales, dinámica divertida y enlace para anotarte.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/Nuevo_icono.png">
+    <meta property="og:image:secure_url" content="https://raw.githubusercontent.com/gersondavidgarcia/bingo-locutando-ando/main/Nuevo_icono.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="274">
+    <meta property="og:url" content="https://bingo-locutando.online/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/png" href="logo-locutando.png">
+    
     <style>
         * { box-sizing: border-box; }
         :root { --oro: #ffcc00; --fondo: #000; --columnas: 5; }
@@ -15,6 +27,11 @@
         input#nombreUser { padding: 10px; border-radius: 8px; border: 2px solid #444; width: 100%; font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center; background: #1e1e1e; color: #ffcc00; transition: 0.2s; }
         input#nombreUser:disabled { background: #333; color: #888; border-color: #666; cursor: not-allowed; }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
+        .stats-bar span { font-weight: bold; }
+        .stats-ronda { color: #ffcc00; }
+        .stats-libres { color: #ffffff; }
+        .stats-ocupados { color: #ffeb3b; }
+        .stats-pagados { color: #28a745; }
         #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
         .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 5px; }
         .brand-logo-img { height: 75px; width: auto; display: block; }
@@ -76,9 +93,12 @@
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ" list="sugerenciasCaja" autocomplete="off">
         <datalist id="sugerenciasCaja"></datalist>
     </div>
-    <div class="stats-bar"><span id="stats">RONDA: 1 | LIBRES: 0 | OCUPADOS: 0 | PAGADOS: 0</span><span id="msgLineas"></span></div>
+    <div class="stats-bar">
+        <span id="stats"></span>
+        <span id="msgLineas"></span>
+    </div>
     <div class="brand-container">
-        <span class="brand-text">🎰 BINGO TOTAL MULTI</span>
+        <span class="brand-text">🎰 BINGO LOCUTANDO</span>
         <button id="btnLupaExterna" class="btn" style="background:#007bff; color:white; font-size: 20px; padding: 5px 10px;" onclick="toggleVerificacionGlobal()">🔍</button>
         <img src="logo-locutando.png" class="brand-logo-img" alt="Logo">
         <button class="btn" style="background:var(--oro); color:#000" onclick="toggleAdmin()">⚙️ ADMIN</button>
@@ -121,6 +141,7 @@
         <button id="btnCopiarLista" class="btn" style="background:#25D366; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn" style="background:#ffcc00; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
         <button id="btnReiniciarGrande" class="btn" style="background:#ff4444; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="reiniciarBingo()">♻️ REINICIAR TABLERO</button>
+        <button id="btnLinkPromocion" class="btn" style="background:#007bff; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarLinkPromocion()">🔗 MANDAR LINK</button>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -162,7 +183,6 @@
     let modoVerificacion = false;
     let numeroRonda = 1;
 
-    // Devuelve lista CON REPETICIONES (cada línea cuenta individualmente)
     function obtenerTodosLosNombresConRepeticiones(numCarton) {
         let idx = numCarton - 1;
         if (idx < 0 || idx >= datos.length) return [];
@@ -208,9 +228,11 @@
             else if(l.estado==='reservado') res++; 
             else pag++; 
         }));
-        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | OCUPADOS: ${res} | PAGADOS: ${pag}`;
+        document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
         const btnLista = document.getElementById("btnCopiarLista");
         if(btnLista) btnLista.innerText = numeroRonda === 5 ? "📋 COPIAR LISTA ESPECIAL" : "📋 COPIAR LISTA WHATSAPP";
+        const btnLink = document.getElementById("btnLinkPromocion");
+        if(btnLink) btnLink.innerText = numeroRonda === 5 ? "🔗 MANDAR LINK ESPECIAL" : "🔗 MANDAR LINK";
     }
 
     function dibujar() {
@@ -427,8 +449,6 @@
         }
     };
     
-    // ========== FUNCIONES CORREGIDAS (AGRUPAN Y SUMAN) ==========
-    
     window.generarMensajeGanadorMulti = () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -446,7 +466,6 @@
         const esRondaEspecial = (numeroRonda === 5);
         const flashChecked = document.getElementById("chkFlash").checked;
         
-        // Función para agrupar y sumar
         const agruparYSumar = (lista, premioUnitario) => {
             let resultado = "";
             const conteo = {};
@@ -526,7 +545,6 @@
             }
         }
         
-        // Agrupar por nombre para sumar total
         const agruparPorNombre = (lista) => {
             const conteo = {};
             lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
@@ -577,7 +595,47 @@
         document.getElementById("chkFlash").checked = false;
     };
     
-    // ========== FIN FUNCIONES CORREGIDAS ==========
+    // NUEVA FUNCIÓN: Copiar link promocional SIN listado de números
+    window.copiarLinkPromocion = () => {
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+        let txt = "";
+        
+        // Encabezado y link
+        txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
+        txt += "https://bingo-locutando.online/\n\n";
+        txt += "```Para los NUEVOS:\nsi no entienden algo, mándenme un mensaje al privado y les explico bien la dinámica. 📲🤝```\n\n";
+        
+        // Tabla de premios según la ronda (sin el título "LISTADO BINGO LINEAL")
+        if (numeroRonda === 5) {
+            // Ronda especial: encabezado con estrellas
+            txt += "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
+            txt += "*💵 Valor:* $1.000\n───────\n";
+            txt += "🏆 *BINGO:* $10.000💰\n";
+            txt += "🎯💎 *Aproximado VIP:* $10.000\n";
+            txt += "🎰💎 *Ruleta PREM:* $5.000\n";
+            txt += "🤑🤑 *Bingo Total:* $25.000\n\n";
+            txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
+        } else {
+            // Ronda normal: sin título de listado
+            txt += "*💵 Valor:* $1.000\n───────\n";
+            txt += "🏆 *BINGO:* $10.000💰\n";
+            txt += "🎰 *Ruleta:* $10.000 Extra\n";
+            txt += "🎯 *Aproximado:* $5.000\n";
+            txt += "⚡ *Flash 25:* $3.000 Extra\n\n";
+            txt += "⚠️ *REGLA:* Si en la partida cae Flash y Ruleta, solo se paga el premio extra de la Ruleta.\n\n";
+        }
+        
+        // Separador visual
+        txt += "─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─\n\n";
+        
+        // Información de contacto y reglas
+        txt += "✅ *Nequi: 3169461962*\n";
+        if (numeroRonda < 5) txt += "✅ *Cada 5 Rondas se juega una ronda ESPECIAL*\n";
+        txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
+        
+        navigator.clipboard.writeText(txt);
+        alert("✅ Mensaje promocional con LINK copiado (sin números)");
+    };
     
     window.copiarListaBingo = () => {
         const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
