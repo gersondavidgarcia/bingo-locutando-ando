@@ -110,7 +110,7 @@
                 <label style="color: var(--verde); font-weight: bold;">📓 SALDOS DE CAJA</label>
                 <button class="btn btn-verde" style="padding: 5px 10px;" onclick="guardarCaja()">💾 GUARDAR CAJA</button>
             </div>
-            <textarea id="notas-caja" rows="5" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
+            <textarea id="notas-caja" rows="10" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
 
         <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
@@ -424,7 +424,7 @@
             } else if (esAproximado) {
                 mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎯💎 *Aproximado VIP # ${numRuleta}*\n👤 *${nombreRuleta}* gana 10mil`;
             } else {
-                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil extra`;
+                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil`;
             }
         } else {
             mensaje += `*Ronda ${emojisRonda[numeroRonda]}*\n \n`;
