@@ -53,6 +53,29 @@
         .grupo-botones-ganador { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #fff; }
         .btn-ganador-caja { background: #e0a800; color: black; width: 100%; padding: 14px; font-size: 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #000; }
+        
+        /* Botones de reinicio en columna (uno debajo del otro) */
+        .botonera-reinicio {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .botonera-reinicio .btn {
+            width: 100%;
+            text-align: center;
+        }
+        .btn-resaltar {
+            background: #0d6efd;
+            color: white;
+            border: 2px solid #ffcc00;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+        }
+        .btn-resaltar:hover {
+            background: #0b5ed7;
+            transform: scale(1.02);
+            transition: 0.1s;
+        }
     </style>
 </head>
 <body>
@@ -109,7 +132,11 @@
         <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingoSimplificada()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn btn-copiar-caja" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
         
-        <button class="btn btn-rojo" style="width:100%; margin-top:25px;" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
+        <!-- Botones en columna (uno debajo del otro) como en la primera imagen -->
+        <div class="botonera-reinicio">
+            <button class="btn btn-rojo" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
+            <button class="btn btn-resaltar" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
+        </div>
     </div>
 
 <script type="module">
@@ -133,7 +160,7 @@
     let seleccionados = [];
     let modoLupa = false;
     let infoBusqueda = "";
-    let numeroRonda = 1;  // Se conserva pero ya no afecta el texto ni premios
+    let numeroRonda = 1;  // Ronda normal SIN límite
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -154,7 +181,11 @@
             }
 
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
-            numeroRonda = d.numero_ronda || 1; 
+            if (d.numero_ronda !== undefined) {
+                numeroRonda = d.numero_ronda;
+            } else {
+                numeroRonda = numeroRonda || 1;
+            }
             
             dibujar();
             actualizarStats();
@@ -313,19 +344,30 @@
         }
     };
 
-    // NUEVA VERSIÓN SIMPLIFICADA DE COPIAR LISTA - SIN PREMIOS EXTRAS, SOLO DOS GANADORES
     window.copiarListaBingoSimplificada = () => {
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-        let rondaMostrar = (numeroRonda >= 1 && numeroRonda <= 5) ? numeroRonda : 1;
+        function numeroAEmoji(num) {
+            const digitos = {
+                '0': '0️⃣', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣',
+                '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'
+            };
+            let numStr = num.toString();
+            let resultado = '';
+            for (let char of numStr) {
+                resultado += digitos[char] || char;
+            }
+            return resultado;
+        }
+        
+        let rondaMostrar = numeroRonda;
+        let emojiRonda = numeroAEmoji(rondaMostrar);
         
         let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += `*Ronda ${emojisRonda[rondaMostrar]}*\n\n`;
+        txt += `*Ronda ${emojiRonda}*\n\n`;
         txt += "*💵 Valor:* $1.000\n";
         txt += "───────\n";
         txt += "🏆 *1er Ganador* $8.000💰\n";
         txt += "🏆 *2do Ganador:* $3.000💰\n\n";
         
-        // Listado de números con sus nombres y estado pagado
         datos.forEach(c => {
             const i = c.lineas[0];
             const nombreMostrar = i.nombre ? i.nombre : "";
@@ -375,7 +417,6 @@
         alert("Saldos copiados");
     };
 
-    // GENERADOR DE MENSAJE DE GANADORES SOLO 1er Y 2do (sin aproximados, sin flash, sin ruleta, sin reglas)
     window.generarMensajeGanadores = () => {
         const inputPrimero = document.getElementById("numPrimerGanador").value;
         const inputSegundo = document.getElementById("numSegundoGanador").value;
@@ -411,10 +452,23 @@
         const nombrePrimero = cartonPrimero.lineas[0].nombre.toUpperCase();
         const nombreSegundo = cartonSegundo.lineas[0].nombre.toUpperCase();
 
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-        let rondaMostrar = (numeroRonda >= 1 && numeroRonda <= 5) ? numeroRonda : 1;
+        function numeroAEmoji(num) {
+            const digitos = {
+                '0': '0️⃣', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣',
+                '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'
+            };
+            let numStr = num.toString();
+            let resultado = '';
+            for (let char of numStr) {
+                resultado += digitos[char] || char;
+            }
+            return resultado;
+        }
         
-        let mensaje = `*🎰 RONDA ${emojisRonda[rondaMostrar]}*\n`;
+        let rondaMostrar = numeroRonda;
+        let emojiRonda = numeroAEmoji(rondaMostrar);
+        
+        let mensaje = `*🎰 RONDA ${emojiRonda}*\n`;
         mensaje += ` \n`;
         mensaje += `🥇 *1er GANADOR #${numPrimero}*\n`;
         mensaje += `👤 *${nombrePrimero}* gana *8.000💰*\n`;
@@ -427,7 +481,6 @@
         alert(`Mensaje de ganadores copiado (1er: ${nombrePrimero} - 2do: ${nombreSegundo})`);
     };
 
-    // CARGA DE PREMIOS SIMPLIFICADA: solo suma 8k al primero y 3k al segundo
     window.cargarPremiosACajaSimplificado = async () => {
         const inputPrimero = document.getElementById("numPrimerGanador").value;
         const inputSegundo = document.getElementById("numSegundoGanador").value;
@@ -466,7 +519,6 @@
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
 
-        // Función auxiliar para sumar saldo
         function agregarSaldo(nombre, cantidad) {
             if (!nombre || cantidad === 0) return;
             let encontrado = false;
@@ -484,9 +536,7 @@
             }
         }
 
-        // 1er ganador: +8 mil
         agregarSaldo(nombrePrimero, 8);
-        // 2do ganador: +3 mil
         agregarSaldo(nombreSegundo, 3);
 
         let cajaFinalTexto = lineas.join('\n');
@@ -495,23 +545,34 @@
         await updateDoc(docRef, { notas_caja: cajaFinalTexto });
         alert(`💰 Premios registrados en caja:\n- ${nombrePrimero}: +8.000\n- ${nombreSegundo}: +3.000`);
 
-        // Limpiar campos después de registrar
         document.getElementById("numPrimerGanador").value = "";
         document.getElementById("numSegundoGanador").value = "";
     };
 
     window.reiniciarTablero = async () => {
-        if (confirm("¿Limpiar tablero? Se eliminarán todos los nombres y estados. La ronda avanzará.")) {
+        if (confirm("¿Limpiar tablero? Se eliminarán todos los nombres y estados (los cartones quedarán libres). La ronda NO se reinicia, solo se avanza al siguiente número.")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
-            let proximaRonda = numeroRonda < 5 ? numeroRonda + 1 : 1;
+            let nuevaRonda = numeroRonda + 1;
             
             await updateDoc(docRef, { 
                 cartones: datos,
-                numero_ronda: proximaRonda
+                numero_ronda: nuevaRonda
             });
             
             seleccionados = [];
             actualizarStats();
+            alert(`Tablero reiniciado. Ahora Ronda ${nuevaRonda}`);
+        }
+    };
+    
+    window.reiniciarRondaACero = async () => {
+        if (confirm("⚠️ ¿Reiniciar el contador de RONDA a 1? Los cartones y sus nombres NO se borrarán, solo cambiará el número de ronda mostrado.")) {
+            await updateDoc(docRef, { 
+                numero_ronda: 1
+            });
+            numeroRonda = 1;
+            actualizarStats();
+            alert("Ronda reiniciada a 1 ✅");
         }
     };
 
@@ -522,7 +583,6 @@
             if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
         });
         
-        // Botón siempre igual (sin cambios por ronda especial)
         const btnVerde = document.getElementById("btnCopiarPrincipal");
         btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
         btnVerde.style.background = "#25D366";
