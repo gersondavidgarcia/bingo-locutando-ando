@@ -43,16 +43,12 @@
 
         .stats { text-align: center; color: #fff; background: #222; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 1px solid #444; }
 
-        /* SECCIÓN DEL CONTROL DE PREMIOS EN DIRECTO */
+        /* SECCIÓN DEL CONTROL DE PREMIOS EN DIRECTO - SIMPLIFICADA SOLO PARA DOS GANADORES */
         .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; }
         .ganador-inputs { display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; }
         .bloque-input { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 280px; }
         .bloque-input label { font-size: 18px; font-weight: bold; color: #fff; }
         .bloque-input input { width: 90px; padding: 12px; font-size: 24px; font-weight: bold; text-align: center; border-radius: 8px; border: 2px solid var(--oro); background: #000; color: #fff; }
-        
-        .ganador-extras { display: flex; justify-content: center; gap: 25px; font-size: 16px; margin-bottom: 15px; padding: 5px; }
-        .ganador-extras label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold; }
-        .ganador-extras input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; }
         
         .grupo-botones-ganador { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #fff; }
@@ -80,28 +76,25 @@
             <button class="btn btn-azul" onclick="toggleLupa()" id="btnLupa">🔍 BUSCAR</button>
         </div>
 
+        <!-- SECCIÓN SIMPLIFICADA: solo dos ganadores (1er y 2do) sin flash ni ruleta ni aproximados -->
         <div class="seccion-ganador">
-            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px;">🏆 CONTROL DE GANADORES</div>
+            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px;">🏆 DECLARAR GANADORES (1er y 2do)</div>
             
             <div class="ganador-inputs">
                 <div class="bloque-input">
-                    <label>BINGO #:</label>
-                    <input type="number" id="numGanador" min="1" max="15" placeholder="#">
+                    <label>🥇 1er GANADOR #:</label>
+                    <input type="number" id="numPrimerGanador" min="1" max="15" placeholder="#">
                 </div>
                 
                 <div class="bloque-input">
-                    <label style="color: var(--oro);">RULETA #:</label>
-                    <input type="number" id="numRuletaFisica" min="1" max="15" placeholder="#">
+                    <label>🥈 2do GANADOR #:</label>
+                    <input type="number" id="numSegundoGanador" min="1" max="15" placeholder="#">
                 </div>
-            </div>
-
-            <div class="ganador-extras">
-                <label id="lblFlash"><input type="checkbox" id="chkFlash"> ⚡ FLASH</label>
             </div>
             
             <div class="grupo-botones-ganador">
-                <button class="btn-ganador-enviar" onclick="generarMensajeGanador()">📋 COPIAR MENSAJE GANADOR</button>
-                <button class="btn-ganador-caja" onclick="cargarPremiosACaja()">💰 REGISTRAR PREMIOS EN CAJA</button>
+                <button class="btn-ganador-enviar" onclick="generarMensajeGanadores()">📋 COPIAR LISTA GANADORES</button>
+                <button class="btn-ganador-caja" onclick="cargarPremiosACajaSimplificado()">💰 REGISTRAR PREMIOS EN CAJA</button>
             </div>
         </div>
 
@@ -113,7 +106,7 @@
             <textarea id="notas-caja" rows="10" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
 
-        <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
+        <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingoSimplificada()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn btn-copiar-caja" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
         
         <button class="btn btn-rojo" style="width:100%; margin-top:25px;" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
@@ -140,7 +133,7 @@
     let seleccionados = [];
     let modoLupa = false;
     let infoBusqueda = "";
-    let numeroRonda = 1;
+    let numeroRonda = 1;  // Se conserva pero ya no afecta el texto ni premios
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -320,39 +313,31 @@
         }
     };
 
-    window.copiarListaBingo = () => {
+    // NUEVA VERSIÓN SIMPLIFICADA DE COPIAR LISTA - SIN PREMIOS EXTRAS, SOLO DOS GANADORES
+    window.copiarListaBingoSimplificada = () => {
         const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-        let txt = "";
-
-        if (numeroRonda === 5) {
-            txt = "⭐⭐⭐⭐⭐\n*RONDA ESPECIAL*\n🔥🔥🔥🔥🔥\n\n";
-            txt += "*💵 Valor:* $1.000\n───────\n"; 
-            txt += "🏆 *BINGO:* $10.000💰\n";
-            txt += "🎯💎 *Aproximado VIP:* $10.000\n";
-            txt += "🎰💎 *Ruleta PREM:* $5.000\n";
-            txt += "🤑🤑 *Bingo Total:* $25.000\n\n";
-            txt += "⚠️ *REGLA:* En esta partida no se juega Bingo Flash\n\n";
-        } else {
-            txt = "*🎰 LISTADO BINGO LINEAL*\n";
-            txt += `*Ronda ${emojisRonda[numeroRonda]}*\n\n`;
-            txt += "*💵 Valor:* $1.000\n───────\n"; 
-            txt += "🏆 *BINGO:* $10.000💰\n";
-            txt += "🎰 *Ruleta:* $10.000 Extra\n";
-            txt += "🎯 *Aproximado:* $5.000\n";
-            txt += "⚡ *Flash 25:* $3.000 Extra\n\n";
-            txt += "⚠️ *REGLA:* Si en la partida cae Flash y Ruleta, solo se paga el premio extra de la Ruleta.\n\n";
-        }
-
+        let rondaMostrar = (numeroRonda >= 1 && numeroRonda <= 5) ? numeroRonda : 1;
+        
+        let txt = "*🎰 LISTADO BINGO LINEAL*\n";
+        txt += `*Ronda ${emojisRonda[rondaMostrar]}*\n\n`;
+        txt += "*💵 Valor:* $1.000\n";
+        txt += "───────\n";
+        txt += "🏆 *1er Ganador* $8.000💰\n";
+        txt += "🏆 *2do Ganador:* $3.000💰\n\n";
+        
+        // Listado de números con sus nombres y estado pagado
         datos.forEach(c => {
             const i = c.lineas[0];
-            txt += `${c.id} 🍀 ${i.nombre ? i.nombre : ""}${i.estado === "pagado" ? " ✅" : ""}\n`;
+            const nombreMostrar = i.nombre ? i.nombre : "";
+            const pagadoIcono = i.estado === "pagado" ? " ✅" : "";
+            txt += `${c.id} 🍀 ${nombreMostrar}${pagadoIcono}\n`;
         });
         
-        txt += "\n✅ *Nequi: 3169461962*";
-        txt += (numeroRonda < 5) ? "\n✅ *Cada 5 Rondas se juega una ronda ESPECIAL*\n✅ *Juega con responsabilidad y disfruta la dinámica.*" : "\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
+        txt += "\n✅ *Nequi: 3169461962*\n";
+        txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
         
         navigator.clipboard.writeText(txt);
-        alert(numeroRonda === 5 ? "¡Lista ESPECIAL copiada! 🔥" : `Ronda ${numeroRonda} copiada`);
+        alert(`Lista de bingo copiada (Ronda ${rondaMostrar})`);
     };
 
     window.filtrarSugerencias = (valor) => {
@@ -390,133 +375,100 @@
         alert("Saldos copiados");
     };
 
-    // GENERADOR DE MENSAJES DE WHATSAPP CON NUEVA ESTRUCTURA Y ELIMINACIÓN DE "EXTRA" EN APROXIMADOS
-    window.generarMensajeGanador = () => {
-        const bInput = document.getElementById("numGanador").value;
-        const rInput = document.getElementById("numRuletaFisica").value;
+    // GENERADOR DE MENSAJE DE GANADORES SOLO 1er Y 2do (sin aproximados, sin flash, sin ruleta, sin reglas)
+    window.generarMensajeGanadores = () => {
+        const inputPrimero = document.getElementById("numPrimerGanador").value;
+        const inputSegundo = document.getElementById("numSegundoGanador").value;
 
-        if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
+        if (!inputPrimero || !inputSegundo) { 
+            alert("Ingresa los números del 1er y 2do ganador"); 
+            return; 
+        }
 
-        const numBingo = parseInt(bInput);
-        const numRuleta = parseInt(rInput);
-        const idxBingo = numBingo - 1;
-        const cartonBingo = datos[idxBingo];
+        const numPrimero = parseInt(inputPrimero);
+        const numSegundo = parseInt(inputSegundo);
+        
+        if (numPrimero === numSegundo) {
+            alert("El 1er y 2do ganador no pueden ser el mismo número.");
+            return;
+        }
 
-        if (!cartonBingo || !cartonBingo.lineas[0].nombre) { alert("Cartón libre o sin nombre"); return; }
-        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+        const idxPrimero = numPrimero - 1;
+        const idxSegundo = numSegundo - 1;
+        
+        const cartonPrimero = datos[idxPrimero];
+        const cartonSegundo = datos[idxSegundo];
 
-        let vecinoAnterior = numBingo === 1 ? 15 : numBingo - 1;
-        let vecinoPosterior = numBingo === 15 ? 1 : numBingo + 1;
-        let esAproximado = (numRuleta === vecinoAnterior || numRuleta === vecinoPosterior);
+        if (!cartonPrimero || !cartonPrimero.lineas[0].nombre) { 
+            alert(`El cartón #${numPrimero} no tiene un nombre asignado o está libre.`); 
+            return; 
+        }
+        if (!cartonSegundo || !cartonSegundo.lineas[0].nombre) { 
+            alert(`El cartón #${numSegundo} no tiene un nombre asignado o está libre.`); 
+            return; 
+        }
 
-        const idxRuleta = numRuleta - 1;
-        const cartonRuleta = datos[idxRuleta];
-        const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "SIN ASIGNAR";
+        const nombrePrimero = cartonPrimero.lineas[0].nombre.toUpperCase();
+        const nombreSegundo = cartonSegundo.lineas[0].nombre.toUpperCase();
 
         const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-        let mensaje = "";
-
-        if (numeroRonda === 5) {
-            mensaje += `⭐🔥⭐🔥⭐🔥\nRONDA ESPECIAL\n`;
-            
-            if (numBingo === numRuleta) {
-                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n🎰 *Ruleta # ${numRuleta}*\n👤 *${nombreBingo}*\n \n🤑 *BINGO TOTAL:* *${nombreBingo}* gana 25mil`;
-            } else if (esAproximado) {
-                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎯💎 *Aproximado VIP # ${numRuleta}*\n👤 *${nombreRuleta}* gana 10mil`;
-            } else {
-                mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n \n🎰 *Ruleta PREM # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil`;
-            }
-        } else {
-            mensaje += `*Ronda ${emojisRonda[numeroRonda]}*\n \n`;
-            
-            let totalAcumulado = 10;
-            let esRuletaMismoNumero = (numBingo === numRuleta);
-            let aplicarFlash = document.getElementById("chkFlash").checked && !esRuletaMismoNumero;
-
-            mensaje += `🏆 *Ganador bingo # ${numBingo}*\n👤 *${nombreBingo}* gana 10mil\n`;
-
-            if (aplicarFlash) {
-                mensaje += `⚡ *Bingo flash 25:* 3mil extra\n`;
-                totalAcumulado += 3;
-            }
-
-            if (esRuletaMismoNumero) {
-                mensaje += `🎰 *Ruleta # ${numRuleta}* gana 10mil extra\n`;
-                totalAcumulado += 10;
-                mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
-            } else if (esAproximado) {
-                // Modificado para no llevar la palabra "extra" ni alterar el Total
-                mensaje += ` \n🎯 *Aproximado # ${numRuleta}*\n👤 *${nombreRuleta}* gana 5mil`;
-                if (aplicarFlash) {
-                    mensaje += `\n \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
-                }
-            } else {
-                if (aplicarFlash) {
-                    mensaje += ` \nTotal:\n👤 *${nombreBingo}* gana ${totalAcumulado}mil`;
-                }
-            }
-        }
+        let rondaMostrar = (numeroRonda >= 1 && numeroRonda <= 5) ? numeroRonda : 1;
+        
+        let mensaje = `*🎰 RONDA ${emojisRonda[rondaMostrar]}*\n`;
+        mensaje += ` \n`;
+        mensaje += `🥇 *1er GANADOR #${numPrimero}*\n`;
+        mensaje += `👤 *${nombrePrimero}* gana *8.000💰*\n`;
+        mensaje += ` \n`;
+        mensaje += `🥈 *2do GANADOR #${numSegundo}*\n`;
+        mensaje += `👤 *${nombreSegundo}* gana *3.000💰*\n`;
+        mensaje += ` \n✅ *Felicidades a los ganadores!*`;
 
         navigator.clipboard.writeText(mensaje.trim());
-        alert(`¡Mensaje de WhatsApp copiado! 🏆`);
+        alert(`Mensaje de ganadores copiado (1er: ${nombrePrimero} - 2do: ${nombreSegundo})`);
     };
 
-    window.cargarPremiosACaja = async () => {
-        const bInput = document.getElementById("numGanador").value;
-        const rInput = document.getElementById("numRuletaFisica").value;
+    // CARGA DE PREMIOS SIMPLIFICADA: solo suma 8k al primero y 3k al segundo
+    window.cargarPremiosACajaSimplificado = async () => {
+        const inputPrimero = document.getElementById("numPrimerGanador").value;
+        const inputSegundo = document.getElementById("numSegundoGanador").value;
 
-        if (!bInput || !rInput) { alert("Ingresa los números de Bingo y Ruleta para calcular saldos."); return; }
-
-        const numBingo = parseInt(bInput);
-        const numRuleta = parseInt(rInput);
-        const idxBingo = numBingo - 1;
-        const cartonBingo = datos[idxBingo];
-
-        if (!cartonBingo || !cartonBingo.lineas[0].nombre) { alert("El cartón no tiene un ganador."); return; }
-        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
-
-        let vecinoAnterior = numBingo === 1 ? 15 : numBingo - 1;
-        let vecinoPosterior = numBingo === 15 ? 1 : numBingo + 1;
-        let esAproximado = (numRuleta === vecinoAnterior || numRuleta === vecinoPosterior);
-
-        const idxRuleta = numRuleta - 1;
-        const cartonRuleta = datos[idxRuleta];
-        const nombreRuleta = (cartonRuleta && cartonRuleta.lineas[0].nombre) ? cartonRuleta.lineas[0].nombre.toUpperCase() : "";
-
-        let premioBingoPrincipal = 10; 
-        let premioVecino = 0;
-        let premioLejosRuleta = 0;
-        let nombrePremioLejos = nombreRuleta;
-
-        if (numeroRonda === 5) {
-            if (numBingo === numRuleta) {
-                premioBingoPrincipal = 25; 
-            } else if (esAproximado) {
-                premioBingoPrincipal = 10;
-                premioVecino = 10;
-            } else {
-                premioBingoPrincipal = 10;
-                premioLejosRuleta = 5;
-            }
-        } else {
-            let esRuletaMismoNumero = (numBingo === numRuleta);
-            if (esRuletaMismoNumero) {
-                premioBingoPrincipal = 20; 
-            } else {
-                if (document.getElementById("chkFlash").checked) {
-                    premioBingoPrincipal = 13; 
-                }
-                if (esAproximado) {
-                    premioVecino = 5;
-                }
-            }
+        if (!inputPrimero || !inputSegundo) {
+            alert("Ingresa los números del 1er y 2do ganador para registrar premios.");
+            return;
         }
+
+        const numPrimero = parseInt(inputPrimero);
+        const numSegundo = parseInt(inputSegundo);
+        
+        if (numPrimero === numSegundo) {
+            alert("El 1er y 2do ganador no pueden ser el mismo número.");
+            return;
+        }
+
+        const idxPrimero = numPrimero - 1;
+        const idxSegundo = numSegundo - 1;
+        
+        const cartonPrimero = datos[idxPrimero];
+        const cartonSegundo = datos[idxSegundo];
+
+        if (!cartonPrimero || !cartonPrimero.lineas[0].nombre) {
+            alert(`El cartón #${numPrimero} no tiene un nombre asignado.`);
+            return;
+        }
+        if (!cartonSegundo || !cartonSegundo.lineas[0].nombre) {
+            alert(`El cartón #${numSegundo} no tiene un nombre asignado.`);
+            return;
+        }
+
+        const nombrePrimero = cartonPrimero.lineas[0].nombre.toUpperCase();
+        const nombreSegundo = cartonSegundo.lineas[0].nombre.toUpperCase();
 
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
 
+        // Función auxiliar para sumar saldo
         function agregarSaldo(nombre, cantidad) {
-            if (!nombre || nombre === "SIN ASIGNAR" || cantidad === 0) return;
+            if (!nombre || cantidad === 0) return;
             let encontrado = false;
             lineas = lineas.map(l => {
                 if (l.startsWith(nombre + ":")) {
@@ -532,25 +484,24 @@
             }
         }
 
-        agregarSaldo(nombreBingo, premioBingoPrincipal);
-        if (premioVecino > 0 && nombreRuleta) agregarSaldo(nombreRuleta, premioVecino);
-        if (premioLejosRuleta > 0 && nombrePremioLejos) agregarSaldo(nombrePremioLejos, premioLejosRuleta);
+        // 1er ganador: +8 mil
+        agregarSaldo(nombrePrimero, 8);
+        // 2do ganador: +3 mil
+        agregarSaldo(nombreSegundo, 3);
 
         let cajaFinalTexto = lineas.join('\n');
         document.getElementById("notas-caja").value = cajaFinalTexto;
 
         await updateDoc(docRef, { notas_caja: cajaFinalTexto });
-        alert(`💰 Premios cargados con éxito en la caja:\n- ${nombreBingo}: +${premioBingoPrincipal}mil` + 
-              (premioVecino > 0 ? `\n- Vecino (${nombreRuleta}): +${premioVecino}mil` : '') + 
-              (premioLejosRuleta > 0 ? `\n- Ruleta (${nombrePremioLejos}): +${premioLejosRuleta}mil` : ''));
+        alert(`💰 Premios registrados en caja:\n- ${nombrePrimero}: +8.000\n- ${nombreSegundo}: +3.000`);
 
-        document.getElementById("numGanador").value = "";
-        document.getElementById("numRuletaFisica").value = "";
-        document.getElementById("chkFlash").checked = false;
+        // Limpiar campos después de registrar
+        document.getElementById("numPrimerGanador").value = "";
+        document.getElementById("numSegundoGanador").value = "";
     };
 
     window.reiniciarTablero = async () => {
-        if (confirm("¿Limpiar tablero?")) {
+        if (confirm("¿Limpiar tablero? Se eliminarán todos los nombres y estados. La ronda avanzará.")) {
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             let proximaRonda = numeroRonda < 5 ? numeroRonda + 1 : 1;
             
@@ -571,18 +522,10 @@
             if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
         });
         
+        // Botón siempre igual (sin cambios por ronda especial)
         const btnVerde = document.getElementById("btnCopiarPrincipal");
-        const lblFlash = document.getElementById("lblFlash");
-        
-        if (numeroRonda === 5) {
-            btnVerde.innerText = "📋 COPIAR LISTA ESPECIAL";
-            btnVerde.style.background = "#ffcc00"; 
-            lblFlash.style.display = "none"; 
-        } else {
-            btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
-            btnVerde.style.background = "#25D366"; 
-            lblFlash.style.display = "flex"; 
-        }
+        btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
+        btnVerde.style.background = "#25D366";
         
         document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} <br> <span style="color: #007bff;">${infoBusqueda}</span>`;
     }
