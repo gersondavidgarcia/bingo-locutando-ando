@@ -40,6 +40,7 @@
         .btn-copiar-grande { background: #25D366; color: #000; width: 100%; font-size: 22px; padding: 20px; margin-top: 10px; border: 3px solid #fff; border-radius: 12px; }
         .btn-copiar-caja { background: #ffcc00; color: #000; width: 100%; font-size: 16px; padding: 15px; margin-top: 10px; border: 2px solid #000; border-radius: 8px; }
         .btn-reinicio-grande { background: #dc3545; color: #fff; width: 100%; font-size: 22px; padding: 20px; margin-top: 10px; border: 3px solid #fff; border-radius: 12px; font-weight: bold; }
+        .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; font-weight: bold; }
 
         textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
 
@@ -70,6 +71,77 @@
         
         .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .warning-text { color: #ffaa00; font-weight: bold; }
+
+        /* Modal para rondas - estilo similar a la caja */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            border: 3px solid var(--oro);
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 85%;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            color: var(--oro);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .modal-content textarea {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-guardar {
+            background: #28a745;
+            color: white;
+        }
+        .btn-cerrar {
+            background: #dc3545;
+            color: white;
+        }
+        .ronda-nota {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 10px;
+            text-align: center;
+            background: #2a2a2a;
+            padding: 6px;
+            border-radius: 6px;
+        }
     </style>
 </head>
 <body>
@@ -149,6 +221,23 @@
         <div class="botonera-reinicio">
             <button class="btn btn-reinicio-grande" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO (+$1.000 al acumulado)</button>
             <button class="btn btn-resaltar" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
+            <button class="btn btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
+        </div>
+    </div>
+
+    <!-- Modal para editar rondas (estilo textarea como la caja) -->
+    <div id="modalRondas" class="modal">
+        <div class="modal-content">
+            <h3>📊 RONDAS POR JUGADOR</h3>
+            <textarea id="rondasTextarea" rows="8" placeholder="DAVID: 4&#10;MARÍA: 2&#10;PEDRO: 1" style="text-transform: uppercase;"></textarea>
+            <div class="modal-buttons">
+                <button class="btn-guardar" onclick="guardarRondas()">💾 GUARDAR RONDAS</button>
+                <button class="btn-cerrar" onclick="cerrarModalRondas()">CERRAR</button>
+            </div>
+            <div class="ronda-nota">
+                ⚠️ Formato: NOMBRE: NÚMERO (ej: DAVID: 4)<br>
+                📌 Al reiniciar el tablero, se suma +1 automáticamente a los jugadores con líneas activas
+            </div>
         </div>
     </div>
 
@@ -175,6 +264,7 @@
     let infoBusqueda = "";
     let numeroRonda = 1;
     let acumulado = 0;
+    let rondasPorJugador = {}; // { "DAVID": 4, "MARIA": 2 }
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -198,6 +288,8 @@
             if (d.numero_ronda !== undefined) numeroRonda = d.numero_ronda;
             if (d.acumulado !== undefined) acumulado = d.acumulado;
             else acumulado = 0;
+            if (d.rondasPorJugador !== undefined) rondasPorJugador = d.rondasPorJugador;
+            else rondasPorJugador = {};
             
             actualizarUIAcumulado();
             dibujar();
@@ -221,28 +313,55 @@
         return Math.round(numero * 1000);
     }
 
-    window.toggleCheckbox = () => {
-        let chk = document.getElementById("chkEntregarAcumulado");
-        chk.checked = !chk.checked;
-    };
-
-    window.modificarAcumulado = async (cambio) => {
-        let nuevoValor = acumulado + (cambio / 1000);
-        if (nuevoValor < 0) nuevoValor = 0;
-        acumulado = nuevoValor;
-        await updateDoc(docRef, { acumulado: acumulado });
-        actualizarUIAcumulado();
-        actualizarStats();
-    };
-
-    window.resetearAcumulado = async () => {
-        if (confirm("¿Resetear el acumulado a $0?")) {
-            acumulado = 0;
-            await updateDoc(docRef, { acumulado: acumulado });
-            actualizarUIAcumulado();
-            actualizarStats();
-            alert("Acumulado reseteado a $0");
+    // Convertir objeto rondas a texto para textarea
+    function rondasToText() {
+        let texto = "";
+        const ordenados = Object.entries(rondasPorJugador).sort((a, b) => b[1] - a[1]);
+        for (let [nombre, rondas] of ordenados) {
+            texto += `${nombre}: ${rondas}\n`;
         }
+        return texto.trim();
+    }
+
+    // Convertir texto a objeto rondas
+    function textToRondas(texto) {
+        const nuevasRondas = {};
+        const lineas = texto.toUpperCase().split('\n');
+        for (let linea of lineas) {
+            linea = linea.trim();
+            if (linea === "") continue;
+            if (linea.includes(':')) {
+                let partes = linea.split(':');
+                let nombre = partes[0].trim();
+                let valor = parseInt(partes[1].trim());
+                if (nombre && !isNaN(valor) && valor > 0) {
+                    nuevasRondas[nombre] = valor;
+                }
+            }
+        }
+        return nuevasRondas;
+    }
+
+    window.mostrarModalRondas = () => {
+        const modal = document.getElementById("modalRondas");
+        const textarea = document.getElementById("rondasTextarea");
+        textarea.value = rondasToText();
+        modal.style.display = "flex";
+    };
+    
+    window.cerrarModalRondas = () => {
+        document.getElementById("modalRondas").style.display = "none";
+    };
+    
+    window.guardarRondas = async () => {
+        const textarea = document.getElementById("rondasTextarea");
+        const nuevoTexto = textarea.value;
+        const nuevasRondas = textToRondas(nuevoTexto);
+        await updateDoc(docRef, { rondasPorJugador: nuevasRondas });
+        rondasPorJugador = nuevasRondas;
+        actualizarStats();
+        alert("Rondas guardadas ✅");
+        cerrarModalRondas();
     };
 
     function dibujar() {
@@ -315,6 +434,7 @@
             for (let nombre in cartonesPorNombre) {
                 let indicesSeleccionados = cartonesPorNombre[nombre];
                 let lineasAComprar = indicesSeleccionados.length;
+                let costoTotal = lineasAComprar * 1.5;
                 
                 let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
                 let saldoActual = 0;
@@ -323,13 +443,14 @@
                 lineasCaja.forEach((l, i) => {
                     if (l.startsWith(nombre + ":")) {
                         let partes = l.split(':');
-                        saldoActual = parseCajaValue(partes[1].trim()) / 1000;
+                        saldoActual = parseFloat(partes[1].trim());
+                        if (isNaN(saldoActual)) saldoActual = 0;
                         indexLinea = i;
                     }
                 });
 
-                if (indexLinea !== -1 && saldoActual >= lineasAComprar) {
-                    let nuevoSaldo = saldoActual - lineasAComprar;
+                if (indexLinea !== -1 && saldoActual >= costoTotal) {
+                    let nuevoSaldo = saldoActual - costoTotal;
                     if (nuevoSaldo > 0) {
                         lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
                     } else {
@@ -339,20 +460,29 @@
                     indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                     cambiosRealizados = true;
                 } else if (indexLinea !== -1 && saldoActual > 0) {
-                    let cartonesParaCobrar = indicesSeleccionados.slice(0, saldoActual);
-                    let cartonesRestantes = indicesSeleccionados.slice(saldoActual);
-                    let confirmarVerde = confirm(`⚠️ El jugador "${nombre}" sólo tiene saldo para ${saldoActual} línea(s). ¿Cobrar esas y marcar el resto como pagado de todas formas?`);
-                    if (confirmarVerde) {
-                        lineasCaja.splice(indexLinea, 1);
+                    let lineasPosibles = Math.floor(saldoActual / 1.5);
+                    if (lineasPosibles > 0) {
+                        let costoReal = lineasPosibles * 1.5;
+                        let nuevoSaldo = saldoActual - costoReal;
+                        if (nuevoSaldo > 0) {
+                            lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
+                        } else {
+                            lineasCaja.splice(indexLinea, 1);
+                        }
                         nuevaCaja = lineasCaja.join('\n');
-                        indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
+                        let indicesPagar = indicesSeleccionados.slice(0, lineasPosibles);
+                        indicesPagar.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                         cambiosRealizados = true;
+                        alert(`⚠️ ${nombre} sólo tenía saldo para ${lineasPosibles} de ${lineasAComprar} línea(s). Se pagaron esas.`);
                     } else {
-                        cartonesParaCobrar.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
-                        cambiosRealizados = true;
+                        let confirmarVerde = confirm(`⚠️ ${nombre} no tiene saldo suficiente para ninguna línea. ¿Marcar como pagado de todas formas?`);
+                        if (confirmarVerde) {
+                            indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
+                            cambiosRealizados = true;
+                        }
                     }
                 } else {
-                    let confirmarVerde = confirm(`⚠️ El jugador "${nombre}" NO tiene saldo. ¿Marcar como pagado de todas formas?`);
+                    let confirmarVerde = confirm(`⚠️ ${nombre} NO tiene saldo en caja. ¿Marcar como pagado de todas formas?`);
                     if (confirmarVerde) {
                         indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                         cambiosRealizados = true;
@@ -433,7 +563,8 @@
                 let partes = linea.split(':');
                 let nombre = partes[0].trim();
                 let valorRaw = partes[1].trim();
-                let valorNum = parseCajaValue(valorRaw) / 1000;
+                let valorNum = parseFloat(valorRaw);
+                if (isNaN(valorNum)) valorNum = 0;
                 lineasNormalizadas.push(`${nombre}: ${valorNum}`);
             } else if (linea.trim() !== "") {
                 lineasNormalizadas.push(linea);
@@ -502,7 +633,6 @@
         const esMismaPersona = (nombreBingo === nombreRuleta);
         
         if (esMismoNumero) {
-            // Mismo número: la persona gana Bingo y Ruleta juntos
             let premioTotal = 11 + 5;
             mensaje += `🏆 *BINGO #${bingoNum}* 🎰 *RULETA #${ruletaNum}*\n`;
             mensaje += `👤 *${nombreBingo}*\n`;
@@ -525,7 +655,6 @@
             mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 1000)} EN TOTAL* 🎉\n`;
         } 
         else if (esMismaPersona) {
-            // Misma persona pero números diferentes
             let premioTotal = 11 + 5;
             mensaje += `🏆 *BINGO #${bingoNum}*\n`;
             mensaje += `👤 *${nombreBingo}* gana *$11.000💰*\n`;
@@ -536,7 +665,6 @@
             mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 1000)} (Bingo + Ruleta)* 🎉\n`;
         }
         else {
-            // Personas diferentes
             mensaje += `🏆 *BINGO #${bingoNum}*\n`;
             mensaje += `👤 *${nombreBingo}* gana *$11.000💰*\n`;
             mensaje += ` \n`;
@@ -544,7 +672,6 @@
             mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
         }
         
-        // Determinar si fue un solo ganador o múltiples
         if (esMismoNumero || esMismaPersona) {
             mensaje += `\n✅ *Felicidades al ganador!*`;
         } else {
@@ -605,7 +732,7 @@
         }
 
         if (esMismoNumero || esMismaPersona) {
-            let totalPremio = 16; // 11 + 5
+            let totalPremio = 16;
             let mensajePremios = `💰 ${nombreBingo} recibe:\n   - Bingo: $11.000\n   - Ruleta: $5.000`;
             
             if (esMismoNumero && entregarAcumulado && acumulado > 0) {
@@ -643,7 +770,19 @@
     };
 
     window.reiniciarTablero = async () => {
-        if (confirm("¿Reiniciar tablero? Se borrarán nombres y estados. Además se sumará +$1.000 al acumulado.")) {
+        if (confirm("¿Reiniciar tablero? Se borrarán nombres y estados. Además se sumará +$1.000 al acumulado y +1 ronda a cada jugador activo.")) {
+            let nuevosRondas = { ...rondasPorJugador };
+            let jugadoresActivos = new Set();
+            datos.forEach(c => {
+                const nombre = c.lineas[0].nombre;
+                if (nombre && nombre !== "") {
+                    jugadoresActivos.add(nombre);
+                }
+            });
+            jugadoresActivos.forEach(jugador => {
+                nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
+            });
+            
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             let nuevaRonda = numeroRonda + 1;
             let nuevoAcumulado = acumulado + 1;
@@ -651,7 +790,8 @@
             await updateDoc(docRef, { 
                 cartones: datos,
                 numero_ronda: nuevaRonda,
-                acumulado: nuevoAcumulado
+                acumulado: nuevoAcumulado,
+                rondasPorJugador: nuevosRondas
             });
             
             seleccionados = [];
