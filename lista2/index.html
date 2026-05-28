@@ -72,7 +72,6 @@
         .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .warning-text { color: #ffaa00; font-weight: bold; }
 
-        /* Modal para rondas - estilo similar a la caja */
         .modal {
             display: none;
             position: fixed;
@@ -125,23 +124,9 @@
             cursor: pointer;
             border: none;
         }
-        .btn-guardar {
-            background: #28a745;
-            color: white;
-        }
-        .btn-cerrar {
-            background: #dc3545;
-            color: white;
-        }
-        .ronda-nota {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 10px;
-            text-align: center;
-            background: #2a2a2a;
-            padding: 6px;
-            border-radius: 6px;
-        }
+        .btn-guardar { background: #28a745; color: white; }
+        .btn-cerrar { background: #dc3545; color: white; }
+        .ronda-nota { font-size: 11px; color: #aaa; margin-top: 10px; text-align: center; background: #2a2a2a; padding: 6px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -175,9 +160,9 @@
             </div>
             <div class="acumulado-valor" id="acumuladoValor">$0</div>
             <div class="acumulado-control">
-                <button class="btn btn-verde" onclick="modificarAcumulado(-1000)">-1.000</button>
-                <button class="btn btn-azul" onclick="modificarAcumulado(1000)">+1.000</button>
-                <button class="btn btn-resaltar" onclick="resetearAcumulado()">RESETEAR</button>
+                <button class="btn btn-verde" id="btnAcumuladoMenos">-1.000</button>
+                <button class="btn btn-azul" id="btnAcumuladoMas">+1.000</button>
+                <button class="btn btn-resaltar" id="btnAcumuladoReset">RESETEAR</button>
             </div>
             <div class="regla-nota">
                 ⚠️ Se suma +$1.000 automáticamente al reiniciar ronda<br>
@@ -225,7 +210,6 @@
         </div>
     </div>
 
-    <!-- Modal para editar rondas (estilo textarea como la caja) -->
     <div id="modalRondas" class="modal">
         <div class="modal-content">
             <h3>📊 RONDAS POR JUGADOR</h3>
@@ -263,8 +247,8 @@
     let modoLupa = false;
     let infoBusqueda = "";
     let numeroRonda = 1;
-    let acumulado = 0;
-    let rondasPorJugador = {}; // { "DAVID": 4, "MARIA": 2 }
+    let acumulado = 0; // Valor en MILES (ej: 5 = 5.000)
+    let rondasPorJugador = {};
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -286,7 +270,7 @@
 
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
             if (d.numero_ronda !== undefined) numeroRonda = d.numero_ronda;
-            if (d.acumulado !== undefined) acumulado = d.acumulado;
+            if (d.acumulado !== undefined && typeof d.acumulado === 'number') acumulado = d.acumulado;
             else acumulado = 0;
             if (d.rondasPorJugador !== undefined) rondasPorJugador = d.rondasPorJugador;
             else rondasPorJugador = {};
@@ -298,7 +282,8 @@
     });
 
     function actualizarUIAcumulado() {
-        document.getElementById("acumuladoValor").innerHTML = `$${formatNumber(acumulado * 1000)}`;
+        const valorMostrar = acumulado * 1000;
+        document.getElementById("acumuladoValor").innerHTML = `$${valorMostrar.toLocaleString()}`;
     }
 
     function formatNumber(num) {
@@ -313,7 +298,6 @@
         return Math.round(numero * 1000);
     }
 
-    // Convertir objeto rondas a texto para textarea
     function rondasToText() {
         let texto = "";
         const ordenados = Object.entries(rondasPorJugador).sort((a, b) => b[1] - a[1]);
@@ -323,7 +307,6 @@
         return texto.trim();
     }
 
-    // Convertir texto a objeto rondas
     function textToRondas(texto) {
         const nuevasRondas = {};
         const lineas = texto.toUpperCase().split('\n');
@@ -362,6 +345,43 @@
         actualizarStats();
         alert("Rondas guardadas ✅");
         cerrarModalRondas();
+    };
+
+    // FUNCIONES DEL ACUMULADO CORREGIDAS
+    window.modificarAcumulado = async (cambioEnMiles) => {
+        // cambioEnMiles es 1 para +1.000 o -1 para -1.000
+        let nuevoValor = acumulado + cambioEnMiles;
+        if (nuevoValor < 0) nuevoValor = 0;
+        acumulado = nuevoValor;
+        await updateDoc(docRef, { acumulado: acumulado });
+        actualizarUIAcumulado();
+        actualizarStats();
+    };
+
+    window.resetearAcumulado = async () => {
+        if (confirm("¿Resetear el acumulado a $0?")) {
+            acumulado = 0;
+            await updateDoc(docRef, { acumulado: acumulado });
+            actualizarUIAcumulado();
+            actualizarStats();
+            alert("Acumulado reseteado a $0");
+        }
+    };
+
+    // Asignar eventos a los botones después de que el DOM cargue
+    document.addEventListener('DOMContentLoaded', () => {
+        const btnMenos = document.getElementById('btnAcumuladoMenos');
+        const btnMas = document.getElementById('btnAcumuladoMas');
+        const btnReset = document.getElementById('btnAcumuladoReset');
+        
+        if (btnMenos) btnMenos.onclick = () => modificarAcumulado(-1);
+        if (btnMas) btnMas.onclick = () => modificarAcumulado(1);
+        if (btnReset) btnReset.onclick = () => resetearAcumulado();
+    });
+
+    window.toggleCheckbox = () => {
+        let chk = document.getElementById("chkEntregarAcumulado");
+        chk.checked = !chk.checked;
     };
 
     function dibujar() {
