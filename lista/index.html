@@ -13,9 +13,10 @@
         .input-wrapper { position: relative; width: 90%; max-width: 500px; margin: auto; }
         input#nombreUser { 
             padding: 15px; border-radius: 8px; border: 2px solid #444; width: 100%;
-            font-size: 20px; font-weight: bold; text-transform: uppercase; text-align: center; background: #222; color: var(--verde);
-            box-sizing: border-box; padding-right: 45px;
+            font-size: 20px; font-weight: bold; text-transform: uppercase; text-align: center; background: #ffffff !important; 
+            color: #000000 !important; box-sizing: border-box; padding-right: 45px;
         }
+        input#nombreUser::placeholder { color: #888888; font-weight: normal; }
         .btn-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #444; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 18px; line-height: 1; }
 
         .tablero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 15px; max-width: 600px; margin: auto; }
@@ -38,12 +39,13 @@
         
         .btn-copiar-grande { background: #25D366; color: #000; width: 100%; font-size: 22px; padding: 20px; margin-top: 10px; border: 3px solid #fff; border-radius: 12px; }
         .btn-copiar-caja { background: #ffcc00; color: #000; width: 100%; font-size: 16px; padding: 15px; margin-top: 10px; border: 2px solid #000; border-radius: 8px; }
+        .btn-reinicio-grande { background: #dc3545; color: #fff; width: 100%; font-size: 22px; padding: 20px; margin-top: 10px; border: 3px solid #fff; border-radius: 12px; font-weight: bold; }
+        .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; font-weight: bold; }
 
         textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
 
         .stats { text-align: center; color: #fff; background: #222; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; font-weight: bold; border: 1px solid #444; }
 
-        /* SECCIÓN DEL CONTROL DE PREMIOS EN DIRECTO - SIMPLIFICADA SOLO PARA DOS GANADORES */
         .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 20px; border-radius: 8px; margin-top: 15px; margin-bottom: 15px; }
         .ganador-inputs { display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; }
         .bloque-input { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 280px; }
@@ -54,27 +56,91 @@
         .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 16px; font-size: 18px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #fff; }
         .btn-ganador-caja { background: #e0a800; color: black; width: 100%; padding: 14px; font-size: 16px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; border: 2px solid #000; }
         
-        /* Botones de reinicio en columna (uno debajo del otro) */
-        .botonera-reinicio {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px;
-        }
-        .botonera-reinicio .btn {
+        .seccion-acumulado { background: #1a1a2e; border: 2px solid var(--oro); border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center; }
+        .acumulado-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        .acumulado-valor { font-size: 32px; font-weight: bold; color: #ffcc00; }
+        .acumulado-check { display: flex; align-items: center; gap: 8px; background: #2a2a3e; padding: 8px 15px; border-radius: 30px; cursor: pointer; }
+        .acumulado-check input { width: 24px; height: 24px; cursor: pointer; transform: scale(1.2); margin-right: 5px; }
+        .acumulado-check label { font-size: 14px; font-weight: bold; color: #ffcc00; cursor: pointer; }
+        .acumulado-control { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .acumulado-control .btn { padding: 8px 16px; font-size: 14px; }
+        
+        .botonera-reinicio { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .btn-resaltar { background: #0d6efd; color: white; border: 2px solid #ffcc00; box-shadow: 0 0 8px rgba(13, 110, 253, 0.5); }
+        .btn-resaltar:hover { background: #0b5ed7; transform: scale(1.02); transition: 0.1s; }
+        
+        .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
+        .warning-text { color: #ffaa00; font-weight: bold; }
+
+        /* Modal para rondas - estilo similar a la caja */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            border: 3px solid var(--oro);
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 85%;
+            overflow-y: auto;
+        }
+        .modal-content h3 {
+            color: var(--oro);
             text-align: center;
+            margin-bottom: 15px;
         }
-        .btn-resaltar {
-            background: #0d6efd;
+        .modal-content textarea {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            border: 2px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-guardar {
+            background: #28a745;
             color: white;
-            border: 2px solid #ffcc00;
-            box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
         }
-        .btn-resaltar:hover {
-            background: #0b5ed7;
-            transform: scale(1.02);
-            transition: 0.1s;
+        .btn-cerrar {
+            background: #dc3545;
+            color: white;
+        }
+        .ronda-nota {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 10px;
+            text-align: center;
+            background: #2a2a2a;
+            padding: 6px;
+            border-radius: 6px;
         }
     </style>
 </head>
@@ -99,25 +165,45 @@
             <button class="btn btn-azul" onclick="toggleLupa()" id="btnLupa">🔍 BUSCAR</button>
         </div>
 
-        <!-- SECCIÓN SIMPLIFICADA: solo dos ganadores (1er y 2do) sin flash ni ruleta ni aproximados -->
+        <div class="seccion-acumulado">
+            <div class="acumulado-header">
+                <div style="color: var(--oro); font-weight: bold; font-size: 14px;">🏆 ACUMULADO</div>
+                <div class="acumulado-check" onclick="toggleCheckbox()">
+                    <input type="checkbox" id="chkEntregarAcumulado">
+                    <label for="chkEntregarAcumulado">✅ ENTREGAR ACUMULADO</label>
+                </div>
+            </div>
+            <div class="acumulado-valor" id="acumuladoValor">$0</div>
+            <div class="acumulado-control">
+                <button class="btn btn-verde" onclick="modificarAcumulado(-1000)">-1.000</button>
+                <button class="btn btn-azul" onclick="modificarAcumulado(1000)">+1.000</button>
+                <button class="btn btn-resaltar" onclick="resetearAcumulado()">RESETEAR</button>
+            </div>
+            <div class="regla-nota">
+                ⚠️ Se suma +$1.000 automáticamente al reiniciar ronda<br>
+                📌 <span class="warning-text">Regla:</span> Para ganar el acumulado, el jugador debe haber participado en <strong>4 rondas diferentes en el día</strong>.<br>
+                🧾 Marca el checkbox SOLO si cumple las condiciones
+            </div>
+        </div>
+
         <div class="seccion-ganador">
-            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px;">🏆 DECLARAR GANADORES (1er y 2do)</div>
+            <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 15px; font-size: 16px; letter-spacing: 1px;">🏆 DECLARAR GANADORES</div>
             
             <div class="ganador-inputs">
                 <div class="bloque-input">
-                    <label>🥇 1er GANADOR #:</label>
-                    <input type="number" id="numPrimerGanador" min="1" max="15" placeholder="#">
+                    <label>🎯 BINGO #:</label>
+                    <input type="number" id="numBingoGanador" min="1" max="15" placeholder="#">
                 </div>
                 
                 <div class="bloque-input">
-                    <label>🥈 2do GANADOR #:</label>
-                    <input type="number" id="numSegundoGanador" min="1" max="15" placeholder="#">
+                    <label>🎰 RULETA #:</label>
+                    <input type="number" id="numRuletaGanador" min="1" max="15" placeholder="#">
                 </div>
             </div>
             
             <div class="grupo-botones-ganador">
-                <button class="btn-ganador-enviar" onclick="generarMensajeGanadores()">📋 COPIAR LISTA GANADORES</button>
-                <button class="btn-ganador-caja" onclick="cargarPremiosACajaSimplificado()">💰 REGISTRAR PREMIOS EN CAJA</button>
+                <button class="btn-ganador-enviar" onclick="generarMensajeGanador()">📋 COPIAR MENSAJE GANADORES</button>
+                <button class="btn-ganador-caja" onclick="registrarPremiosEnCaja()">💰 REGISTRAR PREMIOS EN CAJA</button>
             </div>
         </div>
 
@@ -126,16 +212,32 @@
                 <label style="color: var(--verde); font-weight: bold;">📓 SALDOS DE CAJA</label>
                 <button class="btn btn-verde" style="padding: 5px 10px;" onclick="guardarCaja()">💾 GUARDAR CAJA</button>
             </div>
-            <textarea id="notas-caja" rows="10" placeholder="DAVID: 10" oninput="this.value = this.value.toUpperCase()"></textarea>
+            <textarea id="notas-caja" rows="10" placeholder="Ejemplo:&#10;DAVID: 10&#10;MARIA: 2.5  (2.5 = 2.500)&#10;PEDRO: 0.75" oninput="this.value = this.value.toUpperCase()"></textarea>
         </div>
 
-        <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingoSimplificada()">📋 COPIAR LISTA WHATSAPP</button>
+        <button id="btnCopiarPrincipal" class="btn btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn btn-copiar-caja" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
         
-        <!-- Botones en columna (uno debajo del otro) como en la primera imagen -->
         <div class="botonera-reinicio">
-            <button class="btn btn-rojo" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO</button>
+            <button class="btn btn-reinicio-grande" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO (+$1.000 al acumulado)</button>
             <button class="btn btn-resaltar" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
+            <button class="btn btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
+        </div>
+    </div>
+
+    <!-- Modal para editar rondas (estilo textarea como la caja) -->
+    <div id="modalRondas" class="modal">
+        <div class="modal-content">
+            <h3>📊 RONDAS POR JUGADOR</h3>
+            <textarea id="rondasTextarea" rows="8" placeholder="DAVID: 4&#10;MARÍA: 2&#10;PEDRO: 1" style="text-transform: uppercase;"></textarea>
+            <div class="modal-buttons">
+                <button class="btn-guardar" onclick="guardarRondas()">💾 GUARDAR RONDAS</button>
+                <button class="btn-cerrar" onclick="cerrarModalRondas()">CERRAR</button>
+            </div>
+            <div class="ronda-nota">
+                ⚠️ Formato: NOMBRE: NÚMERO (ej: DAVID: 4)<br>
+                📌 Al reiniciar el tablero, se suma +1 automáticamente a los jugadores con líneas activas
+            </div>
         </div>
     </div>
 
@@ -160,7 +262,9 @@
     let seleccionados = [];
     let modoLupa = false;
     let infoBusqueda = "";
-    let numeroRonda = 1;  // Ronda normal SIN límite
+    let numeroRonda = 1;
+    let acumulado = 0;
+    let rondasPorJugador = {}; // { "DAVID": 4, "MARIA": 2 }
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -181,16 +285,84 @@
             }
 
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
-            if (d.numero_ronda !== undefined) {
-                numeroRonda = d.numero_ronda;
-            } else {
-                numeroRonda = numeroRonda || 1;
-            }
+            if (d.numero_ronda !== undefined) numeroRonda = d.numero_ronda;
+            if (d.acumulado !== undefined) acumulado = d.acumulado;
+            else acumulado = 0;
+            if (d.rondasPorJugador !== undefined) rondasPorJugador = d.rondasPorJugador;
+            else rondasPorJugador = {};
             
+            actualizarUIAcumulado();
             dibujar();
             actualizarStats();
         }
     });
+
+    function actualizarUIAcumulado() {
+        document.getElementById("acumuladoValor").innerHTML = `$${formatNumber(acumulado * 1000)}`;
+    }
+
+    function formatNumber(num) {
+        return num.toLocaleString();
+    }
+
+    function parseCajaValue(valorStr) {
+        if (!valorStr) return 0;
+        let limpio = valorStr.replace(',', '.');
+        let numero = parseFloat(limpio);
+        if (isNaN(numero)) return 0;
+        return Math.round(numero * 1000);
+    }
+
+    // Convertir objeto rondas a texto para textarea
+    function rondasToText() {
+        let texto = "";
+        const ordenados = Object.entries(rondasPorJugador).sort((a, b) => b[1] - a[1]);
+        for (let [nombre, rondas] of ordenados) {
+            texto += `${nombre}: ${rondas}\n`;
+        }
+        return texto.trim();
+    }
+
+    // Convertir texto a objeto rondas
+    function textToRondas(texto) {
+        const nuevasRondas = {};
+        const lineas = texto.toUpperCase().split('\n');
+        for (let linea of lineas) {
+            linea = linea.trim();
+            if (linea === "") continue;
+            if (linea.includes(':')) {
+                let partes = linea.split(':');
+                let nombre = partes[0].trim();
+                let valor = parseInt(partes[1].trim());
+                if (nombre && !isNaN(valor) && valor > 0) {
+                    nuevasRondas[nombre] = valor;
+                }
+            }
+        }
+        return nuevasRondas;
+    }
+
+    window.mostrarModalRondas = () => {
+        const modal = document.getElementById("modalRondas");
+        const textarea = document.getElementById("rondasTextarea");
+        textarea.value = rondasToText();
+        modal.style.display = "flex";
+    };
+    
+    window.cerrarModalRondas = () => {
+        document.getElementById("modalRondas").style.display = "none";
+    };
+    
+    window.guardarRondas = async () => {
+        const textarea = document.getElementById("rondasTextarea");
+        const nuevoTexto = textarea.value;
+        const nuevasRondas = textToRondas(nuevoTexto);
+        await updateDoc(docRef, { rondasPorJugador: nuevasRondas });
+        rondasPorJugador = nuevasRondas;
+        actualizarStats();
+        alert("Rondas guardadas ✅");
+        cerrarModalRondas();
+    };
 
     function dibujar() {
         const container = document.getElementById("tablero");
@@ -262,6 +434,7 @@
             for (let nombre in cartonesPorNombre) {
                 let indicesSeleccionados = cartonesPorNombre[nombre];
                 let lineasAComprar = indicesSeleccionados.length;
+                let costoTotal = lineasAComprar * 1.5;
                 
                 let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
                 let saldoActual = 0;
@@ -270,71 +443,60 @@
                 lineasCaja.forEach((l, i) => {
                     if (l.startsWith(nombre + ":")) {
                         let partes = l.split(':');
-                        saldoActual = parseInt(partes[1].trim()) || 0;
+                        saldoActual = parseFloat(partes[1].trim());
+                        if (isNaN(saldoActual)) saldoActual = 0;
                         indexLinea = i;
                     }
                 });
 
-                if (indexLinea !== -1 && saldoActual >= lineasAComprar) {
-                    let nuevoSaldo = saldoActual - lineasAComprar;
+                if (indexLinea !== -1 && saldoActual >= costoTotal) {
+                    let nuevoSaldo = saldoActual - costoTotal;
                     if (nuevoSaldo > 0) {
                         lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
                     } else {
                         lineasCaja.splice(indexLinea, 1); 
                     }
                     nuevaCaja = lineasCaja.join('\n');
-
-                    indicesSeleccionados.forEach(idx => {
-                        cartonesAActualizar[idx].lineas[0].estado = 'pagado';
-                    });
+                    indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                     cambiosRealizados = true;
-
                 } else if (indexLinea !== -1 && saldoActual > 0) {
-                    let cartonesParaCobrar = indicesSeleccionados.slice(0, saldoActual);
-                    let cartonesRestantes = indicesSeleccionados.slice(saldoActual);
-                    let lineasFaltantes = cartonesRestantes.length;
-
-                    let mensajeAviso = `⚠️ El jugador "${nombre}" sólo tiene saldo para ${saldoActual} línea(s) en caja, pero seleccionaste ${lineasAComprar}.\n\n¿Deseas cobrar las ${saldoActual} línea(s) de la caja y pasar las ${lineasFaltantes} faltantes a VERDE directamente de todos modos?`;
-
-                    let confirmarVerde = confirm(mensajeAviso);
-                    if (confirmarVerde) {
-                        lineasCaja.splice(indexLinea, 1);
+                    let lineasPosibles = Math.floor(saldoActual / 1.5);
+                    if (lineasPosibles > 0) {
+                        let costoReal = lineasPosibles * 1.5;
+                        let nuevoSaldo = saldoActual - costoReal;
+                        if (nuevoSaldo > 0) {
+                            lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
+                        } else {
+                            lineasCaja.splice(indexLinea, 1);
+                        }
                         nuevaCaja = lineasCaja.join('\n');
-
-                        indicesSeleccionados.forEach(idx => {
-                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
-                        });
+                        let indicesPagar = indicesSeleccionados.slice(0, lineasPosibles);
+                        indicesPagar.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                         cambiosRealizados = true;
+                        alert(`⚠️ ${nombre} sólo tenía saldo para ${lineasPosibles} de ${lineasAComprar} línea(s). Se pagaron esas.`);
                     } else {
-                        lineasCaja.splice(indexLinea, 1);
-                        nuevaCaja = lineasCaja.join('\n');
-
-                        cartonesParaCobrar.forEach(idx => {
-                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
-                        });
-                        cambiosRealizados = true;
+                        let confirmarVerde = confirm(`⚠️ ${nombre} no tiene saldo suficiente para ninguna línea. ¿Marcar como pagado de todas formas?`);
+                        if (confirmarVerde) {
+                            indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
+                            cambiosRealizados = true;
+                        }
                     }
                 } else {
-                    let mensajeAviso = `⚠️ El jugador "${nombre}" NO tiene saldo disponible en la caja.\n\n¿Deseas registrar sus cartones y pasarlos a VERDE (PAGADO) directamente de todos modos?`;
-
-                    let confirmarVerde = confirm(mensajeAviso);
+                    let confirmarVerde = confirm(`⚠️ ${nombre} NO tiene saldo en caja. ¿Marcar como pagado de todas formas?`);
                     if (confirmarVerde) {
-                        indicesSeleccionados.forEach(idx => {
-                            cartonesAActualizar[idx].lineas[0].estado = 'pagado';
-                        });
+                        indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
                         cambiosRealizados = true;
                     }
                 }
             }
         } else if (nuevoEstado === 'libre') {
-            let confirmarLiberar = confirm("⚠️ ¿Seguro que deseas LIBERAR y borrar el nombre de los cartones seleccionados?");
-            if (!confirmarLiberar) return;
-
-            seleccionados.forEach(idx => {
-                cartonesAActualizar[idx].lineas[0].estado = nuevoEstado;
-                cartonesAActualizar[idx].lineas[0].nombre = "";
-            });
-            cambiosRealizados = true;
+            if (confirm("⚠️ ¿Liberar y borrar nombres de los cartones seleccionados?")) {
+                seleccionados.forEach(idx => {
+                    cartonesAActualizar[idx].lineas[0].estado = nuevoEstado;
+                    cartonesAActualizar[idx].lineas[0].nombre = "";
+                });
+                cambiosRealizados = true;
+            }
         }
 
         if (cambiosRealizados) {
@@ -344,29 +506,21 @@
         }
     };
 
-    window.copiarListaBingoSimplificada = () => {
+    window.copiarListaBingo = () => {
         function numeroAEmoji(num) {
-            const digitos = {
-                '0': '0️⃣', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣',
-                '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'
-            };
-            let numStr = num.toString();
-            let resultado = '';
-            for (let char of numStr) {
-                resultado += digitos[char] || char;
-            }
-            return resultado;
+            const digitos = {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣'};
+            return num.toString().split('').map(c => digitos[c] || c).join('');
         }
         
-        let rondaMostrar = numeroRonda;
-        let emojiRonda = numeroAEmoji(rondaMostrar);
-        
         let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += `*Ronda ${emojiRonda}*\n\n`;
-        txt += "*💵 Valor:* $1.000\n";
+        txt += `*Ronda ${numeroAEmoji(numeroRonda)}*\n\n`;
+        txt += "*💵 Valor:* $1.500\n";
         txt += "───────\n";
-        txt += "🏆 *1er Ganador* $8.000💰\n";
-        txt += "🏆 *2do Ganador:* $3.000💰\n\n";
+        txt += "🏆 *Bingo:* $11.000💰\n";
+        txt += "🎰 *Ruleta:* $5.000💰\n";
+        if (acumulado > 0) txt += `💰 *Acumulado:* $${formatNumber(acumulado * 1000)}💰\n`;
+        txt += "───────\n";
+        txt += `📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n`;
         
         datos.forEach(c => {
             const i = c.lineas[0];
@@ -379,7 +533,7 @@
         txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
         
         navigator.clipboard.writeText(txt);
-        alert(`Lista de bingo copiada (Ronda ${rondaMostrar})`);
+        alert("Lista de bingo copiada");
     };
 
     window.filtrarSugerencias = (valor) => {
@@ -399,177 +553,256 @@
     };
 
     window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
-    window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
+    
+    window.guardarCaja = async () => { 
+        let cajaTexto = document.getElementById("notas-caja").value.toUpperCase();
+        let lineas = cajaTexto.split('\n');
+        let lineasNormalizadas = [];
+        for (let linea of lineas) {
+            if (linea.includes(':')) {
+                let partes = linea.split(':');
+                let nombre = partes[0].trim();
+                let valorRaw = partes[1].trim();
+                let valorNum = parseFloat(valorRaw);
+                if (isNaN(valorNum)) valorNum = 0;
+                lineasNormalizadas.push(`${nombre}: ${valorNum}`);
+            } else if (linea.trim() !== "") {
+                lineasNormalizadas.push(linea);
+            }
+        }
+        await updateDoc(docRef, { notas_caja: lineasNormalizadas.join('\n') }); 
+        alert("Caja guardada ✅"); 
+    };
 
     window.copiarSoloCaja = () => {
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
-        let txt = "📦*CAJA :*\n\n";
+        let txt = "📦 *CAJA:*\n\n";
         cajaRaw.split('\n').forEach(l => {
             if(l.includes(':')) {
                 let partes = l.split(':');
-                txt += `${partes[0].trim().toUpperCase()}: ${partes[1].trim()}.000\n`;
-            } else if (l.trim() !== "") { 
-                txt += l.toUpperCase() + "\n"; 
-            }
+                let nombre = partes[0].trim();
+                let valor = parseFloat(partes[1].trim());
+                if (!isNaN(valor)) {
+                    txt += `${nombre.toUpperCase()}: $${formatNumber(valor * 1000)}\n`;
+                } else {
+                    txt += l.toUpperCase() + "\n";
+                }
+            } else if (l.trim() !== "") txt += l.toUpperCase() + "\n";
         });
         navigator.clipboard.writeText(txt.trim());
         alert("Saldos copiados");
     };
 
-    window.generarMensajeGanadores = () => {
-        const inputPrimero = document.getElementById("numPrimerGanador").value;
-        const inputSegundo = document.getElementById("numSegundoGanador").value;
+    window.generarMensajeGanador = () => {
+        const bingoNum = parseInt(document.getElementById("numBingoGanador").value);
+        const ruletaNum = parseInt(document.getElementById("numRuletaGanador").value);
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
 
-        if (!inputPrimero || !inputSegundo) { 
-            alert("Ingresa los números del 1er y 2do ganador"); 
-            return; 
-        }
-
-        const numPrimero = parseInt(inputPrimero);
-        const numSegundo = parseInt(inputSegundo);
-        
-        if (numPrimero === numSegundo) {
-            alert("El 1er y 2do ganador no pueden ser el mismo número.");
+        if (isNaN(bingoNum) || isNaN(ruletaNum)) {
+            alert("Ingresa los números de BINGO y RULETA");
             return;
         }
 
-        const idxPrimero = numPrimero - 1;
-        const idxSegundo = numSegundo - 1;
+        const idxBingo = bingoNum - 1;
+        const idxRuleta = ruletaNum - 1;
+        const cartonBingo = datos[idxBingo];
+        const cartonRuleta = datos[idxRuleta];
+
+        if (!cartonBingo || !cartonBingo.lineas[0].nombre) {
+            alert(`El cartón #${bingoNum} (BINGO) no tiene nombre asignado`);
+            return;
+        }
+        if (!cartonRuleta || !cartonRuleta.lineas[0].nombre) {
+            alert(`El cartón #${ruletaNum} (RULETA) no tiene nombre asignado`);
+            return;
+        }
+
+        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+        const nombreRuleta = cartonRuleta.lineas[0].nombre.toUpperCase();
         
-        const cartonPrimero = datos[idxPrimero];
-        const cartonSegundo = datos[idxSegundo];
-
-        if (!cartonPrimero || !cartonPrimero.lineas[0].nombre) { 
-            alert(`El cartón #${numPrimero} no tiene un nombre asignado o está libre.`); 
-            return; 
-        }
-        if (!cartonSegundo || !cartonSegundo.lineas[0].nombre) { 
-            alert(`El cartón #${numSegundo} no tiene un nombre asignado o está libre.`); 
-            return; 
-        }
-
-        const nombrePrimero = cartonPrimero.lineas[0].nombre.toUpperCase();
-        const nombreSegundo = cartonSegundo.lineas[0].nombre.toUpperCase();
-
         function numeroAEmoji(num) {
-            const digitos = {
-                '0': '0️⃣', '1': '1️⃣', '2': '2️⃣', '3': '3️⃣', '4': '4️⃣',
-                '5': '5️⃣', '6': '6️⃣', '7': '7️⃣', '8': '8️⃣', '9': '9️⃣'
-            };
-            let numStr = num.toString();
-            let resultado = '';
-            for (let char of numStr) {
-                resultado += digitos[char] || char;
+            const digitos = {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣'};
+            return num.toString().split('').map(c => digitos[c] || c).join('');
+        }
+
+        let mensaje = `*🎰 RONDA ${numeroAEmoji(numeroRonda)}*\n`;
+        mensaje += ` \n`;
+        
+        const esMismoNumero = (bingoNum === ruletaNum);
+        const esMismaPersona = (nombreBingo === nombreRuleta);
+        
+        if (esMismoNumero) {
+            let premioTotal = 11 + 5;
+            mensaje += `🏆 *BINGO #${bingoNum}* 🎰 *RULETA #${ruletaNum}*\n`;
+            mensaje += `👤 *${nombreBingo}*\n`;
+            mensaje += ` \n`;
+            
+            if (entregarAcumulado && acumulado > 0) {
+                mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
+                mensaje += `🏆 Lleva $${formatNumber(acumulado * 1000)} EXTRA\n`;
+                mensaje += ` \n`;
+                premioTotal += acumulado;
+            } else if (!entregarAcumulado && acumulado > 0) {
+                mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
+                mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
+                mensaje += `💰 El acumulado de $${formatNumber(acumulado * 1000)} sigue en juego.\n`;
+                mensaje += ` \n`;
             }
-            return resultado;
+            mensaje += `🏆 *Bingo:* $11.000\n`;
+            mensaje += `🎰 *Ruleta:* $5.000\n`;
+            mensaje += ` \n`;
+            mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 1000)} EN TOTAL* 🎉\n`;
+        } 
+        else if (esMismaPersona) {
+            let premioTotal = 11 + 5;
+            mensaje += `🏆 *BINGO #${bingoNum}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$11.000💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎰 *RULETA #${ruletaNum}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 1000)} (Bingo + Ruleta)* 🎉\n`;
+        }
+        else {
+            mensaje += `🏆 *BINGO #${bingoNum}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$11.000💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎰 *RULETA #${ruletaNum}*\n`;
+            mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
         }
         
-        let rondaMostrar = numeroRonda;
-        let emojiRonda = numeroAEmoji(rondaMostrar);
-        
-        let mensaje = `*🎰 RONDA ${emojiRonda}*\n`;
-        mensaje += ` \n`;
-        mensaje += `🥇 *1er GANADOR #${numPrimero}*\n`;
-        mensaje += `👤 *${nombrePrimero}* gana *8.000💰*\n`;
-        mensaje += ` \n`;
-        mensaje += `🥈 *2do GANADOR #${numSegundo}*\n`;
-        mensaje += `👤 *${nombreSegundo}* gana *3.000💰*\n`;
-        mensaje += ` \n✅ *Felicidades a los ganadores!*`;
+        if (esMismoNumero || esMismaPersona) {
+            mensaje += `\n✅ *Felicidades al ganador!*`;
+        } else {
+            mensaje += `\n✅ *Felicidades a los ganadores!*`;
+        }
 
         navigator.clipboard.writeText(mensaje.trim());
-        alert(`Mensaje de ganadores copiado (1er: ${nombrePrimero} - 2do: ${nombreSegundo})`);
+        alert("Mensaje de ganadores copiado");
     };
 
-    window.cargarPremiosACajaSimplificado = async () => {
-        const inputPrimero = document.getElementById("numPrimerGanador").value;
-        const inputSegundo = document.getElementById("numSegundoGanador").value;
+    window.registrarPremiosEnCaja = async () => {
+        const bingoNum = parseInt(document.getElementById("numBingoGanador").value);
+        const ruletaNum = parseInt(document.getElementById("numRuletaGanador").value);
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
 
-        if (!inputPrimero || !inputSegundo) {
-            alert("Ingresa los números del 1er y 2do ganador para registrar premios.");
+        if (isNaN(bingoNum) || isNaN(ruletaNum)) {
+            alert("Ingresa los números de BINGO y RULETA");
             return;
         }
 
-        const numPrimero = parseInt(inputPrimero);
-        const numSegundo = parseInt(inputSegundo);
-        
-        if (numPrimero === numSegundo) {
-            alert("El 1er y 2do ganador no pueden ser el mismo número.");
+        const idxBingo = bingoNum - 1;
+        const idxRuleta = ruletaNum - 1;
+        const cartonBingo = datos[idxBingo];
+        const cartonRuleta = datos[idxRuleta];
+
+        if (!cartonBingo || !cartonBingo.lineas[0].nombre) {
+            alert(`El cartón #${bingoNum} (BINGO) no tiene nombre`);
+            return;
+        }
+        if (!cartonRuleta || !cartonRuleta.lineas[0].nombre) {
+            alert(`El cartón #${ruletaNum} (RULETA) no tiene nombre`);
             return;
         }
 
-        const idxPrimero = numPrimero - 1;
-        const idxSegundo = numSegundo - 1;
-        
-        const cartonPrimero = datos[idxPrimero];
-        const cartonSegundo = datos[idxSegundo];
-
-        if (!cartonPrimero || !cartonPrimero.lineas[0].nombre) {
-            alert(`El cartón #${numPrimero} no tiene un nombre asignado.`);
-            return;
-        }
-        if (!cartonSegundo || !cartonSegundo.lineas[0].nombre) {
-            alert(`El cartón #${numSegundo} no tiene un nombre asignado.`);
-            return;
-        }
-
-        const nombrePrimero = cartonPrimero.lineas[0].nombre.toUpperCase();
-        const nombreSegundo = cartonSegundo.lineas[0].nombre.toUpperCase();
+        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+        const nombreRuleta = cartonRuleta.lineas[0].nombre.toUpperCase();
+        const esMismaPersona = (nombreBingo === nombreRuleta);
+        const esMismoNumero = (bingoNum === ruletaNum);
 
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
-
-        function agregarSaldo(nombre, cantidad) {
-            if (!nombre || cantidad === 0) return;
+        
+        function agregarSaldo(nombre, cantidadEnMiles) {
+            if (!nombre || cantidadEnMiles === 0) return;
             let encontrado = false;
             lineas = lineas.map(l => {
                 if (l.startsWith(nombre + ":")) {
                     encontrado = true;
                     let partes = l.split(':');
-                    let nuevoValor = parseInt(partes[1].trim()) + cantidad;
+                    let valorActual = parseFloat(partes[1].trim());
+                    if (isNaN(valorActual)) valorActual = 0;
+                    let nuevoValor = valorActual + cantidadEnMiles;
                     return `${nombre}: ${nuevoValor}`;
                 }
                 return l;
             });
-            if (!encontrado) {
-                lineas.push(`${nombre}: ${cantidad}`);
-            }
+            if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
         }
 
-        agregarSaldo(nombrePrimero, 8);
-        agregarSaldo(nombreSegundo, 3);
+        if (esMismoNumero || esMismaPersona) {
+            let totalPremio = 16;
+            let mensajePremios = `💰 ${nombreBingo} recibe:\n   - Bingo: $11.000\n   - Ruleta: $5.000`;
+            
+            if (esMismoNumero && entregarAcumulado && acumulado > 0) {
+                totalPremio += acumulado;
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n   - Acumulado: $${formatNumber(acumulado * 1000)}`;
+                mensajePremios += `\n\n🎉 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+                acumulado = 0;
+                await updateDoc(docRef, { acumulado: acumulado });
+                actualizarUIAcumulado();
+                actualizarStats();
+            } else if (esMismoNumero && !entregarAcumulado && acumulado > 0) {
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n\n⚠️ ACUMULADO NO ENTREGADO (no cumple condiciones)`;
+                mensajePremios += `\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+                mensajePremios += `\n📌 El acumulado de $${formatNumber(acumulado * 1000)} sigue en juego.`;
+            } else {
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+            }
+            alert(mensajePremios);
+        } else {
+            agregarSaldo(nombreBingo, 11);
+            agregarSaldo(nombreRuleta, 5);
+            alert(`💰 Premios registrados en caja:\n- ${nombreBingo}: +$11.000\n- ${nombreRuleta}: +$5.000`);
+        }
 
         let cajaFinalTexto = lineas.join('\n');
         document.getElementById("notas-caja").value = cajaFinalTexto;
-
         await updateDoc(docRef, { notas_caja: cajaFinalTexto });
-        alert(`💰 Premios registrados en caja:\n- ${nombrePrimero}: +8.000\n- ${nombreSegundo}: +3.000`);
-
-        document.getElementById("numPrimerGanador").value = "";
-        document.getElementById("numSegundoGanador").value = "";
+        
+        document.getElementById("numBingoGanador").value = "";
+        document.getElementById("numRuletaGanador").value = "";
+        document.getElementById("chkEntregarAcumulado").checked = false;
     };
 
     window.reiniciarTablero = async () => {
-        if (confirm("¿Limpiar tablero? Se eliminarán todos los nombres y estados (los cartones quedarán libres). La ronda NO se reinicia, solo se avanza al siguiente número.")) {
+        if (confirm("¿Reiniciar tablero? Se borrarán nombres y estados. Además se sumará +$1.000 al acumulado y +1 ronda a cada jugador activo.")) {
+            let nuevosRondas = { ...rondasPorJugador };
+            let jugadoresActivos = new Set();
+            datos.forEach(c => {
+                const nombre = c.lineas[0].nombre;
+                if (nombre && nombre !== "") {
+                    jugadoresActivos.add(nombre);
+                }
+            });
+            jugadoresActivos.forEach(jugador => {
+                nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
+            });
+            
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             let nuevaRonda = numeroRonda + 1;
+            let nuevoAcumulado = acumulado + 1;
             
             await updateDoc(docRef, { 
                 cartones: datos,
-                numero_ronda: nuevaRonda
+                numero_ronda: nuevaRonda,
+                acumulado: nuevoAcumulado,
+                rondasPorJugador: nuevosRondas
             });
             
             seleccionados = [];
             actualizarStats();
-            alert(`Tablero reiniciado. Ahora Ronda ${nuevaRonda}`);
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$1.000 = $${formatNumber(nuevoAcumulado * 1000)}`);
         }
     };
     
     window.reiniciarRondaACero = async () => {
-        if (confirm("⚠️ ¿Reiniciar el contador de RONDA a 1? Los cartones y sus nombres NO se borrarán, solo cambiará el número de ronda mostrado.")) {
-            await updateDoc(docRef, { 
-                numero_ronda: 1
-            });
+        if (confirm("⚠️ ¿Reiniciar el contador de RONDA a 1? El acumulado NO se modifica.")) {
+            await updateDoc(docRef, { numero_ronda: 1 });
             numeroRonda = 1;
             actualizarStats();
             alert("Ronda reiniciada a 1 ✅");
@@ -583,11 +816,7 @@
             if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
         });
         
-        const btnVerde = document.getElementById("btnCopiarPrincipal");
-        btnVerde.innerText = "📋 COPIAR LISTA WHATSAPP";
-        btnVerde.style.background = "#25D366";
-        
-        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} <br> <span style="color: #007bff;">${infoBusqueda}</span>`;
+        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} | 🏆 ACUMULADO: $${formatNumber(acumulado * 1000)}<br><span style="color: #007bff;">${infoBusqueda}</span>`;
     }
 </script>
 </body>
