@@ -73,7 +73,6 @@
         .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .warning-text { color: #ffaa00; font-weight: bold; }
 
-        /* Separador visual */
         .separador-peligro {
             margin: 5px 0 5px 0;
             text-align: center;
@@ -224,7 +223,6 @@
         <div class="botonera-reinicio">
             <button class="btn btn-reinicio-grande" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO (+$1.000 al acumulado)</button>
             
-            <!-- SOLO AGREGUE ESTE SEPARADOR, NADA MÁS -->
             <div class="separador-peligro">
                 <span>⚠️ 🚨 ⚠️ SOLO TOCAR AL FINAL DEL DÍA ⚠️ 🚨 ⚠️</span>
             </div>
@@ -328,11 +326,17 @@
     }
 
     function formatNumber(num) { return num.toLocaleString(); }
+    
+    // Función para formatear número con puntos para miles (ej: 14500 -> 14.500)
+    function formatNumberWithDots(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
     function parseCajaValue(valorStr) {
         if (!valorStr) return 0;
-        let limpio = valorStr.replace(',', '.');
+        let limpio = valorStr.replace(',', '.').replace(/\./g, '');
         let numero = parseFloat(limpio);
-        return isNaN(numero) ? 0 : Math.round(numero * 1000);
+        return isNaN(numero) ? 0 : Math.round(numero);
     }
 
     function rondasToText() {
@@ -825,24 +829,33 @@
         alert("Caja guardada ✅"); 
     };
 
+    // NUEVA FUNCIÓN copiarSoloCaja con el formato solicitado
     window.copiarSoloCaja = () => {
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
+        
+        let lineas = cajaRaw.split('\n');
         let txt = "📦 *CAJA:*\n\n";
-        cajaRaw.split('\n').forEach(l => {
-            if(l.includes(':')) {
+        
+        for (let l of lineas) {
+            l = l.trim();
+            if (l.includes(':')) {
                 let partes = l.split(':');
                 let nombre = partes[0].trim();
                 let valor = parseFloat(partes[1].trim());
                 if (!isNaN(valor)) {
-                    txt += `${nombre.toUpperCase()}: $${formatNumber(valor * 1000)}\n`;
+                    // Formato: - NOMBRE: 14.500  (con puntos para miles, sin signo $)
+                    txt += `- ${nombre.toUpperCase()}: ${formatNumberWithDots(Math.round(valor * 1000))}\n`;
                 } else {
-                    txt += l.toUpperCase() + "\n";
+                    txt += `- ${l.toUpperCase()}\n`;
                 }
-            } else if (l.trim() !== "") txt += l.toUpperCase() + "\n";
-        });
+            } else if (l !== "") {
+                txt += `- ${l.toUpperCase()}\n`;
+            }
+        }
+        
         navigator.clipboard.writeText(txt.trim());
-        alert("Saldos copiados");
+        alert("Saldos copiados con formato de lista");
     };
 
     function actualizarStats() {
