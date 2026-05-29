@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Lineal - Control Pro</title>
+    <title>Bingo Lineal - Ranking por Puntos</title>
     <link rel="icon" type="image/png" href="logo-locutando.png">
     <style>
         :root { --oro: #ffcc00; --fondo: #000; --verde: #00ff88; }
@@ -41,6 +41,7 @@
         .btn-copiar-caja { background: #ffcc00; color: #000; width: 100%; font-size: 16px; padding: 15px; margin-top: 10px; border: 2px solid #000; border-radius: 8px; }
         .btn-reinicio-grande { background: #dc3545; color: #fff; width: 100%; font-size: 22px; padding: 20px; margin-top: 10px; border: 3px solid #fff; border-radius: 12px; font-weight: bold; }
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; font-weight: bold; }
+        .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 18px; padding: 15px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; font-weight: bold; }
 
         textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 16px; box-sizing: border-box; text-transform: uppercase; }
 
@@ -71,6 +72,23 @@
         
         .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .warning-text { color: #ffaa00; font-weight: bold; }
+
+        /* Separador visual */
+        .separador-peligro {
+            margin: 5px 0 5px 0;
+            text-align: center;
+            border-top: 2px dashed #dc3545;
+            border-bottom: 2px dashed #dc3545;
+            padding: 6px 0;
+            background: rgba(220, 53, 69, 0.1);
+            border-radius: 8px;
+        }
+        .separador-peligro span {
+            font-size: 12px;
+            font-weight: bold;
+            color: #ff8888;
+            letter-spacing: 1px;
+        }
 
         .modal {
             display: none;
@@ -205,22 +223,44 @@
         
         <div class="botonera-reinicio">
             <button class="btn btn-reinicio-grande" onclick="reiniciarTablero()">♻️ REINICIAR SOLO TABLERO (+$1.000 al acumulado)</button>
-            <button class="btn btn-resaltar" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
+            
+            <!-- SOLO AGREGUE ESTE SEPARADOR, NADA MÁS -->
+            <div class="separador-peligro">
+                <span>⚠️ 🚨 ⚠️ SOLO TOCAR AL FINAL DEL DÍA ⚠️ 🚨 ⚠️</span>
+            </div>
+            
+            <button class="btn btn-azul" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
             <button class="btn btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
+            <button class="btn btn-ranking" onclick="mostrarModalPuntos()">🏆 RANKING (PUNTOS)</button>
         </div>
     </div>
 
+    <!-- Modal para rondas -->
     <div id="modalRondas" class="modal">
         <div class="modal-content">
             <h3>📊 RONDAS POR JUGADOR</h3>
-            <textarea id="rondasTextarea" rows="8" placeholder="DAVID: 4&#10;MARÍA: 2&#10;PEDRO: 1" style="text-transform: uppercase;"></textarea>
+            <textarea id="rondasTextarea" rows="8" placeholder="DAVID: 4" style="text-transform: uppercase;"></textarea>
             <div class="modal-buttons">
                 <button class="btn-guardar" onclick="guardarRondas()">💾 GUARDAR RONDAS</button>
                 <button class="btn-cerrar" onclick="cerrarModalRondas()">CERRAR</button>
             </div>
-            <div class="ronda-nota">
-                ⚠️ Formato: NOMBRE: NÚMERO (ej: DAVID: 4)<br>
-                📌 Al reiniciar el tablero, se suma +1 automáticamente a los jugadores con líneas activas
+        </div>
+    </div>
+
+    <!-- Modal para puntos (ranking) -->
+    <div id="modalPuntos" class="modal">
+        <div class="modal-content">
+            <h3>🏆 RANKING (PUNTOS)</h3>
+            <textarea id="puntosTextarea" rows="12" placeholder="DAVID: 10" style="text-transform: uppercase;"></textarea>
+            <div class="ronda-nota" style="margin-bottom: 10px;">
+                📌 Reglas:<br>
+                • Apuntarse en una línea: +1 punto<br>
+                • Ganar Bingo: +3 puntos<br>
+                • Ganar Ruleta: +2 puntos
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-guardar" onclick="guardarPuntos()">💾 GUARDAR PUNTOS</button>
+                <button class="btn-cerrar" onclick="cerrarModalPuntos()">CERRAR</button>
             </div>
         </div>
     </div>
@@ -247,8 +287,10 @@
     let modoLupa = false;
     let infoBusqueda = "";
     let numeroRonda = 1;
-    let acumulado = 0; // Valor en MILES (ej: 5 = 5.000)
+    let acumulado = 0;
     let rondasPorJugador = {};
+    let puntosPorJugador = {};
+    let ganadoresRonda = { bingo: null, ruleta: null };
 
     onSnapshot(docRef, async (snap) => {
         if (snap.exists()) {
@@ -270,10 +312,10 @@
 
             document.getElementById('notas-caja').value = (d.notas_caja || "").toUpperCase();
             if (d.numero_ronda !== undefined) numeroRonda = d.numero_ronda;
-            if (d.acumulado !== undefined && typeof d.acumulado === 'number') acumulado = d.acumulado;
-            else acumulado = 0;
+            if (d.acumulado !== undefined) acumulado = d.acumulado;
             if (d.rondasPorJugador !== undefined) rondasPorJugador = d.rondasPorJugador;
-            else rondasPorJugador = {};
+            if (d.puntosPorJugador !== undefined) puntosPorJugador = d.puntosPorJugador;
+            if (d.ganadoresRonda !== undefined) ganadoresRonda = d.ganadoresRonda;
             
             actualizarUIAcumulado();
             dibujar();
@@ -282,107 +324,256 @@
     });
 
     function actualizarUIAcumulado() {
-        const valorMostrar = acumulado * 1000;
-        document.getElementById("acumuladoValor").innerHTML = `$${valorMostrar.toLocaleString()}`;
+        document.getElementById("acumuladoValor").innerHTML = `$${(acumulado * 1000).toLocaleString()}`;
     }
 
-    function formatNumber(num) {
-        return num.toLocaleString();
-    }
-
+    function formatNumber(num) { return num.toLocaleString(); }
     function parseCajaValue(valorStr) {
         if (!valorStr) return 0;
         let limpio = valorStr.replace(',', '.');
         let numero = parseFloat(limpio);
-        if (isNaN(numero)) return 0;
-        return Math.round(numero * 1000);
+        return isNaN(numero) ? 0 : Math.round(numero * 1000);
     }
 
     function rondasToText() {
         let texto = "";
-        const ordenados = Object.entries(rondasPorJugador).sort((a, b) => b[1] - a[1]);
-        for (let [nombre, rondas] of ordenados) {
+        for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
             texto += `${nombre}: ${rondas}\n`;
         }
         return texto.trim();
     }
 
+    function puntosToText() {
+        let texto = "";
+        for (let [nombre, puntos] of Object.entries(puntosPorJugador).sort((a,b)=>b[1]-a[1])) {
+            texto += `${nombre}: ${puntos}\n`;
+        }
+        return texto.trim();
+    }
+
     function textToRondas(texto) {
-        const nuevasRondas = {};
-        const lineas = texto.toUpperCase().split('\n');
-        for (let linea of lineas) {
+        const nuevas = {};
+        texto.toUpperCase().split('\n').forEach(linea => {
             linea = linea.trim();
-            if (linea === "") continue;
             if (linea.includes(':')) {
                 let partes = linea.split(':');
                 let nombre = partes[0].trim();
                 let valor = parseInt(partes[1].trim());
-                if (nombre && !isNaN(valor) && valor > 0) {
-                    nuevasRondas[nombre] = valor;
-                }
+                if (nombre && !isNaN(valor) && valor > 0) nuevas[nombre] = valor;
             }
-        }
-        return nuevasRondas;
+        });
+        return nuevas;
+    }
+
+    function textToPuntos(texto) {
+        const nuevas = {};
+        texto.toUpperCase().split('\n').forEach(linea => {
+            linea = linea.trim();
+            if (linea.includes(':')) {
+                let partes = linea.split(':');
+                let nombre = partes[0].trim();
+                let valor = parseInt(partes[1].trim());
+                if (nombre && !isNaN(valor) && valor >= 0) nuevas[nombre] = valor;
+            }
+        });
+        return nuevas;
     }
 
     window.mostrarModalRondas = () => {
-        const modal = document.getElementById("modalRondas");
-        const textarea = document.getElementById("rondasTextarea");
-        textarea.value = rondasToText();
-        modal.style.display = "flex";
+        document.getElementById("rondasTextarea").value = rondasToText();
+        document.getElementById("modalRondas").style.display = "flex";
     };
-    
-    window.cerrarModalRondas = () => {
-        document.getElementById("modalRondas").style.display = "none";
-    };
-    
+    window.cerrarModalRondas = () => { document.getElementById("modalRondas").style.display = "none"; };
     window.guardarRondas = async () => {
-        const textarea = document.getElementById("rondasTextarea");
-        const nuevoTexto = textarea.value;
-        const nuevasRondas = textToRondas(nuevoTexto);
-        await updateDoc(docRef, { rondasPorJugador: nuevasRondas });
-        rondasPorJugador = nuevasRondas;
-        actualizarStats();
+        const nuevas = textToRondas(document.getElementById("rondasTextarea").value);
+        await updateDoc(docRef, { rondasPorJugador: nuevas });
+        rondasPorJugador = nuevas;
         alert("Rondas guardadas ✅");
         cerrarModalRondas();
+        actualizarStats();
     };
 
-    // FUNCIONES DEL ACUMULADO CORREGIDAS
-    window.modificarAcumulado = async (cambioEnMiles) => {
-        // cambioEnMiles es 1 para +1.000 o -1 para -1.000
-        let nuevoValor = acumulado + cambioEnMiles;
-        if (nuevoValor < 0) nuevoValor = 0;
-        acumulado = nuevoValor;
+    window.mostrarModalPuntos = () => {
+        document.getElementById("puntosTextarea").value = puntosToText();
+        document.getElementById("modalPuntos").style.display = "flex";
+    };
+    window.cerrarModalPuntos = () => { document.getElementById("modalPuntos").style.display = "none"; };
+    window.guardarPuntos = async () => {
+        const nuevas = textToPuntos(document.getElementById("puntosTextarea").value);
+        await updateDoc(docRef, { puntosPorJugador: nuevas });
+        puntosPorJugador = nuevas;
+        alert("Puntos guardados ✅");
+        cerrarModalPuntos();
+        actualizarStats();
+    };
+
+    window.registrarPremiosEnCaja = async () => {
+        const bingoNum = parseInt(document.getElementById("numBingoGanador").value);
+        const ruletaNum = parseInt(document.getElementById("numRuletaGanador").value);
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+
+        if (isNaN(bingoNum) || isNaN(ruletaNum)) {
+            alert("Ingresa los números de BINGO y RULETA");
+            return;
+        }
+
+        const idxBingo = bingoNum - 1;
+        const idxRuleta = ruletaNum - 1;
+        const cartonBingo = datos[idxBingo];
+        const cartonRuleta = datos[idxRuleta];
+
+        if (!cartonBingo || !cartonBingo.lineas[0].nombre) {
+            alert(`El cartón #${bingoNum} (BINGO) no tiene nombre`);
+            return;
+        }
+        if (!cartonRuleta || !cartonRuleta.lineas[0].nombre) {
+            alert(`El cartón #${ruletaNum} (RULETA) no tiene nombre`);
+            return;
+        }
+
+        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
+        const nombreRuleta = cartonRuleta.lineas[0].nombre.toUpperCase();
+        
+        const nuevosGanadores = { bingo: nombreBingo, ruleta: nombreRuleta };
+        await updateDoc(docRef, { ganadoresRonda: nuevosGanadores });
+        ganadoresRonda = nuevosGanadores;
+
+        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
+        let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+        
+        function agregarSaldo(nombre, cantidadEnMiles) {
+            if (!nombre || cantidadEnMiles === 0) return;
+            let encontrado = false;
+            lineas = lineas.map(l => {
+                if (l.startsWith(nombre + ":")) {
+                    encontrado = true;
+                    let partes = l.split(':');
+                    let valorActual = parseFloat(partes[1].trim());
+                    if (isNaN(valorActual)) valorActual = 0;
+                    let nuevoValor = valorActual + cantidadEnMiles;
+                    return `${nombre}: ${nuevoValor}`;
+                }
+                return l;
+            });
+            if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
+        }
+
+        const esMismoNumero = (bingoNum === ruletaNum);
+        
+        if (esMismoNumero) {
+            let totalPremio = 16;
+            let mensajePremios = `💰 ${nombreBingo} recibe:\n   - Bingo: $11.000\n   - Ruleta: $5.000`;
+            
+            if (entregarAcumulado && acumulado > 0) {
+                totalPremio += acumulado;
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n   - Acumulado: $${formatNumber(acumulado * 1000)}`;
+                mensajePremios += `\n\n🎉 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+                acumulado = 0;
+                await updateDoc(docRef, { acumulado: acumulado });
+                actualizarUIAcumulado();
+            } else if (!entregarAcumulado && acumulado > 0) {
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n\n⚠️ ACUMULADO NO ENTREGADO (no cumple condiciones)`;
+                mensajePremios += `\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+                mensajePremios += `\n📌 El acumulado de $${formatNumber(acumulado * 1000)} sigue en juego.`;
+            } else {
+                agregarSaldo(nombreBingo, totalPremio);
+                mensajePremios += `\n\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+            }
+            alert(mensajePremios);
+        } else {
+            agregarSaldo(nombreBingo, 11);
+            agregarSaldo(nombreRuleta, 5);
+            alert(`💰 Premios registrados en caja:\n- ${nombreBingo}: +$11.000\n- ${nombreRuleta}: +$5.000`);
+        }
+
+        let cajaFinalTexto = lineas.join('\n');
+        document.getElementById("notas-caja").value = cajaFinalTexto;
+        await updateDoc(docRef, { notas_caja: cajaFinalTexto, ganadoresRonda: nuevosGanadores });
+        
+        document.getElementById("numBingoGanador").value = "";
+        document.getElementById("numRuletaGanador").value = "";
+        document.getElementById("chkEntregarAcumulado").checked = false;
+    };
+
+    window.reiniciarTablero = async () => {
+        if (confirm("¿Reiniciar tablero? Se borrarán nombres y estados. Además se sumará +$1.000 al acumulado, +1 ronda a cada jugador activo, y los puntos correspondientes a los ganadores.")) {
+            let nuevosPuntos = { ...puntosPorJugador };
+            let jugadoresActivos = new Set();
+            
+            datos.forEach(c => {
+                const nombre = c.lineas[0].nombre;
+                if (nombre && nombre !== "") {
+                    jugadoresActivos.add(nombre);
+                    nuevosPuntos[nombre] = (nuevosPuntos[nombre] || 0) + 1;
+                }
+            });
+            
+            if (ganadoresRonda.bingo) {
+                nuevosPuntos[ganadoresRonda.bingo] = (nuevosPuntos[ganadoresRonda.bingo] || 0) + 3;
+            }
+            if (ganadoresRonda.ruleta && ganadoresRonda.ruleta !== ganadoresRonda.bingo) {
+                nuevosPuntos[ganadoresRonda.ruleta] = (nuevosPuntos[ganadoresRonda.ruleta] || 0) + 2;
+            }
+            
+            let nuevosRondas = { ...rondasPorJugador };
+            jugadoresActivos.forEach(jugador => {
+                nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
+            });
+            
+            datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
+            let nuevaRonda = numeroRonda + 1;
+            let nuevoAcumulado = acumulado + 1;
+            const ganadoresLimpiar = { bingo: null, ruleta: null };
+            
+            await updateDoc(docRef, { 
+                cartones: datos,
+                numero_ronda: nuevaRonda,
+                acumulado: nuevoAcumulado,
+                rondasPorJugador: nuevosRondas,
+                puntosPorJugador: nuevosPuntos,
+                ganadoresRonda: ganadoresLimpiar
+            });
+            
+            seleccionados = [];
+            actualizarStats();
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$1.000 = $${formatNumber(nuevoAcumulado * 1000)}`);
+        }
+    };
+    
+    window.reiniciarRondaACero = async () => {
+        if (confirm("⚠️ ¿REINICIAR EL CONTADOR DE RONDA A 1? ⚠️\n\nEsto NO afecta el acumulado, ni los puntos, ni las rondas por jugador.\nSolo cambia el número de ronda que se muestra.\n\n¿Estás seguro?")) {
+            await updateDoc(docRef, { numero_ronda: 1 });
+            numeroRonda = 1;
+            actualizarStats();
+            alert("Ronda reiniciada a 1 ✅");
+        }
+    };
+
+    window.modificarAcumulado = async (cambio) => {
+        let nuevo = acumulado + cambio;
+        if (nuevo < 0) nuevo = 0;
+        acumulado = nuevo;
         await updateDoc(docRef, { acumulado: acumulado });
         actualizarUIAcumulado();
         actualizarStats();
     };
-
     window.resetearAcumulado = async () => {
-        if (confirm("¿Resetear el acumulado a $0?")) {
+        if (confirm("¿Resetear acumulado a $0?")) {
             acumulado = 0;
-            await updateDoc(docRef, { acumulado: acumulado });
+            await updateDoc(docRef, { acumulado: 0 });
             actualizarUIAcumulado();
             actualizarStats();
-            alert("Acumulado reseteado a $0");
+            alert("Acumulado reseteado");
         }
     };
-
-    // Asignar eventos a los botones después de que el DOM cargue
     document.addEventListener('DOMContentLoaded', () => {
-        const btnMenos = document.getElementById('btnAcumuladoMenos');
-        const btnMas = document.getElementById('btnAcumuladoMas');
-        const btnReset = document.getElementById('btnAcumuladoReset');
-        
-        if (btnMenos) btnMenos.onclick = () => modificarAcumulado(-1);
-        if (btnMas) btnMas.onclick = () => modificarAcumulado(1);
-        if (btnReset) btnReset.onclick = () => resetearAcumulado();
+        document.getElementById('btnAcumuladoMenos')?.addEventListener('click', () => modificarAcumulado(-1));
+        document.getElementById('btnAcumuladoMas')?.addEventListener('click', () => modificarAcumulado(1));
+        document.getElementById('btnAcumuladoReset')?.addEventListener('click', () => resetearAcumulado());
     });
-
-    window.toggleCheckbox = () => {
-        let chk = document.getElementById("chkEntregarAcumulado");
-        chk.checked = !chk.checked;
-    };
+    window.toggleCheckbox = () => { let chk = document.getElementById("chkEntregarAcumulado"); chk.checked = !chk.checked; };
 
     function dibujar() {
         const container = document.getElementById("tablero");
@@ -394,7 +585,6 @@
             const div = document.createElement("div");
             div.className = `carton ${isSelected ? 'sel' : ''}`;
             div.onclick = () => clickCasilla(idx);
-            
             div.innerHTML = `<div class="carton-h">${carton.id}</div><div class="linea ${info.estado} ${!tieneNombre ? 'libre' : ''}">${tieneNombre ? info.nombre : carton.id}</div>`;
             container.appendChild(div);
         });
@@ -403,44 +593,36 @@
     window.clickCasilla = async (idx) => {
         const info = datos[idx].lineas[0];
         const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
-        
         if (modoLupa && info.nombre) {
             const buscar = info.nombre;
             seleccionados = [];
             datos.forEach((c, i) => { if(c.lineas[0].nombre === buscar) seleccionados.push(i); });
             infoBusqueda = `${buscar}: ${seleccionados.length} líneas`;
-            dibujar();
-            actualizarStats();
+            dibujar(); actualizarStats();
         } else {
             if (info.estado !== 'libre' && nombreInput !== "") { toggleSel(idx); return; }
             if (info.estado === 'libre' && nombreInput !== "") {
                 datos[idx].lineas[0] = { nombre: nombreInput, estado: "reservado" };
                 await updateDoc(docRef, { cartones: datos });
-            } else { 
-                toggleSel(idx); 
-            }
+            } else { toggleSel(idx); }
         }
     };
-
     function toggleSel(idx) {
         const sIdx = seleccionados.indexOf(idx);
         if (sIdx > -1) seleccionados.splice(sIdx, 1);
         else seleccionados.push(idx);
         dibujar();
     }
-
     window.toggleLupa = () => {
         modoLupa = !modoLupa; seleccionados = []; infoBusqueda = "";
         document.getElementById("btnLupa").innerText = modoLupa ? "✅ BUSCANDO" : "🔍 BUSCAR";
         dibujar(); actualizarStats();
     };
-
     window.accionAdmin = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let cartonesAActualizar = [...datos];
-        let cambiosRealizados = false;
-
+        let cambios = false;
         if (nuevoEstado === 'pagado') {
             let cartonesPorNombre = {};
             seleccionados.forEach(idx => {
@@ -450,76 +632,37 @@
                     cartonesPorNombre[info.nombre].push(idx);
                 }
             });
-
             for (let nombre in cartonesPorNombre) {
-                let indicesSeleccionados = cartonesPorNombre[nombre];
-                let lineasAComprar = indicesSeleccionados.length;
-                let costoTotal = lineasAComprar * 1.5;
-                
-                let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
-                let saldoActual = 0;
-                let indexLinea = -1;
-
-                lineasCaja.forEach((l, i) => {
-                    if (l.startsWith(nombre + ":")) {
+                let indices = cartonesPorNombre[nombre];
+                let costo = indices.length * 1.5;
+                let lineasCaja = nuevaCaja.split('\n').map(l=>l.trim()).filter(l=>l!=="");
+                let saldo = 0, idxLinea = -1;
+                lineasCaja.forEach((l,i) => {
+                    if (l.startsWith(nombre+":")) {
                         let partes = l.split(':');
-                        saldoActual = parseFloat(partes[1].trim());
-                        if (isNaN(saldoActual)) saldoActual = 0;
-                        indexLinea = i;
+                        saldo = parseFloat(partes[1].trim()) || 0;
+                        idxLinea = i;
                     }
                 });
-
-                if (indexLinea !== -1 && saldoActual >= costoTotal) {
-                    let nuevoSaldo = saldoActual - costoTotal;
-                    if (nuevoSaldo > 0) {
-                        lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
-                    } else {
-                        lineasCaja.splice(indexLinea, 1); 
-                    }
+                if (idxLinea !== -1 && saldo >= costo) {
+                    let nuevo = saldo - costo;
+                    if (nuevo > 0) lineasCaja[idxLinea] = `${nombre}: ${nuevo}`;
+                    else lineasCaja.splice(idxLinea, 1);
                     nuevaCaja = lineasCaja.join('\n');
-                    indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
-                    cambiosRealizados = true;
-                } else if (indexLinea !== -1 && saldoActual > 0) {
-                    let lineasPosibles = Math.floor(saldoActual / 1.5);
-                    if (lineasPosibles > 0) {
-                        let costoReal = lineasPosibles * 1.5;
-                        let nuevoSaldo = saldoActual - costoReal;
-                        if (nuevoSaldo > 0) {
-                            lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
-                        } else {
-                            lineasCaja.splice(indexLinea, 1);
-                        }
-                        nuevaCaja = lineasCaja.join('\n');
-                        let indicesPagar = indicesSeleccionados.slice(0, lineasPosibles);
-                        indicesPagar.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
-                        cambiosRealizados = true;
-                        alert(`⚠️ ${nombre} sólo tenía saldo para ${lineasPosibles} de ${lineasAComprar} línea(s). Se pagaron esas.`);
-                    } else {
-                        let confirmarVerde = confirm(`⚠️ ${nombre} no tiene saldo suficiente para ninguna línea. ¿Marcar como pagado de todas formas?`);
-                        if (confirmarVerde) {
-                            indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
-                            cambiosRealizados = true;
-                        }
-                    }
+                    indices.forEach(i => cartonesAActualizar[i].lineas[0].estado = 'pagado');
+                    cambios = true;
                 } else {
-                    let confirmarVerde = confirm(`⚠️ ${nombre} NO tiene saldo en caja. ¿Marcar como pagado de todas formas?`);
-                    if (confirmarVerde) {
-                        indicesSeleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'pagado'; });
-                        cambiosRealizados = true;
-                    }
+                    let confirmar = confirm(`⚠️ ${nombre} no tiene saldo suficiente. ¿Marcar como pagado igual?`);
+                    if (confirmar) { indices.forEach(i => cartonesAActualizar[i].lineas[0].estado = 'pagado'); cambios = true; }
                 }
             }
         } else if (nuevoEstado === 'libre') {
             if (confirm("⚠️ ¿Liberar y borrar nombres de los cartones seleccionados?")) {
-                seleccionados.forEach(idx => {
-                    cartonesAActualizar[idx].lineas[0].estado = nuevoEstado;
-                    cartonesAActualizar[idx].lineas[0].nombre = "";
-                });
-                cambiosRealizados = true;
+                seleccionados.forEach(idx => { cartonesAActualizar[idx].lineas[0].estado = 'libre'; cartonesAActualizar[idx].lineas[0].nombre = ""; });
+                cambios = true;
             }
         }
-
-        if (cambiosRealizados) {
+        if (cambios) {
             datos = cartonesAActualizar;
             seleccionados = [];
             await updateDoc(docRef, { cartones: datos, notas_caja: nuevaCaja });
@@ -554,64 +697,6 @@
         
         navigator.clipboard.writeText(txt);
         alert("Lista de bingo copiada");
-    };
-
-    window.filtrarSugerencias = (valor) => {
-        const input = valor.toUpperCase();
-        document.getElementById("nombreUser").value = input;
-        const datalist = document.getElementById("sugerenciasCaja");
-        datalist.innerHTML = "";
-        if (input.length === 0) return;
-        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
-            const nombre = linea.split(':')[0].trim();
-            if (nombre && nombre.startsWith(input)) {
-                const opt = document.createElement("option");
-                opt.value = nombre;
-                datalist.appendChild(opt);
-            }
-        });
-    };
-
-    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
-    
-    window.guardarCaja = async () => { 
-        let cajaTexto = document.getElementById("notas-caja").value.toUpperCase();
-        let lineas = cajaTexto.split('\n');
-        let lineasNormalizadas = [];
-        for (let linea of lineas) {
-            if (linea.includes(':')) {
-                let partes = linea.split(':');
-                let nombre = partes[0].trim();
-                let valorRaw = partes[1].trim();
-                let valorNum = parseFloat(valorRaw);
-                if (isNaN(valorNum)) valorNum = 0;
-                lineasNormalizadas.push(`${nombre}: ${valorNum}`);
-            } else if (linea.trim() !== "") {
-                lineasNormalizadas.push(linea);
-            }
-        }
-        await updateDoc(docRef, { notas_caja: lineasNormalizadas.join('\n') }); 
-        alert("Caja guardada ✅"); 
-    };
-
-    window.copiarSoloCaja = () => {
-        const cajaRaw = document.getElementById("notas-caja").value.trim();
-        if(!cajaRaw) return;
-        let txt = "📦 *CAJA:*\n\n";
-        cajaRaw.split('\n').forEach(l => {
-            if(l.includes(':')) {
-                let partes = l.split(':');
-                let nombre = partes[0].trim();
-                let valor = parseFloat(partes[1].trim());
-                if (!isNaN(valor)) {
-                    txt += `${nombre.toUpperCase()}: $${formatNumber(valor * 1000)}\n`;
-                } else {
-                    txt += l.toUpperCase() + "\n";
-                }
-            } else if (l.trim() !== "") txt += l.toUpperCase() + "\n";
-        });
-        navigator.clipboard.writeText(txt.trim());
-        alert("Saldos copiados");
     };
 
     window.generarMensajeGanador = () => {
@@ -702,138 +787,71 @@
         alert("Mensaje de ganadores copiado");
     };
 
-    window.registrarPremiosEnCaja = async () => {
-        const bingoNum = parseInt(document.getElementById("numBingoGanador").value);
-        const ruletaNum = parseInt(document.getElementById("numRuletaGanador").value);
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-
-        if (isNaN(bingoNum) || isNaN(ruletaNum)) {
-            alert("Ingresa los números de BINGO y RULETA");
-            return;
-        }
-
-        const idxBingo = bingoNum - 1;
-        const idxRuleta = ruletaNum - 1;
-        const cartonBingo = datos[idxBingo];
-        const cartonRuleta = datos[idxRuleta];
-
-        if (!cartonBingo || !cartonBingo.lineas[0].nombre) {
-            alert(`El cartón #${bingoNum} (BINGO) no tiene nombre`);
-            return;
-        }
-        if (!cartonRuleta || !cartonRuleta.lineas[0].nombre) {
-            alert(`El cartón #${ruletaNum} (RULETA) no tiene nombre`);
-            return;
-        }
-
-        const nombreBingo = cartonBingo.lineas[0].nombre.toUpperCase();
-        const nombreRuleta = cartonRuleta.lineas[0].nombre.toUpperCase();
-        const esMismaPersona = (nombreBingo === nombreRuleta);
-        const esMismoNumero = (bingoNum === ruletaNum);
-
-        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
-        let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
-        
-        function agregarSaldo(nombre, cantidadEnMiles) {
-            if (!nombre || cantidadEnMiles === 0) return;
-            let encontrado = false;
-            lineas = lineas.map(l => {
-                if (l.startsWith(nombre + ":")) {
-                    encontrado = true;
-                    let partes = l.split(':');
-                    let valorActual = parseFloat(partes[1].trim());
-                    if (isNaN(valorActual)) valorActual = 0;
-                    let nuevoValor = valorActual + cantidadEnMiles;
-                    return `${nombre}: ${nuevoValor}`;
-                }
-                return l;
-            });
-            if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
-        }
-
-        if (esMismoNumero || esMismaPersona) {
-            let totalPremio = 16;
-            let mensajePremios = `💰 ${nombreBingo} recibe:\n   - Bingo: $11.000\n   - Ruleta: $5.000`;
-            
-            if (esMismoNumero && entregarAcumulado && acumulado > 0) {
-                totalPremio += acumulado;
-                agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n   - Acumulado: $${formatNumber(acumulado * 1000)}`;
-                mensajePremios += `\n\n🎉 TOTAL: $${formatNumber(totalPremio * 1000)}`;
-                acumulado = 0;
-                await updateDoc(docRef, { acumulado: acumulado });
-                actualizarUIAcumulado();
-                actualizarStats();
-            } else if (esMismoNumero && !entregarAcumulado && acumulado > 0) {
-                agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n\n⚠️ ACUMULADO NO ENTREGADO (no cumple condiciones)`;
-                mensajePremios += `\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
-                mensajePremios += `\n📌 El acumulado de $${formatNumber(acumulado * 1000)} sigue en juego.`;
-            } else {
-                agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n\n💰 TOTAL: $${formatNumber(totalPremio * 1000)}`;
+    window.filtrarSugerencias = (valor) => {
+        const input = valor.toUpperCase();
+        document.getElementById("nombreUser").value = input;
+        const datalist = document.getElementById("sugerenciasCaja");
+        datalist.innerHTML = "";
+        if (input.length === 0) return;
+        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
+            const nombre = linea.split(':')[0].trim();
+            if (nombre && nombre.startsWith(input)) {
+                const opt = document.createElement("option");
+                opt.value = nombre;
+                datalist.appendChild(opt);
             }
-            alert(mensajePremios);
-        } else {
-            agregarSaldo(nombreBingo, 11);
-            agregarSaldo(nombreRuleta, 5);
-            alert(`💰 Premios registrados en caja:\n- ${nombreBingo}: +$11.000\n- ${nombreRuleta}: +$5.000`);
-        }
-
-        let cajaFinalTexto = lineas.join('\n');
-        document.getElementById("notas-caja").value = cajaFinalTexto;
-        await updateDoc(docRef, { notas_caja: cajaFinalTexto });
-        
-        document.getElementById("numBingoGanador").value = "";
-        document.getElementById("numRuletaGanador").value = "";
-        document.getElementById("chkEntregarAcumulado").checked = false;
+        });
     };
 
-    window.reiniciarTablero = async () => {
-        if (confirm("¿Reiniciar tablero? Se borrarán nombres y estados. Además se sumará +$1.000 al acumulado y +1 ronda a cada jugador activo.")) {
-            let nuevosRondas = { ...rondasPorJugador };
-            let jugadoresActivos = new Set();
-            datos.forEach(c => {
-                const nombre = c.lineas[0].nombre;
-                if (nombre && nombre !== "") {
-                    jugadoresActivos.add(nombre);
-                }
-            });
-            jugadoresActivos.forEach(jugador => {
-                nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
-            });
-            
-            datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
-            let nuevaRonda = numeroRonda + 1;
-            let nuevoAcumulado = acumulado + 1;
-            
-            await updateDoc(docRef, { 
-                cartones: datos,
-                numero_ronda: nuevaRonda,
-                acumulado: nuevoAcumulado,
-                rondasPorJugador: nuevosRondas
-            });
-            
-            seleccionados = [];
-            actualizarStats();
-            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$1.000 = $${formatNumber(nuevoAcumulado * 1000)}`);
-        }
-    };
+    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
     
-    window.reiniciarRondaACero = async () => {
-        if (confirm("⚠️ ¿Reiniciar el contador de RONDA a 1? El acumulado NO se modifica.")) {
-            await updateDoc(docRef, { numero_ronda: 1 });
-            numeroRonda = 1;
-            actualizarStats();
-            alert("Ronda reiniciada a 1 ✅");
+    window.guardarCaja = async () => { 
+        let cajaTexto = document.getElementById("notas-caja").value.toUpperCase();
+        let lineas = cajaTexto.split('\n');
+        let lineasNormalizadas = [];
+        for (let linea of lineas) {
+            if (linea.includes(':')) {
+                let partes = linea.split(':');
+                let nombre = partes[0].trim();
+                let valorRaw = partes[1].trim();
+                let valorNum = parseFloat(valorRaw);
+                if (isNaN(valorNum)) valorNum = 0;
+                lineasNormalizadas.push(`${nombre}: ${valorNum}`);
+            } else if (linea.trim() !== "") {
+                lineasNormalizadas.push(linea);
+            }
         }
+        await updateDoc(docRef, { notas_caja: lineasNormalizadas.join('\n') }); 
+        alert("Caja guardada ✅"); 
+    };
+
+    window.copiarSoloCaja = () => {
+        const cajaRaw = document.getElementById("notas-caja").value.trim();
+        if(!cajaRaw) return;
+        let txt = "📦 *CAJA:*\n\n";
+        cajaRaw.split('\n').forEach(l => {
+            if(l.includes(':')) {
+                let partes = l.split(':');
+                let nombre = partes[0].trim();
+                let valor = parseFloat(partes[1].trim());
+                if (!isNaN(valor)) {
+                    txt += `${nombre.toUpperCase()}: $${formatNumber(valor * 1000)}\n`;
+                } else {
+                    txt += l.toUpperCase() + "\n";
+                }
+            } else if (l.trim() !== "") txt += l.toUpperCase() + "\n";
+        });
+        navigator.clipboard.writeText(txt.trim());
+        alert("Saldos copiados");
     };
 
     function actualizarStats() {
-        let lib = 0, res = 0, pag = 0;
+        let lib=0,res=0,pag=0;
         datos.forEach(c => {
             const e = c.lineas[0].estado;
-            if(e === 'libre') lib++; else if(e === 'reservado') res++; else pag++;
+            if(e === 'libre') lib++;
+            else if(e === 'reservado') res++;
+            else pag++;
         });
         
         document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} | 🏆 ACUMULADO: $${formatNumber(acumulado * 1000)}<br><span style="color: #007bff;">${infoBusqueda}</span>`;
