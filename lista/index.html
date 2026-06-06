@@ -322,21 +322,14 @@
     });
 
     function actualizarUIAcumulado() {
-        document.getElementById("acumuladoValor").innerHTML = `$${(acumulado * 2500).toLocaleString()}`;
+        let valorMostrar = acumulado * 2500;
+        document.getElementById("acumuladoValor").innerHTML = `$${valorMostrar.toLocaleString()}`;
     }
 
     function formatNumber(num) { return num.toLocaleString(); }
     
-    // Función para formatear número con puntos para miles (ej: 14500 -> 14.500)
     function formatNumberWithDots(num) {
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function parseCajaValue(valorStr) {
-        if (!valorStr) return 0;
-        let limpio = valorStr.replace(',', '.').replace(/\./g, '');
-        let numero = parseFloat(limpio);
-        return isNaN(numero) ? 0 : Math.round(numero);
     }
 
     function rondasToText() {
@@ -464,33 +457,35 @@
 
         const esMismoNumero = (bingoNum === ruletaNum);
         
-        // PREMIOS MODIFICADOS: Bingo $10.000 (10 en miles), Ruleta $5.000 (5 en miles)
-        if (esMismoNumero) {
-            let totalPremio = 15; // 10 (bingo) + 5 (ruleta) = 15
+        if (esMismoNumero && nombreBingo === nombreRuleta) {
+            let totalPremio = 15; // 10 + 5 = 15 mil
             let mensajePremios = `💰 ${nombreBingo} recibe:\n   - Bingo: $10.000\n   - Ruleta: $5.000`;
             
             if (entregarAcumulado && acumulado > 0) {
                 totalPremio += acumulado;
                 agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n   - Acumulado: $${formatNumber(acumulado * 2500)}`;
-                mensajePremios += `\n\n🎉 TOTAL: $${formatNumber(totalPremio * 2500)}`;
+                mensajePremios += `\n   - Acumulado: $${(acumulado * 2500).toLocaleString()}`;
+                mensajePremios += `\n\n🎉 TOTAL: $${(totalPremio * 1000).toLocaleString()}`;
                 acumulado = 0;
                 await updateDoc(docRef, { acumulado: acumulado });
                 actualizarUIAcumulado();
-            } else if (!entregarAcumulado && acumulado > 0) {
-                agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n\n⚠️ ACUMULADO NO ENTREGADO (no cumple condiciones)`;
-                mensajePremios += `\n💰 TOTAL: $${formatNumber(totalPremio * 2500)}`;
-                mensajePremios += `\n📌 El acumulado de $${formatNumber(acumulado * 2500)} sigue en juego.`;
             } else {
                 agregarSaldo(nombreBingo, totalPremio);
-                mensajePremios += `\n\n💰 TOTAL: $${formatNumber(totalPremio * 2500)}`;
+                mensajePremios += `\n\n💰 TOTAL: $${(totalPremio * 1000).toLocaleString()}`;
+                if (acumulado > 0) {
+                    mensajePremios += `\n⚠️ Acumulado NO entregado (${(acumulado * 2500).toLocaleString()} sigue en juego)`;
+                }
             }
             alert(mensajePremios);
+        } else if (nombreBingo === nombreRuleta) {
+            // Misma persona pero diferentes números
+            let totalPremio = 15;
+            agregarSaldo(nombreBingo, totalPremio);
+            alert(`💰 ${nombreBingo} recibe $${(totalPremio * 1000).toLocaleString()} (Bingo $10.000 + Ruleta $5.000)`);
         } else {
-            agregarSaldo(nombreBingo, 10); // Bingo: 10.000
-            agregarSaldo(nombreRuleta, 5);  // Ruleta: 5.000
-            alert(`💰 Premios registrados en caja:\n- ${nombreBingo}: +$10.000\n- ${nombreRuleta}: +$5.000`);
+            agregarSaldo(nombreBingo, 10);
+            agregarSaldo(nombreRuleta, 5);
+            alert(`💰 Premios registrados:\n- ${nombreBingo}: +$10.000\n- ${nombreRuleta}: +$5.000`);
         }
 
         let cajaFinalTexto = lineas.join('\n');
@@ -529,7 +524,7 @@
             
             datos.forEach(c => { c.lineas[0].nombre = ""; c.lineas[0].estado = "libre"; });
             let nuevaRonda = numeroRonda + 1;
-            let nuevoAcumulado = acumulado + 1; // +1 unidad = +$2.500
+            let nuevoAcumulado = acumulado + 1;
             const ganadoresLimpiar = { bingo: null, ruleta: null };
             
             await updateDoc(docRef, { 
@@ -543,7 +538,7 @@
             
             seleccionados = [];
             actualizarStats();
-            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${formatNumber(nuevoAcumulado * 2500)}`);
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${((nuevoAcumulado) * 2500).toLocaleString()}`);
         }
     };
     
@@ -686,7 +681,7 @@
         txt += "───────\n";
         txt += "🏆 *Bingo:* $10.000💰\n";
         txt += "🎰 *Ruleta:* $5.000💰\n";
-        if (acumulado > 0) txt += `💰 *Acumulado:* $${formatNumber(acumulado * 2500)}💰\n`;
+        if (acumulado > 0) txt += `💰 *Acumulado:* $${(acumulado * 2500).toLocaleString()}💰\n`;
         txt += "───────\n";
         txt += `📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n`;
         
@@ -742,37 +737,38 @@
         const esMismoNumero = (bingoNum === ruletaNum);
         const esMismaPersona = (nombreBingo === nombreRuleta);
         
-        if (esMismoNumero) {
-            let premioTotal = 10 + 5; // Bingo 10.000 + Ruleta 5.000 = 15.000
+        if (esMismoNumero && esMismaPersona) {
+            let premioTotal = 15000; // 10000 + 5000
             mensaje += `🏆 *BINGO #${bingoNum}* 🎰 *RULETA #${ruletaNum}*\n`;
             mensaje += `👤 *${nombreBingo}*\n`;
             mensaje += ` \n`;
             
             if (entregarAcumulado && acumulado > 0) {
+                let acumuladoValor = acumulado * 2500;
                 mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
-                mensaje += `🏆 Lleva $${formatNumber(acumulado * 2500)} EXTRA\n`;
+                mensaje += `🏆 Lleva $${acumuladoValor.toLocaleString()} EXTRA\n`;
                 mensaje += ` \n`;
-                premioTotal += acumulado;
-            } else if (!entregarAcumulado && acumulado > 0) {
+                premioTotal += acumuladoValor;
+            } else if (acumulado > 0) {
                 mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
                 mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
-                mensaje += `💰 El acumulado de $${formatNumber(acumulado * 2500)} sigue en juego.\n`;
+                mensaje += `💰 El acumulado de $${(acumulado * 2500).toLocaleString()} sigue en juego.\n`;
                 mensaje += ` \n`;
             }
             mensaje += `🏆 *Bingo:* $10.000\n`;
             mensaje += `🎰 *Ruleta:* $5.000\n`;
             mensaje += ` \n`;
-            mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 2500)} EN TOTAL* 🎉\n`;
+            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
         } 
         else if (esMismaPersona) {
-            let premioTotal = 10 + 5;
+            let premioTotal = 15000;
             mensaje += `🏆 *BINGO #${bingoNum}*\n`;
             mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
             mensaje += ` \n`;
             mensaje += `🎰 *RULETA #${ruletaNum}*\n`;
             mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
             mensaje += ` \n`;
-            mensaje += `🎉 *${nombreBingo} GANA $${formatNumber(premioTotal * 2500)} (Bingo + Ruleta)* 🎉\n`;
+            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
         }
         else {
             mensaje += `🏆 *BINGO #${bingoNum}*\n`;
@@ -830,7 +826,6 @@
         alert("Caja guardada ✅"); 
     };
 
-    // NUEVA FUNCIÓN copiarSoloCaja con el formato solicitado
     window.copiarSoloCaja = () => {
         const cajaRaw = document.getElementById("notas-caja").value.trim();
         if(!cajaRaw) return;
@@ -867,7 +862,7 @@
             else pag++;
         });
         
-        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} | 🏆 ACUMULADO: $${formatNumber(acumulado * 2500)}<br><span style="color: #007bff;">${infoBusqueda}</span>`;
+        document.getElementById("stats").innerHTML = `RONDA: ${numeroRonda} | LIBRES: ${lib} | RESERVADOS: ${res} | PAGADOS: ${pag} | 🏆 ACUMULADO: $${(acumulado * 2500).toLocaleString()}<br><span style="color: #007bff;">${infoBusqueda}</span>`;
     }
 </script>
 </body>
