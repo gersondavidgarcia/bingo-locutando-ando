@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Bingo Total | Acumulado $2.500 | Múltiples Líneas</title>
+    <title>Bingo Locutando Ando | Multi Línea + Acumulado $2.500</title>
     
     <meta property="og:title" content="🎰 BINGO LOCUTANDO">
     <meta property="og:description" content="Juega al bingo en línea con amigos. Premios especiales, dinámica divertida y enlace para anotarte.">
@@ -18,20 +18,19 @@
     
     <style>
         * { box-sizing: border-box; }
-        :root { --oro: #ffcc00; --fondo: #000; --columnas: 5; --verde: #00ff88; }
+        :root { --oro: #ffcc00; --fondo: #000; --columnas: 5; }
         body { font-family: 'Arial Black', sans-serif; background: var(--fondo); color: #fff; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
         .header { background: #111; padding: 5px 15px 0px 15px; text-align: center; position: sticky; top: 0; z-index: 1000; }
         .input-wrapper { position: relative; width: 90%; max-width: 600px; margin: 0 auto; }
-        input#nombreUser { padding: 10px; border-radius: 8px; border: 2px solid #444; width: 100%; font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center; background: #fff; color: #000; transition: 0.2s; }
+        input#nombreUser { padding: 12px; border-radius: 8px; border: 2px solid #444; width: 100%; font-size: 18px; font-weight: bold; text-transform: uppercase; text-align: center; background: #fff; color: #000; transition: 0.2s; }
         input#nombreUser:disabled { background: #333; color: #888; border-color: #666; cursor: not-allowed; }
-        .btn-clear { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: #444; color: #fff; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 18px; }
         .stats-bar { color: var(--oro); font-size: 14px; margin: 5px 0; font-weight: bold; }
         .stats-bar span { font-weight: bold; }
         .stats-ronda { color: #ffcc00; }
         .stats-libres { color: #ffffff; }
         .stats-ocupados { color: #ffeb3b; }
         .stats-pagados { color: #28a745; }
-        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; }
+        #msgLineas { color: #2196f3; font-style: italic; margin-left: 5px; font-weight: bold; font-size: 12px; }
         .brand-container { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 5px; }
         .brand-logo-img { height: 75px; width: auto; display: block; }
         .brand-text { color: #ffffff; font-size: 17px; text-transform: uppercase; font-weight: 900; }
@@ -41,24 +40,76 @@
         .col-control { display: flex; align-items: center; gap: 8px; background: #333; padding: 5px 12px; border-radius: 5px; color: var(--oro); font-size: 10px; }
         .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 25px 0; background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999; }
         .btn-volver { background-color: var(--oro); color: #000; padding: 10px 40px; border-radius: 40px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; }
-        .modo-captura .header, .modo-captura #adminPanel { display: none !important; }
+        
+        /* MODO CAPTURA */
+        .modo-captura .header, 
+        .modo-captura #adminPanel, 
+        .modo-captura .seccion-acumulado,
+        .modo-captura .seccion-ganador,
+        .modo-captura .caja-gastos,
+        .modo-captura .btn-stats,
+        .modo-captura .btn-ranking,
+        .modo-captura #btnReiniciarGrande,
+        .modo-captura #btnLinkPromocion,
+        .modo-captura .btn-copiar-grande,
+        .modo-captura .btn-copiar-caja,
+        .modo-captura .btn[onclick*="copiar"],
+        .modo-captura .btn[onclick*="reiniciarBingo"] { 
+            display: none !important; 
+        }
         .modo-captura .btn-volver-container { display: flex !important; }
-        .modo-captura .tablero { transform: scale(0.4); transform-origin: top center; width: 250%; margin-left: -75%; padding-top: 10px; padding-bottom: 200px; gap: 4px; }
+        .modo-captura .tablero { 
+            transform: scale(0.65); 
+            transform-origin: top center; 
+            width: 155%; 
+            margin-left: -27.5%; 
+            padding-top: 10px; 
+            padding-bottom: 20px; 
+            gap: 8px;
+        }
+        .modo-captura .linea { font-size: 20px !important; min-height: 70px !important; font-weight: 900 !important; }
+        .modo-captura .carton-h { font-size: 24px !important; padding: 10px !important; }
+        .modo-captura .libre { font-size: 28px !important; }
+        
+        /* Franja roja visible en modo captura - REPOSICIONADA MÁS ARRIBA */
+        .captura-footer { display: none; }
+        .modo-captura .captura-footer { 
+            display: block; 
+            position: relative;
+            /* Cambiamos la posición para que quede justo debajo del tablero */
+            margin: -35px auto 30px auto; /* Margen superior negativo para subirlo */
+            text-align: center;
+            border-top: 2px dashed #dc3545;
+            border-bottom: 2px dashed #dc3545;
+            padding: 12px 0;
+            background: rgba(220, 53, 69, 0.2);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 10;
+        }
+        .modo-captura .captura-footer span {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffcc00;
+            letter-spacing: 2px;
+            display: block;
+        }
+        
         .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 10px; padding: 13px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
         .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
         .carton-h { background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; border-bottom: none; }
-        .linea { min-height: 52px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; padding: 6px 4px; text-align: center; line-height: 1.2; word-break: break-word; white-space: pre-line; }
+        .linea { min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; padding: 6px 4px; text-align: center; line-height: 1.2; word-break: break-word; white-space: normal; overflow-wrap: break-word; font-size: 14px; }
         .libre { color: #bbbbbb !important; font-size: 24px !important; opacity: 0.5; font-weight: 900; display: flex; align-items: center; justify-content: center; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
         .seccion-acumulado { background: #1a1a2e; border: 2px solid var(--oro); border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
-        .acumulado-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
         .acumulado-valor { font-size: 32px; font-weight: bold; color: #ffcc00; }
-        .acumulado-check { display: flex; align-items: center; gap: 8px; background: #2a2a3e; padding: 8px 15px; border-radius: 30px; cursor: pointer; }
-        .acumulado-check input { width: 24px; height: 24px; cursor: pointer; transform: scale(1.2); margin-right: 5px; }
+        .acumulado-control { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .acumulado-check { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; background: #2a2a3e; padding: 8px; border-radius: 30px; cursor: pointer; }
+        .acumulado-check input { width: 20px; height: 20px; cursor: pointer; }
         .acumulado-check label { font-size: 14px; font-weight: bold; color: #ffcc00; cursor: pointer; }
-        .acumulado-control { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .seccion-ganador { background: #222; border: 2px solid var(--oro); padding: 15px; border-radius: 8px; width: 100%; max-width: 500px; margin: 15px auto; }
         .ganador-inputs { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-bottom: 12px; }
         .bloque-input { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 250px; }
@@ -68,7 +119,7 @@
         .btn-ganador-enviar { background: #007bff; color: white; width: 100%; padding: 12px; font-size: 14px; border-radius: 6px; border: 1px solid #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .btn-ganador-caja { background: #e0a800; color: black; width: 100%; padding: 12px; font-size: 14px; border-radius: 6px; border: 1px solid #000; font-weight: bold; cursor: pointer; text-transform: uppercase; }
         .caja-gastos { width: 100%; max-width: 500px; margin: 15px auto; }
-        textarea { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 15px; box-sizing: border-box; text-transform: uppercase; }
+        textarea#notas-caja { width: 100%; background: #000; color: #fff; border: 2px solid #333; border-radius: 8px; padding: 15px; font-family: monospace; font-size: 18px; box-sizing: border-box; text-transform: uppercase; min-height: 200px; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a2e; border-radius: 12px; padding: 20px; width: 90%; max-width: 450px; border: 2px solid var(--oro); }
         .modal-content textarea, .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #000; color: #fff; border: 1px solid #444; font-size: 16px; text-transform: uppercase; }
@@ -78,13 +129,13 @@
         .sugerencia-item { padding: 10px; border-bottom: 1px solid #555; cursor: pointer; color: #ffcc00; font-weight: bold; }
         .sugerencia-item:hover { background: #007bff; color: white; }
         .btn-grande { width: 100%; font-size: 18px; padding: 16px; border: 3px solid #fff; border-radius: 12px; margin-top: 10px; }
-        .btn-copiar-grande { background: #25D366; color: #000; width: 100%; font-size: 18px; padding: 16px; border: 3px solid #fff; border-radius: 12px; margin-top: 10px; }
-        .btn-reinicio-grande { background: #dc3545; color: #fff; width: 100%; font-size: 18px; padding: 16px; border: 3px solid #fff; border-radius: 12px; margin-top: 10px; }
-        .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
-        .separador-peligro { margin: 10px 0; text-align: center; border-top: 2px dashed #dc3545; border-bottom: 2px dashed #dc3545; padding: 6px 0; background: rgba(220, 53, 69, 0.1); border-radius: 8px; }
+        .btn-acumulado { padding: 12px 20px; font-size: 16px; font-weight: bold; }
+        .separador-peligro { margin: 15px 0 10px 0; text-align: center; border-top: 2px dashed #dc3545; border-bottom: 2px dashed #dc3545; padding: 8px 0; background: rgba(220, 53, 69, 0.1); border-radius: 8px; }
+        .separador-peligro span { font-size: 12px; font-weight: bold; color: #ff8888; }
         .ronda-nota { font-size: 11px; color: #aaa; margin-top: 10px; text-align: center; background: #2a2a2a; padding: 6px; border-radius: 6px; }
-        .regla-nota { font-size: 11px; color: #aaa; margin-top: 8px; background: #2a2a2a; padding: 6px; border-radius: 6px; }
-        @media (max-width: 700px) { :root { --columnas: 3; } }
+        .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 55px; } }
     </style>
 </head>
 <body>
@@ -92,7 +143,6 @@
     <div class="input-wrapper">
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ" list="sugerenciasCaja" autocomplete="off">
         <datalist id="sugerenciasCaja"></datalist>
-        <button class="btn-clear" onclick="limpiarNombre()">✕</button>
     </div>
     <div class="stats-bar">
         <span id="stats"></span>
@@ -118,26 +168,27 @@
     <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
 </div>
 <div class="tablero" id="tablero"></div>
+
+<!-- Franja roja que se muestra en modo captura - AHORA MÁS ARRIBA (debajo del tablero) -->
+<div class="captura-footer" id="capturaFooter">
+    <span id="capturaRondaText">🎰 RONDA 1 🎰</span>
+</div>
+
 <div id="adminExtraPanel" style="display:none;">
+    
     <div class="seccion-acumulado">
-        <div class="acumulado-header">
-            <div style="color: var(--oro); font-weight: bold; font-size: 14px;">🏆 ACUMULADO</div>
-            <div class="acumulado-check" onclick="toggleCheckbox()">
-                <input type="checkbox" id="chkEntregarAcumulado">
-                <label for="chkEntregarAcumulado">✅ ENTREGAR ACUMULADO</label>
-            </div>
-        </div>
+        <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 10px;">🏆 ACUMULADO (progresivo $2.500 por ronda)</div>
         <div class="acumulado-valor" id="acumuladoValor">$0</div>
         <div class="acumulado-control">
-            <button class="btn btn-verde" id="btnAcumuladoMenos" style="background:#28a745; color:#000;">-2.500</button>
-            <button class="btn btn-azul" id="btnAcumuladoMas" style="background:#007bff; color:#fff;">+2.500</button>
-            <button class="btn" id="btnAcumuladoReset" style="background:#ffcc00; color:#000;">RESETEAR</button>
+            <button class="btn btn-acumulado" id="btnAcumuladoMenos" style="background:#28a745; color:#000; padding: 12px 24px; font-size: 18px;">-2.500</button>
+            <button class="btn btn-acumulado" id="btnAcumuladoMas" style="background:#007bff; color:#fff; padding: 12px 24px; font-size: 18px;">+2.500</button>
+            <button class="btn btn-acumulado" id="btnAcumuladoReset" style="background:#ffcc00; color:#000; padding: 12px 20px; font-size: 16px;">RESETEAR</button>
         </div>
-        <div class="regla-nota">
-            ⚠️ Se suma +$2.500 automáticamente al reiniciar ronda<br>
-            📌 <span class="warning-text" style="color:#ffaa00;">Regla:</span> Para ganar el acumulado, el jugador debe haber participado en <strong>4 rondas diferentes en el día</strong>.<br>
-            🧾 Marca el checkbox SOLO si cumple las condiciones
+        <div class="acumulado-check" onclick="toggleCheckbox()">
+            <input type="checkbox" id="chkEntregarAcumulado">
+            <label for="chkEntregarAcumulado">✅ ENTREGAR ACUMULADO (requiere 4 rondas)</label>
         </div>
+        <div class="ronda-nota">⚠️ Se suma +$2.500 automáticamente al reiniciar ronda | Para ganar acumulado: 4 rondas diferentes en el día</div>
     </div>
 
     <div class="seccion-ganador">
@@ -153,25 +204,26 @@
     </div>
 
     <div class="caja-gastos">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="color: #00ff88; font-weight: bold;">📓 SALDOS DE CAJA (en miles)</label>
-            <button class="btn" style="background:#28a745; color:white; padding: 4px 8px;" onclick="guardarCaja()">💾 GUARDAR CAJA</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="color: #00ff88; font-weight: bold;">📓 SALDOS DE CAJA (en miles - ej: DAVID: 10 = $10.000)</label>
+            <button class="btn" style="background:#28a745; color:white; padding: 6px 12px;" onclick="guardarCaja()">💾 GUARDAR CAJA</button>
         </div>
-        <textarea id="notas-caja" rows="5" placeholder="DAVID: 10&#10;MARIA: 5" oninput="this.value = this.value.toUpperCase()"></textarea>
-        <div class="ronda-nota">📌 La caja se maneja en miles. Ejemplo: "DAVID: 10" = $10.000</div>
+        <textarea id="notas-caja" rows="6" placeholder="DAVID: 10&#10;MARIA: 5" oninput="this.value = this.value.toUpperCase();"></textarea>
     </div>
 
     <div style="width: 100%; max-width: 500px; margin: 10px auto 20px auto; display: flex; flex-direction: column; gap: 10px;">
-        <button id="btnCopiarLista" class="btn-copiar-grande" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
+        <button id="btnCopiarLista" class="btn" style="background:#25D366; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn" style="background:#ffcc00; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
-        <button class="btn-reinicio-grande" onclick="reiniciarBingo()">♻️ REINICIAR TABLERO (+$2.500 AL ACUMULADO)</button>
-        <button class="btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
-        <button class="btn-stats" style="background:#fd7e14;" onclick="mostrarModalPuntos()">🏆 RANKING (PUNTOS)</button>
+        <button id="btnReiniciarGrande" class="btn" style="background:#ff4444; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="reiniciarBingo()">♻️ REINICIAR TABLERO (+$2.500 AL ACUMULADO)</button>
+        <button id="btnLinkPromocion" class="btn" style="background:#007bff; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarLinkPromocion()">🔗 MANDAR LINK</button>
+        
         <div class="separador-peligro">
             <span>⚠️ 🚨 ⚠️ SOLO TOCAR AL FINAL DEL DÍA ⚠️ 🚨 ⚠️</span>
         </div>
-        <button class="btn" style="background:#007bff; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1</button>
-        <button class="btn" style="background:#007bff; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarLinkPromocion()">🔗 MANDAR LINK</button>
+        
+        <button class="btn-stats" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1 (solo número)</button>
+        <button class="btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
+        <button class="btn-ranking" onclick="mostrarModalPuntos()">🏆 RANKING (PUNTOS)</button>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -192,7 +244,6 @@
     </div>
 </div>
 
-<!-- Modal para rondas -->
 <div id="modalRondas" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">📊 RONDAS POR JUGADOR</h3>
@@ -204,7 +255,6 @@
     </div>
 </div>
 
-<!-- Modal para puntos -->
 <div id="modalPuntos" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🏆 RANKING (PUNTOS)</h3>
@@ -242,69 +292,25 @@
     let config = { admin: false, bloqueado: false };
     let modoVerificacion = false;
     let numeroRonda = 1;
-    let acumulado = 0; // Unidades de 2500 pesos
+    let acumulado = 0;
     let rondasPorJugador = {};
     let puntosPorJugador = {};
-    let ganadoresRonda = { bingo: null, ruleta: null };
+    let pendingUpdate = false;
 
-    // ========== FUNCIONES DE UTILIDAD ==========
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
     }
 
     function actualizarUIAcumulado() {
-        document.getElementById("acumuladoValor").innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
+        const elem = document.getElementById("acumuladoValor");
+        if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
     }
 
-    function obtenerTodosLosNombresConRepeticiones(numCarton) {
-        let idx = numCarton - 1;
-        if (idx < 0 || idx >= datos.length) return [];
-        const carton = datos[idx];
-        let lista = [];
-        for (let linea of carton.lineas) {
-            if (linea.nombre && linea.estado !== "libre" && linea.nombre.trim() !== "") {
-                lista.push(linea.nombre.trim());
-            }
-        }
-        return lista;
-    }
+    window.toggleCheckbox = () => { 
+        let chk = document.getElementById("chkEntregarAcumulado"); 
+        chk.checked = !chk.checked; 
+    };
 
-    function obtenerSugerenciasDesdeCaja() {
-        const cajaRaw = document.getElementById("notas-caja").value;
-        const lineas = cajaRaw.split('\n');
-        const nombres = [];
-        lineas.forEach(l => {
-            const partes = l.split(':');
-            if (partes.length >= 2) {
-                let nom = partes[0].trim().toUpperCase();
-                if (nom) nombres.push(nom);
-            }
-        });
-        return [...new Set(nombres)].sort();
-    }
-
-    function actualizarCampoNombre() {
-        const input = document.getElementById("nombreUser");
-        if (config.bloqueado && !config.admin) {
-            input.disabled = true;
-            input.placeholder = "🔒 CERRADO - Solo administrador";
-        } else {
-            input.disabled = false;
-            input.placeholder = "ESCRIBE TU NOMBRE AQUÍ";
-        }
-    }
-
-    function actualizarStats() {
-        let lib=0, res=0, pag=0;
-        datos.forEach(c => c.lineas.forEach(l => { 
-            if(l.estado==='libre') lib++; 
-            else if(l.estado==='reservado') res++; 
-            else pag++; 
-        }));
-        document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span> | 🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
-    }
-
-    // ========== RONDAS Y PUNTOS ==========
     function rondasToText() {
         let texto = "";
         for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
@@ -377,7 +383,6 @@
         actualizarStats();
     };
 
-    // ========== ACUMULADO ==========
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -395,15 +400,97 @@
             alert("Acumulado reseteado");
         }
     };
-    window.toggleCheckbox = () => { let chk = document.getElementById("chkEntregarAcumulado"); chk.checked = !chk.checked; };
-    
+
+    window.reiniciarRondaACero = async () => {
+        if (confirm("⚠️ ¿REINICIAR EL CONTADOR DE RONDA A 1? ⚠️\n\nEsto NO afecta el acumulado, ni los puntos, ni las rondas por jugador.\nSolo cambia el número de ronda que se muestra.\n\n¿Estás seguro?")) {
+            await updateDoc(docRef, { numero_ronda: 1 });
+            numeroRonda = 1;
+            actualizarStats();
+            alert("Ronda reiniciada a 1 ✅");
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('btnAcumuladoMenos')?.addEventListener('click', () => modificarAcumulado(-1));
-        document.getElementById('btnAcumuladoMas')?.addEventListener('click', () => modificarAcumulado(1));
-        document.getElementById('btnAcumuladoReset')?.addEventListener('click', () => resetearAcumulado());
+        const btnMenos = document.getElementById('btnAcumuladoMenos');
+        const btnMas = document.getElementById('btnAcumuladoMas');
+        const btnReset = document.getElementById('btnAcumuladoReset');
+        if (btnMenos) btnMenos.addEventListener('click', () => modificarAcumulado(-1));
+        if (btnMas) btnMas.addEventListener('click', () => modificarAcumulado(1));
+        if (btnReset) btnReset.addEventListener('click', () => resetearAcumulado());
     });
 
-    // ========== DIBUJAR TABLERO ==========
+    function ajustarTamanoTexto(elemento, texto) {
+        if (!elemento) return;
+        elemento.style.fontSize = '';
+        elemento.style.whiteSpace = 'normal';
+        elemento.style.wordBreak = 'break-word';
+        let fontSize = 16;
+        elemento.style.fontSize = fontSize + 'px';
+        while ((elemento.scrollHeight > 60 || elemento.scrollWidth > elemento.clientWidth) && fontSize > 10) {
+            fontSize--;
+            elemento.style.fontSize = fontSize + 'px';
+        }
+    }
+
+    function obtenerTodosLosNombresConRepeticiones(numCarton) {
+        let idx = numCarton - 1;
+        if (idx < 0 || idx >= datos.length) return [];
+        const carton = datos[idx];
+        let lista = [];
+        for (let linea of carton.lineas) {
+            if (linea.nombre && linea.estado !== "libre" && linea.nombre.trim() !== "") {
+                lista.push(linea.nombre.trim());
+            }
+        }
+        return lista;
+    }
+
+    function obtenerSugerenciasDesdeCaja() {
+        const cajaRaw = document.getElementById("notas-caja").value;
+        const lineas = cajaRaw.split('\n');
+        const nombres = [];
+        lineas.forEach(l => {
+            const partes = l.split(':');
+            if (partes.length >= 2) {
+                let nom = partes[0].trim().toUpperCase();
+                if (nom) nombres.push(nom);
+            }
+        });
+        return [...new Set(nombres)].sort();
+    }
+
+    function actualizarCampoNombre() {
+        const input = document.getElementById("nombreUser");
+        if (config.bloqueado && !config.admin) {
+            input.disabled = true;
+            input.placeholder = "🔒 CERRADO - Solo administrador";
+        } else {
+            input.disabled = false;
+            input.placeholder = "ESCRIBE TU NOMBRE AQUÍ";
+        }
+    }
+
+    function actualizarStats() {
+        let lib=0, res=0, pag=0;
+        datos.forEach(c => c.lineas.forEach(l => { 
+            if(l.estado==='libre') lib++; 
+            else if(l.estado==='reservado') res++; 
+            else pag++; 
+        }));
+        document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span> | 🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
+        const btnLista = document.getElementById("btnCopiarLista");
+        if(btnLista) btnLista.innerText = "📋 COPIAR LISTA WHATSAPP";
+        const btnLink = document.getElementById("btnLinkPromocion");
+        if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
+        
+        // Actualizar texto de ronda en la franja roja de captura
+        const capturaText = document.getElementById("capturaRondaText");
+        if (capturaText) {
+            const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+            capturaText.innerHTML = `🎰 RONDA ${emojisRonda[numeroRonda % 6]} 🎰`;
+        }
+    }
+
     function dibujar() {
         const container = document.getElementById("tablero");
         container.innerHTML = "";
@@ -418,7 +505,12 @@
                 if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                 let displayText = (linea.nombre && linea.nombre !== "") ? linea.nombre : (cIdx + 1).toString();
                 lDiv.innerText = displayText;
-                lDiv.onclick = () => manejarClick(cIdx, lIdx);
+                if (linea.nombre && linea.nombre !== "") {
+                    ajustarTamanoTexto(lDiv, displayText);
+                }
+                lDiv.onclick = (function(cartIdx, lineIdx) {
+                    return function() { manejarClick(cartIdx, lineIdx); };
+                })(cIdx, lIdx);
                 div.appendChild(lDiv);
             });
             container.appendChild(div);
@@ -428,8 +520,9 @@
         btnLupa.style.background = modoVerificacion ? "#38D400" : "#007bff";
     }
 
-    // ========== CLICK EN LINEA ==========
     async function manejarClick(c, l) {
+        if (pendingUpdate) return;
+        
         const lineaActual = datos[c].lineas[l];
         const nombreClick = lineaActual.nombre;
         
@@ -450,14 +543,16 @@
         else if (config.admin) {
             const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
             if(lineaActual.estado === "libre" && nombreInput !== "") {
+                pendingUpdate = true;
                 guardarHistorial();
-                // Sumar punto por apuntarse
                 if (nombreInput) {
                     puntosPorJugador[nombreInput] = (puntosPorJugador[nombreInput] || 0) + 1;
-                    await updateDoc(docRef, { puntosPorJugador: puntosPorJugador });
                 }
                 datos[c].lineas[l] = { nombre: nombreInput, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos });
+                await updateDoc(docRef, { cartones: datos, puntosPorJugador: puntosPorJugador });
+                pendingUpdate = false;
+                dibujar();
+                actualizarStats();
             } else {
                 const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
                 if (idx > -1) seleccionados.splice(idx, 1);
@@ -470,12 +565,14 @@
             const n = document.getElementById("nombreUser").value.trim().toUpperCase();
             if(!n) return;
             if(lineaActual.estado === "libre") {
+                pendingUpdate = true;
                 guardarHistorial();
-                // Sumar punto por apuntarse
                 puntosPorJugador[n] = (puntosPorJugador[n] || 0) + 1;
-                await updateDoc(docRef, { puntosPorJugador: puntosPorJugador });
                 datos[c].lineas[l] = { nombre: n, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos });
+                await updateDoc(docRef, { cartones: datos, puntosPorJugador: puntosPorJugador });
+                pendingUpdate = false;
+                dibujar();
+                actualizarStats();
             }
         }
     }
@@ -485,14 +582,21 @@
         if (!modoVerificacion) { seleccionados = []; document.getElementById("msgLineas").innerText = ""; }
         dibujar();
     };
-    window.activarCaptura = () => { document.body.classList.add('modo-captura'); document.getElementById('volverArea').style.display = 'flex'; };
-    window.desactivarCaptura = () => { document.body.classList.remove('modo-captura'); document.getElementById('volverArea').style.display = 'none'; };
+    window.activarCaptura = () => { 
+        document.body.classList.add('modo-captura'); 
+        document.getElementById('volverArea').style.display = 'flex';
+        actualizarStats();
+    };
+    window.desactivarCaptura = () => { 
+        document.body.classList.remove('modo-captura'); 
+        document.getElementById('volverArea').style.display = 'none';
+    };
     
     window.toggleAdmin = async () => {
         if(!config.admin) {
             const pass = prompt("Clave admin:");
             const snap = await getDoc(docRef);
-            if(pass === snap.data()?.pass) {
+            if(pass === snap.data().pass) {
                 config.admin = true;
                 document.getElementById("adminPanel").style.display = "flex";
                 document.getElementById("adminExtraPanel").style.display = "block";
@@ -587,7 +691,7 @@
                             indexLinea = i;
                         }
                     });
-                    let costo = 1.5; // $1.500 en miles = 1.5
+                    let costo = 1.5;
                     if (indexLinea !== -1 && saldoActual >= costo) {
                         let nuevoSaldo = saldoActual - costo;
                         if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
@@ -628,28 +732,19 @@
         }
     };
     
-    // ========== GENERAR MENSAJE GANADOR MULTI LÍNEA ==========
     window.generarMensajeGanadorMulti = () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-        
         if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
         const numBingo = parseInt(bInput);
         const numRuleta = parseInt(rInput);
         const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
         if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
         const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
+        let mensaje = "";
         
-        const esMismoNumero = (numBingo === numRuleta);
-        const acumuladoPesos = getAcumuladoEnPesos();
-        
-        function numeroAEmoji(num) {
-            const digitos = {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣'};
-            return num.toString().split('').map(c => digitos[c] || c).join('');
-        }
-        
-        function agruparYSumar(lista, premioUnitario) {
+        const agruparYSumar = (lista, premioUnitario) => {
             let resultado = "";
             const conteo = {};
             lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
@@ -658,47 +753,39 @@
                 resultado += `👤 *${nombre}* gana $${total.toLocaleString()}\n`;
             }
             return resultado;
-        }
+        };
         
-        let mensaje = `*🎰 RONDA ${numeroAEmoji(numeroRonda)}*\n\n`;
+        mensaje += `*Ronda ${emojisRonda[numeroRonda % 6]}*\n\n`;
+        const esMismoNumero = (numBingo === numRuleta);
         
         if (esMismoNumero) {
-            // Mismo número para bingo y ruleta
-            let premioTotal = 15000; // 10000 + 5000
             mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += `👤 *${nombresBingo.join(", ")}*\n\n`;
-            
-            if (entregarAcumulado && acumulado > 0) {
-                mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
-                mensaje += `🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n\n`;
-                premioTotal += acumuladoPesos;
-            } else if (acumulado > 0) {
-                mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
-                mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
-                mensaje += `💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n\n`;
-            }
-            mensaje += `🏆 *Bingo:* $10.000\n`;
-            mensaje += `🎰 *Ruleta:* $5.000\n\n`;
-            mensaje += `🎉 *${nombresBingo.join(", ")} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
+            mensaje += agruparYSumar(nombresBingo, 15000);
         } else {
-            // Números diferentes
             mensaje += `🏆 *BINGO #${numBingo}*\n`;
-            mensaje += agruparYSumar(nombresBingo, 10);
+            mensaje += agruparYSumar(nombresBingo, 10000);
             mensaje += `\n🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5);
+            mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
+        }
+        
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+        if (entregarAcumulado && acumulado > 0) {
+            const acumuladoPesos = getAcumuladoEnPesos();
+            mensaje += `\n💰 *ACUMULADO ENTREGADO!* 💰\n`;
+            mensaje += `👤 *${nombresBingo[0]}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+        } else if (acumulado > 0) {
+            mensaje += `\n⚠️ *ACUMULADO NO ENTREGADO* (requiere 4 rondas)\n`;
+            mensaje += `💰 El acumulado de $${getAcumuladoEnPesos().toLocaleString()} sigue en juego\n`;
         }
         
         mensaje += `\n✅ *Felicidades a los ganadores!*`;
         navigator.clipboard.writeText(mensaje.trim());
-        alert("✅ Mensaje de ganadores copiado");
+        alert(`✅ Mensaje de ganadores copiado`);
     };
     
-    // ========== REGISTRAR PREMIOS EN CAJA ==========
     window.cargarPremiosACajaMulti = async () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-        
         if (!bInput || !rInput) { alert("Ingresa números"); return; }
         const numBingo = parseInt(bInput);
         const numRuleta = parseInt(rInput);
@@ -707,30 +794,31 @@
         const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
         
         const esMismoNumero = (numBingo === numRuleta);
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
         const acumuladoPesos = getAcumuladoEnPesos();
         const acumuladoEnMiles = acumuladoPesos / 1000;
         
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+        let resumenPremios = [];
         
-        function agregarSaldo(nombre, cantidadEnMiles) {
+        function agregarSaldo(nombre, cantidadEnMiles, concepto) {
             if (!nombre || cantidadEnMiles === 0) return;
             let encontrado = false;
             lineas = lineas.map(l => {
                 if (l.startsWith(nombre + ":")) {
                     encontrado = true;
                     let partes = l.split(':');
-                    let valorActual = parseFloat(partes[1].trim());
-                    if (isNaN(valorActual)) valorActual = 0;
+                    let valorActual = parseFloat(partes[1].trim()) || 0;
                     let nuevoValor = valorActual + cantidadEnMiles;
                     return `${nombre}: ${nuevoValor}`;
                 }
                 return l;
             });
             if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
+            resumenPremios.push(`• ${nombre}: +$${(cantidadEnMiles * 1000).toLocaleString()} (${concepto})`);
         }
         
-        // Agrupar por nombre para sumar múltiples líneas del mismo jugador
         const agruparPorNombre = (lista) => {
             const conteo = {};
             lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
@@ -740,40 +828,38 @@
         if (esMismoNumero) {
             const conteo = agruparPorNombre(nombresBingo);
             for (let [nombre, cantidad] of Object.entries(conteo)) {
-                let totalPremio = 15 * cantidad; // 10 + 5 por cada línea
-                if (entregarAcumulado && acumulado > 0 && cantidad > 0) {
-                    // Solo dar acumulado a una persona (la primera del cartón o al dueño principal)
-                    totalPremio += acumuladoEnMiles;
-                    // Resetear acumulado
-                    acumulado = 0;
-                    await updateDoc(docRef, { acumulado: acumulado });
-                    actualizarUIAcumulado();
-                }
-                agregarSaldo(nombre, totalPremio);
+                agregarSaldo(nombre, 15 * cantidad, `Bingo+Ruleta x${cantidad}`);
             }
-            alert(entregarAcumulado && acumuladoEnMiles > 0 ? `💰 Premios registrados con ACUMULADO incluido` : `💰 Premios registrados (Bingo + Ruleta)`);
         } else {
             const conteoBingo = agruparPorNombre(nombresBingo);
             const conteoRuleta = agruparPorNombre(nombresRuleta);
             for (let [nombre, cantidad] of Object.entries(conteoBingo)) {
-                agregarSaldo(nombre, 10 * cantidad);
+                agregarSaldo(nombre, 10 * cantidad, `Bingo x${cantidad}`);
             }
             for (let [nombre, cantidad] of Object.entries(conteoRuleta)) {
-                agregarSaldo(nombre, 5 * cantidad);
+                agregarSaldo(nombre, 5 * cantidad, `Ruleta x${cantidad}`);
             }
-            alert(`💰 Premios registrados: Bingo $10.000 | Ruleta $5.000`);
+        }
+        
+        if (entregarAcumulado && acumulado > 0) {
+            const primerGanador = Object.keys(agruparPorNombre(nombresBingo))[0];
+            if (primerGanador) {
+                agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO`);
+                acumulado = 0;
+                await updateDoc(docRef, { acumulado: acumulado });
+                actualizarUIAcumulado();
+            }
         }
         
         let cajaFinal = lineas.join('\n');
         document.getElementById("notas-caja").value = cajaFinal;
         await updateDoc(docRef, { notas_caja: cajaFinal });
         
-        // Limpiar inputs
-        document.getElementById("numGanador").value = "";
-        document.getElementById("numRuletaFisica").value = "";
-        document.getElementById("chkEntregarAcumulado").checked = false;
+        let alertMsg = "💰 PREMIOS REGISTRADOS:\n\n";
+        alertMsg += resumenPremios.join("\n");
+        alertMsg += "\n\n✅ Saldos actualizados en caja";
+        alert(alertMsg);
         
-        // Registrar puntos para ganadores
         let nuevosPuntos = { ...puntosPorJugador };
         for (let nombre of nombresBingo) {
             nuevosPuntos[nombre] = (nuevosPuntos[nombre] || 0) + 3;
@@ -783,17 +869,21 @@
         }
         await updateDoc(docRef, { puntosPorJugador: nuevosPuntos });
         puntosPorJugador = nuevosPuntos;
+        
+        document.getElementById("numGanador").value = "";
+        document.getElementById("numRuletaFisica").value = "";
+        document.getElementById("chkEntregarAcumulado").checked = false;
     };
     
-    // ========== COPIAR LINK PROMOCIONAL ==========
     window.copiarLinkPromocion = () => {
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
         let txt = "";
         txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
         txt += "https://bingo-locutando.online/\n\n";
         txt += "```Para los NUEVOS:\nsi no entienden algo, mándenme un mensaje al privado y les explico bien la dinámica. 📲🤝```\n\n";
         txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
-        txt += "🎰 *Ruleta:* $5.000💰\n";
+        txt += "🎰 *RULETA:* $5.000💰\n";
         if (acumulado > 0) txt += `💰 *Acumulado:* $${getAcumuladoEnPesos().toLocaleString()}💰\n`;
         txt += "───────\n";
         txt += "📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
@@ -804,34 +894,26 @@
         alert("✅ Mensaje promocional con LINK copiado");
     };
     
-    // ========== COPIAR LISTA BINGO ==========
     window.copiarListaBingo = () => {
-        function numeroAEmoji(num) {
-            const digitos = {'0':'0️⃣','1':'1️⃣','2':'2️⃣','3':'3️⃣','4':'4️⃣','5':'5️⃣','6':'6️⃣','7':'7️⃣','8':'8️⃣','9':'9️⃣'};
-            return num.toString().split('').map(c => digitos[c] || c).join('');
-        }
-        
+        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
         let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += `*Ronda ${numeroAEmoji(numeroRonda)}*\n\n`;
-        txt += "*💵 Valor:* $1.500\n";
-        txt += "───────\n";
+        txt += `*Ronda ${emojisRonda[numeroRonda % 6]}*\n\n`;
+        txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
-        txt += "🎰 *Ruleta:* $5.000💰\n";
+        txt += "🎰 *RULETA:* $5.000💰\n";
         if (acumulado > 0) txt += `💰 *Acumulado:* $${getAcumuladoEnPesos().toLocaleString()}💰\n`;
         txt += "───────\n";
-        txt += `📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n`;
+        txt += "📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
         
         datos.forEach((c, idx) => {
             const primera = c.lineas[0];
             let displayName = primera.nombre || "";
             txt += `${idx+1} 🍀 ${displayName}${primera.estado === "pagado" ? " ✅" : ""}\n`;
         });
-        
         txt += "\n✅ *Nequi: 3169461962*\n";
         txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
-        
         navigator.clipboard.writeText(txt);
-        alert("Lista de bingo copiada");
+        alert(`Lista de bingo copiada`);
     };
     
     window.copiarSoloCaja = () => {
@@ -853,10 +935,9 @@
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
     window.reiniciarBingo = async () => { 
-        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por apuntarse a cada jugador activo\n• +3 PUNTOS al ganador de Bingo\n• +2 PUNTOS al ganador de Ruleta")) { 
+        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por apuntarse a cada jugador activo")) { 
             guardarHistorial(); 
             
-            // Sumar puntos y rondas a jugadores activos
             let nuevosPuntos = { ...puntosPorJugador };
             let nuevosRondas = { ...rondasPorJugador };
             let jugadoresActivos = new Set();
@@ -874,45 +955,23 @@
                 nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
             });
             
-            // Sumar puntos a ganadores de la ronda anterior
-            if (ganadoresRonda.bingo) {
-                nuevosPuntos[ganadoresRonda.bingo] = (nuevosPuntos[ganadoresRonda.bingo] || 0) + 3;
-            }
-            if (ganadoresRonda.ruleta && ganadoresRonda.ruleta !== ganadoresRonda.bingo) {
-                nuevosPuntos[ganadoresRonda.ruleta] = (nuevosPuntos[ganadoresRonda.ruleta] || 0) + 2;
-            }
-            
-            // Limpiar tablero
             datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
-            
             let nuevaRonda = numeroRonda + 1;
             let nuevoAcumulado = acumulado + 1;
-            const ganadoresLimpiar = { bingo: null, ruleta: null };
             
             await updateDoc(docRef, { 
-                cartones: datos,
+                cartones: datos, 
                 numero_ronda: nuevaRonda,
                 acumulado: nuevoAcumulado,
                 puntosPorJugador: nuevosPuntos,
-                rondasPorJugador: nuevosRondas,
-                ganadoresRonda: ganadoresLimpiar
+                rondasPorJugador: nuevosRondas
             }); 
-            
             seleccionados = []; 
             dibujar(); 
             actualizarStats();
             actualizarUIAcumulado();
             alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
         } 
-    };
-    
-    window.reiniciarRondaACero = async () => {
-        if (confirm("⚠️ ¿REINICIAR EL CONTADOR DE RONDA A 1? ⚠️\n\nEsto NO afecta el acumulado, ni los puntos, ni las rondas por jugador.\nSolo cambia el número de ronda que se muestra.\n\n¿Estás seguro?")) {
-            await updateDoc(docRef, { numero_ronda: 1 });
-            numeroRonda = 1;
-            actualizarStats();
-            alert("Ronda reiniciada a 1 ✅");
-        }
     };
     
     window.toggleBloqueo = async () => { 
@@ -927,12 +986,7 @@
     
     window.gestionarFilas = async (cambio) => { guardarHistorial(); datos.forEach(c => { if(cambio===1) c.lineas.push({nombre:"", estado:"libre"}); else if(cambio===-1 && c.lineas.length>1) c.lineas.pop(); }); await updateDoc(docRef, { cartones: datos }); };
     window.cambiarCols = (v) => { document.documentElement.style.setProperty('--columnas', v); document.getElementById("valCol").innerText = v; };
-    window.guardarCaja = async () => { 
-        let cajaTexto = document.getElementById("notas-caja").value.toUpperCase();
-        await updateDoc(docRef, { notas_caja: cajaTexto }); 
-        alert("Caja guardada ✅"); 
-    };
-    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
+    window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
     window.filtrarSugerencias = (valor) => {
         const input = valor.toUpperCase();
         document.getElementById("nombreUser").value = input;
@@ -948,34 +1002,21 @@
             }
         });
     };
+    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
     
-    // ========== SNAPSHOT FIRESTORE ==========
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
-            
-            if (!d.cartones || d.cartones.length === 0) {
-                let estructuraBase = [];
-                for (let i = 1; i <= 15; i++) {
-                    estructuraBase.push({ id: String(i), lineas: [{ estado: "libre", nombre: "" }] });
-                }
-                datos = estructuraBase;
-            } else {
-                datos = d.cartones.slice(0, 15);
-            }
-            
+            datos = (d.cartones || []).slice(0, 15);
             config.bloqueado = d.bloqueado || false;
             const btnB = document.getElementById("btnBloqueo");
             btnB.innerText = config.bloqueado ? "🔒 CERRADO" : "🔓 ABIERTO";
             btnB.style.background = config.bloqueado ? "#dc3545" : "#00ff88";
-            
             if (d.notas_caja !== undefined) document.getElementById('notas-caja').value = d.notas_caja.toUpperCase();
             numeroRonda = d.numero_ronda || 1;
             acumulado = d.acumulado || 0;
             rondasPorJugador = d.rondasPorJugador || {};
             puntosPorJugador = d.puntosPorJugador || {};
-            ganadoresRonda = d.ganadoresRonda || { bingo: null, ruleta: null };
-            
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
