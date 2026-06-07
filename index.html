@@ -54,7 +54,8 @@
         .modo-captura .btn-copiar-grande,
         .modo-captura .btn-copiar-caja,
         .modo-captura .btn[onclick*="copiar"],
-        .modo-captura .btn[onclick*="reiniciarBingo"] { 
+        .modo-captura .btn[onclick*="reiniciarBingo"],
+        .modo-captura .separador-peligro { 
             display: none !important; 
         }
         .modo-captura .btn-volver-container { display: flex !important; }
@@ -71,13 +72,12 @@
         .modo-captura .carton-h { font-size: 24px !important; padding: 10px !important; }
         .modo-captura .libre { font-size: 28px !important; }
         
-        /* Franja roja visible en modo captura - REPOSICIONADA MÁS ARRIBA */
+        /* Franja roja visible en modo captura */
         .captura-footer { display: none; }
         .modo-captura .captura-footer { 
             display: block; 
             position: relative;
-            /* Cambiamos la posición para que quede justo debajo del tablero */
-            margin: -150px auto 30px auto; /* Margen superior negativo para subirlo */
+            margin: -150px auto 30px auto;
             text-align: center;
             border-top: 2px dashed #dc3545;
             border-bottom: 2px dashed #dc3545;
@@ -136,10 +136,10 @@
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 55px; } 
-     /* Ajuste para celular - sube la franja roja */
-    .modo-captura .captura-footer { 
-        margin: -200px auto 30px auto;
-    }}
+        /* Ajuste para celular - sube la franja roja */
+        .modo-captura .captura-footer { 
+            margin: -200px auto 30px auto;
+        }}
         
     </style>
 </head>
@@ -174,7 +174,7 @@
 </div>
 <div class="tablero" id="tablero"></div>
 
-<!-- Franja roja que se muestra en modo captura - AHORA MÁS ARRIBA (debajo del tablero) -->
+<!-- Franja roja que se muestra en modo captura -->
 <div class="captura-footer" id="capturaFooter">
     <span id="capturaRondaText">🎰 RONDA 1 🎰</span>
 </div>
@@ -482,7 +482,8 @@
             else if(l.estado==='reservado') res++; 
             else pag++; 
         }));
-        document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span> | 🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
+        // ACUMULADO ELIMINADO de la barra de estadísticas
+        document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
         const btnLista = document.getElementById("btnCopiarLista");
         if(btnLista) btnLista.innerText = "📋 COPIAR LISTA WHATSAPP";
         const btnLink = document.getElementById("btnLinkPromocion");
