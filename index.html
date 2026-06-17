@@ -136,7 +136,6 @@
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 55px; } 
-        /* Ajuste para celular - sube la franja roja */
         .modo-captura .captura-footer { 
             margin: -200px auto 30px auto;
         }}
@@ -482,18 +481,16 @@
             else if(l.estado==='reservado') res++; 
             else pag++; 
         }));
-        // ACUMULADO ELIMINADO de la barra de estadísticas
         document.getElementById("stats").innerHTML = `<span class="stats-ronda">RONDA: ${numeroRonda}</span> | <span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
         const btnLista = document.getElementById("btnCopiarLista");
         if(btnLista) btnLista.innerText = "📋 COPIAR LISTA WHATSAPP";
         const btnLink = document.getElementById("btnLinkPromocion");
         if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
         
-        // Actualizar texto de ronda en la franja roja de captura
+        // Actualizar texto de ronda en la franja roja de captura - AHORA MUESTRA EL NÚMERO REAL
         const capturaText = document.getElementById("capturaRondaText");
         if (capturaText) {
-            const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-            capturaText.innerHTML = `🎰 RONDA ${emojisRonda[numeroRonda % 6]} 🎰`;
+            capturaText.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
         }
     }
 
@@ -747,7 +744,6 @@
         const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
         if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
         const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
         let mensaje = "";
         
         const agruparYSumar = (lista, premioUnitario) => {
@@ -761,7 +757,8 @@
             return resultado;
         };
         
-        mensaje += `*Ronda ${emojisRonda[numeroRonda % 6]}*\n\n`;
+        // Mostrar RONDA con número REAL
+        mensaje += `*🎰 RONDA ${numeroRonda}*\n\n`;
         const esMismoNumero = (numBingo === numRuleta);
         
         if (esMismoNumero) {
@@ -774,15 +771,19 @@
             mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
         }
         
+        // ========== ACUMULADO - SIEMPRE SE MUESTRA (CORREGIDO) ==========
         const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
         if (entregarAcumulado && acumulado > 0) {
             const acumuladoPesos = getAcumuladoEnPesos();
+            // Determinar a quién se le entrega (el ganador del bingo)
+            let ganadorAcumulado = nombresBingo.length > 0 ? nombresBingo[0] : "SIN ASIGNAR";
             mensaje += `\n💰 *ACUMULADO ENTREGADO!* 💰\n`;
-            mensaje += `👤 *${nombresBingo[0]}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+            mensaje += `👤 *${ganadorAcumulado}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
         } else if (acumulado > 0) {
             mensaje += `\n⚠️ *ACUMULADO NO ENTREGADO* (requiere 4 rondas)\n`;
             mensaje += `💰 El acumulado de $${getAcumuladoEnPesos().toLocaleString()} sigue en juego\n`;
         }
+        // ================================================================
         
         mensaje += `\n✅ *Felicidades a los ganadores!*`;
         navigator.clipboard.writeText(mensaje.trim());
@@ -882,7 +883,6 @@
     };
     
     window.copiarLinkPromocion = () => {
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
         let txt = "";
         txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
         txt += "https://bingo-locutando.online/\n\n";
@@ -901,9 +901,8 @@
     };
     
     window.copiarListaBingo = () => {
-        const emojisRonda = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
         let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += `*Ronda ${emojisRonda[numeroRonda % 6]}*\n\n`;
+        txt += `*Ronda ${numeroRonda}*\n\n`;
         txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
         txt += "🎰 *RULETA:* $5.000💰\n";
