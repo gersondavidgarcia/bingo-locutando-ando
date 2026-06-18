@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Bingo Ger Locutando</title>
+    <title>Bingo Ger Locutando | Multi Línea</title>
     
     <meta property="og:title" content="🎰 BINGO LOCUTANDO">
     <meta property="og:description" content="Ingresa a este link para escoger tú número de la suerte.">
@@ -41,7 +41,7 @@
         .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 25px 0; background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999; }
         .btn-volver { background-color: var(--oro); color: #000; padding: 10px 40px; border-radius: 40px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; }
         
-        /* MODO CAPTURA */
+        /* MODO CAPTURA - RESPONSIVE Y BIEN UBICADO */
         .modo-captura .header, 
         .modo-captura #adminPanel, 
         .modo-captura .seccion-acumulado,
@@ -59,51 +59,110 @@
             display: none !important; 
         }
         .modo-captura .btn-volver-container { display: flex !important; }
+        
+        /* En modo captura, el contenedor se ajusta naturalmente */
+        .modo-captura .contenedor-tablero {
+            transform: scale(0.8);
+            transform-origin: top center;
+            width: 125%;
+            margin-left: -12.5%;
+            padding: 10px 0;
+        }
         .modo-captura .tablero { 
-            transform: scale(0.65); 
-            transform-origin: top center; 
-            width: 155%; 
-            margin-left: -27.5%; 
-            padding-top: 10px; 
-            padding-bottom: 20px; 
-            gap: 8px;
+            gap: 6px;
+            padding: 5px;
         }
-        .modo-captura .linea { font-size: 20px !important; min-height: 70px !important; font-weight: 900 !important; }
-        .modo-captura .carton-h { font-size: 24px !important; padding: 10px !important; }
-        .modo-captura .libre { font-size: 28px !important; }
-        
-        /* Franja roja visible en modo captura */
-        .captura-footer { display: none; }
-        .modo-captura .captura-footer { 
-            display: block; 
-            position: relative;
-            margin: -150px auto 30px auto;
-            text-align: center;
-            border-top: 2px dashed #dc3545;
-            border-bottom: 2px dashed #dc3545;
-            padding: 12px 0;
-            background: rgba(220, 53, 69, 0.2);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            z-index: 10;
+        .modo-captura .linea { 
+            font-size: 18px !important; 
+            min-height: 55px !important; 
+            font-weight: 900 !important; 
+            padding: 4px 2px !important;
         }
-        .modo-captura .captura-footer span {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffcc00;
-            letter-spacing: 2px;
-            display: block;
+        .modo-captura .carton-h { 
+            font-size: 20px !important; 
+            padding: 6px !important; 
+        }
+        .modo-captura .libre { 
+            font-size: 22px !important; 
+        }
+        .modo-captura .ronda-grande {
+            font-size: 28px !important;
+            padding: 4px 0 !important;
+        }
+        .modo-captura .acumulado-visible {
+            font-size: 22px !important;
+            padding: 2px 0 !important;
         }
         
-        .tablero { display: grid; grid-template-columns: repeat(var(--columnas), 1fr); gap: 10px; padding: 13px; width: 100%; box-sizing: border-box; transition: all 0.3s ease; }
-        .carton { background: #fff; border-radius: 8px; border: 2px solid #333; overflow: hidden; display: flex; flex-direction: column; height: 90px; transition: 0.2s; }
-        .carton-h { background: #222; color: var(--oro); padding: 4px; font-weight: bold; text-align: center; font-size: 18px; }
+        /* CONTENEDOR TABLERO + RONDA + ACUMULADO */
+        .contenedor-tablero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tablero { 
+            display: grid; 
+            grid-template-columns: repeat(var(--columnas), 1fr); 
+            gap: 10px; 
+            padding: 13px 13px 0 13px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            transition: all 0.3s ease; 
+            margin: 0;
+        }
+        
+        .carton { background: #fff; border-radius: 4px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
+        .carton-h { background: #222; color: #ffcc00; font-size: 22px; padding: 8px; font-weight: bold; text-align: center; border-top: 2px solid #fff; border-left: 2px solid #fff; border-right: 2px solid #fff; border-bottom: none; }
         .linea { min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; padding: 6px 4px; text-align: center; line-height: 1.2; word-break: break-word; white-space: normal; overflow-wrap: break-word; font-size: 14px; }
         .libre { color: #bbbbbb !important; font-size: 24px !important; opacity: 0.5; font-weight: 900; display: flex; align-items: center; justify-content: center; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
+        
+        /* RONDA GRANDE - SIEMPRE VISIBLE */
+        .ronda-grande {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffcc00;
+            padding: 6px 0 0 0;
+            margin: 0;
+            width: 100%;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+            line-height: 1.2;
+        }
+        
+        /* ACUMULADO VISIBLE PARA TODOS (solo lectura) */
+        .acumulado-visible {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ff88;
+            padding: 2px 0 0 0;
+            margin: 0;
+            width: 100%;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            line-height: 1.2;
+        }
+        
+        @media (max-width: 700px) {
+            .ronda-grande { font-size: 28px; }
+            .acumulado-visible { font-size: 22px; }
+            .modo-captura .ronda-grande { font-size: 22px !important; }
+            .modo-captura .acumulado-visible { font-size: 18px !important; }
+            .modo-captura .contenedor-tablero {
+                transform: scale(0.75);
+                width: 135%;
+                margin-left: -17.5%;
+            }
+        }
+        
         .seccion-acumulado { background: #1a1a2e; border: 2px solid var(--oro); border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
         .acumulado-valor { font-size: 32px; font-weight: bold; color: #ffcc00; }
         .acumulado-control { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
@@ -135,11 +194,7 @@
         .ronda-nota { font-size: 11px; color: #aaa; margin-top: 10px; text-align: center; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
-        @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 55px; } 
-        .modo-captura .captura-footer { 
-            margin: -200px auto 30px auto;
-        }}
-        
+        @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 50px; } }
     </style>
 </head>
 <body>
@@ -171,11 +226,12 @@
     <button class="btn" style="background:#d9d7d7; color:black" onclick="marcarAccion('libre')">❌ LIBERAR</button>
     <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
 </div>
-<div class="tablero" id="tablero"></div>
 
-<!-- Franja roja que se muestra en modo captura -->
-<div class="captura-footer" id="capturaFooter">
-    <span id="capturaRondaText">🎰 RONDA 1 🎰</span>
+<!-- CONTENEDOR TABLERO + RONDA + ACUMULADO -->
+<div class="contenedor-tablero">
+    <div class="tablero" id="tablero"></div>
+    <div class="ronda-grande" id="rondaGrande">🎰 RONDA 1 🎰</div>
+    <div class="acumulado-visible" id="acumuladoVisible">🏆 ACUMULADO: $0</div>
 </div>
 
 <div id="adminExtraPanel" style="display:none;">
@@ -308,6 +364,12 @@
     function actualizarUIAcumulado() {
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
+        
+        // Actualizar acumulado visible para todos
+        const acumVisible = document.getElementById("acumuladoVisible");
+        if (acumVisible) {
+            acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
+        }
     }
 
     window.toggleCheckbox = () => { 
@@ -487,11 +549,14 @@
         const btnLink = document.getElementById("btnLinkPromocion");
         if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
         
-        // Actualizar texto de ronda en la franja roja de captura - AHORA MUESTRA EL NÚMERO REAL
-        const capturaText = document.getElementById("capturaRondaText");
-        if (capturaText) {
-            capturaText.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
+        // Actualizar texto de ronda GRANDE
+        const rondaGrande = document.getElementById("rondaGrande");
+        if (rondaGrande) {
+            rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
         }
+        
+        // Actualizar acumulado visible
+        actualizarUIAcumulado();
     }
 
     function dibujar() {
@@ -548,11 +613,8 @@
             if(lineaActual.estado === "libre" && nombreInput !== "") {
                 pendingUpdate = true;
                 guardarHistorial();
-                if (nombreInput) {
-                    puntosPorJugador[nombreInput] = (puntosPorJugador[nombreInput] || 0) + 1;
-                }
                 datos[c].lineas[l] = { nombre: nombreInput, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos, puntosPorJugador: puntosPorJugador });
+                await updateDoc(docRef, { cartones: datos });
                 pendingUpdate = false;
                 dibujar();
                 actualizarStats();
@@ -570,9 +632,8 @@
             if(lineaActual.estado === "libre") {
                 pendingUpdate = true;
                 guardarHistorial();
-                puntosPorJugador[n] = (puntosPorJugador[n] || 0) + 1;
                 datos[c].lineas[l] = { nombre: n, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos, puntosPorJugador: puntosPorJugador });
+                await updateDoc(docRef, { cartones: datos });
                 pendingUpdate = false;
                 dibujar();
                 actualizarStats();
@@ -757,7 +818,6 @@
             return resultado;
         };
         
-        // Mostrar RONDA con número REAL
         mensaje += `*🎰 RONDA ${numeroRonda}*\n\n`;
         const esMismoNumero = (numBingo === numRuleta);
         
@@ -771,19 +831,19 @@
             mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
         }
         
-        // ========== ACUMULADO - SIEMPRE SE MUESTRA (CORREGIDO) ==========
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-        if (entregarAcumulado && acumulado > 0) {
-            const acumuladoPesos = getAcumuladoEnPesos();
-            // Determinar a quién se le entrega (el ganador del bingo)
-            let ganadorAcumulado = nombresBingo.length > 0 ? nombresBingo[0] : "SIN ASIGNAR";
-            mensaje += `\n💰 *ACUMULADO ENTREGADO!* 💰\n`;
-            mensaje += `👤 *${ganadorAcumulado}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
-        } else if (acumulado > 0) {
-            mensaje += `\n⚠️ *ACUMULADO NO ENTREGADO* (requiere 4 rondas)\n`;
-            mensaje += `💰 El acumulado de $${getAcumuladoEnPesos().toLocaleString()} sigue en juego\n`;
+        // SOLO mostrar acumulado si Bingo == Ruleta (mismo número)
+        if (esMismoNumero) {
+            const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+            if (entregarAcumulado && acumulado > 0) {
+                const acumuladoPesos = getAcumuladoEnPesos();
+                let ganadorAcumulado = nombresBingo.length > 0 ? nombresBingo[0] : "SIN ASIGNAR";
+                mensaje += `\n💰 *ACUMULADO ENTREGADO!* 💰\n`;
+                mensaje += `👤 *${ganadorAcumulado}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+            } else if (acumulado > 0) {
+                mensaje += `\n⚠️ *ACUMULADO NO ENTREGADO* (requiere 4 rondas)\n`;
+                mensaje += `💰 El acumulado de $${getAcumuladoEnPesos().toLocaleString()} sigue en juego\n`;
+            }
         }
-        // ================================================================
         
         mensaje += `\n✅ *Felicidades a los ganadores!*`;
         navigator.clipboard.writeText(mensaje.trim());
@@ -848,7 +908,8 @@
             }
         }
         
-        if (entregarAcumulado && acumulado > 0) {
+        // Solo entregar acumulado si Bingo == Ruleta
+        if (esMismoNumero && entregarAcumulado && acumulado > 0) {
             const primerGanador = Object.keys(agruparPorNombre(nombresBingo))[0];
             if (primerGanador) {
                 agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO`);
@@ -886,7 +947,7 @@
         let txt = "";
         txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
         txt += "https://bingo-locutando.online/\n\n";
-        txt += "```Para los NUEVOS:\nsi no entienden algo, mándenme un mensaje al privado y les explico bien la dinámica. 📲🤝```\n\n";
+        txt += `*Ronda ${numeroRonda}*\n \n`;
         txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
         txt += "🎰 *RULETA:* $5.000💰\n";
@@ -929,7 +990,8 @@
             if(l.includes(':')) { 
                 let p = l.split(':'); 
                 let valor = parseFloat(p[1].trim());
-                txt += `${p[0].trim()}: $${(Math.round(valor * 1000)).toLocaleString()}\n`; 
+                let valorConPuntos = Math.round(valor * 1000).toLocaleString('es-CO');
+                txt += `- ${p[0].trim()}: ${valorConPuntos}\n`; 
             }
             else if(l.trim()) txt += l + "\n";
         });
@@ -940,7 +1002,7 @@
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
     window.reiniciarBingo = async () => { 
-        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por apuntarse a cada jugador activo")) { 
+        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por apuntarse a cada jugador activo\n• +3 PUNTOS al ganador de BINGO\n• +2 PUNTOS al ganador de RULETA")) { 
             guardarHistorial(); 
             
             let nuevosPuntos = { ...puntosPorJugador };
@@ -989,8 +1051,20 @@
         await updateDoc(docRef, { bloqueado: config.bloqueado });
     };
     
-    window.gestionarFilas = async (cambio) => { guardarHistorial(); datos.forEach(c => { if(cambio===1) c.lineas.push({nombre:"", estado:"libre"}); else if(cambio===-1 && c.lineas.length>1) c.lineas.pop(); }); await updateDoc(docRef, { cartones: datos }); };
-    window.cambiarCols = (v) => { document.documentElement.style.setProperty('--columnas', v); document.getElementById("valCol").innerText = v; };
+    window.gestionarFilas = async (cambio) => { 
+        guardarHistorial(); 
+        datos.forEach(c => { 
+            if(cambio===1) c.lineas.push({nombre:"", estado:"libre"}); 
+            else if(cambio===-1 && c.lineas.length>1) c.lineas.pop(); 
+        }); 
+        await updateDoc(docRef, { cartones: datos }); 
+    };
+    window.cambiarCols = (v) => { 
+        document.documentElement.style.setProperty('--columnas', v); 
+        document.getElementById("valCol").innerText = v; 
+        // Forzar redibujo para que se ajuste
+        dibujar();
+    };
     window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
     window.filtrarSugerencias = (valor) => {
         const input = valor.toUpperCase();
