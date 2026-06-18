@@ -543,7 +543,7 @@
             else if(l.estado==='reservado') res++; 
             else pag++; 
         }));
-        document.getElementById("stats").innerHTML = `<span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">OCUPADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
+        document.getElementById("stats").innerHTML = `<span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">RESERVADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
         const btnLista = document.getElementById("btnCopiarLista");
         if(btnLista) btnLista.innerText = "📋 COPIAR LISTA WHATSAPP";
         const btnLink = document.getElementById("btnLinkPromocion");
@@ -735,57 +735,86 @@
         document.getElementById("modalModificar").style.display = "none";
     };
     
+    // ========== FUNCIÓN MARCAR ACCIÓN CORREGIDA ==========
     window.marcarAccion = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         guardarHistorial();
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let cartonesAActualizar = JSON.parse(JSON.stringify(datos));
         let cambiosRealizados = false;
+        
         if (nuevoEstado === 'pagado') {
+            // Agrupar seleccionados por nombre
+            let lineasPorNombre = {};
             for (let sel of seleccionados) {
                 const info = datos[sel.c].lineas[sel.l];
                 if (info.nombre && info.estado !== 'pagado') {
                     let nombre = info.nombre.trim();
-                    let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
-                    let saldoActual = 0, indexLinea = -1;
-                    lineasCaja.forEach((l, i) => {
-                        if (l.startsWith(nombre + ":")) {
-                            let partes = l.split(':');
-                            saldoActual = parseFloat(partes[1].trim()) || 0;
-                            indexLinea = i;
-                        }
-                    });
-                    let costo = 1.5;
-                    if (indexLinea !== -1 && saldoActual >= costo) {
-                        let nuevoSaldo = saldoActual - costo;
-                        if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
-                        else lineasCaja.splice(indexLinea, 1);
-                        nuevaCaja = lineasCaja.join('\n');
+                    if (!lineasPorNombre[nombre]) lineasPorNombre[nombre] = [];
+                    lineasPorNombre[nombre].push(sel);
+                }
+            }
+            
+            // Procesar cada nombre UNA sola vez
+            for (let nombre in lineasPorNombre) {
+                let indices = lineasPorNombre[nombre];
+                let cantidad = indices.length;
+                let costo = cantidad * 1.5;
+                
+                let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+                let saldoActual = 0, indexLinea = -1;
+                lineasCaja.forEach((l, i) => {
+                    if (l.startsWith(nombre + ":")) {
+                        let partes = l.split(':');
+                        saldoActual = parseFloat(partes[1].trim()) || 0;
+                        indexLinea = i;
+                    }
+                });
+                
+                if (indexLinea !== -1 && saldoActual >= costo) {
+                    // Tiene saldo suficiente - pagar todo
+                    let nuevoSaldo = saldoActual - costo;
+                    if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
+                    else lineasCaja.splice(indexLinea, 1);
+                    nuevaCaja = lineasCaja.join('\n');
+                    
+                    indices.forEach(sel => {
                         cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
+                    });
+                    cambiosRealizados = true;
+                    
+                } else if (indexLinea !== -1 && saldoActual > 0 && saldoActual < costo) {
+                    // Saldo insuficiente - mostrar UNA advertencia
+                    let mensajeAdvertencia = `⚠️ ${nombre} tiene saldo de ${saldoActual} mil, pero necesita ${costo} mil para ${cantidad} línea(s).`;
+                    if (confirm(mensajeAdvertencia + `\n¿Marcar VERDE igualmente?`)) {
+                        lineasCaja.splice(indexLinea, 1);
+                        nuevaCaja = lineasCaja.join('\n');
+                        indices.forEach(sel => {
+                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
+                        });
                         cambiosRealizados = true;
-                    } else if (indexLinea !== -1 && saldoActual > 0) {
-                        if (confirm(`⚠️ ${nombre} solo tiene saldo para ${saldoActual} mil. ¿Marcar VERDE igualmente?`)) {
-                            lineasCaja.splice(indexLinea, 1);
-                            nuevaCaja = lineasCaja.join('\n');
+                    }
+                } else {
+                    // No tiene saldo - mostrar UNA advertencia
+                    let mensajeAdvertencia = `⚠️ ${nombre} NO tiene saldo en caja para ${cantidad} línea(s).`;
+                    if (confirm(mensajeAdvertencia + `\n¿Marcar VERDE igualmente?`)) {
+                        indices.forEach(sel => {
                             cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                            cambiosRealizados = true;
-                        }
-                    } else {
-                        if (confirm(`⚠️ ${nombre} NO tiene saldo en caja. ¿Marcar VERDE igualmente?`)) {
-                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                            cambiosRealizados = true;
-                        }
+                        });
+                        cambiosRealizados = true;
                     }
                 }
             }
+            
         } else if (nuevoEstado === 'libre') {
-            if(!confirm("⚠️ ¿Liberar y borrar nombres?")) return;
+            if (!confirm("⚠️ ¿Liberar y borrar nombres de las líneas seleccionadas?")) return;
             for (let sel of seleccionados) {
                 cartonesAActualizar[sel.c].lineas[sel.l].estado = "libre";
                 cartonesAActualizar[sel.c].lineas[sel.l].nombre = "";
             }
             cambiosRealizados = true;
         }
+        
         if (cambiosRealizados) {
             datos = cartonesAActualizar;
             seleccionados = [];
@@ -795,6 +824,7 @@
             actualizarStats();
         }
     };
+    // ===================================================
     
     window.generarMensajeGanadorMulti = () => {
         const bInput = document.getElementById("numGanador").value;
@@ -813,7 +843,7 @@
             lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
             for (let [nombre, cantidad] of Object.entries(conteo)) {
                 let total = cantidad * premioUnitario;
-                resultado += `👤 *${nombre}* gana $${total.toLocaleString()}\n`;
+                resultado += `👤 *${nombre}* gana $${total.toLocaleString()}💰 \n`;
             }
             return resultado;
         };
