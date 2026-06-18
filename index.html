@@ -116,8 +116,31 @@
         }
         
         .carton { background: #fff; border-radius: 8px; border: 2px solid #000; overflow: hidden; display: flex; flex-direction: column; }
-        .carton-h { background: #222; color: #ffcc00; font-size: 20px; padding: 4px; font-weight: bold; text-align: center;  border-bottom: none; }
-        .linea { min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 900; border-bottom: 2px solid #000; color: #000; cursor: pointer; padding: 6px 4px; text-align: center; line-height: 1.2; word-break: break-word; white-space: normal; overflow-wrap: break-word; font-size: 14px; }
+        .carton-h { background: #222; color: #ffcc00; font-size: 20px; padding: 4px; font-weight: bold; text-align: center; border-bottom: none; }
+        
+        /* LÍNEA - FORZAR UNA SOLA LÍNEA Y ACHICAR TEXTO */
+        .linea { 
+            min-height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 900; 
+            border-bottom: 2px solid #000; 
+            color: #000; 
+            cursor: pointer; 
+            padding: 4px 4px; 
+            text-align: center; 
+            line-height: 1.1; 
+            white-space: nowrap;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
+        }
+        .linea:last-child { border-bottom: none; }
+        
         .libre { color: #bbbbbb !important; font-size: 24px !important; opacity: 0.5; font-weight: 900; display: flex; align-items: center; justify-content: center; }
         .reservado { background-color: #ffeb3b !important; color: #000 !important; }
         .pagado { background-color: #28a745 !important; color: #fff !important; }
@@ -161,6 +184,7 @@
                 width: 135%;
                 margin-left: -17.5%;
             }
+            .linea { font-size: 12px; min-height: 40px; }
         }
         
         .seccion-acumulado { background: #1a1a2e; border: 2px solid var(--oro); border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
@@ -194,7 +218,6 @@
         .ronda-nota { font-size: 11px; color: #aaa; margin-top: 10px; text-align: center; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
-        @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 50px; } }
     </style>
 </head>
 <body>
@@ -365,7 +388,6 @@
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
         
-        // Actualizar acumulado visible para todos
         const acumVisible = document.getElementById("acumuladoVisible");
         if (acumVisible) {
             acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
@@ -487,14 +509,53 @@
 
     function ajustarTamanoTexto(elemento, texto) {
         if (!elemento) return;
-        elemento.style.fontSize = '';
-        elemento.style.whiteSpace = 'normal';
-        elemento.style.wordBreak = 'break-word';
+        
+        // Forzar UNA sola línea
+        elemento.style.whiteSpace = 'nowrap';
+        elemento.style.display = 'flex';
+        elemento.style.alignItems = 'center';
+        elemento.style.justifyContent = 'center';
+        elemento.style.overflow = 'hidden';
+        elemento.style.textOverflow = 'ellipsis';
+        elemento.style.wordBreak = 'normal';
+        elemento.innerText = texto;
+        
+        // Empezar con tamaño 16px
         let fontSize = 16;
         elemento.style.fontSize = fontSize + 'px';
-        while ((elemento.scrollHeight > 60 || elemento.scrollWidth > elemento.clientWidth) && fontSize > 10) {
+        
+        // Reducir hasta que quepa en UNA línea
+        while (elemento.scrollWidth > elemento.clientWidth && fontSize > 7) {
             fontSize--;
             elemento.style.fontSize = fontSize + 'px';
+        }
+        
+        // Si el texto tiene más de 15 caracteres, empezar con fuente más pequeña
+        if (texto.length > 15 && fontSize > 12) {
+            fontSize = 12;
+            elemento.style.fontSize = fontSize + 'px';
+            while (elemento.scrollWidth > elemento.clientWidth && fontSize > 7) {
+                fontSize--;
+                elemento.style.fontSize = fontSize + 'px';
+            }
+        }
+        
+        if (texto.length > 20 && fontSize > 10) {
+            fontSize = 10;
+            elemento.style.fontSize = fontSize + 'px';
+            while (elemento.scrollWidth > elemento.clientWidth && fontSize > 7) {
+                fontSize--;
+                elemento.style.fontSize = fontSize + 'px';
+            }
+        }
+        
+        if (texto.length > 25 && fontSize > 9) {
+            fontSize = 9;
+            elemento.style.fontSize = fontSize + 'px';
+            while (elemento.scrollWidth > elemento.clientWidth && fontSize > 7) {
+                fontSize--;
+                elemento.style.fontSize = fontSize + 'px';
+            }
         }
     }
 
@@ -549,13 +610,11 @@
         const btnLink = document.getElementById("btnLinkPromocion");
         if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
         
-        // Actualizar texto de ronda GRANDE
         const rondaGrande = document.getElementById("rondaGrande");
         if (rondaGrande) {
             rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
         }
         
-        // Actualizar acumulado visible
         actualizarUIAcumulado();
     }
 
@@ -571,7 +630,7 @@
                 lDiv.className = `linea ${linea.estado}`;
                 if(!linea.nombre || linea.nombre === "") lDiv.classList.add("libre");
                 if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
-                let displayText = (linea.nombre && linea.nombre !== "") ? linea.nombre : (cIdx + 1).toString();
+                let displayText = (linea.nombre && linea.nombre !== "") ? linea.nombre : "";
                 lDiv.innerText = displayText;
                 if (linea.nombre && linea.nombre !== "") {
                     ajustarTamanoTexto(lDiv, displayText);
@@ -831,7 +890,6 @@
             mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
         }
         
-        // SOLO mostrar acumulado si Bingo == Ruleta (mismo número)
         if (esMismoNumero) {
             const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
             if (entregarAcumulado && acumulado > 0) {
@@ -908,7 +966,6 @@
             }
         }
         
-        // Solo entregar acumulado si Bingo == Ruleta
         if (esMismoNumero && entregarAcumulado && acumulado > 0) {
             const primerGanador = Object.keys(agruparPorNombre(nombresBingo))[0];
             if (primerGanador) {
@@ -1062,7 +1119,6 @@
     window.cambiarCols = (v) => { 
         document.documentElement.style.setProperty('--columnas', v); 
         document.getElementById("valCol").innerText = v; 
-        // Forzar redibujo para que se ajuste
         dibujar();
     };
     window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
