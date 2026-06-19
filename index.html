@@ -365,7 +365,6 @@
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
         
-        // Actualizar acumulado visible para todos
         const acumVisible = document.getElementById("acumuladoVisible");
         if (acumVisible) {
             acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
@@ -549,13 +548,11 @@
         const btnLink = document.getElementById("btnLinkPromocion");
         if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
         
-        // Actualizar texto de ronda GRANDE
         const rondaGrande = document.getElementById("rondaGrande");
         if (rondaGrande) {
             rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
         }
         
-        // Actualizar acumulado visible
         actualizarUIAcumulado();
     }
 
@@ -735,7 +732,7 @@
         document.getElementById("modalModificar").style.display = "none";
     };
     
-    // ========== FUNCIÓN MARCAR ACCIÓN CORREGIDA ==========
+    // ========== FUNCIÓN MARCAR ACCIÓN CORREGIDA CON DETALLES ==========
     window.marcarAccion = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         guardarHistorial();
@@ -771,22 +768,38 @@
                     }
                 });
                 
+                // Función para formatear pesos con puntos
+                const formatPesos = (valorEnMiles) => {
+                    return Math.round(valorEnMiles * 1000).toLocaleString('es-CO');
+                };
+                
                 if (indexLinea !== -1 && saldoActual >= costo) {
-                    // Tiene saldo suficiente - pagar todo
-                    let nuevoSaldo = saldoActual - costo;
-                    if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
-                    else lineasCaja.splice(indexLinea, 1);
-                    nuevaCaja = lineasCaja.join('\n');
-                    
-                    indices.forEach(sel => {
-                        cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                    });
-                    cambiosRealizados = true;
+                    // Tiene saldo suficiente - mostrar confirmación
+                    let saldoRestante = saldoActual - costo;
+                    let mensajeConfirmacion = `✅ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    mensajeConfirmacion += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    mensajeConfirmacion += `💸 Le quedarán: $${formatPesos(saldoRestante)}\n\n`;
+                    mensajeConfirmacion += `¿Confirmar pago?`;
+                    if (confirm(mensajeConfirmacion)) {
+                        let nuevoSaldo = saldoActual - costo;
+                        if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
+                        else lineasCaja.splice(indexLinea, 1);
+                        nuevaCaja = lineasCaja.join('\n');
+                        
+                        indices.forEach(sel => {
+                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
+                        });
+                        cambiosRealizados = true;
+                    }
                     
                 } else if (indexLinea !== -1 && saldoActual > 0 && saldoActual < costo) {
-                    // Saldo insuficiente - mostrar UNA advertencia
-                    let mensajeAdvertencia = `⚠️ ${nombre} tiene saldo de ${saldoActual} mil, pero necesita ${costo} mil para ${cantidad} línea(s).`;
-                    if (confirm(mensajeAdvertencia + `\n¿Marcar VERDE igualmente?`)) {
+                    // Saldo insuficiente - mostrar UNA advertencia con detalle
+                    let saldoRestante = saldoActual - costo;
+                    let mensajeAdvertencia = `⚠️ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    mensajeAdvertencia += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    mensajeAdvertencia += `💸 Le quedarían: $${formatPesos(saldoRestante)}\n\n`;
+                    mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
+                    if (confirm(mensajeAdvertencia)) {
                         lineasCaja.splice(indexLinea, 1);
                         nuevaCaja = lineasCaja.join('\n');
                         indices.forEach(sel => {
@@ -796,8 +809,10 @@
                     }
                 } else {
                     // No tiene saldo - mostrar UNA advertencia
-                    let mensajeAdvertencia = `⚠️ ${nombre} NO tiene saldo en caja para ${cantidad} línea(s).`;
-                    if (confirm(mensajeAdvertencia + `\n¿Marcar VERDE igualmente?`)) {
+                    let mensajeAdvertencia = `⚠️ ${nombre} NO tiene saldo en caja\n`;
+                    mensajeAdvertencia += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n\n`;
+                    mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
+                    if (confirm(mensajeAdvertencia)) {
                         indices.forEach(sel => {
                             cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
                         });
@@ -824,7 +839,7 @@
             actualizarStats();
         }
     };
-    // ===================================================
+    // ===============================================================
     
     window.generarMensajeGanadorMulti = () => {
         const bInput = document.getElementById("numGanador").value;
@@ -1041,7 +1056,7 @@
             
             datos.forEach(c => {
                 c.lineas.forEach(linea => {
-                    if (linea.nombre && linea.nombre !== "" && linea.estado !== "pagado") {
+                    if (linea.nombre && linea.nombre !== "") {
                         jugadoresActivos.add(linea.nombre);
                     }
                 });
@@ -1092,7 +1107,6 @@
     window.cambiarCols = (v) => { 
         document.documentElement.style.setProperty('--columnas', v); 
         document.getElementById("valCol").innerText = v; 
-        // Forzar redibujo para que se ajuste
         dibujar();
     };
     window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
