@@ -41,7 +41,6 @@
         .btn-volver-container { width: 100%; display: none; justify-content: center; padding: 25px 0; background: var(--fondo); position: fixed; bottom: 0; left: 0; z-index: 9999; }
         .btn-volver { background-color: var(--oro); color: #000; padding: 10px 40px; border-radius: 40px; font-size: 15px; font-weight: 900; border: none; cursor: pointer; }
         
-        /* MODO CAPTURA - RESPONSIVE Y BIEN UBICADO */
         .modo-captura .header, 
         .modo-captura #adminPanel, 
         .modo-captura .seccion-acumulado,
@@ -60,7 +59,6 @@
         }
         .modo-captura .btn-volver-container { display: flex !important; }
         
-        /* En modo captura, el contenedor se ajusta naturalmente */
         .modo-captura .contenedor-tablero {
             transform: scale(0.8);
             transform-origin: top center;
@@ -94,7 +92,6 @@
             padding: 2px 0 !important;
         }
         
-        /* CONTENEDOR TABLERO + RONDA + ACUMULADO */
         .contenedor-tablero {
             display: flex;
             flex-direction: column;
@@ -123,7 +120,6 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
         
-        /* RONDA GRANDE - SIEMPRE VISIBLE */
         .ronda-grande {
             text-align: center;
             font-size: 36px;
@@ -137,7 +133,6 @@
             line-height: 1.2;
         }
         
-        /* ACUMULADO VISIBLE PARA TODOS (solo lectura) */
         .acumulado-visible {
             text-align: center;
             font-size: 28px;
@@ -227,7 +222,6 @@
     <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
 </div>
 
-<!-- CONTENEDOR TABLERO + RONDA + ACUMULADO -->
 <div class="contenedor-tablero">
     <div class="tablero" id="tablero"></div>
     <div class="ronda-grande" id="rondaGrande">🎰 RONDA 1 🎰</div>
@@ -364,7 +358,6 @@
     function actualizarUIAcumulado() {
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
-        
         const acumVisible = document.getElementById("acumuladoVisible");
         if (acumVisible) {
             acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
@@ -552,7 +545,6 @@
         if (rondaGrande) {
             rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
         }
-        
         actualizarUIAcumulado();
     }
 
@@ -732,7 +724,7 @@
         document.getElementById("modalModificar").style.display = "none";
     };
     
-    // ========== FUNCIÓN MARCAR ACCIÓN CORREGIDA CON DETALLES ==========
+    // ========== FUNCIÓN MARCAR ACCIÓN CON EMOJIS GRANDES (TRIPLES) ==========
     window.marcarAccion = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         guardarHistorial();
@@ -741,7 +733,6 @@
         let cambiosRealizados = false;
         
         if (nuevoEstado === 'pagado') {
-            // Agrupar seleccionados por nombre
             let lineasPorNombre = {};
             for (let sel of seleccionados) {
                 const info = datos[sel.c].lineas[sel.l];
@@ -752,7 +743,6 @@
                 }
             }
             
-            // Procesar cada nombre UNA sola vez
             for (let nombre in lineasPorNombre) {
                 let indices = lineasPorNombre[nombre];
                 let cantidad = indices.length;
@@ -768,17 +758,15 @@
                     }
                 });
                 
-                // Función para formatear pesos con puntos
                 const formatPesos = (valorEnMiles) => {
                     return Math.round(valorEnMiles * 1000).toLocaleString('es-CO');
                 };
                 
                 if (indexLinea !== -1 && saldoActual >= costo) {
-                    // Tiene saldo suficiente - mostrar confirmación
                     let saldoRestante = saldoActual - costo;
-                    let mensajeConfirmacion = `✅ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
-                    mensajeConfirmacion += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
-                    mensajeConfirmacion += `💸 Le quedarán: $${formatPesos(saldoRestante)}\n\n`;
+                    let mensajeConfirmacion = `✅✅✅ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    mensajeConfirmacion += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    mensajeConfirmacion += `Le quedarán: $${formatPesos(saldoRestante)}\n\n`;
                     mensajeConfirmacion += `¿Confirmar pago?`;
                     if (confirm(mensajeConfirmacion)) {
                         let nuevoSaldo = saldoActual - costo;
@@ -793,11 +781,10 @@
                     }
                     
                 } else if (indexLinea !== -1 && saldoActual > 0 && saldoActual < costo) {
-                    // Saldo insuficiente - mostrar UNA advertencia con detalle
                     let saldoRestante = saldoActual - costo;
-                    let mensajeAdvertencia = `⚠️ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
-                    mensajeAdvertencia += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
-                    mensajeAdvertencia += `💸 Le quedarían: $${formatPesos(saldoRestante)}\n\n`;
+                    let mensajeAdvertencia = `⚠️⚠️⚠️ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    mensajeAdvertencia += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    mensajeAdvertencia += `Le quedarían: $${formatPesos(saldoRestante)}\n\n`;
                     mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
                     if (confirm(mensajeAdvertencia)) {
                         lineasCaja.splice(indexLinea, 1);
@@ -808,9 +795,8 @@
                         cambiosRealizados = true;
                     }
                 } else {
-                    // No tiene saldo - mostrar UNA advertencia
-                    let mensajeAdvertencia = `⚠️ ${nombre} NO tiene saldo en caja\n`;
-                    mensajeAdvertencia += `📊 Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n\n`;
+                    let mensajeAdvertencia = `⚠️⚠️⚠️ ${nombre} NO tiene saldo en caja\n`;
+                    mensajeAdvertencia += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n\n`;
                     mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
                     if (confirm(mensajeAdvertencia)) {
                         indices.forEach(sel => {
@@ -822,7 +808,7 @@
             }
             
         } else if (nuevoEstado === 'libre') {
-            if (!confirm("⚠️ ¿Liberar y borrar nombres de las líneas seleccionadas?")) return;
+            if (!confirm("⚠️⚠️⚠️ ¿Liberar y borrar nombres de las líneas seleccionadas?")) return;
             for (let sel of seleccionados) {
                 cartonesAActualizar[sel.c].lineas[sel.l].estado = "libre";
                 cartonesAActualizar[sel.c].lineas[sel.l].nombre = "";
@@ -839,7 +825,7 @@
             actualizarStats();
         }
     };
-    // ===============================================================
+    // ===========================================================
     
     window.generarMensajeGanadorMulti = () => {
         const bInput = document.getElementById("numGanador").value;
@@ -876,7 +862,6 @@
             mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
         }
         
-        // SOLO mostrar acumulado si Bingo == Ruleta (mismo número)
         if (esMismoNumero) {
             const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
             if (entregarAcumulado && acumulado > 0) {
@@ -953,7 +938,6 @@
             }
         }
         
-        // Solo entregar acumulado si Bingo == Ruleta
         if (esMismoNumero && entregarAcumulado && acumulado > 0) {
             const primerGanador = Object.keys(agruparPorNombre(nombresBingo))[0];
             if (primerGanador) {
