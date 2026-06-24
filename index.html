@@ -177,8 +177,8 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a2e; border-radius: 12px; padding: 20px; width: 90%; max-width: 450px; border: 2px solid var(--oro); }
         .modal-content textarea, .modal-content input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; background: #000; color: #fff; border: 1px solid #444; font-size: 16px; text-transform: uppercase; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .modal-buttons button { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .modal-buttons { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .modal-buttons button { flex: 1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; min-width: 80px; }
         .sugerencias-list { background: #222; border-radius: 8px; max-height: 150px; overflow-y: auto; margin-top: 5px; border: 1px solid #444; }
         .sugerencia-item { padding: 10px; border-bottom: 1px solid #555; cursor: pointer; color: #ffcc00; font-weight: bold; }
         .sugerencia-item:hover { background: #007bff; color: white; }
@@ -189,6 +189,12 @@
         .ronda-nota { font-size: 11px; color: #aaa; margin-top: 10px; text-align: center; background: #2a2a2a; padding: 6px; border-radius: 6px; }
         .btn-stats { background: #6f42c1; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ranking { background: #fd7e14; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-ganadores { background: #e83e8c; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-numeros { background: #20c997; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-verde { background: #28a745; color: white; }
+        .btn-rojo { background: #dc3545; color: white; }
+        .btn-naranja { background: #fd7e14; color: white; }
+        .btn-reinicio-ronda { background: #7a6442; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 50px; } }
     </style>
 </head>
@@ -275,13 +281,16 @@
             <span>⚠️ 🚨 ⚠️ SOLO TOCAR AL FINAL DEL DÍA ⚠️ 🚨 ⚠️</span>
         </div>
         
-        <button class="btn-stats" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1 (solo número)</button>
+        <button class="btn-reinicio-ronda" onclick="reiniciarRondaACero()">🔄 REINICIAR RONDA A 1 (solo número)</button>
         <button class="btn-stats" onclick="mostrarModalRondas()">📊 RONDAS POR JUGADOR</button>
         <button class="btn-ranking" onclick="mostrarModalPuntos()">🏆 RANKING (PUNTOS)</button>
+        <button class="btn-ganadores" onclick="mostrarModalGanadores()">🏆 GANADORES DE RONDAS</button>
+        <button class="btn-numeros" onclick="mostrarModalNumeros()">🎯 NÚMEROS SALIDOS</button>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
 
+<!-- MODAL MODIFICAR -->
 <div id="modalModificar" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro); margin:0 0 10px;">✏️ Modificar nombre(s)</h3>
@@ -298,30 +307,80 @@
     </div>
 </div>
 
+<!-- MODAL RONDAS POR JUGADOR -->
 <div id="modalRondas" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">📊 RONDAS POR JUGADOR</h3>
         <textarea id="rondasTextarea" rows="8" placeholder="DAVID: 4" style="text-transform: uppercase;"></textarea>
+        <div class="ronda-nota" style="margin-bottom: 10px;">
+            📌 Las rondas se acumulan por jugador
+        </div>
         <div class="modal-buttons">
-            <button class="btn-guardar" style="background:#28a745; color:white;" onclick="guardarRondas()">💾 GUARDAR RONDAS</button>
-            <button class="btn-cerrar" style="background:#dc3545; color:white;" onclick="cerrarModalRondas()">CERRAR</button>
+            <button class="btn-verde" onclick="guardarRondas()">💾 GUARDAR RONDAS</button>
+            <button class="btn-rojo" onclick="cerrarModalRondas()">❌ CERRAR</button>
+            <button class="btn-naranja" onclick="reiniciarRondas()">🔄 REINICIAR</button>
         </div>
     </div>
 </div>
 
+<!-- MODAL RANKING PUNTOS POR TRAMOS -->
 <div id="modalPuntos" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🏆 RANKING (PUNTOS)</h3>
-        <textarea id="puntosTextarea" rows="12" placeholder="DAVID: 10" style="text-transform: uppercase;"></textarea>
-        <div class="ronda-nota" style="margin-bottom: 10px;">
-            📌 Reglas:<br>
-            • Apuntarse en una línea: +1 punto<br>
-            • Ganar Bingo: +3 puntos<br>
-            • Ganar Ruleta: +2 puntos
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 12px;">
+            <button class="btn-tramo" data-tramo="1" style="background:#007bff; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #fff; font-weight: bold; cursor: pointer; font-size: 12px;">📊 1-20</button>
+            <button class="btn-tramo" data-tramo="2" style="background:#007bff; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #fff; font-weight: bold; cursor: pointer; font-size: 12px;">📊 21-40</button>
+            <button class="btn-tramo" data-tramo="3" style="background:#007bff; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #fff; font-weight: bold; cursor: pointer; font-size: 12px;">📊 41-60</button>
+            <button class="btn-tramo" data-tramo="4" style="background:#fd7e14; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #ffcc00; font-weight: bold; cursor: pointer; font-size: 12px;">📊 61-80</button>
+            <button class="btn-tramo" data-tramo="5" style="background:#fd7e14; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #ffcc00; font-weight: bold; cursor: pointer; font-size: 12px;">📊 81-100</button>
+            <button class="btn-tramo" data-tramo="total" style="background:#28a745; color:white; padding: 8px 14px; border-radius: 6px; border: 2px solid #ffcc00; font-weight: bold; cursor: pointer; font-size: 12px;">📊 TOTAL</button>
         </div>
-        <div class="modal-buttons">
-            <button class="btn-guardar" style="background:#28a745; color:white;" onclick="guardarPuntos()">💾 GUARDAR PUNTOS</button>
-            <button class="btn-cerrar" style="background:#dc3545; color:white;" onclick="cerrarModalPuntos()">CERRAR</button>
+        
+        <div id="puntosDisplay" style="background:#000; border-radius: 8px; padding: 12px; min-height: 150px; max-height: 300px; overflow-y: auto; border: 1px solid #444;">
+            Selecciona un tramo para ver el ranking
+        </div>
+        
+        <div class="ronda-nota" style="margin-top: 10px;">
+            📌 Los puntos se acumulan por tramos de 20 rondas<br>
+            • Apuntarse: +1 punto | Bingo: +3 puntos | Ruleta: +2 puntos
+        </div>
+        <div class="modal-buttons" style="margin-top: 12px;">
+            <button class="btn-verde" onclick="guardarPuntosTramos()">💾 GUARDAR PUNTOS</button>
+            <button class="btn-rojo" onclick="cerrarModalPuntos()">❌ CERRAR</button>
+            <button class="btn-naranja" onclick="reiniciarTodosLosPuntos()">🔄 REINICIAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL GANADORES DE RONDAS -->
+<div id="modalGanadores" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--oro);">🏆 GANADORES DE RONDAS</h3>
+        <textarea id="ganadoresTextarea" rows="12" placeholder="RONDA 1&#10;Bingo #5 --- DAVID&#10;Ruleta #3 --- MARIA" style="text-transform: uppercase;"></textarea>
+        <div class="ronda-nota" style="margin-bottom: 10px;">
+            📌 Formato: RONDA X | Bingo #X --- NOMBRE | Ruleta #X --- NOMBRE
+        </div>
+        <div class="modal-buttons" style="margin-top: 12px;">
+            <button class="btn-verde" onclick="guardarGanadores()">💾 GUARDAR GANADORES</button>
+            <button class="btn-rojo" onclick="cerrarModalGanadores()">❌ CERRAR</button>
+            <button class="btn-naranja" onclick="limpiarGanadores()">🔄 LIMPIAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NÚMEROS SALIDOS -->
+<div id="modalNumeros" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--oro);">🎯 NÚMEROS SALIDOS</h3>
+        <textarea id="numerosTextarea" rows="12" placeholder="BINGOS: 2,5,8,10&#10;RULETAS: 3,6,9,12" style="text-transform: uppercase;"></textarea>
+        <div class="ronda-nota" style="margin-bottom: 10px;">
+            📌 BINGOS: números separados por coma | RULETAS: números separados por coma
+        </div>
+        <div class="modal-buttons" style="margin-top: 12px;">
+            <button class="btn-verde" onclick="guardarNumeros()">💾 GUARDAR NÚMEROS</button>
+            <button class="btn-rojo" onclick="cerrarModalNumeros()">❌ CERRAR</button>
+            <button class="btn-naranja" onclick="limpiarNumeros()">🔄 LIMPIAR</button>
         </div>
     </div>
 </div>
@@ -348,8 +407,11 @@
     let numeroRonda = 1;
     let acumulado = 0;
     let rondasPorJugador = {};
-    let puntosPorJugador = {};
+    let puntosPorTramo = {};
+    let historialGanadores = [];
+    let numerosSalidos = { bingos: [], ruletas: [] };
     let pendingUpdate = false;
+    let tramoActualEditando = null;
 
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
@@ -369,18 +431,309 @@
         chk.checked = !chk.checked; 
     };
 
+    // ========== FUNCIONES PARA TRAMOS ==========
+    function getTramoActual() {
+        if (numeroRonda <= 20) return 1;
+        else if (numeroRonda <= 40) return 2;
+        else if (numeroRonda <= 60) return 3;
+        else if (numeroRonda <= 80) return 4;
+        else return 5;
+    }
+
+    function getNombreTramo(tramo) {
+        const limites = {
+            1: "1-20",
+            2: "21-40",
+            3: "41-60",
+            4: "61-80",
+            5: "81-100"
+        };
+        return limites[tramo] || `Tramo ${tramo}`;
+    }
+
+    function getClaveTramo(tramo) {
+        return `tramo_${tramo}`;
+    }
+
+    function getPuntosTramo(tramo) {
+        const clave = getClaveTramo(tramo);
+        return puntosPorTramo[clave] || {};
+    }
+
+    function getTotalPuntos() {
+        const total = {};
+        for (let clave in puntosPorTramo) {
+            for (let nombre in puntosPorTramo[clave]) {
+                total[nombre] = (total[nombre] || 0) + puntosPorTramo[clave][nombre];
+            }
+        }
+        return total;
+    }
+
+    // ========== RANKING PUNTOS CON TEXTOAREA NORMAL ==========
+    window.mostrarModalPuntos = () => {
+        document.getElementById("modalPuntos").style.display = "flex";
+        const tramo = getTramoActual();
+        tramoActualEditando = tramo;
+        mostrarPuntosTextarea(tramo);
+    };
+
+    window.cerrarModalPuntos = () => { 
+        document.getElementById("modalPuntos").style.display = "none";
+        tramoActualEditando = null;
+    };
+
+    function mostrarPuntosTextarea(tramo) {
+        const display = document.getElementById("puntosDisplay");
+        const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
+        const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
+        
+        let texto = "";
+        if (sorted.length === 0) {
+            texto = "No hay puntos registrados en este tramo";
+        } else {
+            sorted.forEach(([nombre, puntos]) => {
+                texto += `${nombre}: ${puntos}\n`;
+            });
+        }
+        
+        display.innerHTML = `<textarea id="puntosTextarea" rows="10" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase;">${texto.trim()}</textarea>`;
+    }
+
+    window.guardarPuntosTramos = async () => {
+        const textarea = document.getElementById("puntosTextarea");
+        if (!textarea) {
+            alert("No hay datos para guardar");
+            return;
+        }
+        
+        const lines = textarea.value.split('\n');
+        const nuevosPuntos = {};
+        const tramo = tramoActualEditando;
+        
+        lines.forEach(line => {
+            line = line.trim();
+            if (line.includes(':')) {
+                const partes = line.split(':');
+                const nombre = partes[0].trim().toUpperCase();
+                const valor = parseInt(partes[1].trim());
+                if (nombre && !isNaN(valor) && valor >= 0) {
+                    nuevosPuntos[nombre] = valor;
+                }
+            }
+        });
+        
+        if (tramo === 'total') {
+            alert("No se puede guardar en TOTAL, selecciona un tramo específico");
+            return;
+        }
+        
+        const clave = getClaveTramo(tramo);
+        puntosPorTramo[clave] = nuevosPuntos;
+        await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+        alert("Puntos guardados ✅");
+        cerrarModalPuntos();
+        actualizarStats();
+    };
+
+    window.reiniciarTodosLosPuntos = async () => {
+        if (confirm("⚠️ ¿Estás seguro? Esto borrará TODOS los puntos de TODOS los tramos.")) {
+            puntosPorTramo = {};
+            await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+            alert("✅ Todos los puntos han sido reiniciados");
+            const tramoActual = getTramoActual();
+            tramoActualEditando = tramoActual;
+            mostrarPuntosTextarea(tramoActual);
+            actualizarStats();
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.btn-tramo').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tramo = this.dataset.tramo;
+                tramoActualEditando = tramo === 'total' ? 'total' : parseInt(tramo);
+                mostrarPuntosTextarea(tramoActualEditando);
+            });
+        });
+    });
+    // =========================================
+
+    // ========== FUNCIONES PARA GANADORES Y NÚMEROS ==========
+    async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
+        if (!historialGanadores) historialGanadores = [];
+        historialGanadores.push({
+            ronda: numeroRonda,
+            bingoNum: bingoNum,
+            bingoNombre: bingoNombre,
+            ruletaNum: ruletaNum,
+            ruletaNombre: ruletaNombre
+        });
+        // También guardar números salidos
+        if (!numerosSalidos.bingos) numerosSalidos.bingos = [];
+        if (!numerosSalidos.ruletas) numerosSalidos.ruletas = [];
+        numerosSalidos.bingos.push(bingoNum);
+        numerosSalidos.ruletas.push(ruletaNum);
+        if (historialGanadores.length > 100) {
+            historialGanadores = historialGanadores.slice(-100);
+        }
+        await updateDoc(docRef, { historialGanadores: historialGanadores, numerosSalidos: numerosSalidos });
+    }
+
+    function getHistorialGanadores() {
+        return historialGanadores || [];
+    }
+
+    // ========== FUNCIONES PARA GANADORES DE RONDAS ==========
+    window.mostrarModalGanadores = () => {
+        const textarea = document.getElementById("ganadoresTextarea");
+        let texto = "";
+        if (historialGanadores && historialGanadores.length > 0) {
+            historialGanadores.forEach(item => {
+                texto += `RONDA ${item.ronda}\n`;
+                texto += `Bingo #${item.bingoNum} --- ${item.bingoNombre}\n`;
+                texto += `Ruleta #${item.ruletaNum} --- ${item.ruletaNombre}\n\n`;
+            });
+        } else {
+            texto = "No hay ganadores registrados aún.";
+        }
+        textarea.value = texto.trim();
+        document.getElementById("modalGanadores").style.display = "flex";
+    };
+
+    window.cerrarModalGanadores = () => { 
+        document.getElementById("modalGanadores").style.display = "none"; 
+    };
+
+    window.guardarGanadores = async () => {
+        const texto = document.getElementById("ganadoresTextarea").value;
+        const lines = texto.split('\n');
+        const nuevosGanadores = [];
+        let rondaActual = null;
+        let bingoNum = null, bingoNombre = null, ruletaNum = null, ruletaNombre = null;
+        
+        for (let line of lines) {
+            line = line.trim();
+            if (line.startsWith('RONDA')) {
+                if (rondaActual !== null && bingoNum !== null && ruletaNum !== null) {
+                    nuevosGanadores.push({
+                        ronda: rondaActual,
+                        bingoNum: bingoNum,
+                        bingoNombre: bingoNombre,
+                        ruletaNum: ruletaNum,
+                        ruletaNombre: ruletaNombre
+                    });
+                }
+                const partes = line.split(' ');
+                rondaActual = parseInt(partes[1]);
+                bingoNum = null; bingoNombre = null; ruletaNum = null; ruletaNombre = null;
+            } else if (line.startsWith('Bingo')) {
+                const partes = line.split('---');
+                const numPart = partes[0].replace('Bingo #', '').trim();
+                bingoNum = parseInt(numPart);
+                bingoNombre = partes[1] ? partes[1].trim() : '';
+            } else if (line.startsWith('Ruleta')) {
+                const partes = line.split('---');
+                const numPart = partes[0].replace('Ruleta #', '').trim();
+                ruletaNum = parseInt(numPart);
+                ruletaNombre = partes[1] ? partes[1].trim() : '';
+            }
+        }
+        
+        if (rondaActual !== null && bingoNum !== null && ruletaNum !== null) {
+            nuevosGanadores.push({
+                ronda: rondaActual,
+                bingoNum: bingoNum,
+                bingoNombre: bingoNombre,
+                ruletaNum: ruletaNum,
+                ruletaNombre: ruletaNombre
+            });
+        }
+        
+        if (nuevosGanadores.length > 0) {
+            historialGanadores = nuevosGanadores;
+            await updateDoc(docRef, { historialGanadores: historialGanadores });
+            alert("✅ Ganadores guardados");
+        } else {
+            alert("⚠️ No se pudo guardar. Verifica el formato.");
+        }
+    };
+
+    window.limpiarGanadores = async () => {
+        if (confirm("⚠️ ¿Estás seguro? Esto borrará TODO el historial de ganadores.")) {
+            historialGanadores = [];
+            await updateDoc(docRef, { historialGanadores: historialGanadores });
+            document.getElementById("ganadoresTextarea").value = "No hay ganadores registrados aún.";
+            alert("✅ Historial de ganadores limpiado");
+        }
+    };
+
+    // ========== FUNCIONES PARA NÚMEROS SALIDOS ==========
+    window.mostrarModalNumeros = () => {
+        const textarea = document.getElementById("numerosTextarea");
+        let texto = "";
+        if (numerosSalidos.bingos && numerosSalidos.bingos.length > 0) {
+            texto += `BINGOS: ${numerosSalidos.bingos.join(', ')}\n`;
+        } else {
+            texto += "BINGOS: Ninguno aún\n";
+        }
+        if (numerosSalidos.ruletas && numerosSalidos.ruletas.length > 0) {
+            texto += `RULETAS: ${numerosSalidos.ruletas.join(', ')}`;
+        } else {
+            texto += "RULETAS: Ninguna aún";
+        }
+        textarea.value = texto;
+        document.getElementById("modalNumeros").style.display = "flex";
+    };
+
+    window.cerrarModalNumeros = () => { 
+        document.getElementById("modalNumeros").style.display = "none"; 
+    };
+
+    window.guardarNumeros = async () => {
+        const texto = document.getElementById("numerosTextarea").value;
+        const lines = texto.split('\n');
+        const bingos = [];
+        const ruletas = [];
+        
+        for (let line of lines) {
+            line = line.trim();
+            if (line.startsWith('BINGOS:')) {
+                const nums = line.replace('BINGOS:', '').trim();
+                nums.split(',').forEach(n => {
+                    const num = parseInt(n.trim());
+                    if (!isNaN(num)) bingos.push(num);
+                });
+            } else if (line.startsWith('RULETAS:')) {
+                const nums = line.replace('RULETAS:', '').trim();
+                nums.split(',').forEach(n => {
+                    const num = parseInt(n.trim());
+                    if (!isNaN(num)) ruletas.push(num);
+                });
+            }
+        }
+        
+        numerosSalidos.bingos = bingos;
+        numerosSalidos.ruletas = ruletas;
+        await updateDoc(docRef, { numerosSalidos: numerosSalidos });
+        alert("✅ Números guardados");
+    };
+
+    window.limpiarNumeros = async () => {
+        if (confirm("⚠️ ¿Estás seguro? Esto borrará TODOS los números salidos.")) {
+            numerosSalidos.bingos = [];
+            numerosSalidos.ruletas = [];
+            await updateDoc(docRef, { numerosSalidos: numerosSalidos });
+            document.getElementById("numerosTextarea").value = "BINGOS: Ninguno aún\nRULETAS: Ninguna aún";
+            alert("✅ Números limpiados");
+        }
+    };
+
+    // ========== FUNCIONES PARA RONDAS ==========
     function rondasToText() {
         let texto = "";
         for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
             texto += `${nombre}: ${rondas}\n`;
-        }
-        return texto.trim();
-    }
-
-    function puntosToText() {
-        let texto = "";
-        for (let [nombre, puntos] of Object.entries(puntosPorJugador).sort((a,b)=>b[1]-a[1])) {
-            texto += `${nombre}: ${puntos}\n`;
         }
         return texto.trim();
     }
@@ -399,20 +752,6 @@
         return nuevas;
     }
 
-    function textToPuntos(texto) {
-        const nuevas = {};
-        texto.toUpperCase().split('\n').forEach(linea => {
-            linea = linea.trim();
-            if (linea.includes(':')) {
-                let partes = linea.split(':');
-                let nombre = partes[0].trim();
-                let valor = parseInt(partes[1].trim());
-                if (nombre && !isNaN(valor) && valor >= 0) nuevas[nombre] = valor;
-            }
-        });
-        return nuevas;
-    }
-
     window.mostrarModalRondas = () => {
         document.getElementById("rondasTextarea").value = rondasToText();
         document.getElementById("modalRondas").style.display = "flex";
@@ -426,20 +765,16 @@
         cerrarModalRondas();
         actualizarStats();
     };
-
-    window.mostrarModalPuntos = () => {
-        document.getElementById("puntosTextarea").value = puntosToText();
-        document.getElementById("modalPuntos").style.display = "flex";
+    window.reiniciarRondas = async () => {
+        if (confirm("⚠️ ¿Estás seguro? Esto borrará TODAS las rondas por jugador.")) {
+            rondasPorJugador = {};
+            await updateDoc(docRef, { rondasPorJugador: rondasPorJugador });
+            alert("✅ Rondas reiniciadas");
+            document.getElementById("rondasTextarea").value = "";
+            actualizarStats();
+        }
     };
-    window.cerrarModalPuntos = () => { document.getElementById("modalPuntos").style.display = "none"; };
-    window.guardarPuntos = async () => {
-        const nuevas = textToPuntos(document.getElementById("puntosTextarea").value);
-        await updateDoc(docRef, { puntosPorJugador: nuevas });
-        puntosPorJugador = nuevas;
-        alert("Puntos guardados ✅");
-        cerrarModalPuntos();
-        actualizarStats();
-    };
+    // =========================================
 
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
@@ -724,7 +1059,6 @@
         document.getElementById("modalModificar").style.display = "none";
     };
     
-    // ========== FUNCIÓN MARCAR ACCIÓN CON EMOJIS GRANDES (TRIPLES) ==========
     window.marcarAccion = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
         guardarHistorial();
@@ -825,79 +1159,127 @@
             actualizarStats();
         }
     };
-    // ===========================================================
     
-    window.generarMensajeGanadorMulti = () => {
-        const bInput = document.getElementById("numGanador").value;
-        const rInput = document.getElementById("numRuletaFisica").value;
-        if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
-        const numBingo = parseInt(bInput);
-        const numRuleta = parseInt(rInput);
-        const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
-        if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
-        const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
-        let mensaje = "";
+    window.generarMensajeGanadorMulti = async () => {
+    const bInput = document.getElementById("numGanador").value;
+    const rInput = document.getElementById("numRuletaFisica").value;
+    if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
+    const numBingo = parseInt(bInput);
+    const numRuleta = parseInt(rInput);
+    const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
+    if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
+    const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
+    
+    // Obtener el primer nombre (asumiendo que cada cartón tiene un solo nombre)
+    const nombreBingo = nombresBingo[0];
+    const nombreRuleta = nombresRuleta[0];
+    
+    const esMismoNumero = (numBingo === numRuleta);
+    const esMismaPersona = (nombreBingo === nombreRuleta);
+    const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+    const acumuladoPesos = getAcumuladoEnPesos();
+    
+    let mensaje = `*🎰 RONDA ${numeroRonda}*\n`;
+    mensaje += ` \n`;
+    
+    let premioTotal = 0;
+    
+    if (esMismoNumero && esMismaPersona) {
+        premioTotal = 15000; // 10000 + 5000
+        mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
+        mensaje += `👤 *${nombreBingo}*\n`;
+        mensaje += ` \n`;
         
-        const agruparYSumar = (lista, premioUnitario) => {
-            let resultado = "";
-            const conteo = {};
-            lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
-            for (let [nombre, cantidad] of Object.entries(conteo)) {
-                let total = cantidad * premioUnitario;
-                resultado += `👤 *${nombre}* gana $${total.toLocaleString()}💰 \n`;
-            }
-            return resultado;
-        };
-        
-        mensaje += `*🎰 RONDA ${numeroRonda}*\n\n`;
-        const esMismoNumero = (numBingo === numRuleta);
-        
-        if (esMismoNumero) {
-            mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += agruparYSumar(nombresBingo, 15000);
-        } else {
-            mensaje += `🏆 *BINGO #${numBingo}*\n`;
-            mensaje += agruparYSumar(nombresBingo, 10000);
-            mensaje += `\n🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += agruparYSumar(nombresRuleta.length ? nombresRuleta : ["SIN ASIGNAR"], 5000);
+        if (entregarAcumulado && acumulado > 0) {
+            mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
+            mensaje += `🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+            mensaje += ` \n`;
+            premioTotal += acumuladoPesos;
+        } else if (acumulado > 0) {
+            mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
+            mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
+            mensaje += `💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n`;
+            mensaje += ` \n`;
         }
         
-        if (esMismoNumero) {
-            const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-            if (entregarAcumulado && acumulado > 0) {
-                const acumuladoPesos = getAcumuladoEnPesos();
-                let ganadorAcumulado = nombresBingo.length > 0 ? nombresBingo[0] : "SIN ASIGNAR";
-                mensaje += `\n💰 *ACUMULADO ENTREGADO!* 💰\n`;
-                mensaje += `👤 *${ganadorAcumulado}* gana $${acumuladoPesos.toLocaleString()} EXTRA\n`;
-            } else if (acumulado > 0) {
-                mensaje += `\n⚠️ *ACUMULADO NO ENTREGADO* (requiere 4 rondas)\n`;
-                mensaje += `💰 El acumulado de $${getAcumuladoEnPesos().toLocaleString()} sigue en juego\n`;
-            }
-        }
         
+        mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
+    } 
+    else if (esMismaPersona) {
+        premioTotal = 15000;
+        mensaje += `🏆 *BINGO #${numBingo}*\n`;
+        mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
+        mensaje += ` \n`;
+        mensaje += `🎰 *RULETA #${numRuleta}*\n`;
+        mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
+        mensaje += ` \n`;
+        mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
+    }
+    else {
+        mensaje += `🏆 *BINGO #${numBingo}*\n`;
+        mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
+        mensaje += ` \n`;
+        mensaje += `🎰 *RULETA #${numRuleta}*\n`;
+        mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
+    }
+    
+    if (esMismoNumero || esMismaPersona) {
+        mensaje += `✅ *Felicidades al ganador!*`;
+    } else {
         mensaje += `\n✅ *Felicidades a los ganadores!*`;
-        navigator.clipboard.writeText(mensaje.trim());
-        alert(`✅ Mensaje de ganadores copiado`);
-    };
+    }
+
+    navigator.clipboard.writeText(mensaje.trim());
+    alert("Mensaje de ganadores copiado");
     
+    if (nombresBingo.length > 0) {
+        const bingoNombre = nombresBingo.length === 1 ? nombresBingo[0] : nombresBingo.join(", ");
+        const ruletaNombre = nombresRuleta.length === 1 ? nombresRuleta[0] : nombresRuleta.join(", ");
+        await guardarGanadoresEnHistorial(numBingo, bingoNombre, numRuleta, ruletaNombre);
+    }
+};
+    
+    // ========== FUNCIÓN CARGAR PREMIOS EN CAJA ==========
     window.cargarPremiosACajaMulti = async () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
-        if (!bInput || !rInput) { alert("Ingresa números"); return; }
+        
+        if (!bInput || !rInput) { 
+            alert("⚠️ Ingresa números de Bingo y Ruleta"); 
+            return; 
+        }
+        
         const numBingo = parseInt(bInput);
         const numRuleta = parseInt(rInput);
         const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
-        if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
+        
+        if (nombresBingo.length === 0) { 
+            alert("⚠️ El cartón de BINGO #" + numBingo + " no tiene nombres asignados"); 
+            return; 
+        }
+        
         const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
+        
+        if (nombresRuleta.length === 0) {
+            alert("⚠️ El cartón de RULETA #" + numRuleta + " no tiene nombres asignados");
+            return;
+        }
         
         const esMismoNumero = (numBingo === numRuleta);
         const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
         const acumuladoPesos = getAcumuladoEnPesos();
         const acumuladoEnMiles = acumuladoPesos / 1000;
+        const tramoActual = getTramoActual();
+        const clave = getClaveTramo(tramoActual);
+        
+        // Inicializar el tramo si no existe
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
         
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
         let resumenPremios = [];
+        let premiosAgregados = false;
+        let acumuladoEntregado = false;
         
         function agregarSaldo(nombre, cantidadEnMiles, concepto) {
             if (!nombre || cantidadEnMiles === 0) return;
@@ -912,64 +1294,101 @@
                 }
                 return l;
             });
-            if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
-            resumenPremios.push(`• ${nombre}: +$${(cantidadEnMiles * 1000).toLocaleString()} (${concepto})`);
+            if (!encontrado) {
+                lineas.push(`${nombre}: ${cantidadEnMiles}`);
+            }
+            const valorFormateado = (cantidadEnMiles * 1000).toLocaleString();
+            resumenPremios.push(`• ${nombre}: +$${valorFormateado} (${concepto})`);
+            premiosAgregados = true;
+        }
+        
+        function agregarPuntos(nombre, puntos) {
+            if (!nombre || puntos === 0) return;
+            puntosPorTramo[clave][nombre] = (puntosPorTramo[clave][nombre] || 0) + puntos;
         }
         
         const agruparPorNombre = (lista) => {
             const conteo = {};
-            lista.forEach(n => { conteo[n] = (conteo[n] || 0) + 1; });
+            lista.forEach(n => { 
+                const nombreLimpio = n.trim();
+                if (nombreLimpio) {
+                    conteo[nombreLimpio] = (conteo[nombreLimpio] || 0) + 1; 
+                }
+            });
             return conteo;
         };
         
+        // 1. Procesar premios de BINGO y RULETA + SUMAR PUNTOS
         if (esMismoNumero) {
             const conteo = agruparPorNombre(nombresBingo);
             for (let [nombre, cantidad] of Object.entries(conteo)) {
                 agregarSaldo(nombre, 15 * cantidad, `Bingo+Ruleta x${cantidad}`);
+                agregarPuntos(nombre, 5 * cantidad);
             }
         } else {
             const conteoBingo = agruparPorNombre(nombresBingo);
             const conteoRuleta = agruparPorNombre(nombresRuleta);
+            
             for (let [nombre, cantidad] of Object.entries(conteoBingo)) {
                 agregarSaldo(nombre, 10 * cantidad, `Bingo x${cantidad}`);
+                agregarPuntos(nombre, 3 * cantidad);
             }
+            
             for (let [nombre, cantidad] of Object.entries(conteoRuleta)) {
                 agregarSaldo(nombre, 5 * cantidad, `Ruleta x${cantidad}`);
+                agregarPuntos(nombre, 2 * cantidad);
             }
         }
         
+        // 2. Procesar ACUMULADO si aplica
         if (esMismoNumero && entregarAcumulado && acumulado > 0) {
-            const primerGanador = Object.keys(agruparPorNombre(nombresBingo))[0];
+            const conteo = agruparPorNombre(nombresBingo);
+            const primerGanador = Object.keys(conteo)[0];
             if (primerGanador) {
-                agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO`);
+                agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO 🏆`);
+                acumuladoEntregado = true;
                 acumulado = 0;
                 await updateDoc(docRef, { acumulado: acumulado });
                 actualizarUIAcumulado();
             }
         }
         
-        let cajaFinal = lineas.join('\n');
-        document.getElementById("notas-caja").value = cajaFinal;
-        await updateDoc(docRef, { notas_caja: cajaFinal });
-        
-        let alertMsg = "💰 PREMIOS REGISTRADOS:\n\n";
-        alertMsg += resumenPremios.join("\n");
-        alertMsg += "\n\n✅ Saldos actualizados en caja";
-        alert(alertMsg);
-        
-        let nuevosPuntos = { ...puntosPorJugador };
-        for (let nombre of nombresBingo) {
-            nuevosPuntos[nombre] = (nuevosPuntos[nombre] || 0) + 3;
+        // 3. Guardar cambios en Firebase
+        if (premiosAgregados) {
+            let cajaFinal = lineas.join('\n');
+            document.getElementById("notas-caja").value = cajaFinal;
+            
+            // Guardar puntos en Firebase
+            await updateDoc(docRef, { 
+                notas_caja: cajaFinal,
+                puntosPorTramo: puntosPorTramo
+            });
+            
+            // Mostrar resumen
+            let alertMsg = "✅ PREMIOS REGISTRADOS EXITOSAMENTE:\n\n";
+            alertMsg += "💰 SALDOS EN CAJA:\n";
+            alertMsg += resumenPremios.join("\n");
+            
+            if (acumuladoEntregado) {
+                alertMsg += `\n\n🏆 ACUMULADO ENTREGADO: $${acumuladoPesos.toLocaleString()}`;
+            } else if (esMismoNumero && acumuladoPesos > 0 && !entregarAcumulado) {
+                alertMsg += `\n\n⚠️ ACUMULADO NO ENTREGADO (marca la casilla para entregarlo)`;
+                alertMsg += `\n💰 Acumulado disponible: $${acumuladoPesos.toLocaleString()}`;
+            }
+            alertMsg += "\n\n✅ Todos los saldos fueron actualizados en la caja.";
+            alert(alertMsg);
+            
+            // Limpiar campos
+            document.getElementById("numGanador").value = "";
+            document.getElementById("numRuletaFisica").value = "";
+            document.getElementById("chkEntregarAcumulado").checked = false;
+            
+            // Actualizar stats
+            actualizarStats();
+            
+        } else {
+            alert("⚠️ No se registraron premios. Verifica que los cartones tengan nombres asignados.");
         }
-        for (let nombre of nombresRuleta) {
-            nuevosPuntos[nombre] = (nuevosPuntos[nombre] || 0) + 2;
-        }
-        await updateDoc(docRef, { puntosPorJugador: nuevosPuntos });
-        puntosPorJugador = nuevosPuntos;
-        
-        document.getElementById("numGanador").value = "";
-        document.getElementById("numRuletaFisica").value = "";
-        document.getElementById("chkEntregarAcumulado").checked = false;
     };
     
     window.copiarLinkPromocion = () => {
@@ -1031,11 +1450,9 @@
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
     window.reiniciarBingo = async () => { 
-        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por apuntarse a cada jugador activo\n• +3 PUNTOS al ganador de BINGO\n• +2 PUNTOS al ganador de RULETA")) { 
+        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n• +3 PUNTOS al ganador de BINGO\n• +2 PUNTOS al ganador de RULETA")) { 
             guardarHistorial(); 
             
-            let nuevosPuntos = { ...puntosPorJugador };
-            let nuevosRondas = { ...rondasPorJugador };
             let jugadoresActivos = new Set();
             
             datos.forEach(c => {
@@ -1047,8 +1464,16 @@
             });
             
             jugadoresActivos.forEach(jugador => {
-                nuevosPuntos[jugador] = (nuevosPuntos[jugador] || 0) + 1;
-                nuevosRondas[jugador] = (nuevosRondas[jugador] || 0) + 1;
+                rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+            });
+            
+            const tramoActual = getTramoActual();
+            if (!puntosPorTramo) puntosPorTramo = {};
+            const clave = getClaveTramo(tramoActual);
+            if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+            
+            jugadoresActivos.forEach(jugador => {
+                puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
             });
             
             datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
@@ -1059,8 +1484,8 @@
                 cartones: datos, 
                 numero_ronda: nuevaRonda,
                 acumulado: nuevoAcumulado,
-                puntosPorJugador: nuevosPuntos,
-                rondasPorJugador: nuevosRondas
+                puntosPorTramo: puntosPorTramo,
+                rondasPorJugador: rondasPorJugador
             }); 
             seleccionados = []; 
             dibujar(); 
@@ -1123,7 +1548,9 @@
             numeroRonda = d.numero_ronda || 1;
             acumulado = d.acumulado || 0;
             rondasPorJugador = d.rondasPorJugador || {};
-            puntosPorJugador = d.puntosPorJugador || {};
+            puntosPorTramo = d.puntosPorTramo || {};
+            historialGanadores = d.historialGanadores || [];
+            numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
