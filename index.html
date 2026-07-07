@@ -195,6 +195,7 @@
         .btn-rojo { background: #dc3545; color: white; }
         .btn-naranja { background: #fd7e14; color: white; }
         .btn-reinicio-ronda { background: #7a6442; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-ronda-gratis { background: #ff6b6b; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 50px; } }
     </style>
 </head>
@@ -286,6 +287,7 @@
         <button class="btn-ranking" onclick="mostrarModalPuntos()">🏆 RANKING (PUNTOS)</button>
         <button class="btn-ganadores" onclick="mostrarModalGanadores()">🏆 GANADORES DE RONDAS</button>
         <button class="btn-numeros" onclick="mostrarModalNumeros()">🎯 NÚMEROS SALIDOS</button>
+        <button class="btn-ronda-gratis" onclick="copiarListaRondaGratis()">🎁 MANDAR RONDA GRATIS</button>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -1161,83 +1163,81 @@
     };
     
     window.generarMensajeGanadorMulti = async () => {
-    const bInput = document.getElementById("numGanador").value;
-    const rInput = document.getElementById("numRuletaFisica").value;
-    if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
-    const numBingo = parseInt(bInput);
-    const numRuleta = parseInt(rInput);
-    const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
-    if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
-    const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
-    
-    // Obtener el primer nombre (asumiendo que cada cartón tiene un solo nombre)
-    const nombreBingo = nombresBingo[0];
-    const nombreRuleta = nombresRuleta[0];
-    
-    const esMismoNumero = (numBingo === numRuleta);
-    const esMismaPersona = (nombreBingo === nombreRuleta);
-    const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-    const acumuladoPesos = getAcumuladoEnPesos();
-    
-    let mensaje = `*🎰 RONDA ${numeroRonda}*\n`;
-    mensaje += ` \n`;
-    
-    let premioTotal = 0;
-    
-    if (esMismoNumero && esMismaPersona) {
-        premioTotal = 15000; // 10000 + 5000
-        mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
-        mensaje += `👤 *${nombreBingo}*\n`;
+        const bInput = document.getElementById("numGanador").value;
+        const rInput = document.getElementById("numRuletaFisica").value;
+        if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
+        const numBingo = parseInt(bInput);
+        const numRuleta = parseInt(rInput);
+        const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
+        if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
+        const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
+        
+        const nombreBingo = nombresBingo[0];
+        const nombreRuleta = nombresRuleta[0];
+        
+        const esMismoNumero = (numBingo === numRuleta);
+        const esMismaPersona = (nombreBingo === nombreRuleta);
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+        const acumuladoPesos = getAcumuladoEnPesos();
+        
+        let mensaje = `*🎰 RONDA ${numeroRonda}*\n`;
         mensaje += ` \n`;
         
-        if (entregarAcumulado && acumulado > 0) {
-            mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
-            mensaje += `🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+        let premioTotal = 0;
+        
+        if (esMismoNumero && esMismaPersona) {
+            premioTotal = 15000;
+            mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
+            mensaje += `👤 *${nombreBingo}*\n`;
             mensaje += ` \n`;
-            premioTotal += acumuladoPesos;
-        } else if (acumulado > 0) {
-            mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
-            mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
-            mensaje += `💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n`;
+            
+            if (entregarAcumulado && acumulado > 0) {
+                mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
+                mensaje += `🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+                mensaje += ` \n`;
+                premioTotal += acumuladoPesos;
+            } else if (acumulado > 0) {
+                mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
+                mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
+                mensaje += `💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n`;
+                mensaje += ` \n`;
+            }
+            
+            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
+        } 
+        else if (esMismaPersona) {
+            premioTotal = 15000;
+            mensaje += `🏆 *BINGO #${numBingo}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
             mensaje += ` \n`;
+            mensaje += `🎰 *RULETA #${numRuleta}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
+        }
+        else {
+            mensaje += `🏆 *BINGO #${numBingo}*\n`;
+            mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎰 *RULETA #${numRuleta}*\n`;
+            mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
         }
         
-        
-        mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
-    } 
-    else if (esMismaPersona) {
-        premioTotal = 15000;
-        mensaje += `🏆 *BINGO #${numBingo}*\n`;
-        mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
-        mensaje += ` \n`;
-        mensaje += `🎰 *RULETA #${numRuleta}*\n`;
-        mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
-        mensaje += ` \n`;
-        mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
-    }
-    else {
-        mensaje += `🏆 *BINGO #${numBingo}*\n`;
-        mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
-        mensaje += ` \n`;
-        mensaje += `🎰 *RULETA #${numRuleta}*\n`;
-        mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
-    }
-    
-    if (esMismoNumero || esMismaPersona) {
-        mensaje += `✅ *Felicidades al ganador!*`;
-    } else {
-        mensaje += `\n✅ *Felicidades a los ganadores!*`;
-    }
+        if (esMismoNumero || esMismaPersona) {
+            mensaje += `✅ *Felicidades al ganador!*`;
+        } else {
+            mensaje += `\n✅ *Felicidades a los ganadores!*`;
+        }
 
-    navigator.clipboard.writeText(mensaje.trim());
-    alert("Mensaje de ganadores copiado");
-    
-    if (nombresBingo.length > 0) {
-        const bingoNombre = nombresBingo.length === 1 ? nombresBingo[0] : nombresBingo.join(", ");
-        const ruletaNombre = nombresRuleta.length === 1 ? nombresRuleta[0] : nombresRuleta.join(", ");
-        await guardarGanadoresEnHistorial(numBingo, bingoNombre, numRuleta, ruletaNombre);
-    }
-};
+        navigator.clipboard.writeText(mensaje.trim());
+        alert("Mensaje de ganadores copiado");
+        
+        if (nombresBingo.length > 0) {
+            const bingoNombre = nombresBingo.length === 1 ? nombresBingo[0] : nombresBingo.join(", ");
+            const ruletaNombre = nombresRuleta.length === 1 ? nombresRuleta[0] : nombresRuleta.join(", ");
+            await guardarGanadoresEnHistorial(numBingo, bingoNombre, numRuleta, ruletaNombre);
+        }
+    };
     
     // ========== FUNCIÓN CARGAR PREMIOS EN CAJA ==========
     window.cargarPremiosACajaMulti = async () => {
@@ -1272,7 +1272,6 @@
         const tramoActual = getTramoActual();
         const clave = getClaveTramo(tramoActual);
         
-        // Inicializar el tramo si no existe
         if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
         
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
@@ -1318,7 +1317,6 @@
             return conteo;
         };
         
-        // 1. Procesar premios de BINGO y RULETA + SUMAR PUNTOS
         if (esMismoNumero) {
             const conteo = agruparPorNombre(nombresBingo);
             for (let [nombre, cantidad] of Object.entries(conteo)) {
@@ -1340,7 +1338,6 @@
             }
         }
         
-        // 2. Procesar ACUMULADO si aplica
         if (esMismoNumero && entregarAcumulado && acumulado > 0) {
             const conteo = agruparPorNombre(nombresBingo);
             const primerGanador = Object.keys(conteo)[0];
@@ -1353,18 +1350,15 @@
             }
         }
         
-        // 3. Guardar cambios en Firebase
         if (premiosAgregados) {
             let cajaFinal = lineas.join('\n');
             document.getElementById("notas-caja").value = cajaFinal;
             
-            // Guardar puntos en Firebase
             await updateDoc(docRef, { 
                 notas_caja: cajaFinal,
                 puntosPorTramo: puntosPorTramo
             });
             
-            // Mostrar resumen
             let alertMsg = "✅ PREMIOS REGISTRADOS EXITOSAMENTE:\n\n";
             alertMsg += "💰 SALDOS EN CAJA:\n";
             alertMsg += resumenPremios.join("\n");
@@ -1378,12 +1372,10 @@
             alertMsg += "\n\n✅ Todos los saldos fueron actualizados en la caja.";
             alert(alertMsg);
             
-            // Limpiar campos
             document.getElementById("numGanador").value = "";
             document.getElementById("numRuletaFisica").value = "";
             document.getElementById("chkEntregarAcumulado").checked = false;
             
-            // Actualizar stats
             actualizarStats();
             
         } else {
@@ -1428,6 +1420,26 @@
         txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
         navigator.clipboard.writeText(txt);
         alert(`Lista de bingo copiada`);
+    };
+    
+    window.copiarListaRondaGratis = () => {
+        let txt = "*🎰 LISTADO BINGO LINEAL*\n";
+        txt += "*Ronda GRATIS*\n";
+        txt += "───────\n";
+        txt += "🏆 *PREMIO BINGO:* $5.000💰\n";
+        txt += "───────\n";
+        
+        datos.forEach((c, idx) => {
+            const primera = c.lineas[0];
+            let displayName = primera.nombre || "";
+            if (displayName) {
+                txt += `${idx+1} 🍀 ${displayName}\n`;
+            }
+        });
+        
+        txt += "\nGracias por seguir apoyándome se les quiere 😘";
+        navigator.clipboard.writeText(txt);
+        alert("✅ Mensaje de Ronda Gratis copiado");
     };
     
     window.copiarSoloCaja = () => {
