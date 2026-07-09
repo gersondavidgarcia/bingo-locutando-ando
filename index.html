@@ -196,6 +196,23 @@
         .btn-naranja { background: #fd7e14; color: white; }
         .btn-reinicio-ronda { background: #7a6442; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ronda-gratis { background: #ff6b6b; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        
+        /* Estilos para el acumulado reserva */
+        .seccion-reserva { background: #0a1a2e; border: 2px solid #007bff; border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
+        .reserva-valor { font-size: 32px; font-weight: bold; color: #00bfff; }
+        .reserva-check { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; background: #0d2a3e; padding: 8px; border-radius: 30px; cursor: pointer; }
+        .reserva-check input { width: 20px; height: 20px; cursor: pointer; }
+        .reserva-check label { font-size: 14px; font-weight: bold; color: #00bfff; cursor: pointer; }
+        .reserva-control { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .btn-reserva { background: #17a2b8; color: white; padding: 12px 24px; font-size: 14px; border: 2px solid #ffcc00; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-reserva:hover { background: #138496; }
+        .btn-activar-reserva { background: #dc3545; color: white; padding: 12px 24px; font-size: 14px; border: 2px solid #ffcc00; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-activar-reserva:hover { background: #c82333; }
+        
+        /* Checkbox pequeño dentro de reserva */
+        .reserva-check-small { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; background: #0d2a3e; padding: 4px 12px; border-radius: 30px; cursor: pointer; }
+        .reserva-check-small input { width: 24px; height: 24px; cursor: pointer; }
+        .reserva-check-small label { font-size: 12px; font-weight: bold; color: #00bfff; cursor: pointer; }
         @media (max-width: 700px) { :root { --columnas: 3; } .linea { font-size: 12px; min-height: 50px; } }
     </style>
 </head>
@@ -275,6 +292,7 @@
     <div style="width: 100%; max-width: 500px; margin: 10px auto 20px auto; display: flex; flex-direction: column; gap: 10px;">
         <button id="btnCopiarLista" class="btn" style="background:#25D366; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarListaBingo()">📋 COPIAR LISTA WHATSAPP</button>
         <button class="btn" style="background:#ffcc00; color:#000; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarSoloCaja()">📓 COPIAR SOLO SALDOS</button>
+        
         <button id="btnReiniciarGrande" class="btn" style="background:#ff4444; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="reiniciarBingo()">♻️ REINICIAR TABLERO (+$2.500 AL ACUMULADO)</button>
         <button id="btnLinkPromocion" class="btn" style="background:#007bff; color:white; font-size:18px; padding:16px; border:3px solid #fff; border-radius:12px;" onclick="copiarLinkPromocion()">🔗 MANDAR LINK</button>
         
@@ -288,6 +306,29 @@
         <button class="btn-ganadores" onclick="mostrarModalGanadores()">🏆 GANADORES DE RONDAS</button>
         <button class="btn-numeros" onclick="mostrarModalNumeros()">🎯 NÚMEROS SALIDOS</button>
         <button class="btn-ronda-gratis" onclick="copiarListaRondaGratis()">🎁 MANDAR RONDA GRATIS</button>
+        
+        <!-- ACUMULADO RESERVA -->
+            <div class="seccion-reserva">
+         <div style="color: #00bfff; font-weight: bold; text-align: center; margin-bottom: 10px;">💰 ACUMULADO RESERVA</div>
+         <div class="reserva-valor" id="reservaValor">$0</div>
+    
+          <!-- Checkbox para guardar en reserva al reiniciar - COLOR AMARILLO -->
+           <div class="reserva-check-small" onclick="toggleGuardarEnReserva()">
+          <input type="checkbox" id="chkGuardarEnReserva">
+          <label for="chkGuardarEnReserva" style="color: #ffcc00; font-weight: bold; font-size: 20px; cursor: pointer;">📥 Guardar +$2.500 <br> en RESERVA al reiniciar</label>
+          </div>
+    
+          <div class="reserva-control">
+          <button class="btn-reserva" onclick="modificarReserva(-1)">-2.500</button>
+         <button class="btn-reserva" onclick="modificarReserva(1)">+2.500</button>
+          <button class="btn-activar-reserva" onclick="activarReservaDirecto()">✅ ACTIVAR RESERVA</button>
+          
+    </div>
+    
+    <!-- ELIMINADO: el checkbox "ACTIVAR RESERVA" que estaba aquí -->
+    
+    <div class="ronda-nota">⚠️ El dinero de la reserva se suma al acumulado principal al activarla</div>
+</div>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -408,6 +449,7 @@
     let modoVerificacion = false;
     let numeroRonda = 1;
     let acumulado = 0;
+    let acumuladoReserva = 0;
     let rondasPorJugador = {};
     let puntosPorTramo = {};
     let historialGanadores = [];
@@ -419,6 +461,10 @@
         return acumulado * 2500;
     }
 
+    function getAcumuladoReservaEnPesos() {
+        return acumuladoReserva * 2500;
+    }
+
     function actualizarUIAcumulado() {
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
@@ -426,12 +472,22 @@
         if (acumVisible) {
             acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
         }
+        const reservaElem = document.getElementById("reservaValor");
+        if (reservaElem) {
+            reservaElem.innerHTML = `$${getAcumuladoReservaEnPesos().toLocaleString()}`;
+        }
     }
 
     window.toggleCheckbox = () => { 
         let chk = document.getElementById("chkEntregarAcumulado"); 
         chk.checked = !chk.checked; 
     };
+
+    window.toggleGuardarEnReserva = () => { 
+        let chk = document.getElementById("chkGuardarEnReserva"); 
+        chk.checked = !chk.checked; 
+    };
+
 
     // ========== FUNCIONES PARA TRAMOS ==========
     function getTramoActual() {
@@ -571,7 +627,6 @@
             ruletaNum: ruletaNum,
             ruletaNombre: ruletaNombre
         });
-        // También guardar números salidos
         if (!numerosSalidos.bingos) numerosSalidos.bingos = [];
         if (!numerosSalidos.ruletas) numerosSalidos.ruletas = [];
         numerosSalidos.bingos.push(bingoNum);
@@ -778,6 +833,7 @@
     };
     // =========================================
 
+    // ========== FUNCIONES PARA EL ACUMULADO ==========
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -786,6 +842,7 @@
         actualizarUIAcumulado();
         actualizarStats();
     };
+    
     window.resetearAcumulado = async () => {
         if (confirm("¿Resetear acumulado a $0?")) {
             acumulado = 0;
@@ -793,6 +850,37 @@
             actualizarUIAcumulado();
             actualizarStats();
             alert("Acumulado reseteado");
+        }
+    };
+
+    // ========== FUNCIONES PARA LA RESERVA ==========
+    window.modificarReserva = async (cambio) => {
+        let nuevo = acumuladoReserva + cambio;
+        if (nuevo < 0) nuevo = 0;
+        acumuladoReserva = nuevo;
+        await updateDoc(docRef, { acumuladoReserva: acumuladoReserva });
+        actualizarUIAcumulado();
+        actualizarStats();
+    };
+
+    window.activarReservaDirecto = async () => {
+        if (acumuladoReserva === 0) {
+            alert("⚠️ No hay dinero en reserva para activar");
+            return;
+        }
+        
+        if (confirm(`¿Activar reserva de $${getAcumuladoReservaEnPesos().toLocaleString()}?\n\nSe sumará al acumulado principal y la reserva quedará en $0.`)) {
+            acumulado = acumulado + acumuladoReserva;
+            acumuladoReserva = 0;
+            await updateDoc(docRef, { 
+                acumulado: acumulado,
+                acumuladoReserva: acumuladoReserva 
+            });
+            // Desmarcar el checkbox de activar reserva si estaba marcado
+            document.getElementById('chkActivarReserva').checked = false;
+            actualizarUIAcumulado();
+            actualizarStats();
+            alert(`✅ Reserva activada. Nuevo acumulado: $${getAcumuladoEnPesos().toLocaleString()}`);
         }
     };
 
@@ -1172,62 +1260,92 @@
         if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
         const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
         
-        const nombreBingo = nombresBingo[0];
-        const nombreRuleta = nombresRuleta[0];
-        
         const esMismoNumero = (numBingo === numRuleta);
-        const esMismaPersona = (nombreBingo === nombreRuleta);
         const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
         const acumuladoPesos = getAcumuladoEnPesos();
         
+        function agruparNombres(lista) {
+            const conteo = {};
+            lista.forEach(n => {
+                conteo[n] = (conteo[n] || 0) + 1;
+            });
+            return conteo;
+        }
+        
+        const conteoBingo = agruparNombres(nombresBingo);
+        const conteoRuleta = agruparNombres(nombresRuleta);
+        
+        const nombresUnicosBingo = Object.keys(conteoBingo);
+        const nombresUnicosRuleta = Object.keys(conteoRuleta);
+        const esMismaPersona = (nombresUnicosBingo.length === 1 && nombresUnicosRuleta.length === 1 && nombresUnicosBingo[0] === nombresUnicosRuleta[0]);
+        
         let mensaje = `*🎰 RONDA ${numeroRonda}*\n`;
-        mensaje += ` \n`;
+        mensaje += ` \n`;
         
         let premioTotal = 0;
         
         if (esMismoNumero && esMismaPersona) {
-            premioTotal = 15000;
+            const nombreUnico = nombresUnicosBingo[0];
+            const cantidadTotal = conteoBingo[nombreUnico];
+            premioTotal = 15000 * cantidadTotal;
+            
             mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += `👤 *${nombreBingo}*\n`;
-            mensaje += ` \n`;
+            mensaje += `👤 *${nombreUnico}* (${cantidadTotal} línea${cantidadTotal > 1 ? 's' : ''})\n`;
+            mensaje += ` \n`;
             
             if (entregarAcumulado && acumulado > 0) {
                 mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n`;
                 mensaje += `🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n`;
-                mensaje += ` \n`;
+                mensaje += ` \n`;
                 premioTotal += acumuladoPesos;
             } else if (acumulado > 0) {
                 mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n`;
                 mensaje += `📌 No cumple las condiciones (4 rondas diferentes en el día).\n`;
                 mensaje += `💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n`;
-                mensaje += ` \n`;
+                mensaje += ` \n`;
             }
             
-            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
+            mensaje += `🎉 *${nombreUnico} GANA $${premioTotal.toLocaleString()} EN TOTAL* 🎉\n`;
         } 
         else if (esMismaPersona) {
-            premioTotal = 15000;
+            const nombreUnico = nombresUnicosBingo[0];
+            const cantidadBingo = conteoBingo[nombreUnico];
+            const cantidadRuleta = conteoRuleta[nombreUnico];
+            premioTotal = (10000 * cantidadBingo) + (5000 * cantidadRuleta);
+            
             mensaje += `🏆 *BINGO #${numBingo}*\n`;
-            mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
-            mensaje += ` \n`;
+            mensaje += `👤 *${nombreUnico}* (${cantidadBingo} línea${cantidadBingo > 1 ? 's' : ''}) gana *$${(10000 * cantidadBingo).toLocaleString()}💰*\n`;
+            mensaje += ` \n`;
+            
             mensaje += `🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += `👤 *${nombreBingo}* gana *$5.000💰*\n`;
-            mensaje += ` \n`;
-            mensaje += `🎉 *${nombreBingo} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
+            mensaje += `👤 *${nombreUnico}* (${cantidadRuleta} línea${cantidadRuleta > 1 ? 's' : ''}) gana *$${(5000 * cantidadRuleta).toLocaleString()}💰*\n`;
+            mensaje += ` \n`;
+            mensaje += `🎉 *${nombreUnico} GANA $${premioTotal.toLocaleString()} (Bingo + Ruleta)* 🎉\n`;
         }
         else {
             mensaje += `🏆 *BINGO #${numBingo}*\n`;
-            mensaje += `👤 *${nombreBingo}* gana *$10.000💰*\n`;
-            mensaje += ` \n`;
+            for (let [nombre, cantidad] of Object.entries(conteoBingo)) {
+                const total = 10000 * cantidad;
+                if (cantidad === 1) {
+                    mensaje += `👤 *${nombre}* gana *$${total.toLocaleString()}💰*\n`;
+                } else {
+                    mensaje += `👤 *${nombre}* (${cantidad} líneas) gana *$${total.toLocaleString()}💰*\n`;
+                }
+            }
+            mensaje += ` \n`;
+            
             mensaje += `🎰 *RULETA #${numRuleta}*\n`;
-            mensaje += `👤 *${nombreRuleta}* gana *$5.000💰*\n`;
+            for (let [nombre, cantidad] of Object.entries(conteoRuleta)) {
+                const total = 5000 * cantidad;
+                if (cantidad === 1) {
+                    mensaje += `👤 *${nombre}* gana *$${total.toLocaleString()}💰*\n`;
+                } else {
+                    mensaje += `👤 *${nombre}* (${cantidad} líneas) gana *$${total.toLocaleString()}💰*\n`;
+                }
+            }
         }
         
-        if (esMismoNumero || esMismaPersona) {
-            mensaje += `✅ *Felicidades al ganador!*`;
-        } else {
-            mensaje += `\n✅ *Felicidades a los ganadores!*`;
-        }
+        mensaje += `\n✅ *Felicidades a los ganadores!*`;
 
         navigator.clipboard.writeText(mensaje.trim());
         alert("Mensaje de ganadores copiado");
@@ -1461,9 +1579,17 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
+    // ========== FUNCIÓN REINICIAR TABLERO CON CHECKBOX ==========
     window.reiniciarBingo = async () => { 
-        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda. Además:\n• Se sumará +$2.500 al ACUMULADO\n• +1 RONDA a cada jugador activo\n• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n• +3 PUNTOS al ganador de BINGO\n• +2 PUNTOS al ganador de RULETA")) { 
+        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda.\n\n" + 
+            "• +1 RONDA a cada jugador activo\n" +
+            "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n" +
+            "• +3 PUNTOS al ganador de BINGO\n" +
+            "• +2 PUNTOS al ganador de RULETA")) { 
+            
             guardarHistorial(); 
+            
+            const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
             
             let jugadoresActivos = new Set();
             
@@ -1489,21 +1615,39 @@
             });
             
             datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
+            
             let nuevaRonda = numeroRonda + 1;
-            let nuevoAcumulado = acumulado + 1;
+            let nuevoAcumulado = acumulado;
+            let nuevaReserva = acumuladoReserva;
+            
+            if (guardarEnReserva) {
+                nuevaReserva = acumuladoReserva + 1;
+            } else {
+                nuevoAcumulado = acumulado + 1;
+            }
             
             await updateDoc(docRef, { 
                 cartones: datos, 
                 numero_ronda: nuevaRonda,
                 acumulado: nuevoAcumulado,
+                acumuladoReserva: nuevaReserva,
                 puntosPorTramo: puntosPorTramo,
                 rondasPorJugador: rondasPorJugador
             }); 
+            
             seleccionados = []; 
             dibujar(); 
             actualizarStats();
             actualizarUIAcumulado();
-            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
+            
+            // Desmarcar el checkbox de guardar en reserva
+            document.getElementById('chkGuardarEnReserva').checked = false;
+            
+            if (guardarEnReserva) {
+                alert(`Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}`);
+            } else {
+                alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
+            }
         } 
     };
     
@@ -1559,6 +1703,7 @@
             if (d.notas_caja !== undefined) document.getElementById('notas-caja').value = d.notas_caja.toUpperCase();
             numeroRonda = d.numero_ronda || 1;
             acumulado = d.acumulado || 0;
+            acumuladoReserva = d.acumuladoReserva || 0;
             rondasPorJugador = d.rondasPorJugador || {};
             puntosPorTramo = d.puntosPorTramo || {};
             historialGanadores = d.historialGanadores || [];
