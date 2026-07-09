@@ -196,6 +196,7 @@
         .btn-naranja { background: #fd7e14; color: white; }
         .btn-reinicio-ronda { background: #7a6442; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ronda-gratis { background: #ff6b6b; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-ruleta { background: #17a2b8; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         
         /* Estilos para el acumulado reserva */
         .seccion-reserva { background: #0a1a2e; border: 2px solid #007bff; border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
@@ -320,6 +321,7 @@
         <button class="btn-ganadores" onclick="mostrarModalGanadores()">🏆 GANADORES DE RONDAS</button>
         <button class="btn-numeros" onclick="mostrarModalNumeros()">🎯 NÚMEROS SALIDOS</button>
         <button class="btn-ronda-gratis" onclick="copiarListaRondaGratis()">🎁 MANDAR RONDA GRATIS</button>
+        <button class="btn-ruleta" onclick="mostrarModalRuleta()">🎲 ASIGNAR AL AZAR</button>
         
         <!-- ACUMULADO RESERVA -->
         <div class="seccion-reserva">
@@ -341,29 +343,7 @@
             <div class="ronda-nota">⚠️ El dinero de la reserva se suma al acumulado principal al activarla</div>
         </div>
 
-        <!-- ========== NUEVA SECCIÓN ASIGNAR RULETA AL AZAR ========== -->
-        <div style="width: 100%; max-width: 500px; margin: 15px auto; background: #1a1a2e; border: 2px solid #ffcc00; border-radius: 8px; padding: 15px;">
-            <div style="color: var(--oro); font-weight: bold; text-align: center; font-size: 18px; margin-bottom: 10px;">🎲 ASIGNAR NÚMEROS GRATIS AL AZAR</div>
-            
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
-                <select id="selectTramoRuleta" style="padding: 10px 16px; border-radius: 8px; background: #000; color: #fff; border: 2px solid var(--oro); font-size: 16px; font-weight: bold; flex: 1; min-width: 150px;">
-                    <option value="1">1-20</option>
-                    <option value="2" selected>21-40</option>
-                    <option value="3">41-60</option>
-                    <option value="4">61-80</option>
-                    <option value="5">81-100</option>
-                </select>
-                <button id="btnAsignarRuleta" style="background: var(--oro); color: #000; padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;">🎲 ASIGNAR AL AZAR</button>
-            </div>
-            
-            <div id="resultadoRuleta" style="background: #000; border-radius: 8px; padding: 12px; min-height: 80px; border: 1px solid #444; font-size: 14px; max-height: 300px; overflow-y: auto;">
-                <p style="color: #888; text-align: center; margin: 0;">Presiona el botón para asignar números</p>
-            </div>
-            
-            <div style="font-size: 11px; color: #aaa; text-align: center; margin-top: 8px;">
-                📌 1er lugar: 3 números | 2do lugar: 2 números | 3ro al 12vo: 1 número | Berta y Alba quedan fuera
-            </div>
-        </div>
+        
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -459,6 +439,36 @@
             <button class="btn-verde" onclick="guardarNumeros()">💾 GUARDAR NÚMEROS</button>
             <button class="btn-rojo" onclick="cerrarModalNumeros()">❌ CERRAR</button>
             <button class="btn-naranja" onclick="limpiarNumeros()">🔄 LIMPIAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ASIGNAR RULETA -->
+<div id="modalRuleta" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <h3 style="color: var(--oro); text-align: center; margin: 0 0 10px;">🎲 ASIGNAR NÚMEROS GRATIS AL AZAR</h3>
+        
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
+            <select id="selectTramoRuletaModal" style="padding: 10px 16px; border-radius: 8px; background: #000; color: #fff; border: 2px solid var(--oro); font-size: 16px; font-weight: bold; flex: 1; min-width: 150px;">
+                <option value="1">1-20</option>
+                <option value="2" selected>21-40</option>
+                <option value="3">41-60</option>
+                <option value="4">61-80</option>
+                <option value="5">81-100</option>
+            </select>
+            <button id="btnAsignarRuletaModal" style="background: var(--oro); color: #000; padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;">🎲 ASIGNAR AL AZAR</button>
+        </div>
+        
+        <div id="resultadoRuletaModal" style="background: #000; border-radius: 8px; padding: 12px; min-height: 80px; border: 1px solid #444; font-size: 14px; max-height: 300px; overflow-y: auto;">
+            <p style="color: #888; text-align: center; margin: 0;">Presiona el botón para asignar números</p>
+        </div>
+        
+        <div style="font-size: 11px; color: #aaa; text-align: center; margin-top: 8px;">
+            📌 1er lugar: 3 números | 2do lugar: 2 números | 3ro al 12vo: 1 número | Berta y Alba quedan fuera
+        </div>
+        
+        <div class="modal-buttons" style="margin-top: 12px;">
+            <button class="btn-rojo" onclick="cerrarModalRuleta()" style="width: 100%;">❌ CERRAR</button>
         </div>
     </div>
 </div>
@@ -1787,30 +1797,50 @@
 
     async function asignarRuletaYGuardar(tramo) {
         const numerosDisponibles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        let numeros = shuffleArray([...numerosDisponibles]);
         
-        const ranking = obtenerRankingPorTramo(tramo);
-        const participantes = ranking.slice(0, 12);
+        // ====== 1. RECORRER CARTONES Y VER QUIÉNES YA ESTÁN ANOTADOS ======
+        let nombresAnotados = new Set();
+        let cartonesOcupados = new Set();
         
-        // ====== LIMPIAR TODOS LOS NOMBRES DEL TABLERO ======
-        datos.forEach(c => {
-            c.lineas.forEach(l => {
-                l.nombre = "";
-                l.estado = "libre";
+        datos.forEach((c, idx) => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    nombresAnotados.add(linea.nombre);
+                    cartonesOcupados.add(idx + 1); // Guardamos el número del cartón
+                }
             });
         });
         
+        // ====== 2. OBTENER RANKING DEL TRAMO ======
+        const ranking = obtenerRankingPorTramo(tramo);
+        
+        // ====== 3. FILTRAR SOLO LOS QUE NO ESTÁN ANOTADOS ======
+        const participantesPendientes = ranking.filter(jug => !nombresAnotados.has(jug.nombre));
+        
+        // ====== 4. OBTENER CARTONES LIBRES ======
+        let cartonesLibres = [];
+        for (let i = 1; i <= 15; i++) {
+            if (!cartonesOcupados.has(i)) {
+                cartonesLibres.push(i);
+            }
+        }
+        
+        // Barajar cartones libres
+        cartonesLibres = shuffleArray(cartonesLibres);
+        
+        // ====== 5. ASIGNAR A LOS PENDIENTES ======
         let idx = 0;
         let asignaciones = [];
         
-        for (const jug of participantes) {
+        // Calcular cuántos números necesita cada uno
+        for (const jug of participantesPendientes) {
             const asignados = [];
             for (let i = 0; i < jug.cantidad; i++) {
-                if (idx < numeros.length) {
-                    const numCarton = numeros[idx];
+                if (idx < cartonesLibres.length) {
+                    const numCarton = cartonesLibres[idx];
                     asignados.push(numCarton);
                     
-                    // Buscar el cartón y asignar el nombre en la PRIMERA línea libre
+                    // Asignar el nombre en el cartón
                     const cartonIdx = numCarton - 1;
                     if (cartonIdx >= 0 && cartonIdx < datos.length) {
                         let lineaAsignada = false;
@@ -1823,7 +1853,6 @@
                             }
                         }
                         if (!lineaAsignada) {
-                            // Si no hay líneas libres, crear una nueva
                             datos[cartonIdx].lineas.push({
                                 nombre: jug.nombre,
                                 estado: "reservado"
@@ -1833,30 +1862,202 @@
                     idx++;
                 }
             }
-            asignaciones.push({
+            if (asignados.length > 0) {
+                asignaciones.push({
+                    nombre: jug.nombre,
+                    puntos: jug.puntos,
+                    cantidad: jug.cantidad,
+                    numeros: asignados
+                });
+            }
+        }
+        
+        // ====== 6. GUARDAR EN FIREBASE ======
+        await updateDoc(docRef, { cartones: datos });
+        
+        // ====== 7. MOSTRAR RESULTADOS ======
+        mostrarResultadoRuleta(asignaciones, tramo);
+        dibujar();
+        actualizarStats();
+        
+        // ====== 8. MENSAJE FINAL ======
+        let mensaje = `✅ Asignación completada para el tramo ${getNombreTramo(tramo)}\n\n`;
+        mensaje += `📌 Jugadores ya anotados: ${nombresAnotados.size}\n`;
+        mensaje += `📌 Nuevos asignados: ${asignaciones.length}\n`;
+        mensaje += `📌 Cartones libres restantes: ${cartonesLibres.length - idx}`;
+        alert(mensaje);
+    }
+
+    
+
+    // ========== FUNCIONES PARA EL MODAL DE RULETA ==========
+    window.mostrarModalRuleta = () => {
+        document.getElementById("modalRuleta").style.display = "flex";
+        // Cargar resultados iniciales si hay datos
+        const tramo = parseInt(document.getElementById('selectTramoRuletaModal').value);
+        const resultados = asignarNumerosRuleta(tramo);
+        mostrarResultadoRuletaModal(resultados, tramo);
+    };
+
+    window.cerrarModalRuleta = () => {
+        document.getElementById("modalRuleta").style.display = "none";
+    };
+
+    function asignarNumerosRuleta(tramo) {
+        const numerosDisponibles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        let numeros = shuffleArray([...numerosDisponibles]);
+        
+        const ranking = obtenerRankingPorTramo(tramo);
+        const participantes = ranking.slice(0, 12);
+        
+        const resultado = [];
+        let idx = 0;
+
+        for (const jug of participantes) {
+            const asignados = [];
+            for (let i = 0; i < jug.cantidad; i++) {
+                if (idx < numeros.length) {
+                    asignados.push(numeros[idx]);
+                    idx++;
+                }
+            }
+            resultado.push({
                 nombre: jug.nombre,
                 puntos: jug.puntos,
                 cantidad: jug.cantidad,
                 numeros: asignados
             });
         }
+        return resultado;
+    }
+
+    function mostrarResultadoRuletaModal(resultados, tramo) {
+        const container = document.getElementById('resultadoRuletaModal');
+        const tramoTexto = {
+            1: '1-20',
+            2: '21-40',
+            3: '41-60',
+            4: '61-80',
+            5: '81-100'
+        }[tramo] || tramo;
         
-        // Guardar en Firebase
+        if (resultados.length === 0) {
+            container.innerHTML = `<p style="color: #ff6b6b; text-align: center;">⚠️ No hay puntos registrados en el tramo ${tramoTexto}</p>`;
+            return;
+        }
+        
+        let html = `<div style="color: var(--oro); font-weight: bold; margin-bottom: 8px;">🎯 Ronda ${tramoTexto}</div>`;
+        
+        for (const r of resultados) {
+            const numsStr = r.numeros.length > 0 ? r.numeros.join(', ') : '⚠️ Sin número';
+            const bgColor = r.cantidad >= 3 ? '#ffcc00' : (r.cantidad >= 2 ? '#ff8800' : '#444');
+            const textColor = r.cantidad >= 2 ? '#000' : '#fff';
+            html += `
+                <div class="resultado-ruleta-item" style="background: ${bgColor}; color: ${textColor};">
+                    <span><strong>${r.nombre}</strong> (${r.puntos} pts) → ${r.cantidad} número${r.cantidad > 1 ? 's' : ''}</span>
+                    <span class="nums">${numsStr}</span>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+
+    async function asignarRuletaYGuardarModal(tramo) {
+        const numerosDisponibles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        
+        // ====== 1. RECORRER CARTONES Y VER QUIÉNES YA ESTÁN ANOTADOS ======
+        let nombresAnotados = new Set();
+        let cartonesOcupados = new Set();
+        
+        datos.forEach((c, idx) => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    nombresAnotados.add(linea.nombre);
+                    cartonesOcupados.add(idx + 1);
+                }
+            });
+        });
+        
+        // ====== 2. OBTENER RANKING DEL TRAMO ======
+        const ranking = obtenerRankingPorTramo(tramo);
+        
+        // ====== 3. FILTRAR SOLO LOS QUE NO ESTÁN ANOTADOS ======
+        const participantesPendientes = ranking.filter(jug => !nombresAnotados.has(jug.nombre));
+        
+        // ====== 4. OBTENER CARTONES LIBRES ======
+        let cartonesLibres = [];
+        for (let i = 1; i <= 15; i++) {
+            if (!cartonesOcupados.has(i)) {
+                cartonesLibres.push(i);
+            }
+        }
+        
+        // Barajar cartones libres
+        cartonesLibres = shuffleArray(cartonesLibres);
+        
+        // ====== 5. ASIGNAR A LOS PENDIENTES ======
+        let idx = 0;
+        let asignaciones = [];
+        
+        for (const jug of participantesPendientes) {
+            const asignados = [];
+            for (let i = 0; i < jug.cantidad; i++) {
+                if (idx < cartonesLibres.length) {
+                    const numCarton = cartonesLibres[idx];
+                    asignados.push(numCarton);
+                    
+                    const cartonIdx = numCarton - 1;
+                    if (cartonIdx >= 0 && cartonIdx < datos.length) {
+                        let lineaAsignada = false;
+                        for (let l = 0; l < datos[cartonIdx].lineas.length; l++) {
+                            if (datos[cartonIdx].lineas[l].estado === "libre") {
+                                datos[cartonIdx].lineas[l].nombre = jug.nombre;
+                                datos[cartonIdx].lineas[l].estado = "reservado";
+                                lineaAsignada = true;
+                                break;
+                            }
+                        }
+                        if (!lineaAsignada) {
+                            datos[cartonIdx].lineas.push({
+                                nombre: jug.nombre,
+                                estado: "reservado"
+                            });
+                        }
+                    }
+                    idx++;
+                }
+            }
+            if (asignados.length > 0) {
+                asignaciones.push({
+                    nombre: jug.nombre,
+                    puntos: jug.puntos,
+                    cantidad: jug.cantidad,
+                    numeros: asignados
+                });
+            }
+        }
+        
+        // ====== 6. GUARDAR EN FIREBASE ======
         await updateDoc(docRef, { cartones: datos });
         
-        // Mostrar resultados
-        mostrarResultadoRuleta(asignaciones, tramo);
+        // ====== 7. MOSTRAR RESULTADOS ======
+        mostrarResultadoRuletaModal(asignaciones, tramo);
         dibujar();
         actualizarStats();
         
-        alert(`✅ Números asignados en los cartones para el tramo ${getNombreTramo(tramo)}`);
+        // ====== 8. MENSAJE FINAL ======
+        let mensaje = `✅ Asignación completada para el tramo ${getNombreTramo(tramo)}\n\n`;
+        mensaje += `📌 Jugadores ya anotados: ${nombresAnotados.size}\n`;
+        mensaje += `📌 Nuevos asignados: ${asignaciones.length}\n`;
+        mensaje += `📌 Cartones libres restantes: ${cartonesLibres.length - idx}`;
+        alert(mensaje);
     }
 
-    // Reemplazar el evento del botón
-    document.getElementById('btnAsignarRuleta').addEventListener('click', async function() {
-        const tramo = parseInt(document.getElementById('selectTramoRuleta').value);
-        if (confirm(`¿ASIGNAR NÚMEROS PARA EL TRAMO ${getNombreTramo(tramo)}?\n\nSe borrarán los nombres actuales y se asignarán los nuevos según el ranking.`)) {
-            await asignarRuletaYGuardar(tramo);
+    // Evento del botón dentro del modal
+    document.getElementById('btnAsignarRuletaModal').addEventListener('click', async function() {
+        const tramo = parseInt(document.getElementById('selectTramoRuletaModal').value);
+        if (confirm(`¿ASIGNAR NÚMEROS PARA EL TRAMO ${getNombreTramo(tramo)}?\n\nSe respetarán los nombres ya anotados y se asignarán los que faltan según el ranking.`)) {
+            await asignarRuletaYGuardarModal(tramo);
         }
     });
 
