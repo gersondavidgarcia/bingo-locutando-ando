@@ -307,10 +307,61 @@
         .ranking-item-modal.total:hover {
             background: #34495e;
         }
-        /* ===== FIN ESTILOS RANKING DROPDOWN ===== */
+
+        /* ===== ESTILO AFUERA EN DROPDOWN ===== */
+        .ranking-item-modal.afuera {
+            background: #4a0a0a;
+            color: #ff4444;
+            border-top: 1px solid #ff4444;
+            font-size: 15px;
+        }
+        .ranking-item-modal.afuera:hover {
+            background: #5a0a0a;
+        }
+
+        /* ===== ESTILOS AFUERA ===== */
+        .afuera-section {
+            margin-top: 8px;
+            padding: 10px 14px;
+            background: #1a0a0a;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+        }
+        .afuera-title {
+            color: #ff4444;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+        }
+        .afuera-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 8px;
+            color: #ff8888;
+            font-size: 13px;
+            border-bottom: 1px solid #331111;
+        }
+        .afuera-item:last-child {
+            border-bottom: none;
+        }
+        .afuera-item .afuera-nombre {
+            font-weight: bold;
+        }
+        .afuera-item .afuera-puntos {
+            color: #ff6666;
+        }
+        .afuera-vacio {
+            color: #88ff88;
+            text-align: center;
+            font-size: 13px;
+            padding: 6px 0;
+        }
     </style>
 </head>
 <body>
+
 <div class="header">
     <div class="input-wrapper">
         <input type="text" id="nombreUser" placeholder="ESCRIBE TU NOMBRE AQUÍ" list="sugerenciasCaja" autocomplete="off">
@@ -340,7 +391,7 @@
     <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
 </div>
 
-<div class="contenedor-tablero">
+<div class="contenedor-tablero" id="contenedorTablero">
     <div class="tablero" id="tablero"></div>
     <div class="ronda-grande" id="rondaGrande">🎰 RONDA 1 🎰</div>
     <div class="acumulado-visible" id="acumuladoVisible">🏆 ACUMULADO: $0</div>
@@ -453,7 +504,7 @@
     </div>
 </div>
 
-<!-- MODAL RANKING PUNTOS CON DROPDOWN DENTRO -->
+<!-- MODAL RANKING PUNTOS CON DROPDOWN + AFUERA -->
 <div id="modalPuntos" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🏆 RANKING (PUNTOS)</h3>
@@ -471,6 +522,7 @@
                 <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80</div>
                 <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100</div>
                 <div class="ranking-item-modal total" onclick="seleccionarTramoRanking('total')">TOTAL</div>
+                <div class="ranking-item-modal afuera" onclick="seleccionarTramoRanking('afuera')">🚫 AFUERA</div>
             </div>
         </div>
 
@@ -620,12 +672,66 @@
         container.classList.toggle('active');
     };
 
+    // Función para calcular AFUERA
+    function calcularAfuera() {
+        const todosLosJugadores = new Set();
+        for (let clave in puntosPorTramo) {
+            for (let nombre in puntosPorTramo[clave]) {
+                todosLosJugadores.add(nombre);
+            }
+        }
+        
+        const jugadoresQueEntran = new Set();
+        for (let t = 1; t <= 5; t++) {
+            const clave = `tramo_${t}`;
+            const data = puntosPorTramo[clave] || {};
+            const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+            const top12 = sorted.slice(0, 12);
+            top12.forEach(([nombre]) => jugadoresQueEntran.add(nombre));
+        }
+        
+        const afuera = [];
+        todosLosJugadores.forEach(nombre => {
+            if (!jugadoresQueEntran.has(nombre)) {
+                let totalPuntos = 0;
+                for (let clave in puntosPorTramo) {
+                    if (puntosPorTramo[clave][nombre]) {
+                        totalPuntos += puntosPorTramo[clave][nombre];
+                    }
+                }
+                afuera.push({ nombre, puntos: totalPuntos });
+            }
+        });
+        afuera.sort((a, b) => b.puntos - a.puntos);
+        return afuera;
+    }
+
     window.seleccionarTramoRanking = (tramo) => {
-        // Cerrar dropdown
         document.getElementById('rankingDropdownContainer').classList.remove('active');
         
-        // Actualizar el label del botón
         const label = document.getElementById('tramoSeleccionadoLabel');
+        const display = document.getElementById('puntosDisplay');
+        
+        if (tramo === 'afuera') {
+            label.textContent = '🚫 AFUERA';
+            tramoActualEditando = null;
+            
+            const afuera = calcularAfuera();
+            let texto = "";
+            if (afuera.length === 0) {
+                texto = "✅ ¡Todos los jugadores han entrado al menos una vez!";
+                display.innerHTML = `<div style="color:#88ff88; text-align:center; padding:20px; font-size:16px;">${texto}</div>`;
+            } else {
+                texto = "🚫 JUGADORES FUERA\n\n";
+                afuera.forEach(item => {
+                    texto += `${item.nombre}: ${item.puntos} pts\n`;
+                });
+                display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${texto.trim()}</textarea>`;
+            }
+            return;
+        }
+        
+        // Tramo normal o total
         if (tramo === 'total') {
             label.textContent = '📊 TOTAL';
         } else {
@@ -633,12 +739,10 @@
             label.textContent = `📊 ${nombres[tramo]}`;
         }
         
-        // Mostrar los puntos del tramo seleccionado
         tramoActualEditando = tramo;
         mostrarPuntosTextarea(tramo);
     };
 
-    // Cerrar dropdown al hacer clic fuera
     document.addEventListener('click', function(event) {
         const container = document.getElementById('rankingDropdownContainer');
         if (container && !container.contains(event.target)) {
@@ -691,7 +795,6 @@
         tramoActualEditando = tramo;
         document.getElementById("modalPuntos").style.display = "flex";
         
-        // Actualizar el label del botón con el tramo actual
         const label = document.getElementById('tramoSeleccionadoLabel');
         const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
         label.textContent = `📊 ${nombres[tramo] || 'Seleccionar tramo'}`;
@@ -718,13 +821,18 @@
             });
         }
         
-        display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase;">${texto.trim()}</textarea>`;
+        display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${texto.trim()}</textarea>`;
     }
 
     window.guardarPuntosTramos = async () => {
         const textarea = document.getElementById("puntosTextarea");
         if (!textarea) {
             alert("No hay datos para guardar");
+            return;
+        }
+        
+        if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
+            alert("No se puede guardar en AFUERA, selecciona un tramo específico");
             return;
         }
         
@@ -1729,75 +1837,75 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ========== FUNCIÓN REINICIAR TABLERO CON CHECKBOX ==========
-    window.reiniciarBingo = async () => { 
-        if(confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda.\n\n" + 
+    // ========== FUNCIÓN REINICIAR TABLERO (SIN CRONÓMETRO) ==========
+    window.reiniciarBingo = async () => {
+        if (!confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda.\n\n" + 
             "• +1 RONDA a cada jugador activo\n" +
             "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n" +
             "• +3 PUNTOS al ganador de BINGO\n" +
             "• +2 PUNTOS al ganador de RULETA")) { 
-            
-            guardarHistorial(); 
-            
-            const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-            
-            let jugadoresActivos = new Set();
-            
-            datos.forEach(c => {
-                c.lineas.forEach(linea => {
-                    if (linea.nombre && linea.nombre !== "") {
-                        jugadoresActivos.add(linea.nombre);
-                    }
-                });
+            return;
+        }
+        
+        guardarHistorial();
+        
+        const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+        
+        let jugadoresActivos = new Set();
+        datos.forEach(c => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    jugadoresActivos.add(linea.nombre);
+                }
             });
-            
-            jugadoresActivos.forEach(jugador => {
-                rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-            });
-            
-            const tramoActual = getTramoActual();
-            if (!puntosPorTramo) puntosPorTramo = {};
-            const clave = getClaveTramo(tramoActual);
-            if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-            
-            jugadoresActivos.forEach(jugador => {
-                puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-            });
-            
-            datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
-            
-            let nuevaRonda = numeroRonda + 1;
-            let nuevoAcumulado = acumulado;
-            let nuevaReserva = acumuladoReserva;
-            
-            if (guardarEnReserva) {
-                nuevaReserva = acumuladoReserva + 1;
-            } else {
-                nuevoAcumulado = acumulado + 1;
-            }
-            
-            await updateDoc(docRef, { 
-                cartones: datos, 
-                numero_ronda: nuevaRonda,
-                acumulado: nuevoAcumulado,
-                acumuladoReserva: nuevaReserva,
-                puntosPorTramo: puntosPorTramo,
-                rondasPorJugador: rondasPorJugador
-            }); 
-            
-            seleccionados = []; 
-            dibujar(); 
-            actualizarStats();
-            actualizarUIAcumulado();
-            
-            document.getElementById('chkGuardarEnReserva').checked = false;
-            
-            if (guardarEnReserva) {
-                alert(`Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}`);
-            } else {
-                alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
-            }
-        } 
+        });
+        
+        jugadoresActivos.forEach(jugador => {
+            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+        });
+        
+        const tramoActual = getTramoActual();
+        if (!puntosPorTramo) puntosPorTramo = {};
+        const clave = getClaveTramo(tramoActual);
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+        
+        jugadoresActivos.forEach(jugador => {
+            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
+        });
+        
+        datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
+        
+        let nuevaRonda = numeroRonda + 1;
+        let nuevoAcumulado = acumulado;
+        let nuevaReserva = acumuladoReserva;
+        
+        if (guardarEnReserva) {
+            nuevaReserva = acumuladoReserva + 1;
+        } else {
+            nuevoAcumulado = acumulado + 1;
+        }
+        
+        await updateDoc(docRef, { 
+            cartones: datos, 
+            numero_ronda: nuevaRonda,
+            acumulado: nuevoAcumulado,
+            acumuladoReserva: nuevaReserva,
+            puntosPorTramo: puntosPorTramo,
+            rondasPorJugador: rondasPorJugador
+        }); 
+        
+        seleccionados = []; 
+        dibujar(); 
+        actualizarStats();
+        actualizarUIAcumulado();
+        
+        document.getElementById('chkGuardarEnReserva').checked = false;
+        
+        if (guardarEnReserva) {
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}`);
+        } else {
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
+        }
     };
     
     window.toggleBloqueo = async () => { 
