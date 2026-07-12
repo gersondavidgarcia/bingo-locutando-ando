@@ -638,11 +638,11 @@
                 <span class="btn-arrow">▼</span>
             </button>
             <div class="ranking-dropdown-modal" id="rankingDropdown">
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20 (1 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40 (2 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60 (3 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80 (4 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100 (5 RONDA GRATIS)</div>
                 <div class="ranking-item-modal total" onclick="seleccionarTramoRanking('total')">TOTAL</div>
                 <div class="ranking-item-modal afuera" onclick="seleccionarTramoRanking('afuera')">🚫 AFUERA</div>
             </div>
@@ -703,11 +703,11 @@
         
         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
             <select id="selectTramoRuletaModal" style="padding: 10px 16px; border-radius: 8px; background: #000; color: #fff; border: 2px solid var(--oro); font-size: 16px; font-weight: bold; flex: 1; min-width: 150px;">
-                <option value="1">1-20</option>
-                <option value="2" selected>21-40</option>
-                <option value="3">41-60</option>
-                <option value="4">61-80</option>
-                <option value="5">81-100</option>
+                <option value="1">1-20 (1 RONDA GRATIS)</option>
+                <option value="2" selected>21-40 (2 RONDA GRATIS)</option>
+                <option value="3">41-60 (3 RONDA GRATIS)</option>
+                <option value="4">61-80 (4 RONDA GRATIS)</option>
+                <option value="5">81-100 (5 RONDA GRATIS)</option>
             </select>
             <button id="btnAsignarRuletaModal" style="background: var(--oro); color: #000; padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;">🎲 ASIGNAR AL AZAR</button>
         </div>
@@ -755,6 +755,8 @@
     let pendingUpdate = false;
     let tramoActualEditando = null;
     let cronometroActivo = false;
+    let cronometroSegundos = 0;
+    let cronometroIntervalo = null;
 
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
@@ -858,8 +860,14 @@
         if (tramo === 'total') {
             label.textContent = '📊 TOTAL';
         } else {
-            const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
-            label.textContent = `📊 ${nombres[tramo]}`;
+            const nombres = {
+                1: '📊 1-20 (1 RONDA GRATIS)',
+                2: '📊 21-40 (2 RONDA GRATIS)',
+                3: '📊 41-60 (3 RONDA GRATIS)',
+                4: '📊 61-80 (4 RONDA GRATIS)',
+                5: '📊 81-100 (5 RONDA GRATIS)'
+            };
+            label.textContent = nombres[tramo];
         }
         
         tramoActualEditando = tramo;
@@ -919,8 +927,14 @@
         document.getElementById("modalPuntos").style.display = "flex";
         
         const label = document.getElementById('tramoSeleccionadoLabel');
-        const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
-        label.textContent = `📊 ${nombres[tramo] || 'Seleccionar tramo'}`;
+        const nombres = {
+            1: '📊 1-20 (1 RONDA GRATIS)',
+            2: '📊 21-40 (2 RONDA GRATIS)',
+            3: '📊 41-60 (3 RONDA GRATIS)',
+            4: '📊 61-80 (4 RONDA GRATIS)',
+            5: '📊 81-100 (5 RONDA GRATIS)'
+        };
+        label.textContent = nombres[tramo] || '📊 Seleccionar tramo';
         
         mostrarPuntosTextarea(tramo);
     };
@@ -931,81 +945,74 @@
     };
 
     function mostrarPuntosTextarea(tramo) {
-      const display = document.getElementById("puntosDisplay");
-       const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
-       const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
+     const display = document.getElementById("puntosDisplay");
+     const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
+     const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
     
      let texto = "";
-      if (sorted.length === 0) {
+     if (sorted.length === 0) {
         texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
         display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">${texto}</div>`;
         return;
      }
     
-    // Construir el HTML con separador después del puesto 12
-    let html = `<div style="font-family:monospace; font-size:14px; text-transform:uppercase; line-height:1.8;">`;
-    
-    sorted.forEach(([nombre, puntos], index) => {
+    // Construir el contenido con la línea divisoria después del puesto 12
+        let contenido = "";
+     sorted.forEach(([nombre, puntos], index) => {
         const puesto = index + 1;
-        const esTop12 = puesto <= 12;
-        const color = esTop12 ? '#ffcc00' : '#ffffff';
-        const estilo = esTop12 ? 'font-weight:bold;' : 'font-weight:normal;';
+        contenido += `${puesto}. ${nombre}: ${puntos}\n`;
         
-        html += `<div style="display:flex; justify-content:space-between; padding:2px 4px; ${estilo} color:${color};">
-            <span>${puesto}. ${nombre}</span>
-            <span>${puntos} pts</span>
-        </div>`;
-        
-        // Línea divisoria después del puesto 12
+        // Después del puesto 12, agregar línea divisoria
         if (index === 11) {
-            html += `<div style="border-top: 2px solid #ff4444; margin: 6px 0 4px 0; opacity:0.5;"></div>`;
-            html += `<div style="color:#ff4444; font-size:11px; text-align:center; margin-bottom:4px;">🚫 AFUERA</div>`;
+            contenido += `-------------\n`;
+            contenido += `🚫 AFUERA\n`;
         }
-    });
+     });
     
-    html += `</div>`;
-    display.innerHTML = html;
-}
+     let html = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${contenido.trim()}</textarea>`;
+    
+      display.innerHTML = html;
+    }
 
     window.guardarPuntosTramos = async () => {
         const textarea = document.getElementById("puntosTextarea");
-        if (!textarea) {
-            alert("No hay datos para guardar");
-            return;
-        }
-        
-        if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
-            alert("No se puede guardar en AFUERA, selecciona un tramo específico");
-            return;
-        }
-        
-        const lines = textarea.value.split('\n');
-        const nuevosPuntos = {};
-        const tramo = tramoActualEditando;
-        
-        if (tramo === 'total') {
-            alert("No se puede guardar en TOTAL, selecciona un tramo específico");
-            return;
-        }
-        
-        lines.forEach(line => {
-            line = line.trim();
-            if (line.includes(':')) {
-                const partes = line.split(':');
-                const nombre = partes[0].trim().toUpperCase();
-                const valor = parseInt(partes[1].trim());
-                if (nombre && !isNaN(valor) && valor >= 0) {
-                    nuevosPuntos[nombre] = valor;
-                }
+     if (!textarea) {
+        alert("No hay datos para guardar");
+        return;
+     }
+    
+      if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
+        alert("No se puede guardar en AFUERA, selecciona un tramo específico");
+        return;
+     }
+    
+     const lines = textarea.value.split('\n');
+     const nuevosPuntos = {};
+     const tramo = tramoActualEditando;
+    
+     if (tramo === 'total') {
+        alert("No se puede guardar en TOTAL, selecciona un tramo específico");
+        return;
+     }
+    
+     lines.forEach(line => {
+        line = line.trim();
+        if (line.includes(':')) {
+            const partes = line.split(':');
+            const nombre = partes[0].trim().toUpperCase();
+            const valor = parseInt(partes[1].trim());
+            if (nombre && !isNaN(valor) && valor >= 0) {
+                nuevosPuntos[nombre] = valor;
             }
+        }
         });
-        
-        const clave = getClaveTramo(tramo);
-        puntosPorTramo[clave] = nuevosPuntos;
-        await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
-        alert("Puntos guardados ✅");
-        cerrarModalPuntos();
-        actualizarStats();
+    
+     const clave = getClaveTramo(tramo);
+     puntosPorTramo[clave] = nuevosPuntos;
+     await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+     alert("Puntos guardados ✅");
+     cerrarModalPuntos();
+     actualizarStats();
     };
 
     window.reiniciarTodosLosPuntos = async () => {
@@ -1020,7 +1027,73 @@
         }
     };
 
-    // ========== FUNCIONES PARA GANADORES Y NÚMEROS ==========
+    // ============================================================
+    // FUNCIÓN PARA INICIAR EL CRONÓMETRO
+    // ============================================================
+    function iniciarCronometro(segundosIniciales) {
+        if (cronometroIntervalo) {
+            clearInterval(cronometroIntervalo);
+            cronometroIntervalo = null;
+        }
+        
+        cronometroActivo = true;
+        cronometroSegundos = segundosIniciales;
+        
+        const overlay = document.getElementById('cronometroOverlay');
+        const numeroElem = document.getElementById('cronometroNumero');
+        const barraElem = document.getElementById('cronometroBarra');
+        
+        overlay.classList.add('visible');
+        numeroElem.textContent = cronometroSegundos;
+        barraElem.style.width = '100%';
+        
+        function actualizarColores(tiempo) {
+            if (tiempo > 6) {
+                numeroElem.style.color = '#ff4444';
+                barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
+            } else if (tiempo > 3) {
+                numeroElem.style.color = '#ffcc00';
+                barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
+            } else {
+                numeroElem.style.color = '#00ff88';
+                barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
+            }
+        }
+        
+        actualizarColores(cronometroSegundos);
+        
+        cronometroIntervalo = setInterval(async () => {
+            cronometroSegundos--;
+            numeroElem.textContent = cronometroSegundos;
+            barraElem.style.width = (cronometroSegundos / 9 * 100) + '%';
+            actualizarColores(cronometroSegundos);
+            
+            await updateDoc(docRef, { 
+                cronometroActivo: true,
+                cronometroSegundos: cronometroSegundos
+            });
+            
+            if (cronometroSegundos <= 0) {
+                clearInterval(cronometroIntervalo);
+                cronometroIntervalo = null;
+                cronometroActivo = false;
+                
+                overlay.classList.remove('visible');
+                
+                numeroElem.style.color = '#ffcc00';
+                barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
+                
+                await updateDoc(docRef, { 
+                    cronometroActivo: false,
+                    cronometroSegundos: 0
+                });
+            }
+        }, 1000);
+    }
+
+    // ============================================================
+    // FUNCIONES PARA GANADORES Y NÚMEROS
+    // ============================================================
     async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
         if (!historialGanadores) historialGanadores = [];
         historialGanadores.push({
@@ -1980,141 +2053,94 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO (SOLO SOBRE CARTONES) ==========
-   window.reiniciarBingo = async () => {
-     if (cronometroActivo) return;
-    
+    // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO (GUARDADO EN FIREBASE) ==========
+    window.reiniciarBingo = async () => {
+        if (cronometroActivo) return;
+        
         guardarHistorial();
-    
-     const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-    
-     let jugadoresActivos = new Set();
-      datos.forEach(c => {
-        c.lineas.forEach(linea => {
-            if (linea.nombre && linea.nombre !== "") {
-                jugadoresActivos.add(linea.nombre);
-            }
+        
+        const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+        
+        let jugadoresActivos = new Set();
+        datos.forEach(c => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    jugadoresActivos.add(linea.nombre);
+                }
+            });
         });
-     });
-    
-     jugadoresActivos.forEach(jugador => {
-        rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-     });
-    
-     const tramoActual = getTramoActual();
-     if (!puntosPorTramo) puntosPorTramo = {};
-     const clave = getClaveTramo(tramoActual);
-     if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-    
-     jugadoresActivos.forEach(jugador => {
-        puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-     });
-    
-     const datosBackup = JSON.parse(JSON.stringify(datos));
-     const nuevaRonda = numeroRonda + 1;
+        
+        jugadoresActivos.forEach(jugador => {
+            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+        });
+        
+        const tramoActual = getTramoActual();
+        if (!puntosPorTramo) puntosPorTramo = {};
+        const clave = getClaveTramo(tramoActual);
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+        
+        jugadoresActivos.forEach(jugador => {
+            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
+        });
+        
+        const datosBackup = JSON.parse(JSON.stringify(datos));
+        const nuevaRonda = numeroRonda + 1;
         let nuevoAcumulado = acumulado;
-     let nuevaReserva = acumuladoReserva;
-    
-      if (guardarEnReserva) {
-        nuevaReserva = acumuladoReserva + 1;
-      } else {
-        nuevoAcumulado = acumulado + 1;
-     }
-    
-    // ===== UNA SOLA ALERTA CON EL MENSAJE PRIMERO =====
-     let mensaje = "";
-      if (guardarEnReserva) {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
-     } else {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
-     }
-    
-      mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-      mensaje += "• +1 RONDA a cada jugador activo\n";
-     mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
-     mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-     mensaje += "• +2 PUNTOS al ganador de RULETA";
-    
-     if (!confirm(mensaje)) { 
-        return;
-     }
-    
-    // ===== BORRAR CARTONES =====
-     datosBackup.forEach(c => {
-        c.lineas.forEach(l => {
-            l.nombre = "";
-            l.estado = "libre";
-        });
-     });
-     datos = datosBackup;
-    
-    // ===== GUARDAR EN FIREBASE =====
-     await updateDoc(docRef, { 
-        cartones: datos, 
-        numero_ronda: nuevaRonda,
-        acumulado: nuevoAcumulado,
-        acumuladoReserva: nuevaReserva,
-        puntosPorTramo: puntosPorTramo,
-        rondasPorJugador: rondasPorJugador
-     });
-    
-     seleccionados = [];
-     dibujar();
-     actualizarStats();
-     actualizarUIAcumulado();
-     document.getElementById('chkGuardarEnReserva').checked = false;
-    
-    // ===== MOSTRAR CRONÓMETRO (9 SEGUNDOS - SEMÁFORO INVERTIDO) =====
-     cronometroActivo = true;
-     const overlay = document.getElementById('cronometroOverlay');
-     const numeroElem = document.getElementById('cronometroNumero');
-     const barraElem = document.getElementById('cronometroBarra');
-    
-     overlay.classList.add('visible');
-    
-     let segundos = 9;
-     numeroElem.textContent = segundos;
-     barraElem.style.width = '100%';
-    
-    // ===== Función para actualizar colores (INVERTIDO - cuenta atrás) =====
-     function actualizarColores(tiempo) {
-        if (tiempo > 6) {
-            // ROJO al principio (segundos 9, 8, 7) - ¡CORRE!
-            numeroElem.style.color = '#ff4444';
-            barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
-        } else if (tiempo > 3) {
-            // AMARILLO (segundos 6, 5, 4) - ¡ATENCIÓN!
-            numeroElem.style.color = '#ffcc00';
-            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
+        let nuevaReserva = acumuladoReserva;
+        
+        if (guardarEnReserva) {
+            nuevaReserva = acumuladoReserva + 1;
         } else {
-            // VERDE al final (segundos 3, 2, 1) - ¡YA PUEDES!
-            numeroElem.style.color = '#00ff88';
-            barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
+            nuevoAcumulado = acumulado + 1;
         }
-     }
-    
-    // Colores iniciales
-     actualizarColores(segundos);
-    
-     const intervalo = setInterval(() => {
-        segundos--;
-        numeroElem.textContent = segundos;
-        barraElem.style.width = (segundos / 9 * 100) + '%';
         
-        // Actualizar colores según el tiempo restante
-        actualizarColores(segundos);
-        
-        if (segundos <= 0) {
-            clearInterval(intervalo);
-            
-            overlay.classList.remove('visible');
-            cronometroActivo = false;
-            
-            // Restaurar colores
-            numeroElem.style.color = '#ffcc00';
-            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
+        // ===== UNA SOLA ALERTA CON EL MENSAJE PRIMERO =====
+        let mensaje = "";
+        if (guardarEnReserva) {
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
+        } else {
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
         }
-      }, 1000);
+        
+        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
+        mensaje += "• +1 RONDA a cada jugador activo\n";
+        mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
+        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
+        mensaje += "• +2 PUNTOS al ganador de RULETA";
+        
+        if (!confirm(mensaje)) { 
+            return;
+        }
+        
+        // ===== BORRAR CARTONES =====
+        datosBackup.forEach(c => {
+            c.lineas.forEach(l => {
+                l.nombre = "";
+                l.estado = "libre";
+            });
+        });
+        datos = datosBackup;
+        
+        // ===== GUARDAR EN FIREBASE =====
+        await updateDoc(docRef, { 
+            cartones: datos, 
+            numero_ronda: nuevaRonda,
+            acumulado: nuevoAcumulado,
+            acumuladoReserva: nuevaReserva,
+            puntosPorTramo: puntosPorTramo,
+            rondasPorJugador: rondasPorJugador,
+            cronometroActivo: true,
+            cronometroSegundos: 9
+        });
+        
+        seleccionados = [];
+        dibujar();
+        actualizarStats();
+        actualizarUIAcumulado();
+        document.getElementById('chkGuardarEnReserva').checked = false;
+        
+        // ===== INICIAR CRONÓMETRO =====
+        iniciarCronometro(9);
     };
     
     window.toggleBloqueo = async () => { 
@@ -2341,7 +2367,8 @@
     });
 
     // =========================================
-
+    // ONSNAPSHOT - RESTAURAR CRONÓMETRO AL CARGAR
+    // =========================================
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
@@ -2358,6 +2385,23 @@
             puntosPorTramo = d.puntosPorTramo || {};
             historialGanadores = d.historialGanadores || [];
             numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
+            
+            // ===== RESTAURAR CRONÓMETRO =====
+            if (d.cronometroActivo !== undefined) {
+                cronometroActivo = d.cronometroActivo;
+                cronometroSegundos = d.cronometroSegundos || 0;
+            }
+            
+            // Si el cronómetro estaba activo y no hay un intervalo corriendo, restaurarlo
+            if (cronometroActivo && cronometroSegundos > 0 && !cronometroIntervalo) {
+                iniciarCronometro(cronometroSegundos);
+            } else if (!cronometroActivo && cronometroIntervalo) {
+                // Si Firebase dice que está inactivo pero el intervalo sigue corriendo
+                clearInterval(cronometroIntervalo);
+                cronometroIntervalo = null;
+                document.getElementById('cronometroOverlay').classList.remove('visible');
+            }
+            
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
