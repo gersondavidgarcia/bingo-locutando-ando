@@ -98,7 +98,6 @@
             width: 100%;
             padding: 0;
             margin: 0;
-            position: relative;
         }
         
         .tablero { 
@@ -320,112 +319,6 @@
             background: #5a0a0a;
         }
 
-        /* ===== ESTILOS DEL CRONÓMETRO - SOLO SOBRE CARTONES ===== */
-        #cronometroOverlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 500;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            border-radius: 12px;
-            pointer-events: none;
-        }
-        #cronometroOverlay * {
-            pointer-events: none;
-        }
-        #cronometroOverlay.visible {
-            display: flex !important;
-        }
-
-        .cronometro-titulo {
-            font-size: 50px;
-            font-weight: 900;
-            color: #ffcc00;
-            margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
-            animation: pulseGlow 1.5s ease-in-out infinite;
-        }
-        @keyframes pulseGlow {
-            0%, 100% { text-shadow: 0 0 20px rgba(255, 204, 0, 0.3); }
-            50% { text-shadow: 0 0 60px rgba(255, 204, 0, 0.8), 0 0 100px rgba(255, 204, 0, 0.4); }
-        }
-        .cronometro-tiempo {
-            font-size: 100px;
-            font-weight: 900;
-            color: #ffcc00;
-            margin: 10px 0;
-            text-shadow: 0 0 40px rgba(255, 204, 0, 0.6);
-            font-family: 'Arial Black', sans-serif;
-            line-height: 1;
-        }
-        .cronometro-sub {
-            font-size: 24px;
-            color: #ffffff;
-            margin: 15px 0 5px 0;
-            font-weight: bold;
-        }
-        .cronometro-aviso {
-            font-size: 18px;
-            color: #88ddff;
-            margin-top: 10px;
-            font-weight: bold;
-            background: rgba(255,255,255,0.05);
-            padding: 12px 20px;
-            border-radius: 50px;
-            border: 1px solid rgba(136, 221, 255, 0.2);
-        }
-        .cronometro-aviso span {
-            color: #ffcc00;
-            font-weight: 900;
-        }
-        .cronometro-emojis {
-            font-size: 40px;
-            margin-top: 15px;
-            letter-spacing: 10px;
-            animation: bounceEmojis 1s ease-in-out infinite alternate;
-        }
-        @keyframes bounceEmojis {
-            0% { transform: translateY(0px); }
-            100% { transform: translateY(-10px); }
-        }
-        .cronometro-bar {
-            width: 80%;
-            max-width: 400px;
-            height: 6px;
-            background: #333;
-            border-radius: 10px;
-            margin: 15px auto 0 auto;
-            overflow: hidden;
-        }
-        .cronometro-bar-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #ffcc00, #ff8800);
-            border-radius: 10px;
-            transition: width 0.3s linear;
-        }
-        .cronometro-texto-final {
-            margin-top: 20px;
-            color: #888;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        @media (max-width: 700px) {
-            .cronometro-titulo { font-size: 32px; }
-            .cronometro-tiempo { font-size: 70px; }
-            .cronometro-sub { font-size: 18px; }
-            .cronometro-aviso { font-size: 14px; padding: 8px 14px; }
-            .cronometro-emojis { font-size: 28px; }
-        }
-
         /* ===== ESTILOS AFUERA ===== */
         .afuera-section {
             margin-top: 8px;
@@ -499,21 +392,6 @@
 </div>
 
 <div class="contenedor-tablero" id="contenedorTablero">
-    <!-- ===== CRONÓMETRO - SOLO SOBRE CARTONES ===== -->
-    <div id="cronometroOverlay">
-        <div style="text-align:center; max-width:600px; width:100%;">
-            <div class="cronometro-titulo">🔥 ¡PREPARATE! 🔥</div>
-            <div class="cronometro-sub">El juego se abrirá en</div>
-            <div class="cronometro-tiempo" id="cronometroNumero">15</div>
-            <div class="cronometro-aviso">✍️ Puedes ir escribiendo tu nombre <span>ARRIBA</span> mientras esperas</div>
-            <div class="cronometro-emojis">⚡ 🎰 🍀 💰</div>
-            <div class="cronometro-bar">
-                <div class="cronometro-bar-fill" id="cronometroBarra"></div>
-            </div>
-            <div class="cronometro-texto-final">¡Los cartones están por salir!</div>
-        </div>
-    </div>
-
     <div class="tablero" id="tablero"></div>
     <div class="ronda-grande" id="rondaGrande">🎰 RONDA 1 🎰</div>
     <div class="acumulado-visible" id="acumuladoVisible">🏆 ACUMULADO: $0</div>
@@ -638,11 +516,11 @@
                 <span class="btn-arrow">▼</span>
             </button>
             <div class="ranking-dropdown-modal" id="rankingDropdown">
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20 (1 RONDA GRATIS)</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40 (2 RONDA GRATIS)</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60 (3 RONDA GRATIS)</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80 (4 RONDA GRATIS)</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100 (5 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100</div>
                 <div class="ranking-item-modal total" onclick="seleccionarTramoRanking('total')">TOTAL</div>
                 <div class="ranking-item-modal afuera" onclick="seleccionarTramoRanking('afuera')">🚫 AFUERA</div>
             </div>
@@ -703,11 +581,11 @@
         
         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
             <select id="selectTramoRuletaModal" style="padding: 10px 16px; border-radius: 8px; background: #000; color: #fff; border: 2px solid var(--oro); font-size: 16px; font-weight: bold; flex: 1; min-width: 150px;">
-                <option value="1">1-20 (1 RONDA GRATIS)</option>
-                <option value="2" selected>21-40 (2 RONDA GRATIS)</option>
-                <option value="3">41-60 (3 RONDA GRATIS)</option>
-                <option value="4">61-80 (4 RONDA GRATIS)</option>
-                <option value="5">81-100 (5 RONDA GRATIS)</option>
+                <option value="1">1-20</option>
+                <option value="2" selected>21-40</option>
+                <option value="3">41-60</option>
+                <option value="4">61-80</option>
+                <option value="5">81-100</option>
             </select>
             <button id="btnAsignarRuletaModal" style="background: var(--oro); color: #000; padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;">🎲 ASIGNAR AL AZAR</button>
         </div>
@@ -754,9 +632,6 @@
     let numerosSalidos = { bingos: [], ruletas: [] };
     let pendingUpdate = false;
     let tramoActualEditando = null;
-    let cronometroActivo = false;
-    let cronometroSegundos = 0;
-    let cronometroIntervalo = null;
 
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
@@ -860,14 +735,8 @@
         if (tramo === 'total') {
             label.textContent = '📊 TOTAL';
         } else {
-            const nombres = {
-                1: '📊 1-20 (1 RONDA GRATIS)',
-                2: '📊 21-40 (2 RONDA GRATIS)',
-                3: '📊 41-60 (3 RONDA GRATIS)',
-                4: '📊 61-80 (4 RONDA GRATIS)',
-                5: '📊 81-100 (5 RONDA GRATIS)'
-            };
-            label.textContent = nombres[tramo];
+            const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
+            label.textContent = `📊 ${nombres[tramo]}`;
         }
         
         tramoActualEditando = tramo;
@@ -927,14 +796,8 @@
         document.getElementById("modalPuntos").style.display = "flex";
         
         const label = document.getElementById('tramoSeleccionadoLabel');
-        const nombres = {
-            1: '📊 1-20 (1 RONDA GRATIS)',
-            2: '📊 21-40 (2 RONDA GRATIS)',
-            3: '📊 41-60 (3 RONDA GRATIS)',
-            4: '📊 61-80 (4 RONDA GRATIS)',
-            5: '📊 81-100 (5 RONDA GRATIS)'
-        };
-        label.textContent = nombres[tramo] || '📊 Seleccionar tramo';
+        const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
+        label.textContent = `📊 ${nombres[tramo] || 'Seleccionar tramo'}`;
         
         mostrarPuntosTextarea(tramo);
     };
@@ -945,74 +808,61 @@
     };
 
     function mostrarPuntosTextarea(tramo) {
-     const display = document.getElementById("puntosDisplay");
-     const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
-     const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
-    
-     let texto = "";
-     if (sorted.length === 0) {
-        texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
-        display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">${texto}</div>`;
-        return;
-     }
-    
-    // Construir el contenido con la línea divisoria después del puesto 12
-        let contenido = "";
-     sorted.forEach(([nombre, puntos], index) => {
-        const puesto = index + 1;
-        contenido += `${puesto}. ${nombre}: ${puntos}\n`;
+        const display = document.getElementById("puntosDisplay");
+        const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
+        const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
         
-        // Después del puesto 12, agregar línea divisoria
-        if (index === 11) {
-            contenido += `-------------\n`;
-            contenido += `🚫 AFUERA\n`;
+        let texto = "";
+        if (sorted.length === 0) {
+            texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
+        } else {
+            sorted.forEach(([nombre, puntos]) => {
+                texto += `${nombre}: ${puntos}\n`;
+            });
         }
-     });
-    
-     let html = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${contenido.trim()}</textarea>`;
-    
-      display.innerHTML = html;
+        
+        display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${texto.trim()}</textarea>`;
     }
 
     window.guardarPuntosTramos = async () => {
         const textarea = document.getElementById("puntosTextarea");
-     if (!textarea) {
-        alert("No hay datos para guardar");
-        return;
-     }
-    
-      if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
-        alert("No se puede guardar en AFUERA, selecciona un tramo específico");
-        return;
-     }
-    
-     const lines = textarea.value.split('\n');
-     const nuevosPuntos = {};
-     const tramo = tramoActualEditando;
-    
-     if (tramo === 'total') {
-        alert("No se puede guardar en TOTAL, selecciona un tramo específico");
-        return;
-     }
-    
-     lines.forEach(line => {
-        line = line.trim();
-        if (line.includes(':')) {
-            const partes = line.split(':');
-            const nombre = partes[0].trim().toUpperCase();
-            const valor = parseInt(partes[1].trim());
-            if (nombre && !isNaN(valor) && valor >= 0) {
-                nuevosPuntos[nombre] = valor;
-            }
+        if (!textarea) {
+            alert("No hay datos para guardar");
+            return;
         }
+        
+        if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
+            alert("No se puede guardar en AFUERA, selecciona un tramo específico");
+            return;
+        }
+        
+        const lines = textarea.value.split('\n');
+        const nuevosPuntos = {};
+        const tramo = tramoActualEditando;
+        
+        if (tramo === 'total') {
+            alert("No se puede guardar en TOTAL, selecciona un tramo específico");
+            return;
+        }
+        
+        lines.forEach(line => {
+            line = line.trim();
+            if (line.includes(':')) {
+                const partes = line.split(':');
+                const nombre = partes[0].trim().toUpperCase();
+                const valor = parseInt(partes[1].trim());
+                if (nombre && !isNaN(valor) && valor >= 0) {
+                    nuevosPuntos[nombre] = valor;
+                }
+            }
         });
-    
-     const clave = getClaveTramo(tramo);
-     puntosPorTramo[clave] = nuevosPuntos;
-     await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
-     alert("Puntos guardados ✅");
-     cerrarModalPuntos();
-     actualizarStats();
+        
+        const clave = getClaveTramo(tramo);
+        puntosPorTramo[clave] = nuevosPuntos;
+        await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+        alert("Puntos guardados ✅");
+        cerrarModalPuntos();
+        actualizarStats();
     };
 
     window.reiniciarTodosLosPuntos = async () => {
@@ -1027,73 +877,7 @@
         }
     };
 
-    // ============================================================
-    // FUNCIÓN PARA INICIAR EL CRONÓMETRO
-    // ============================================================
-    function iniciarCronometro(segundosIniciales) {
-        if (cronometroIntervalo) {
-            clearInterval(cronometroIntervalo);
-            cronometroIntervalo = null;
-        }
-        
-        cronometroActivo = true;
-        cronometroSegundos = segundosIniciales;
-        
-        const overlay = document.getElementById('cronometroOverlay');
-        const numeroElem = document.getElementById('cronometroNumero');
-        const barraElem = document.getElementById('cronometroBarra');
-        
-        overlay.classList.add('visible');
-        numeroElem.textContent = cronometroSegundos;
-        barraElem.style.width = '100%';
-        
-        function actualizarColores(tiempo) {
-            if (tiempo > 6) {
-                numeroElem.style.color = '#ff4444';
-                barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
-            } else if (tiempo > 3) {
-                numeroElem.style.color = '#ffcc00';
-                barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
-            } else {
-                numeroElem.style.color = '#00ff88';
-                barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
-            }
-        }
-        
-        actualizarColores(cronometroSegundos);
-        
-        cronometroIntervalo = setInterval(async () => {
-            cronometroSegundos--;
-            numeroElem.textContent = cronometroSegundos;
-            barraElem.style.width = (cronometroSegundos / 9 * 100) + '%';
-            actualizarColores(cronometroSegundos);
-            
-            await updateDoc(docRef, { 
-                cronometroActivo: true,
-                cronometroSegundos: cronometroSegundos
-            });
-            
-            if (cronometroSegundos <= 0) {
-                clearInterval(cronometroIntervalo);
-                cronometroIntervalo = null;
-                cronometroActivo = false;
-                
-                overlay.classList.remove('visible');
-                
-                numeroElem.style.color = '#ffcc00';
-                barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
-                
-                await updateDoc(docRef, { 
-                    cronometroActivo: false,
-                    cronometroSegundos: 0
-                });
-            }
-        }, 1000);
-    }
-
-    // ============================================================
-    // FUNCIONES PARA GANADORES Y NÚMEROS
-    // ============================================================
+    // ========== FUNCIONES PARA GANADORES Y NÚMEROS ==========
     async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
         if (!historialGanadores) historialGanadores = [];
         historialGanadores.push({
@@ -2053,9 +1837,15 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO (GUARDADO EN FIREBASE) ==========
+    // ========== FUNCIÓN REINICIAR TABLERO (SIN CRONÓMETRO) ==========
     window.reiniciarBingo = async () => {
-        if (cronometroActivo) return;
+        if (!confirm("¿REINICIAR TABLERO? Se borrarán los nombres de esta ronda.\n\n" + 
+            "• +1 RONDA a cada jugador activo\n" +
+            "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n" +
+            "• +3 PUNTOS al ganador de BINGO\n" +
+            "• +2 PUNTOS al ganador de RULETA")) { 
+            return;
+        }
         
         guardarHistorial();
         
@@ -2083,8 +1873,9 @@
             puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
         });
         
-        const datosBackup = JSON.parse(JSON.stringify(datos));
-        const nuevaRonda = numeroRonda + 1;
+        datos.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; })); 
+        
+        let nuevaRonda = numeroRonda + 1;
         let nuevoAcumulado = acumulado;
         let nuevaReserva = acumuladoReserva;
         
@@ -2094,53 +1885,27 @@
             nuevoAcumulado = acumulado + 1;
         }
         
-        // ===== UNA SOLA ALERTA CON EL MENSAJE PRIMERO =====
-        let mensaje = "";
-        if (guardarEnReserva) {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
-        } else {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
-        }
-        
-        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-        mensaje += "• +1 RONDA a cada jugador activo\n";
-        mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
-        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-        mensaje += "• +2 PUNTOS al ganador de RULETA";
-        
-        if (!confirm(mensaje)) { 
-            return;
-        }
-        
-        // ===== BORRAR CARTONES =====
-        datosBackup.forEach(c => {
-            c.lineas.forEach(l => {
-                l.nombre = "";
-                l.estado = "libre";
-            });
-        });
-        datos = datosBackup;
-        
-        // ===== GUARDAR EN FIREBASE =====
         await updateDoc(docRef, { 
             cartones: datos, 
             numero_ronda: nuevaRonda,
             acumulado: nuevoAcumulado,
             acumuladoReserva: nuevaReserva,
             puntosPorTramo: puntosPorTramo,
-            rondasPorJugador: rondasPorJugador,
-            cronometroActivo: true,
-            cronometroSegundos: 9
-        });
+            rondasPorJugador: rondasPorJugador
+        }); 
         
-        seleccionados = [];
-        dibujar();
+        seleccionados = []; 
+        dibujar(); 
         actualizarStats();
         actualizarUIAcumulado();
+        
         document.getElementById('chkGuardarEnReserva').checked = false;
         
-        // ===== INICIAR CRONÓMETRO =====
-        iniciarCronometro(9);
+        if (guardarEnReserva) {
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}`);
+        } else {
+            alert(`Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}`);
+        }
     };
     
     window.toggleBloqueo = async () => { 
@@ -2367,8 +2132,7 @@
     });
 
     // =========================================
-    // ONSNAPSHOT - RESTAURAR CRONÓMETRO AL CARGAR
-    // =========================================
+
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
@@ -2385,23 +2149,6 @@
             puntosPorTramo = d.puntosPorTramo || {};
             historialGanadores = d.historialGanadores || [];
             numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
-            
-            // ===== RESTAURAR CRONÓMETRO =====
-            if (d.cronometroActivo !== undefined) {
-                cronometroActivo = d.cronometroActivo;
-                cronometroSegundos = d.cronometroSegundos || 0;
-            }
-            
-            // Si el cronómetro estaba activo y no hay un intervalo corriendo, restaurarlo
-            if (cronometroActivo && cronometroSegundos > 0 && !cronometroIntervalo) {
-                iniciarCronometro(cronometroSegundos);
-            } else if (!cronometroActivo && cronometroIntervalo) {
-                // Si Firebase dice que está inactivo pero el intervalo sigue corriendo
-                clearInterval(cronometroIntervalo);
-                cronometroIntervalo = null;
-                document.getElementById('cronometroOverlay').classList.remove('visible');
-            }
-            
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
