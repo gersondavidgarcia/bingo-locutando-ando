@@ -53,6 +53,7 @@
         .modo-captura .btn-copiar-caja,
         .modo-captura .btn[onclick*="copiar"],
         .modo-captura .btn[onclick*="reiniciarBingo"],
+        .modo-captura .btn[onclick*="reiniciarTodo"],
         .modo-captura .separador-peligro { 
             display: none !important; 
         }
@@ -197,6 +198,8 @@
         .btn-reinicio-ronda { background: #7a6442; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ronda-gratis { background: #ff6b6b; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
         .btn-ruleta { background: #17a2b8; color: white; width: 100%; font-size: 16px; padding: 14px; margin-top: 10px; border: 2px solid #ffcc00; border-radius: 12px; }
+        .btn-reiniciar-todo { background: #dc3545; color: white; width: 100%; font-size: 22px; padding: 20px; margin-top: 20px; border: 4px solid #ffcc00; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .btn-reiniciar-todo:hover { background: #ff4444; transform: scale(1.01); }
         
         .seccion-reserva { background: #0a1a2e; border: 2px solid #007bff; border-radius: 8px; padding: 15px; margin: 15px auto; max-width: 500px; text-align: center; }
         .reserva-valor { font-size: 40px; font-weight: bold; color: #ffffff; }
@@ -589,6 +592,10 @@
             </div>
             <div class="ronda-nota">⚠️ El dinero de la reserva se suma al acumulado principal al activarla</div>
         </div>
+
+        <!-- ===== BOTÓN REINICIAR TODO EL JUEGO ===== -->
+        <button class="btn-reiniciar-todo" onclick="reiniciarTodoElJuego()">🔄 REINICIAR TODO EL JUEGO</button>
+        <div style="font-size: 10px; color: #ff6666; text-align: center; margin-top: -8px;">⚠️ Esto reinicia: RONDA, RONDAS POR JUGADOR, RANKING, GANADORES y NÚMEROS SALIDOS</div>
     </div>
 </div>
 <div class="btn-volver-container" id="volverArea"><button class="btn btn-volver" onclick="desactivarCaptura()">🔙 VOLVER</button></div>
@@ -638,11 +645,11 @@
                 <span class="btn-arrow">▼</span>
             </button>
             <div class="ranking-dropdown-modal" id="rankingDropdown">
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80</div>
-                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(1)">1-20 (1 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(2)">21-40 (2 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(3)">41-60 (3 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(4)">61-80 (4 RONDA GRATIS)</div>
+                <div class="ranking-item-modal" onclick="seleccionarTramoRanking(5)">81-100 (5 RONDA GRATIS)</div>
                 <div class="ranking-item-modal total" onclick="seleccionarTramoRanking('total')">TOTAL</div>
                 <div class="ranking-item-modal afuera" onclick="seleccionarTramoRanking('afuera')">🚫 AFUERA</div>
             </div>
@@ -703,11 +710,11 @@
         
         <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px;">
             <select id="selectTramoRuletaModal" style="padding: 10px 16px; border-radius: 8px; background: #000; color: #fff; border: 2px solid var(--oro); font-size: 16px; font-weight: bold; flex: 1; min-width: 150px;">
-                <option value="1">1-20</option>
-                <option value="2" selected>21-40</option>
-                <option value="3">41-60</option>
-                <option value="4">61-80</option>
-                <option value="5">81-100</option>
+                <option value="1">1-20 (1 RONDA GRATIS)</option>
+                <option value="2" selected>21-40 (2 RONDA GRATIS)</option>
+                <option value="3">41-60 (3 RONDA GRATIS)</option>
+                <option value="4">61-80 (4 RONDA GRATIS)</option>
+                <option value="5">81-100 (5 RONDA GRATIS)</option>
             </select>
             <button id="btnAsignarRuletaModal" style="background: var(--oro); color: #000; padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px; cursor: pointer;">🎲 ASIGNAR AL AZAR</button>
         </div>
@@ -754,9 +761,11 @@
     let numerosSalidos = { bingos: [], ruletas: [] };
     let pendingUpdate = false;
     let tramoActualEditando = null;
+    
+    // Variables del cronómetro optimizado con timestamp
     let cronometroActivo = false;
-    let cronometroInterval = null;
-    let cronometroData = null;
+    let cronometroIntervalo = null;
+    const CRONOMETRO_DURACION = 12; // 12 segundos
 
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
@@ -797,6 +806,7 @@
         container.classList.toggle('active');
     };
 
+    // Función para calcular AFUERA
     function calcularAfuera() {
         const todosLosJugadores = new Set();
         for (let clave in puntosPorTramo) {
@@ -855,11 +865,18 @@
             return;
         }
         
+        // Tramo normal o total
         if (tramo === 'total') {
             label.textContent = '📊 TOTAL';
         } else {
-            const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
-            label.textContent = `📊 ${nombres[tramo]}`;
+            const nombres = {
+                1: '📊 1-20 (1 RONDA GRATIS)',
+                2: '📊 21-40 (2 RONDA GRATIS)',
+                3: '📊 41-60 (3 RONDA GRATIS)',
+                4: '📊 61-80 (4 RONDA GRATIS)',
+                5: '📊 81-100 (5 RONDA GRATIS)'
+            };
+            label.textContent = nombres[tramo];
         }
         
         tramoActualEditando = tramo;
@@ -872,6 +889,8 @@
             container.classList.remove('active');
         }
     });
+
+    // ==============================================
 
     function getTramoActual() {
         if (numeroRonda <= 20) return 1;
@@ -917,8 +936,14 @@
         document.getElementById("modalPuntos").style.display = "flex";
         
         const label = document.getElementById('tramoSeleccionadoLabel');
-        const nombres = {1:'1-20',2:'21-40',3:'41-60',4:'61-80',5:'81-100'};
-        label.textContent = `📊 ${nombres[tramo] || 'Seleccionar tramo'}`;
+        const nombres = {
+            1: '📊 1-20 (1 RONDA GRATIS)',
+            2: '📊 21-40 (2 RONDA GRATIS)',
+            3: '📊 41-60 (3 RONDA GRATIS)',
+            4: '📊 61-80 (4 RONDA GRATIS)',
+            5: '📊 81-100 (5 RONDA GRATIS)'
+        };
+        label.textContent = nombres[tramo] || '📊 Seleccionar tramo';
         
         mostrarPuntosTextarea(tramo);
     };
@@ -929,39 +954,34 @@
     };
 
     function mostrarPuntosTextarea(tramo) {
-      const display = document.getElementById("puntosDisplay");
-       const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
-       const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
-    
-     let texto = "";
-      if (sorted.length === 0) {
-        texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
-        display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">${texto}</div>`;
-        return;
-     }
-    
-    let html = `<div style="font-family:monospace; font-size:14px; text-transform:uppercase; line-height:1.8;">`;
-    
-    sorted.forEach(([nombre, puntos], index) => {
-        const puesto = index + 1;
-        const esTop12 = puesto <= 12;
-        const color = esTop12 ? '#ffcc00' : '#ffffff';
-        const estilo = esTop12 ? 'font-weight:bold;' : 'font-weight:normal;';
+        const display = document.getElementById("puntosDisplay");
+        const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
+        const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
         
-        html += `<div style="display:flex; justify-content:space-between; padding:2px 4px; ${estilo} color:${color};">
-            <span>${puesto}. ${nombre}</span>
-            <span>${puntos} pts</span>
-        </div>`;
-        
-        if (index === 11) {
-            html += `<div style="border-top: 2px solid #ff4444; margin: 6px 0 4px 0; opacity:0.5;"></div>`;
-            html += `<div style="color:#ff4444; font-size:11px; text-align:center; margin-bottom:4px;">🚫 AFUERA</div>`;
+        let texto = "";
+        if (sorted.length === 0) {
+            texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
+            display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">${texto}</div>`;
+            return;
         }
-    });
-    
-    html += `</div>`;
-    display.innerHTML = html;
-}
+        
+        // Construir el contenido con la línea divisoria después del puesto 12
+        let contenido = "";
+        sorted.forEach(([nombre, puntos], index) => {
+            const puesto = index + 1;
+            contenido += `${puesto}. ${nombre}: ${puntos}\n`;
+            
+            // Después del puesto 12, agregar línea divisoria
+            if (index === 11) {
+                contenido += `-------------\n`;
+                contenido += `🚫 AFUERA\n`;
+            }
+        });
+        
+        let html = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${contenido.trim()}</textarea>`;
+        
+        display.innerHTML = html;
+    }
 
     window.guardarPuntosTramos = async () => {
         const textarea = document.getElementById("puntosTextarea");
@@ -1016,6 +1036,188 @@
         }
     };
 
+    // ============================================================
+    // FUNCIÓN PARA REINICIAR TODO EL JUEGO
+    // ============================================================
+    window.reiniciarTodoElJuego = async () => {
+        if (!confirm("⚠️⚠️⚠️ ¿REINICIAR TODO EL JUEGO?\n\nEsto reiniciará:\n• Ronda a 1\n• Rondas por jugador\n• Ranking de puntos (todos los tramos)\n• Ganadores de rondas\n• Números salidos\n\n¿Estás completamente seguro?")) {
+            return;
+        }
+        
+        try {
+            // Reiniciar ronda a 1
+            numeroRonda = 1;
+            
+            // Reiniciar rondas por jugador
+            rondasPorJugador = {};
+            
+            // Reiniciar puntos de todos los tramos
+            puntosPorTramo = {};
+            
+            // Reiniciar historial de ganadores
+            historialGanadores = [];
+            
+            // Reiniciar números salidos
+            numerosSalidos = { bingos: [], ruletas: [] };
+            
+            // Limpiar seleccionados
+            seleccionados = [];
+            document.getElementById("msgLineas").innerText = "";
+            
+            // Guardar todo en Firebase
+            await updateDoc(docRef, {
+                numero_ronda: 1,
+                rondasPorJugador: rondasPorJugador,
+                puntosPorTramo: puntosPorTramo,
+                historialGanadores: historialGanadores,
+                numerosSalidos: numerosSalidos
+            });
+            
+            alert("✅ ¡Juego reiniciado completamente!\n\n" +
+                "• Ronda: 1\n" +
+                "• Rondas por jugador: 0\n" +
+                "• Ranking: 0 puntos\n" +
+                "• Ganadores: vacío\n" +
+                "• Números salidos: vacío");
+            
+            // Actualizar la interfaz
+            actualizarStats();
+            
+        } catch (error) {
+            alert("❌ Error al reiniciar: " + error.message);
+            console.error(error);
+        }
+    };
+
+    // ============================================================
+    // FUNCIÓN PARA INICIAR EL CRONÓMETRO (OPTIMIZADO CON TIMESTAMP)
+    // SOLO 1 ESCRITURA EN FIREBASE
+    // ============================================================
+    function iniciarCronometroOptimizado() {
+        if (cronometroIntervalo) {
+            clearInterval(cronometroIntervalo);
+            cronometroIntervalo = null;
+        }
+        
+        cronometroActivo = true;
+        const inicio = Date.now();
+        
+        const overlay = document.getElementById('cronometroOverlay');
+        const numeroElem = document.getElementById('cronometroNumero');
+        const barraElem = document.getElementById('cronometroBarra');
+        
+        overlay.classList.add('visible');
+        
+        // Guardar en Firebase SOLO UNA VEZ (timestamp de inicio)
+        updateDoc(docRef, {
+            cronometroActivo: true,
+            cronometroInicio: inicio,
+            cronometroDuracion: CRONOMETRO_DURACION
+        }).catch(err => console.error("Error al guardar cronómetro:", err));
+        
+        function actualizarCronometro() {
+            const ahora = Date.now();
+            const tiempoTranscurrido = Math.floor((ahora - inicio) / 1000);
+            const segundosRestantes = Math.max(0, CRONOMETRO_DURACION - tiempoTranscurrido);
+            
+            numeroElem.textContent = segundosRestantes;
+            barraElem.style.width = (segundosRestantes / CRONOMETRO_DURACION * 100) + '%';
+            actualizarColoresCronometro(segundosRestantes, numeroElem, barraElem);
+            
+            if (segundosRestantes <= 0) {
+                clearInterval(cronometroIntervalo);
+                cronometroIntervalo = null;
+                cronometroActivo = false;
+                overlay.classList.remove('visible');
+                
+                // Limpiar estado en Firebase
+                updateDoc(docRef, {
+                    cronometroActivo: false,
+                    cronometroInicio: null,
+                    cronometroDuracion: 0
+                }).catch(err => console.error("Error al limpiar cronómetro:", err));
+            }
+        }
+        
+        actualizarCronometro();
+        cronometroIntervalo = setInterval(actualizarCronometro, 500);
+    }
+    
+    function actualizarColoresCronometro(tiempo, numeroElem, barraElem) {
+        if (tiempo > 8) {
+            numeroElem.style.color = '#ff4444';
+            barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
+        } else if (tiempo > 4) {
+            numeroElem.style.color = '#ffcc00';
+            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
+        } else {
+            numeroElem.style.color = '#00ff88';
+            barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
+        }
+    }
+    
+    function restaurarCronometro(data) {
+        if (data && data.cronometroActivo && data.cronometroInicio) {
+            const ahora = Date.now();
+            const tiempoTranscurrido = Math.floor((ahora - data.cronometroInicio) / 1000);
+            const segundosRestantes = Math.max(0, CRONOMETRO_DURACION - tiempoTranscurrido);
+            
+            if (segundosRestantes > 0) {
+                cronometroActivo = true;
+                const overlay = document.getElementById('cronometroOverlay');
+                const numeroElem = document.getElementById('cronometroNumero');
+                const barraElem = document.getElementById('cronometroBarra');
+                
+                overlay.classList.add('visible');
+                numeroElem.textContent = segundosRestantes;
+                barraElem.style.width = (segundosRestantes / CRONOMETRO_DURACION * 100) + '%';
+                actualizarColoresCronometro(segundosRestantes, numeroElem, barraElem);
+                
+                if (cronometroIntervalo) {
+                    clearInterval(cronometroIntervalo);
+                    cronometroIntervalo = null;
+                }
+                
+                const inicio = data.cronometroInicio;
+                cronometroIntervalo = setInterval(() => {
+                    const ahora2 = Date.now();
+                    const tiempoTranscurrido2 = Math.floor((ahora2 - inicio) / 1000);
+                    const segundosRestantes2 = Math.max(0, CRONOMETRO_DURACION - tiempoTranscurrido2);
+                    
+                    numeroElem.textContent = segundosRestantes2;
+                    barraElem.style.width = (segundosRestantes2 / CRONOMETRO_DURACION * 100) + '%';
+                    actualizarColoresCronometro(segundosRestantes2, numeroElem, barraElem);
+                    
+                    if (segundosRestantes2 <= 0) {
+                        clearInterval(cronometroIntervalo);
+                        cronometroIntervalo = null;
+                        cronometroActivo = false;
+                        overlay.classList.remove('visible');
+                        
+                        updateDoc(docRef, {
+                            cronometroActivo: false,
+                            cronometroInicio: null,
+                            cronometroDuracion: 0
+                        }).catch(err => console.error("Error al limpiar cronómetro:", err));
+                    }
+                }, 500);
+                return true;
+            } else {
+                cronometroActivo = false;
+                document.getElementById('cronometroOverlay').classList.remove('visible');
+                updateDoc(docRef, {
+                    cronometroActivo: false,
+                    cronometroInicio: null,
+                    cronometroDuracion: 0
+                }).catch(err => console.error("Error al limpiar cronómetro:", err));
+            }
+        }
+        return false;
+    }
+
+    // ============================================================
+    // FUNCIONES PARA GANADORES Y NÚMEROS
+    // ============================================================
     async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
         if (!historialGanadores) historialGanadores = [];
         historialGanadores.push({
@@ -1039,6 +1241,7 @@
         return historialGanadores || [];
     }
 
+    // ========== FUNCIONES PARA GANADORES DE RONDAS ==========
     window.mostrarModalGanadores = () => {
         const textarea = document.getElementById("ganadoresTextarea");
         let texto = "";
@@ -1122,6 +1325,7 @@
         }
     };
 
+    // ========== FUNCIONES PARA NÚMEROS SALIDOS ==========
     window.mostrarModalNumeros = () => {
         const textarea = document.getElementById("numerosTextarea");
         let texto = "";
@@ -1182,6 +1386,7 @@
         }
     };
 
+    // ========== FUNCIONES PARA RONDAS ==========
     function rondasToText() {
         let texto = "";
         for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
@@ -1227,6 +1432,7 @@
         }
     };
 
+    // ========== FUNCIONES PARA EL ACUMULADO ==========
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -1246,6 +1452,7 @@
         }
     };
 
+    // ========== FUNCIONES PARA LA RESERVA ==========
     window.modificarReserva = async (cambio) => {
         let nuevo = acumuladoReserva + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -1394,6 +1601,12 @@
     }
 
     async function manejarClick(c, l) {
+        // ===== BLOQUEO DE CLICS MIENTRAS EL CRONÓMETRO ESTÁ ACTIVO =====
+        if (cronometroActivo) {
+            // No hace nada, solo ignora el click
+            return;
+        }
+        
         if (pendingUpdate) return;
         
         const lineaActual = datos[c].lineas[l];
@@ -1678,7 +1891,7 @@
         if (esMismoNumero && esMismaPersona) {
             const nombreUnico = nombresUnicosBingo[0];
             const cantidadTotal = conteoBingo[nombreUnico];
-            premioTotal = 12000 * cantidadTotal;
+            premioTotal = 15000 * cantidadTotal;
             
             mensaje += `🏆 *BINGO #${numBingo}* 🎰 *RULETA #${numRuleta}*\n`;
             mensaje += `👤 *${nombreUnico}* (${cantidadTotal} línea${cantidadTotal > 1 ? 's' : ''})\n`;
@@ -1748,6 +1961,7 @@
         }
     };
     
+    // ========== FUNCIÓN CARGAR PREMIOS EN CAJA ==========
     window.cargarPremiosACajaMulti = async () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -1969,173 +2183,86 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ==============================================
-    // FUNCIONES DEL CRONÓMETRO CON FIREBASE
-    // ==============================================
-    
-    function iniciarCronometroDesdeFirebase(segundos) {
-        if (cronometroInterval) {
-            clearInterval(cronometroInterval);
-            cronometroInterval = null;
-        }
-        
-        cronometroActivo = true;
-        const overlay = document.getElementById('cronometroOverlay');
-        const numeroElem = document.getElementById('cronometroNumero');
-        const barraElem = document.getElementById('cronometroBarra');
-        
-        overlay.classList.add('visible');
-        numeroElem.textContent = segundos;
-        barraElem.style.width = (segundos / 9 * 100) + '%';
-        actualizarColoresCronometro(segundos, numeroElem, barraElem);
-        
-        cronometroInterval = setInterval(() => {
-            segundos--;
-            
-            if (segundos <= 0) {
-                clearInterval(cronometroInterval);
-                cronometroInterval = null;
-                cronometroActivo = false;
-                overlay.classList.remove('visible');
-                
-                // Limpiar estado en Firebase
-                updateDoc(docRef, { 
-                    cronometroActivo: false,
-                    cronometroSegundos: 0
-                }).catch(err => console.error("Error al limpiar cronómetro:", err));
-                
-                return;
-            }
-            
-            numeroElem.textContent = segundos;
-            barraElem.style.width = (segundos / 9 * 100) + '%';
-            actualizarColoresCronometro(segundos, numeroElem, barraElem);
-            
-            // Guardar estado en Firebase
-            updateDoc(docRef, { 
-                cronometroSegundos: segundos,
-                cronometroActivo: true
-            }).catch(err => console.error("Error al guardar cronómetro:", err));
-            
-        }, 1000);
-    }
-    
-    function actualizarColoresCronometro(tiempo, numeroElem, barraElem) {
-        if (tiempo > 6) {
-            numeroElem.style.color = '#ff4444';
-            barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
-        } else if (tiempo > 3) {
-            numeroElem.style.color = '#ffcc00';
-            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
-        } else {
-            numeroElem.style.color = '#00ff88';
-            barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
-        }
-    }
-    
-    function restaurarCronometro(data) {
-        if (data && data.cronometroActivo && data.cronometroSegundos > 0) {
-            // Hay un cronómetro activo en Firebase, restaurarlo
-            if (cronometroInterval) {
-                clearInterval(cronometroInterval);
-                cronometroInterval = null;
-            }
-            iniciarCronometroDesdeFirebase(data.cronometroSegundos);
-            return true;
-        } else if (data && data.cronometroSegundos === 0 && data.cronometroActivo === false) {
-            // No hay cronómetro activo, asegurarse de que el overlay esté oculto
-            document.getElementById('cronometroOverlay').classList.remove('visible');
-            cronometroActivo = false;
-        }
-        return false;
-    }
-    
-    // ==============================================
-    
+    // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO OPTIMIZADO ==========
     window.reiniciarBingo = async () => {
         if (cronometroActivo) return;
         
-        guardarHistorial();
-        
-        const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-        
-        let jugadoresActivos = new Set();
-        datos.forEach(c => {
-            c.lineas.forEach(linea => {
-                if (linea.nombre && linea.nombre !== "") {
-                    jugadoresActivos.add(linea.nombre);
-                }
-            });
-        });
-        
-        jugadoresActivos.forEach(jugador => {
-            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-        });
-        
-        const tramoActual = getTramoActual();
-        if (!puntosPorTramo) puntosPorTramo = {};
-        const clave = getClaveTramo(tramoActual);
-        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-        
-        jugadoresActivos.forEach(jugador => {
-            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-        });
-        
-        const datosBackup = JSON.parse(JSON.stringify(datos));
-        const nuevaRonda = numeroRonda + 1;
-        let nuevoAcumulado = acumulado;
-        let nuevaReserva = acumuladoReserva;
-        
-        if (guardarEnReserva) {
-            nuevaReserva = acumuladoReserva + 1;
-        } else {
-            nuevoAcumulado = acumulado + 1;
-        }
-        
-        let mensaje = "";
-        if (guardarEnReserva) {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
-        } else {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
-        }
-        
-        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-        mensaje += "• +1 RONDA a cada jugador activo\n";
-        mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
-        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-        mensaje += "• +2 PUNTOS al ganador de RULETA";
-        
-        if (!confirm(mensaje)) { 
+        if (!confirm("⚠️ ¿Reiniciar tablero?\n\nSe borrarán todos los nombres y se sumará +$2.500 al acumulado.\n\n" + 
+            "• +1 RONDA a cada jugador activo\n" +
+            "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)")) { 
             return;
         }
         
-        datosBackup.forEach(c => {
-            c.lineas.forEach(l => {
-                l.nombre = "";
-                l.estado = "libre";
+        try {
+            guardarHistorial();
+            
+            let jugadoresActivos = new Set();
+            datos.forEach(c => {
+                c.lineas.forEach(linea => {
+                    if (linea.nombre && linea.nombre !== "") {
+                        jugadoresActivos.add(linea.nombre);
+                    }
+                });
             });
-        });
-        datos = datosBackup;
-        
-        await updateDoc(docRef, { 
-            cartones: datos, 
-            numero_ronda: nuevaRonda,
-            acumulado: nuevoAcumulado,
-            acumuladoReserva: nuevaReserva,
-            puntosPorTramo: puntosPorTramo,
-            rondasPorJugador: rondasPorJugador,
-            cronometroActivo: true,
-            cronometroSegundos: 9
-        });
-        
-        seleccionados = [];
-        dibujar();
-        actualizarStats();
-        actualizarUIAcumulado();
-        document.getElementById('chkGuardarEnReserva').checked = false;
-        
-        // Iniciar cronómetro localmente
-        iniciarCronometroDesdeFirebase(9);
+            
+            jugadoresActivos.forEach(jugador => {
+                rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+            });
+            
+            const tramoActual = getTramoActual();
+            const clave = getClaveTramo(tramoActual);
+            if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+            
+            jugadoresActivos.forEach(jugador => {
+                puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
+            });
+            
+            const backup = JSON.parse(JSON.stringify(datos));
+            backup.forEach(c => {
+                c.lineas.forEach(l => {
+                    l.nombre = "";
+                    l.estado = "libre";
+                });
+            });
+            datos = backup;
+            
+            const nuevaRonda = numeroRonda + 1;
+            const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+            let nuevoAcumulado = acumulado;
+            let nuevaReserva = acumuladoReserva;
+            
+            if (guardarEnReserva) {
+                nuevaReserva = acumuladoReserva + 1;
+            } else {
+                nuevoAcumulado = acumulado + 1;
+            }
+            
+            await updateDoc(docRef, { 
+                cartones: datos, 
+                numero_ronda: nuevaRonda,
+                acumulado: nuevoAcumulado,
+                acumuladoReserva: nuevaReserva,
+                puntosPorTramo: puntosPorTramo,
+                rondasPorJugador: rondasPorJugador
+            });
+            
+            numeroRonda = nuevaRonda;
+            acumulado = nuevoAcumulado;
+            acumuladoReserva = nuevaReserva;
+            seleccionados = [];
+            
+            dibujar();
+            actualizarStats();
+            actualizarUIAcumulado();
+            document.getElementById('chkGuardarEnReserva').checked = false;
+            
+            // Iniciar cronómetro optimizado (solo 1 escritura en Firebase)
+            iniciarCronometroOptimizado();
+            
+        } catch (error) {
+            alert("❌ Error al reiniciar: " + error.message);
+            console.error(error);
+        }
     };
     
     window.toggleBloqueo = async () => { 
@@ -2179,6 +2306,7 @@
     };
     window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
 
+    // ========== ASIGNAR RULETA AL AZAR ==========
     function obtenerRankingPorTramo(tramo) {
         const clave = `tramo_${tramo}`;
         const datosTramo = puntosPorTramo[clave] || {};
@@ -2292,7 +2420,7 @@
         const participantesPendientes = ranking.filter(jug => !nombresAnotados.has(jug.nombre));
         
         let cartonesLibres = [];
-        for (let i = 1; i <= 12; i++) {
+        for (let i = 1; i <= 15; i++) {
             if (!cartonesOcupados.has(i)) {
                 cartonesLibres.push(i);
             }
@@ -2361,9 +2489,8 @@
     });
 
     // =========================================
-    // SNAPSHOT DE FIREBASE - RESTAURAR CRONÓMETRO
+    // ONSNAPSHOT - RESTAURAR CRONÓMETRO AL CARGAR
     // =========================================
-
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
@@ -2381,7 +2508,7 @@
             historialGanadores = d.historialGanadores || [];
             numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
             
-            // Restaurar cronómetro si está activo
+            // ===== RESTAURAR CRONÓMETRO OPTIMIZADO =====
             restaurarCronometro(d);
             
             actualizarCampoNombre();
