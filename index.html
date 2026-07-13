@@ -755,6 +755,8 @@
     let pendingUpdate = false;
     let tramoActualEditando = null;
     let cronometroActivo = false;
+    let cronometroInterval = null;
+    let cronometroData = null;
 
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
@@ -795,7 +797,6 @@
         container.classList.toggle('active');
     };
 
-    // Función para calcular AFUERA
     function calcularAfuera() {
         const todosLosJugadores = new Set();
         for (let clave in puntosPorTramo) {
@@ -854,7 +855,6 @@
             return;
         }
         
-        // Tramo normal o total
         if (tramo === 'total') {
             label.textContent = '📊 TOTAL';
         } else {
@@ -872,8 +872,6 @@
             container.classList.remove('active');
         }
     });
-
-    // ==============================================
 
     function getTramoActual() {
         if (numeroRonda <= 20) return 1;
@@ -942,7 +940,6 @@
         return;
      }
     
-    // Construir el HTML con separador después del puesto 12
     let html = `<div style="font-family:monospace; font-size:14px; text-transform:uppercase; line-height:1.8;">`;
     
     sorted.forEach(([nombre, puntos], index) => {
@@ -956,7 +953,6 @@
             <span>${puntos} pts</span>
         </div>`;
         
-        // Línea divisoria después del puesto 12
         if (index === 11) {
             html += `<div style="border-top: 2px solid #ff4444; margin: 6px 0 4px 0; opacity:0.5;"></div>`;
             html += `<div style="color:#ff4444; font-size:11px; text-align:center; margin-bottom:4px;">🚫 AFUERA</div>`;
@@ -1020,7 +1016,6 @@
         }
     };
 
-    // ========== FUNCIONES PARA GANADORES Y NÚMEROS ==========
     async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
         if (!historialGanadores) historialGanadores = [];
         historialGanadores.push({
@@ -1044,7 +1039,6 @@
         return historialGanadores || [];
     }
 
-    // ========== FUNCIONES PARA GANADORES DE RONDAS ==========
     window.mostrarModalGanadores = () => {
         const textarea = document.getElementById("ganadoresTextarea");
         let texto = "";
@@ -1128,7 +1122,6 @@
         }
     };
 
-    // ========== FUNCIONES PARA NÚMEROS SALIDOS ==========
     window.mostrarModalNumeros = () => {
         const textarea = document.getElementById("numerosTextarea");
         let texto = "";
@@ -1189,7 +1182,6 @@
         }
     };
 
-    // ========== FUNCIONES PARA RONDAS ==========
     function rondasToText() {
         let texto = "";
         for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
@@ -1235,7 +1227,6 @@
         }
     };
 
-    // ========== FUNCIONES PARA EL ACUMULADO ==========
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -1255,7 +1246,6 @@
         }
     };
 
-    // ========== FUNCIONES PARA LA RESERVA ==========
     window.modificarReserva = async (cambio) => {
         let nuevo = acumuladoReserva + cambio;
         if (nuevo < 0) nuevo = 0;
@@ -1758,7 +1748,6 @@
         }
     };
     
-    // ========== FUNCIÓN CARGAR PREMIOS EN CAJA ==========
     window.cargarPremiosACajaMulti = async () => {
         const bInput = document.getElementById("numGanador").value;
         const rInput = document.getElementById("numRuletaFisica").value;
@@ -1980,141 +1969,173 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO (SOLO SOBRE CARTONES) ==========
-   window.reiniciarBingo = async () => {
-     if (cronometroActivo) return;
+    // ==============================================
+    // FUNCIONES DEL CRONÓMETRO CON FIREBASE
+    // ==============================================
     
-        guardarHistorial();
-    
-     const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-    
-     let jugadoresActivos = new Set();
-      datos.forEach(c => {
-        c.lineas.forEach(linea => {
-            if (linea.nombre && linea.nombre !== "") {
-                jugadoresActivos.add(linea.nombre);
+    function iniciarCronometroDesdeFirebase(segundos) {
+        if (cronometroInterval) {
+            clearInterval(cronometroInterval);
+            cronometroInterval = null;
+        }
+        
+        cronometroActivo = true;
+        const overlay = document.getElementById('cronometroOverlay');
+        const numeroElem = document.getElementById('cronometroNumero');
+        const barraElem = document.getElementById('cronometroBarra');
+        
+        overlay.classList.add('visible');
+        numeroElem.textContent = segundos;
+        barraElem.style.width = (segundos / 9 * 100) + '%';
+        actualizarColoresCronometro(segundos, numeroElem, barraElem);
+        
+        cronometroInterval = setInterval(() => {
+            segundos--;
+            
+            if (segundos <= 0) {
+                clearInterval(cronometroInterval);
+                cronometroInterval = null;
+                cronometroActivo = false;
+                overlay.classList.remove('visible');
+                
+                // Limpiar estado en Firebase
+                updateDoc(docRef, { 
+                    cronometroActivo: false,
+                    cronometroSegundos: 0
+                }).catch(err => console.error("Error al limpiar cronómetro:", err));
+                
+                return;
             }
-        });
-     });
+            
+            numeroElem.textContent = segundos;
+            barraElem.style.width = (segundos / 9 * 100) + '%';
+            actualizarColoresCronometro(segundos, numeroElem, barraElem);
+            
+            // Guardar estado en Firebase
+            updateDoc(docRef, { 
+                cronometroSegundos: segundos,
+                cronometroActivo: true
+            }).catch(err => console.error("Error al guardar cronómetro:", err));
+            
+        }, 1000);
+    }
     
-     jugadoresActivos.forEach(jugador => {
-        rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-     });
-    
-     const tramoActual = getTramoActual();
-     if (!puntosPorTramo) puntosPorTramo = {};
-     const clave = getClaveTramo(tramoActual);
-     if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-    
-     jugadoresActivos.forEach(jugador => {
-        puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-     });
-    
-     const datosBackup = JSON.parse(JSON.stringify(datos));
-     const nuevaRonda = numeroRonda + 1;
-        let nuevoAcumulado = acumulado;
-     let nuevaReserva = acumuladoReserva;
-    
-      if (guardarEnReserva) {
-        nuevaReserva = acumuladoReserva + 1;
-      } else {
-        nuevoAcumulado = acumulado + 1;
-     }
-    
-    // ===== UNA SOLA ALERTA CON EL MENSAJE PRIMERO =====
-     let mensaje = "";
-      if (guardarEnReserva) {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
-     } else {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
-     }
-    
-      mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-      mensaje += "• +1 RONDA a cada jugador activo\n";
-     mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
-     mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-     mensaje += "• +2 PUNTOS al ganador de RULETA";
-    
-     if (!confirm(mensaje)) { 
-        return;
-     }
-    
-    // ===== BORRAR CARTONES =====
-     datosBackup.forEach(c => {
-        c.lineas.forEach(l => {
-            l.nombre = "";
-            l.estado = "libre";
-        });
-     });
-     datos = datosBackup;
-    
-    // ===== GUARDAR EN FIREBASE =====
-     await updateDoc(docRef, { 
-        cartones: datos, 
-        numero_ronda: nuevaRonda,
-        acumulado: nuevoAcumulado,
-        acumuladoReserva: nuevaReserva,
-        puntosPorTramo: puntosPorTramo,
-        rondasPorJugador: rondasPorJugador
-     });
-    
-     seleccionados = [];
-     dibujar();
-     actualizarStats();
-     actualizarUIAcumulado();
-     document.getElementById('chkGuardarEnReserva').checked = false;
-    
-    // ===== MOSTRAR CRONÓMETRO (9 SEGUNDOS - SEMÁFORO INVERTIDO) =====
-     cronometroActivo = true;
-     const overlay = document.getElementById('cronometroOverlay');
-     const numeroElem = document.getElementById('cronometroNumero');
-     const barraElem = document.getElementById('cronometroBarra');
-    
-     overlay.classList.add('visible');
-    
-     let segundos = 9;
-     numeroElem.textContent = segundos;
-     barraElem.style.width = '100%';
-    
-    // ===== Función para actualizar colores (INVERTIDO - cuenta atrás) =====
-     function actualizarColores(tiempo) {
+    function actualizarColoresCronometro(tiempo, numeroElem, barraElem) {
         if (tiempo > 6) {
-            // ROJO al principio (segundos 9, 8, 7) - ¡CORRE!
             numeroElem.style.color = '#ff4444';
             barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
         } else if (tiempo > 3) {
-            // AMARILLO (segundos 6, 5, 4) - ¡ATENCIÓN!
             numeroElem.style.color = '#ffcc00';
             barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
         } else {
-            // VERDE al final (segundos 3, 2, 1) - ¡YA PUEDES!
             numeroElem.style.color = '#00ff88';
             barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
         }
-     }
+    }
     
-    // Colores iniciales
-     actualizarColores(segundos);
-    
-     const intervalo = setInterval(() => {
-        segundos--;
-        numeroElem.textContent = segundos;
-        barraElem.style.width = (segundos / 9 * 100) + '%';
-        
-        // Actualizar colores según el tiempo restante
-        actualizarColores(segundos);
-        
-        if (segundos <= 0) {
-            clearInterval(intervalo);
-            
-            overlay.classList.remove('visible');
+    function restaurarCronometro(data) {
+        if (data && data.cronometroActivo && data.cronometroSegundos > 0) {
+            // Hay un cronómetro activo en Firebase, restaurarlo
+            if (cronometroInterval) {
+                clearInterval(cronometroInterval);
+                cronometroInterval = null;
+            }
+            iniciarCronometroDesdeFirebase(data.cronometroSegundos);
+            return true;
+        } else if (data && data.cronometroSegundos === 0 && data.cronometroActivo === false) {
+            // No hay cronómetro activo, asegurarse de que el overlay esté oculto
+            document.getElementById('cronometroOverlay').classList.remove('visible');
             cronometroActivo = false;
-            
-            // Restaurar colores
-            numeroElem.style.color = '#ffcc00';
-            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
         }
-      }, 1000);
+        return false;
+    }
+    
+    // ==============================================
+    
+    window.reiniciarBingo = async () => {
+        if (cronometroActivo) return;
+        
+        guardarHistorial();
+        
+        const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+        
+        let jugadoresActivos = new Set();
+        datos.forEach(c => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    jugadoresActivos.add(linea.nombre);
+                }
+            });
+        });
+        
+        jugadoresActivos.forEach(jugador => {
+            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+        });
+        
+        const tramoActual = getTramoActual();
+        if (!puntosPorTramo) puntosPorTramo = {};
+        const clave = getClaveTramo(tramoActual);
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+        
+        jugadoresActivos.forEach(jugador => {
+            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
+        });
+        
+        const datosBackup = JSON.parse(JSON.stringify(datos));
+        const nuevaRonda = numeroRonda + 1;
+        let nuevoAcumulado = acumulado;
+        let nuevaReserva = acumuladoReserva;
+        
+        if (guardarEnReserva) {
+            nuevaReserva = acumuladoReserva + 1;
+        } else {
+            nuevoAcumulado = acumulado + 1;
+        }
+        
+        let mensaje = "";
+        if (guardarEnReserva) {
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | +$2.500 guardado en RESERVA = $${(nuevaReserva * 2500).toLocaleString()}\n\n`;
+        } else {
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRonda} | Acumulado +$2.500 = $${(nuevoAcumulado * 2500).toLocaleString()}\n\n`;
+        }
+        
+        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
+        mensaje += "• +1 RONDA a cada jugador activo\n";
+        mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
+        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
+        mensaje += "• +2 PUNTOS al ganador de RULETA";
+        
+        if (!confirm(mensaje)) { 
+            return;
+        }
+        
+        datosBackup.forEach(c => {
+            c.lineas.forEach(l => {
+                l.nombre = "";
+                l.estado = "libre";
+            });
+        });
+        datos = datosBackup;
+        
+        await updateDoc(docRef, { 
+            cartones: datos, 
+            numero_ronda: nuevaRonda,
+            acumulado: nuevoAcumulado,
+            acumuladoReserva: nuevaReserva,
+            puntosPorTramo: puntosPorTramo,
+            rondasPorJugador: rondasPorJugador,
+            cronometroActivo: true,
+            cronometroSegundos: 9
+        });
+        
+        seleccionados = [];
+        dibujar();
+        actualizarStats();
+        actualizarUIAcumulado();
+        document.getElementById('chkGuardarEnReserva').checked = false;
+        
+        // Iniciar cronómetro localmente
+        iniciarCronometroDesdeFirebase(9);
     };
     
     window.toggleBloqueo = async () => { 
@@ -2158,7 +2179,6 @@
     };
     window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
 
-    // ========== ASIGNAR RULETA AL AZAR ==========
     function obtenerRankingPorTramo(tramo) {
         const clave = `tramo_${tramo}`;
         const datosTramo = puntosPorTramo[clave] || {};
@@ -2341,6 +2361,8 @@
     });
 
     // =========================================
+    // SNAPSHOT DE FIREBASE - RESTAURAR CRONÓMETRO
+    // =========================================
 
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
@@ -2358,6 +2380,10 @@
             puntosPorTramo = d.puntosPorTramo || {};
             historialGanadores = d.historialGanadores || [];
             numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
+            
+            // Restaurar cronómetro si está activo
+            restaurarCronometro(d);
+            
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
