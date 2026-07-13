@@ -767,6 +767,15 @@
     let cronometroIntervalo = null;
     const CRONOMETRO_DURACION = 12; // 12 segundos
 
+    // ============================================================
+    // FUNCIÓN PARA LIMPIAR NOMBRES (quita números del ranking)
+    // ============================================================
+    function limpiarNombre(nombre) {
+        // Quita números al inicio como "1. DAVID" → "DAVID"
+        // También quita "1- DAVID" o "1) DAVID"
+        return nombre.replace(/^[\d]+[\.\-\)\s]+/, '').trim();
+    }
+
     function getAcumuladoEnPesos() {
         return acumulado * 2500;
     }
@@ -2374,7 +2383,7 @@
             const textColor = r.cantidad >= 2 ? '#000' : '#fff';
             html += `
                 <div class="resultado-ruleta-item" style="background: ${bgColor}; color: ${textColor};">
-                    <span><strong>${r.nombre}</strong> (${r.puntos} pts) → ${r.cantidad} número${r.cantidad > 1 ? 's' : ''}</span>
+                    <span><strong>${limpiarNombre(r.nombre)}</strong> (${r.puntos} pts) → ${r.cantidad} número${r.cantidad > 1 ? 's' : ''}</span>
                     <span class="nums">${numsStr}</span>
                 </div>
             `;
@@ -2412,7 +2421,7 @@
                 }
             }
             resultado.push({
-                nombre: jug.nombre,
+                nombre: limpiarNombre(jug.nombre),
                 puntos: jug.puntos,
                 cantidad: jug.cantidad,
                 numeros: asignados
@@ -2430,14 +2439,18 @@
         datos.forEach((c, idx) => {
             c.lineas.forEach(linea => {
                 if (linea.nombre && linea.nombre !== "") {
-                    nombresAnotados.add(linea.nombre);
+                    const nombreLimpio = limpiarNombre(linea.nombre);
+                    nombresAnotados.add(nombreLimpio);
                     cartonesOcupados.add(idx + 1);
                 }
             });
         });
         
         const ranking = obtenerRankingPorTramo(tramo);
-        const participantesPendientes = ranking.filter(jug => !nombresAnotados.has(jug.nombre));
+        const participantesPendientes = ranking.filter(jug => {
+            const nombreLimpio = limpiarNombre(jug.nombre);
+            return !nombresAnotados.has(nombreLimpio);
+        });
         
         let cartonesLibres = [];
         for (let i = 1; i <= 15; i++) {
@@ -2452,6 +2465,7 @@
         let asignaciones = [];
         
         for (const jug of participantesPendientes) {
+            const nombreLimpio = limpiarNombre(jug.nombre);
             const asignados = [];
             for (let i = 0; i < jug.cantidad; i++) {
                 if (idx < cartonesLibres.length) {
@@ -2463,7 +2477,7 @@
                         let lineaAsignada = false;
                         for (let l = 0; l < datos[cartonIdx].lineas.length; l++) {
                             if (datos[cartonIdx].lineas[l].estado === "libre") {
-                                datos[cartonIdx].lineas[l].nombre = jug.nombre;
+                                datos[cartonIdx].lineas[l].nombre = nombreLimpio;
                                 datos[cartonIdx].lineas[l].estado = "reservado";
                                 lineaAsignada = true;
                                 break;
@@ -2471,7 +2485,7 @@
                         }
                         if (!lineaAsignada) {
                             datos[cartonIdx].lineas.push({
-                                nombre: jug.nombre,
+                                nombre: nombreLimpio,
                                 estado: "reservado"
                             });
                         }
@@ -2481,7 +2495,7 @@
             }
             if (asignados.length > 0) {
                 asignaciones.push({
-                    nombre: jug.nombre,
+                    nombre: nombreLimpio,
                     puntos: jug.puntos,
                     cantidad: jug.cantidad,
                     numeros: asignados
