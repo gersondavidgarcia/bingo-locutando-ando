@@ -1037,10 +1037,16 @@
     };
 
     // ============================================================
-    // FUNCIÓN PARA REINICIAR TODO EL JUEGO
+    // FUNCIÓN PARA REINICIAR TODO EL JUEGO (CON DOBLE ADVERTENCIA)
     // ============================================================
     window.reiniciarTodoElJuego = async () => {
-        if (!confirm("⚠️⚠️⚠️ ¿REINICIAR TODO EL JUEGO?\n\nEsto reiniciará:\n• Ronda a 1\n• Rondas por jugador\n• Ranking de puntos (todos los tramos)\n• Ganadores de rondas\n• Números salidos\n\n¿Estás completamente seguro?")) {
+        // PRIMERA ADVERTENCIA
+        if (!confirm("⚠️⚠️⚠️ ¿REINICIAR TODO EL JUEGO?\n\nEsto reiniciará:\n• Ronda a 1\n• Rondas por jugador a 0\n• Ranking de puntos (todos los tramos) a 0\n• Ganadores de rondas (vacío)\n• Números salidos (vacío)\n\n¿Estás seguro?")) {
+            return;
+        }
+        
+        // SEGUNDA ADVERTENCIA
+        if (!confirm("⚠️⚠️⚠️ ÚLTIMA ADVERTENCIA ⚠️⚠️⚠️\n\nSe borrarán TODOS los datos del juego mencionados anteriormente\n\n¿Confirmas el reinicio total?")) {
             return;
         }
         
@@ -2186,82 +2192,96 @@
     // ========== FUNCIÓN REINICIAR TABLERO CON CRONÓMETRO OPTIMIZADO ==========
     window.reiniciarBingo = async () => {
         if (cronometroActivo) return;
+    
+     const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+     const acumuladoActual = getAcumuladoEnPesos();
+     const nuevaRondaPreview = numeroRonda + 1;
+    
+     let mensaje = "";
+     if (guardarEnReserva) {
+        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | +$2.500 guardado en RESERVA\n\n`;
+     } else {
+        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | Acumulado +$2.500 = $${(acumuladoActual + 2500).toLocaleString()}\n\n`;
+      }
+    
+     mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
+     mensaje += "• +1 RONDA a cada jugador activo\n";
+     mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
+     mensaje += "• +3 PUNTOS al ganador de BINGO\n";
+     mensaje += "• +2 PUNTOS al ganador de RULETA";
+    
+     if (!confirm(mensaje)) {
+        return;
+     }
+    
+     try {
+        guardarHistorial();
         
-        if (!confirm("⚠️ ¿Reiniciar tablero?\n\nSe borrarán todos los nombres y se sumará +$2.500 al acumulado.\n\n" + 
-            "• +1 RONDA a cada jugador activo\n" +
-            "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)")) { 
-            return;
+        let jugadoresActivos = new Set();
+        datos.forEach(c => {
+            c.lineas.forEach(linea => {
+                if (linea.nombre && linea.nombre !== "") {
+                    jugadoresActivos.add(linea.nombre);
+                }
+            });
+        });
+        
+        jugadoresActivos.forEach(jugador => {
+            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
+        });
+        
+        const tramoActual = getTramoActual();
+        const clave = getClaveTramo(tramoActual);
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+        
+        jugadoresActivos.forEach(jugador => {
+            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
+        });
+        
+        const backup = JSON.parse(JSON.stringify(datos));
+        backup.forEach(c => {
+            c.lineas.forEach(l => {
+                l.nombre = "";
+                l.estado = "libre";
+            });
+        });
+        datos = backup;
+        
+        const nuevaRonda = numeroRonda + 1;
+        let nuevoAcumulado = acumulado;
+        let nuevaReserva = acumuladoReserva;
+        
+        if (guardarEnReserva) {
+            nuevaReserva = acumuladoReserva + 1;
+        } else {
+            nuevoAcumulado = acumulado + 1;
         }
         
-        try {
-            guardarHistorial();
-            
-            let jugadoresActivos = new Set();
-            datos.forEach(c => {
-                c.lineas.forEach(linea => {
-                    if (linea.nombre && linea.nombre !== "") {
-                        jugadoresActivos.add(linea.nombre);
-                    }
-                });
-            });
-            
-            jugadoresActivos.forEach(jugador => {
-                rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-            });
-            
-            const tramoActual = getTramoActual();
-            const clave = getClaveTramo(tramoActual);
-            if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-            
-            jugadoresActivos.forEach(jugador => {
-                puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-            });
-            
-            const backup = JSON.parse(JSON.stringify(datos));
-            backup.forEach(c => {
-                c.lineas.forEach(l => {
-                    l.nombre = "";
-                    l.estado = "libre";
-                });
-            });
-            datos = backup;
-            
-            const nuevaRonda = numeroRonda + 1;
-            const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-            let nuevoAcumulado = acumulado;
-            let nuevaReserva = acumuladoReserva;
-            
-            if (guardarEnReserva) {
-                nuevaReserva = acumuladoReserva + 1;
-            } else {
-                nuevoAcumulado = acumulado + 1;
-            }
-            
-            await updateDoc(docRef, { 
-                cartones: datos, 
-                numero_ronda: nuevaRonda,
-                acumulado: nuevoAcumulado,
-                acumuladoReserva: nuevaReserva,
-                puntosPorTramo: puntosPorTramo,
-                rondasPorJugador: rondasPorJugador
-            });
-            
-            numeroRonda = nuevaRonda;
-            acumulado = nuevoAcumulado;
-            acumuladoReserva = nuevaReserva;
-            seleccionados = [];
-            
-            dibujar();
-            actualizarStats();
-            actualizarUIAcumulado();
-            document.getElementById('chkGuardarEnReserva').checked = false;
-            
-            // Iniciar cronómetro optimizado (solo 1 escritura en Firebase)
-            iniciarCronometroOptimizado();
-            
-        } catch (error) {
-            alert("❌ Error al reiniciar: " + error.message);
-            console.error(error);
+        await updateDoc(docRef, { 
+            cartones: datos, 
+            numero_ronda: nuevaRonda,
+            acumulado: nuevoAcumulado,
+            acumuladoReserva: nuevaReserva,
+            puntosPorTramo: puntosPorTramo,
+            rondasPorJugador: rondasPorJugador
+        });
+        
+        numeroRonda = nuevaRonda;
+        acumulado = nuevoAcumulado;
+        acumuladoReserva = nuevaReserva;
+        seleccionados = [];
+        
+        dibujar();
+        actualizarStats();
+        actualizarUIAcumulado();
+        document.getElementById('chkGuardarEnReserva').checked = false;
+        
+        // Iniciar cronómetro optimizado (solo 1 escritura en Firebase)
+        iniciarCronometroOptimizado();
+        
+     } catch (error) {
+        alert("❌ Error al reiniciar: " + error.message);
+        console.error(error);
         }
     };
     
