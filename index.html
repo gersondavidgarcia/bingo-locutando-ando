@@ -93,14 +93,15 @@
         }
         
         .contenedor-tablero {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            padding: 0;
-            margin: 0;
-            position: relative;
-        }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    min-height: 500px; /* ← Altura mínima fija */
+}
         
         .tablero { 
             display: grid; 
@@ -121,6 +122,7 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
         
+        /* ===== RONDA - VISIBLE SOLO EN ADMIN ===== */
         .ronda-grande {
             text-align: center;
             font-size: 36px;
@@ -132,6 +134,18 @@
             letter-spacing: 3px;
             text-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
             line-height: 1.2;
+            visibility: visible;
+            height: auto;
+            overflow: visible;
+            transition: none;
+        }
+        /* Cuando está oculta, mantiene el espacio pero no se ve */
+        .ronda-grande.oculta {
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
         }
         
         .acumulado-visible {
@@ -518,7 +532,8 @@
     </div>
 
     <div class="tablero" id="tablero"></div>
-    <div class="ronda-grande" id="rondaGrande">🎰 RONDA 1 🎰</div>
+    <!-- ===== RONDA - OCULTA POR DEFECTO, VISIBLE EN ADMIN ===== -->
+    <div class="ronda-grande oculta" id="rondaGrande">🎰 RONDA 1 🎰</div>
     <div class="acumulado-visible" id="acumuladoVisible">🏆 ACUMULADO: $0</div>
 </div>
 
@@ -1017,7 +1032,9 @@
             line = line.trim();
             if (line.includes(':')) {
                 const partes = line.split(':');
-                const nombre = partes[0].trim().toUpperCase();
+                // ===== LIMPIAR EL NOMBRE ANTES DE GUARDAR =====
+                let nombre = partes[0].trim().toUpperCase();
+                nombre = limpiarNombre(nombre); // ← Elimina números como "1. DAVID" → "DAVID"
                 const valor = parseInt(partes[1].trim());
                 if (nombre && !isNaN(valor) && valor >= 0) {
                     nuevosPuntos[nombre] = valor;
@@ -1581,7 +1598,13 @@
         
         const rondaGrande = document.getElementById("rondaGrande");
         if (rondaGrande) {
-            rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
+            // ===== MOSTRAR RONDA SOLO SI EL ADMIN ESTÁ LOGUEADO =====
+            if (config.admin) {
+                rondaGrande.classList.remove('oculta');
+                rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
+            } else {
+                rondaGrande.classList.add('oculta');
+            }
         }
         actualizarUIAcumulado();
     }
@@ -1698,6 +1721,7 @@
                 document.getElementById("adminPanel").style.display = "flex";
                 document.getElementById("adminExtraPanel").style.display = "block";
                 actualizarCampoNombre();
+                actualizarStats(); // ← Para mostrar la ronda
             } else alert("Clave incorrecta");
         } else {
             config.admin = false;
@@ -1707,6 +1731,7 @@
             seleccionados = [];
             document.getElementById("msgLineas").innerText = "";
             actualizarCampoNombre();
+            actualizarStats(); // ← Para ocultar la ronda
             dibujar();
         }
     };
@@ -2124,7 +2149,7 @@
         let txt = "";
         txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
         txt += "https://bingo-locutando.online/\n\n";
-        txt += `*Ronda ${numeroRonda}*\n \n`;
+        // ===== YA NO MUESTRA LA RONDA =====
         txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
         txt += "🎰 *RULETA:* $5.000💰\n";
@@ -2140,7 +2165,7 @@
     
     window.copiarListaBingo = () => {
         let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += `*Ronda ${numeroRonda}*\n\n`;
+        // ===== YA NO MUESTRA LA RONDA =====
         txt += "*💵 Valor:* $1.500\n───────\n";
         txt += "🏆 *BINGO:* $10.000💰\n";
         txt += "🎰 *RULETA:* $5.000💰\n";
@@ -2202,95 +2227,117 @@
     window.reiniciarBingo = async () => {
         if (cronometroActivo) return;
     
-     const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
-     const acumuladoActual = getAcumuladoEnPesos();
-     const nuevaRondaPreview = numeroRonda + 1;
+        const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
+        const acumuladoActual = getAcumuladoEnPesos();
+        const nuevaRondaPreview = numeroRonda + 1;
     
-     let mensaje = "";
-     if (guardarEnReserva) {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | +$2.500 guardado en RESERVA\n\n`;
-     } else {
-        mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | Acumulado +$2.500 = $${(acumuladoActual + 2500).toLocaleString()}\n\n`;
-      }
-    
-     mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-     mensaje += "• +1 RONDA a cada jugador activo\n";
-     mensaje += "• +1 PUNTO a cada jugador activo (se guarda en el tramo actual)\n";
-     mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-     mensaje += "• +2 PUNTOS al ganador de RULETA";
-    
-     if (!confirm(mensaje)) {
-        return;
-     }
-    
-     try {
-        guardarHistorial();
-        
-        let jugadoresActivos = new Set();
-        datos.forEach(c => {
-            c.lineas.forEach(linea => {
-                if (linea.nombre && linea.nombre !== "") {
-                    jugadoresActivos.add(linea.nombre);
-                }
-            });
-        });
-        
-        jugadoresActivos.forEach(jugador => {
-            rondasPorJugador[jugador] = (rondasPorJugador[jugador] || 0) + 1;
-        });
-        
-        const tramoActual = getTramoActual();
-        const clave = getClaveTramo(tramoActual);
-        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-        
-        jugadoresActivos.forEach(jugador => {
-            puntosPorTramo[clave][jugador] = (puntosPorTramo[clave][jugador] || 0) + 1;
-        });
-        
-        const backup = JSON.parse(JSON.stringify(datos));
-        backup.forEach(c => {
-            c.lineas.forEach(l => {
-                l.nombre = "";
-                l.estado = "libre";
-            });
-        });
-        datos = backup;
-        
-        const nuevaRonda = numeroRonda + 1;
-        let nuevoAcumulado = acumulado;
-        let nuevaReserva = acumuladoReserva;
-        
+        let mensaje = "";
         if (guardarEnReserva) {
-            nuevaReserva = acumuladoReserva + 1;
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | +$2.500 guardado en RESERVA\n\n`;
         } else {
-            nuevoAcumulado = acumulado + 1;
+            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | Acumulado +$2.500 = $${(acumuladoActual + 2500).toLocaleString()}\n\n`;
         }
-        
-        await updateDoc(docRef, { 
-            cartones: datos, 
-            numero_ronda: nuevaRonda,
-            acumulado: nuevoAcumulado,
-            acumuladoReserva: nuevaReserva,
-            puntosPorTramo: puntosPorTramo,
-            rondasPorJugador: rondasPorJugador
-        });
-        
-        numeroRonda = nuevaRonda;
-        acumulado = nuevoAcumulado;
-        acumuladoReserva = nuevaReserva;
-        seleccionados = [];
-        
-        dibujar();
-        actualizarStats();
-        actualizarUIAcumulado();
-        document.getElementById('chkGuardarEnReserva').checked = false;
-        
-        // Iniciar cronómetro optimizado (solo 1 escritura en Firebase)
-        iniciarCronometroOptimizado();
-        
-     } catch (error) {
-        alert("❌ Error al reiniciar: " + error.message);
-        console.error(error);
+    
+        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
+        mensaje += "• +1 RONDA a cada jugador activo\n";
+        mensaje += "• +1 PUNTO por cada línea ocupada (se guarda en el tramo actual)\n";
+        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
+        mensaje += "• +2 PUNTOS al ganador de RULETA";
+    
+        if (!confirm(mensaje)) {
+            return;
+        }
+    
+        try {
+            guardarHistorial();
+            
+            // ============================================================
+            // 1. OBTENER EL TRAMO ACTUAL Y LA CLAVE (ANTES DE USARLA)
+            // ============================================================
+            const tramoActual = getTramoActual();
+            const clave = getClaveTramo(tramoActual);
+            if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+            
+            // ============================================================
+            // 2. CONTAR TODAS LAS LÍNEAS OCUPADAS POR CADA JUGADOR
+            // ============================================================
+            let lineasPorJugador = {};
+            datos.forEach(c => {
+                c.lineas.forEach(linea => {
+                    if (linea.nombre && linea.nombre !== "") {
+                        const nombre = linea.nombre.trim();
+                        lineasPorJugador[nombre] = (lineasPorJugador[nombre] || 0) + 1;
+                    }
+                });
+            });
+            
+            // ============================================================
+            // 3. SUMAR TODAS LAS LÍNEAS AL RANKING (PUNTOS)
+            // ============================================================
+            Object.entries(lineasPorJugador).forEach(([nombre, cantidad]) => {
+                puntosPorTramo[clave][nombre] = (puntosPorTramo[clave][nombre] || 0) + cantidad;
+            });
+            
+            // ============================================================
+            // 4. SUMAR RONDAS POR JUGADOR (1 ronda por persona, sin importar líneas)
+            // ============================================================
+            Object.keys(lineasPorJugador).forEach(nombre => {
+                rondasPorJugador[nombre] = (rondasPorJugador[nombre] || 0) + 1;
+            });
+            
+            // ============================================================
+            // 5. BORRAR LOS NOMBRES DE LOS CARTONES
+            // ============================================================
+            const backup = JSON.parse(JSON.stringify(datos));
+            backup.forEach(c => {
+                c.lineas.forEach(l => {
+                    l.nombre = "";
+                    l.estado = "libre";
+                });
+            });
+            datos = backup;
+            
+            // ============================================================
+            // 6. ACTUALIZAR RONDA Y ACUMULADO
+            // ============================================================
+            const nuevaRonda = numeroRonda + 1;
+            let nuevoAcumulado = acumulado;
+            let nuevaReserva = acumuladoReserva;
+            
+            if (guardarEnReserva) {
+                nuevaReserva = acumuladoReserva + 1;
+            } else {
+                nuevoAcumulado = acumulado + 1;
+            }
+            
+            // ============================================================
+            // 7. GUARDAR EN FIREBASE
+            // ============================================================
+            await updateDoc(docRef, { 
+                cartones: datos, 
+                numero_ronda: nuevaRonda,
+                acumulado: nuevoAcumulado,
+                acumuladoReserva: nuevaReserva,
+                puntosPorTramo: puntosPorTramo,
+                rondasPorJugador: rondasPorJugador
+            });
+            
+            numeroRonda = nuevaRonda;
+            acumulado = nuevoAcumulado;
+            acumuladoReserva = nuevaReserva;
+            seleccionados = [];
+            
+            dibujar();
+            actualizarStats();
+            actualizarUIAcumulado();
+            document.getElementById('chkGuardarEnReserva').checked = false;
+            
+            // Iniciar cronómetro optimizado (solo 1 escritura en Firebase)
+            iniciarCronometroOptimizado();
+            
+        } catch (error) {
+            alert("❌ Error al reiniciar: " + error.message);
+            console.error(error);
         }
     };
     
