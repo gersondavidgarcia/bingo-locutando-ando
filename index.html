@@ -1640,10 +1640,12 @@
         btnLupa.style.background = modoVerificacion ? "#38D400" : "#007bff";
     }
 
+    // ============================================================
+    // MANEJAR CLICK - VERSIÓN MEJORADA CON LECTURA PREVIA DE FIREBASE
+    // ============================================================
     async function manejarClick(c, l) {
-        // ===== BLOQUEO DE CLICS MIENTRAS EL CRONÓMETRO ESTÁ ACTIVO =====
+        // Bloquear clics mientras el cronómetro está activo
         if (cronometroActivo) {
-            // No hace nada, solo ignora el click
             return;
         }
         
@@ -1652,6 +1654,7 @@
         const lineaActual = datos[c].lineas[l];
         const nombreClick = lineaActual.nombre;
         
+        // Modo verificación (lupa)
         if (modoVerificacion && nombreClick && nombreClick !== "") {
             seleccionados = [];
             let listaCartones = [];
@@ -1665,37 +1668,99 @@
             });
             document.getElementById("msgLineas").innerText = `${nombreClick}: ${seleccionados.length} líneas en: ${listaCartones.join(", ")}`;
             dibujar();
-        } 
-        else if (config.admin) {
+            return;
+        }
+        
+        // Modo administrador
+        if (config.admin) {
             const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
             if(lineaActual.estado === "libre" && nombreInput !== "") {
                 pendingUpdate = true;
                 guardarHistorial();
-                datos[c].lineas[l] = { nombre: nombreInput, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos });
+                
+                // ===== LEER EL DOCUMENTO ACTUAL DESDE FIREBASE =====
+                try {
+                    const snap = await getDoc(docRef);
+                    if (!snap.exists()) {
+                        pendingUpdate = false;
+                        return;
+                    }
+                    const data = snap.data();
+                    let cartonesActuales = data.cartones || [];
+                    
+                    // Asegurar que el índice existe
+                    if (!cartonesActuales[c] || !cartonesActuales[c].lineas) {
+                        pendingUpdate = false;
+                        return;
+                    }
+                    
+                    // Verificar que la línea sigue libre (evita conflictos)
+                    if (cartonesActuales[c].lineas[l].estado !== "libre") {
+                        pendingUpdate = false;
+                        return;
+                    }
+                    
+                    // Modificar la línea específica
+                    cartonesActuales[c].lineas[l] = { nombre: nombreInput, estado: "reservado" };
+                    
+                    // Guardar en Firebase
+                    await updateDoc(docRef, { cartones: cartonesActuales });
+                } catch (error) {
+                    console.error("Error al guardar:", error);
+                }
                 pendingUpdate = false;
-                dibujar();
-                actualizarStats();
+                // El onSnapshot actualizará la UI automáticamente
             } else {
                 const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
                 if (idx > -1) seleccionados.splice(idx, 1);
                 else seleccionados.push({c, l});
                 dibujar();
             }
-        } 
-        else {
-            if(config.bloqueado && !config.admin) return;
-            const n = document.getElementById("nombreUser").value.trim().toUpperCase();
-            if(!n) return;
-            if(lineaActual.estado === "libre") {
-                pendingUpdate = true;
-                guardarHistorial();
-                datos[c].lineas[l] = { nombre: n, estado: "reservado" };
-                await updateDoc(docRef, { cartones: datos });
-                pendingUpdate = false;
-                dibujar();
-                actualizarStats();
+            return;
+        }
+        
+        // Usuario normal (no admin)
+        if(config.bloqueado && !config.admin) return;
+        const n = document.getElementById("nombreUser").value.trim().toUpperCase();
+        if(!n) return;
+        
+        if(lineaActual.estado === "libre") {
+            pendingUpdate = true;
+            guardarHistorial();
+            
+            // ===== LEER EL DOCUMENTO ACTUAL DESDE FIREBASE =====
+            try {
+                const snap = await getDoc(docRef);
+                if (!snap.exists()) {
+                    pendingUpdate = false;
+                    return;
+                }
+                const data = snap.data();
+                let cartonesActuales = data.cartones || [];
+                
+                // Asegurar que el índice existe
+                if (!cartonesActuales[c] || !cartonesActuales[c].lineas) {
+                    pendingUpdate = false;
+                    return;
+                }
+                
+                // Verificar que la línea sigue libre (evita conflictos)
+                if (cartonesActuales[c].lineas[l].estado !== "libre") {
+                    alert("⚠️ Esta línea ya fue ocupada por otra persona.");
+                    pendingUpdate = false;
+                    return;
+                }
+                
+                // Modificar la línea específica
+                cartonesActuales[c].lineas[l] = { nombre: n, estado: "reservado" };
+                
+                // Guardar en Firebase
+                await updateDoc(docRef, { cartones: cartonesActuales });
+            } catch (error) {
+                console.error("Error al guardar:", error);
             }
+            pendingUpdate = false;
+            // El onSnapshot actualizará la UI automáticamente
         }
     }
 
