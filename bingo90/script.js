@@ -47,7 +47,6 @@
         '#17becf', '#e377c2', '#393b79', '#6b6ecf'
     ];
 
-    // ANIMACIÓN DE MIRA TELESCÓPICA - AHORA ESPERA 1.8 SEGUNDOS A QUE DESAPAREZCA TOTALMENTE
     function animarCirculoEnCelda(celda) {
         return new Promise((resolve) => {
             if (!celda) {
@@ -69,7 +68,6 @@
 
             document.body.appendChild(circulo);
 
-            // Tiempo extendido a 1800ms (1.8s)
             setTimeout(() => {
                 circulo.remove();
                 resolve();
@@ -360,9 +358,16 @@
         });
     }
 
-    function actualizarMarcasCartones(num) {
+    // BLOQUEA EL PINTADO SI ESTE CARTÓN ES EL QUE TIENE EL PREMIO PENDIENTE POR LA MIRA
+    function actualizarMarcasCartones(num, idCartonIgnorar = null) {
         const celdasCoincidentes = document.querySelectorAll(`.celda[data-num="${num}"]`);
+        
         celdasCoincidentes.forEach(celda => {
+            const cartonPadre = celda.closest('.carton');
+            if (idCartonIgnorar && cartonPadre && cartonPadre.id === `carton-${idCartonIgnorar}`) {
+                return; // Ignora por completo esta celda para que se quede blanca
+            }
+
             if (markedNumbers.has(num)) {
                 celda.classList.remove('marcada', 'animar-marca', 'con-raya');
                 void celda.offsetWidth;
@@ -370,15 +375,11 @@
                 celda.classList.add('animar-marca');
 
                 setTimeout(() => {
-                    if (markedNumbers.has(num)) {
-                        celda.classList.add('marcada');
-                    }
+                    if (markedNumbers.has(num)) celda.classList.add('marcada');
                 }, 600);
 
                 setTimeout(() => {
-                    if (markedNumbers.has(num)) {
-                        celda.classList.add('con-raya');
-                    }
+                    if (markedNumbers.has(num)) celda.classList.add('con-raya');
                 }, 1000);
 
             } else {
@@ -388,9 +389,12 @@
 
         if (markedNumbers.has(num)) {
             currentCartones.forEach((carton, idx) => {
+                const idCartonActual = idx + 1;
+                if (idCartonIgnorar && idCartonActual === idCartonIgnorar) return;
+
                 const tieneNumero = carton.some(row => row.includes(num));
                 if (tieneNumero) {
-                    const headerElem = document.getElementById(`carton-header-${idx + 1}`);
+                    const headerElem = document.getElementById(`carton-header-${idCartonActual}`);
                     if (headerElem) {
                         headerElem.classList.remove('hit-alert');
                         void headerElem.offsetWidth;
@@ -407,6 +411,23 @@
             } else {
                 bolita.classList.remove('marcada');
             }
+        }
+    }
+
+    // PINTA Y RAYA LA CELDA ÚNICAMENTE CUANDO EL CÍRCULO TERMINA DE BAJAR
+    function ejecutarMarcadoPremioGanador(num, idCarton) {
+        const celda = document.querySelector(`#carton-${idCarton} .celda[data-num="${num}"]`);
+        if (celda) {
+            celda.classList.remove('marcada', 'animar-marca', 'con-raya');
+            void celda.offsetWidth;
+            celda.classList.add('animar-marca', 'marcada', 'con-raya');
+        }
+
+        const headerElem = document.getElementById(`carton-header-${idCarton}`);
+        if (headerElem) {
+            headerElem.classList.remove('hit-alert');
+            void headerElem.offsetWidth;
+            headerElem.classList.add('hit-alert');
         }
     }
 
@@ -544,12 +565,11 @@
             void sphere.offsetWidth;
             sphere.classList.add('rodar-entrada');
 
-            actualizarMarcasCartones(num);
+            await verificarPremios(num);
+
             actualizarEstado(num);
             actualizarRecientesUI();
             decirNumero(num);
-
-            await verificarPremios(num);
 
             setTimeout(() => {
                 sphere.classList.remove('rodar-entrada');
@@ -601,31 +621,44 @@
             }
         }
 
+        let idCartonGanadorPospuesto = null;
+
+        if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
+            idCartonGanadorPospuesto = candidatosLinea[0].idCarton;
+        } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
+            idCartonGanadorPospuesto = candidatosBingo[0].idCarton;
+        }
+
+        // Aquí se actualizan las marcas normales, pero ignorando la celda ganadora temporalmente
+        actualizarMarcasCartones(numActual, idCartonGanadorPospuesto);
+
+        // LÍNEA
         if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
             lineaCantadaGlobal = true;
             const ganador = candidatosLinea[0];
-
             const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
 
             if (celdaGanadora) {
                 await animarCirculoEnCelda(celdaGanadora);
             }
 
+            ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
             trazarLineaGanadora(ganador.idx, ganador.r);
             agregarBadgePremio(ganador.idCarton, 'linea');
             mostrarBanner(`¡LÍNEA EN CARTÓN ${ganador.idCarton}! 📐`, false);
         }
 
+        // BINGO
         if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
             bingoCantadoGlobal = true;
             const ganador = candidatosBingo[0];
-
             const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
 
             if (celdaGanadora) {
                 await animarCirculoEnCelda(celdaGanadora);
             }
 
+            ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
             agregarBadgePremio(ganador.idCarton, 'bingo');
             mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganador.idCarton} !! 🎉🏆`, true);
         }
