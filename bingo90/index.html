@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bingo Tradicional · Premio Único Global</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="bingo-app">
+        <div class="header-bar">
+            <h1>🎲 BINGO (10 CARTONES - REGLAS OFICIALES)</h1>
+            <div class="header-actions">
+                <button class="btn-generar" id="btnGenerar">🔄 Cambiar</button>
+                <button class="btn-reset" id="resetBtn">⟲ Limpiar</button>
+            </div>
+        </div>
+
+        <div class="banner-premio" id="bannerPremio"></div>
+
+        <div class="cartones-grid" id="cartonesGrid"></div>
+
+        <div class="bolillero-container">
+            <div class="bolillero-top-row">
+                <div class="bolillero-stage">
+                    <div class="bolillero-sphere" id="bolilleroSphere">
+                        <span class="bolillero-numero" id="numeroDisplay">--</span>
+                    </div>
+                </div>
+                <button class="btn-sacar-bola" id="btnSacarBola">🎱 SACAR BOLA</button>
+                <div class="stats-box">
+                    Bolas
+                    <span id="statsDisplay">0/90</span>
+                </div>
+            </div>
+
+            <div class="recientes-container">
+                <div class="recientes-lista" id="recientesLista"></div>
+            </div>
+        </div>
+
+        <div class="panel-numeros-inferior">
+            <div class="titulo-tabla">CONTROL (1 - 90)</div>
+            <div class="tabla-numeros" id="tablaNumeros"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
