@@ -8,10 +8,9 @@
 
     let lineaCantadaGlobal = false;
     let bingoCantadoGlobal = false;
+    let pausarMarcadoGeneral = false;
 
-    // RASTREO DE ALERTAS POR CARTÓN Y FILA
     let estadoAlertasA1 = new Map();
-
     const TOTAL_CARTONES = 10;
 
     const paletasColores = [
@@ -63,13 +62,20 @@
             
             circulo.style.left = `${centroX}px`;
             circulo.style.top = `${centroY}px`;
-            circulo.style.width = `${rect.width * 1.2}px`;
-            circulo.style.height = `${rect.height * 1.2}px`;
+            circulo.style.width = `${Math.max(rect.width * 1.5, 60)}px`;
+            circulo.style.height = `${Math.max(rect.height * 1.5, 60)}px`;
 
             document.body.appendChild(circulo);
 
+            void circulo.offsetWidth;
+
+            console.log('✅ Círculo creado en:', centroX, centroY);
+
             setTimeout(() => {
-                circulo.remove();
+                if (circulo.parentNode) {
+                    circulo.remove();
+                    console.log('🗑️ Círculo eliminado');
+                }
                 resolve();
             }, 1800);
         });
@@ -111,6 +117,7 @@
         shuffle(bolasDisponibles);
         historialBolas = [];
         esPrimeraBola = true;
+        pausarMarcadoGeneral = false;
     }
 
     function tieneDemasiadosConsecutivos(fila) {
@@ -358,16 +365,12 @@
         });
     }
 
-    // BLOQUEA EL PINTADO SI ESTE CARTÓN ES EL QUE TIENE EL PREMIO PENDIENTE POR LA MIRA
-    function actualizarMarcasCartones(num, idCartonIgnorar = null) {
+    function actualizarMarcasCartones(num) {
+        if (pausarMarcadoGeneral) return;
+
         const celdasCoincidentes = document.querySelectorAll(`.celda[data-num="${num}"]`);
         
         celdasCoincidentes.forEach(celda => {
-            const cartonPadre = celda.closest('.carton');
-            if (idCartonIgnorar && cartonPadre && cartonPadre.id === `carton-${idCartonIgnorar}`) {
-                return; // Ignora por completo esta celda para que se quede blanca
-            }
-
             if (markedNumbers.has(num)) {
                 celda.classList.remove('marcada', 'animar-marca', 'con-raya');
                 void celda.offsetWidth;
@@ -390,8 +393,6 @@
         if (markedNumbers.has(num)) {
             currentCartones.forEach((carton, idx) => {
                 const idCartonActual = idx + 1;
-                if (idCartonIgnorar && idCartonActual === idCartonIgnorar) return;
-
                 const tieneNumero = carton.some(row => row.includes(num));
                 if (tieneNumero) {
                     const headerElem = document.getElementById(`carton-header-${idCartonActual}`);
@@ -414,7 +415,6 @@
         }
     }
 
-    // PINTA Y RAYA LA CELDA ÚNICAMENTE CUANDO EL CÍRCULO TERMINA DE BAJAR
     function ejecutarMarcadoPremioGanador(num, idCarton) {
         const celda = document.querySelector(`#carton-${idCarton} .celda[data-num="${num}"]`);
         if (celda) {
@@ -532,14 +532,71 @@
             markedNumbers.delete(num);
             historialBolas = historialBolas.filter(n => n !== num);
             actualizarMarcasCartones(num);
+            actualizarEstado(num);
+            actualizarRecientesUI();
+            // No verificamos premios al desmarcar
         } else {
+            // Para marcar manual desde la tabla, lo hacemos de forma síncrona
             markedNumbers.add(num);
             historialBolas.push(num);
-            actualizarMarcasCartones(num);
+            
+            // Verificar premios de forma síncrona (sin animaciones)
+            verificarPremiosManual(num);
+            
+            actualizarEstado(num);
+            actualizarRecientesUI();
         }
-        actualizarEstado(num);
-        actualizarRecientesUI();
-        verificarPremios(num);
+    }
+
+    function verificarPremiosManual(numActual) {
+        // Verificar si hay premio después de marcar manualmente
+        let hayLinea = false;
+        let hayBingo = false;
+        let ganadorLinea = null;
+        let ganadorBingo = null;
+
+        for (let idx = 0; idx < currentCartones.length; idx++) {
+            const carton = currentCartones[idx];
+            let numerosMarcadosTotal = 0;
+
+            for (let r = 0; r < 3; r++) {
+                const numerosFila = carton[r].filter(n => n !== null);
+                const filaCompletada = numerosFila.every(n => markedNumbers.has(n));
+
+                if (filaCompletada && !lineaCantadaGlobal) {
+                    hayLinea = true;
+                    ganadorLinea = { idx, r, idCarton: idx + 1 };
+                }
+
+                numerosMarcadosTotal += numerosFila.filter(n => markedNumbers.has(n)).length;
+            }
+
+            if (numerosMarcadosTotal === 15 && !bingoCantadoGlobal) {
+                hayBingo = true;
+                ganadorBingo = { idx, idCarton: idx + 1 };
+            }
+        }
+
+        if (hayLinea && !lineaCantadaGlobal) {
+            lineaCantadaGlobal = true;
+            if (ganadorLinea) {
+                trazarLineaGanadora(ganadorLinea.idx, ganadorLinea.r);
+                agregarBadgePremio(ganadorLinea.idCarton, 'linea');
+                mostrarBanner(`¡LÍNEA EN CARTÓN ${ganadorLinea.idCarton}! 📐`, false);
+            }
+        }
+
+        if (hayBingo && !bingoCantadoGlobal) {
+            bingoCantadoGlobal = true;
+            if (ganadorBingo) {
+                agregarBadgePremio(ganadorBingo.idCarton, 'bingo');
+                mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganadorBingo.idCarton} !! 🎉🏆`, true);
+            }
+        }
+
+        // Actualizar marcas visuales
+        actualizarMarcasCartones(numActual);
+        calcularYMostrarAlertasA1();
     }
 
     function sacarBolaConAnimacion() {
@@ -555,9 +612,8 @@
 
         const ejecutarEntradaNuevaBola = async () => {
             const num = bolasDisponibles.pop();
-            markedNumbers.add(num);
-            historialBolas.push(num);
-
+            
+            // 1. Mostrar la bola en el bolillero
             display.textContent = num;
             sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
 
@@ -565,16 +621,20 @@
             void sphere.offsetWidth;
             sphere.classList.add('rodar-entrada');
 
-            await verificarPremios(num);
-
-            actualizarEstado(num);
-            actualizarRecientesUI();
             decirNumero(num);
 
-            setTimeout(() => {
-                sphere.classList.remove('rodar-entrada');
-                isAnimating = false;
-            }, 650);
+            // Esperar a que la bola termine la animación
+            await new Promise(r => setTimeout(r, 650));
+
+            // 2. Verificar premios (el número NO se ha marcado aún)
+            await verificarPremiosConSincronizacion(num);
+
+            // Actualizar UI
+            actualizarEstado(num);
+            actualizarRecientesUI();
+
+            sphere.classList.remove('rodar-entrada');
+            isAnimating = false;
         };
 
         if (esPrimeraBola) {
@@ -596,74 +656,116 @@
         document.getElementById('statsDisplay').textContent = `${markedNumbers.size}/90`;
     }
 
-    async function verificarPremios(numActual) {
+    async function verificarPremiosConSincronizacion(numActual) {
+        // PRIMERO: Buscar candidatos a premio ANTES de pintar
         let candidatosLinea = [];
         let candidatosBingo = [];
 
+        // Verificar si hay premio con el número actual (sin marcarlo aún)
         for (let idx = 0; idx < currentCartones.length; idx++) {
             const carton = currentCartones[idx];
-            const idCarton = idx + 1;
             let numerosMarcadosTotal = 0;
 
             for (let r = 0; r < 3; r++) {
                 const numerosFila = carton[r].filter(n => n !== null);
-                const filaCompletada = numerosFila.every(n => markedNumbers.has(n));
+                // Verificar si con el número actual se completa la fila
+                const filaCompletada = numerosFila.every(n => markedNumbers.has(n) || n === numActual);
 
                 if (filaCompletada && !lineaCantadaGlobal) {
-                    candidatosLinea.push({ idx, r, idCarton });
+                    // Solo si la fila NO estaba completa antes de este número
+                    const filaCompletaSinActual = numerosFila.every(n => markedNumbers.has(n));
+                    if (!filaCompletaSinActual) {
+                        candidatosLinea.push({ idx, r, idCarton: idx + 1 });
+                    }
                 }
 
-                numerosMarcadosTotal += numerosFila.filter(n => markedNumbers.has(n)).length;
+                // Contar marcados incluyendo el actual
+                const marcadosEnFila = numerosFila.filter(n => markedNumbers.has(n) || n === numActual).length;
+                numerosMarcadosTotal += marcadosEnFila;
             }
 
+            // Verificar bingo incluyendo el número actual
             if (numerosMarcadosTotal === 15 && !bingoCantadoGlobal) {
-                candidatosBingo.push({ idx, idCarton });
+                // Solo si NO estaba completo antes
+                let marcadosPrevios = 0;
+                for (let r = 0; r < 3; r++) {
+                    const numerosFila = carton[r].filter(n => n !== null);
+                    marcadosPrevios += numerosFila.filter(n => markedNumbers.has(n)).length;
+                }
+                if (marcadosPrevios === 14) {
+                    candidatosBingo.push({ idx, idCarton: idx + 1 });
+                }
             }
         }
 
-        let idCartonGanadorPospuesto = null;
-
-        if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
-            idCartonGanadorPospuesto = candidatosLinea[0].idCarton;
-        } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
-            idCartonGanadorPospuesto = candidatosBingo[0].idCarton;
-        }
-
-        // Aquí se actualizan las marcas normales, pero ignorando la celda ganadora temporalmente
-        actualizarMarcasCartones(numActual, idCartonGanadorPospuesto);
-
-        // LÍNEA
-        if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
-            lineaCantadaGlobal = true;
-            const ganador = candidatosLinea[0];
-            const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
-
-            if (celdaGanadora) {
-                await animarCirculoEnCelda(celdaGanadora);
+        // CASO: HAY PREMIO (Línea o Bingo)
+        if ((candidatosLinea.length > 0 && !lineaCantadaGlobal) || (candidatosBingo.length > 0 && !bingoCantadoGlobal)) {
+            
+            // La casilla NO se pinta aún - permanece en blanco
+            
+            // Si hay línea
+            if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
+                lineaCantadaGlobal = true;
+                const ganador = candidatosLinea[0];
+                
+                // Buscar la celda ganadora (está en blanco porque no se ha pintado)
+                const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
+                
+                console.log('🎯 LÍNEA! Celda ganadora:', celdaGanadora);
+                
+                // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
+                if (celdaGanadora) {
+                    await animarCirculoEnCelda(celdaGanadora);
+                }
+                
+                // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla y la fila
+                markedNumbers.add(numActual);
+                pausarMarcadoGeneral = false;
+                actualizarMarcasCartones(numActual);
+                
+                ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
+                trazarLineaGanadora(ganador.idx, ganador.r);
+                agregarBadgePremio(ganador.idCarton, 'linea');
+                mostrarBanner(`¡LÍNEA EN CARTÓN ${ganador.idCarton}! 📐`, false);
+                
+            // Si hay bingo
+            } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
+                bingoCantadoGlobal = true;
+                const ganador = candidatosBingo[0];
+                
+                // Buscar la celda ganadora (está en blanco porque no se ha pintado)
+                const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
+                
+                console.log('🎯 BINGO! Celda ganadora:', celdaGanadora);
+                
+                // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
+                if (celdaGanadora) {
+                    await animarCirculoEnCelda(celdaGanadora);
+                }
+                
+                // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla
+                markedNumbers.add(numActual);
+                pausarMarcadoGeneral = false;
+                actualizarMarcasCartones(numActual);
+                
+                ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
+                agregarBadgePremio(ganador.idCarton, 'bingo');
+                mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganador.idCarton} !! 🎉🏆`, true);
             }
 
-            ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
-            trazarLineaGanadora(ganador.idx, ganador.r);
-            agregarBadgePremio(ganador.idCarton, 'linea');
-            mostrarBanner(`¡LÍNEA EN CARTÓN ${ganador.idCarton}! 📐`, false);
-        }
-
-        // BINGO
-        if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
-            bingoCantadoGlobal = true;
-            const ganador = candidatosBingo[0];
-            const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
-
-            if (celdaGanadora) {
-                await animarCirculoEnCelda(celdaGanadora);
-            }
-
-            ejecutarMarcadoPremioGanador(numActual, ganador.idCarton);
-            agregarBadgePremio(ganador.idCarton, 'bingo');
-            mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganador.idCarton} !! 🎉🏆`, true);
+        } else {
+            // CASO: JUGADA NORMAL (Sin premio) -> Se marca y se pinta la casilla normalmente
+            markedNumbers.add(numActual);
+            pausarMarcadoGeneral = false;
+            actualizarMarcasCartones(numActual);
         }
 
         calcularYMostrarAlertasA1();
+    }
+
+    function verificarPremios(numActual) {
+        // Mantenemos esta función de compatibilidad por si se llama desde el toggle manual de la tabla
+        verificarPremiosConSincronizacion(numActual);
     }
 
     function mostrarBanner(texto, esBingo) {
@@ -680,6 +782,7 @@
         markedNumbers.clear();
         lineaCantadaGlobal = false;
         bingoCantadoGlobal = false;
+        pausarMarcadoGeneral = false;
         estadoAlertasA1.clear();
         inicializarBolillero();
         document.getElementById('numeroDisplay').textContent = '--';
