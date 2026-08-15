@@ -5,12 +5,11 @@
 }
 
 body {
-    background: #f0f2f5; /* Tu color gris original */
+    background: #f0f2f5;
     font-family: 'Segoe UI', Arial, sans-serif;
-    /* 🟢 CAMBIOS CLAVE: Altura forzada y sin scroll */
-    height: 100vh; 
-    overflow: hidden; 
-    /* 🟢 FIN DE CAMBIOS CLAVE */
+    /* 🟢 CAMBIO CLAVE PARA MÓVILES: Usamos 100dvh en lugar de 100vh */
+    height: 100dvh; 
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: flex-start;
