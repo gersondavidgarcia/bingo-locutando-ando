@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bingo 90 - Menú Principal</title>
+    
+    <!-- Configuración PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="x5-full-screen" content="true">
+    <meta name="full-screen" content="yes">
+    
+    <style>
+        /* Estilos exclusivos del menú (no toca tu style.css) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+        }
+        .menu-container {
+            text-align: center;
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            font-size: 4.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #f5c842;
+            text-shadow: 0 4px 15px rgba(245, 200, 66, 0.3);
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 1rem;
+            color: #b0b0b0;
+            margin-bottom: 40px;
+        }
+        .btn-jugar {
+            background: #f5c842;
+            color: #1a1a2e;
+            border: none;
+            padding: 18px 0;
+            font-size: 1.4rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(245, 200, 66, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .btn-jugar:active { transform: scale(0.96); }
+        
+        .btn-reglas {
+            background: transparent;
+            color: #888;
+            border: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .btn-reglas:active { color: #fff; }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #444;
+        }
+
+        /* Modal de reglas */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-box {
+            background: #1a1a2e;
+            border: 1px solid #f5c842;
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 340px;
+            width: 90%;
+            text-align: left;
+            color: #e0e0e0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+        .modal-box h2 {
+            color: #f5c842;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .modal-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .modal-box ul li::before {
+            content: "🎯 ";
+        }
+        .modal-box .cerrar-modal {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f5c842;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <span class="logo">🎲</span>
+        <h1>BINGO 90</h1>
+        <p class="subtitle">10 Cartones · Premio Único Global</p>
+        
+        <button class="btn-jugar" onclick="irAlJuego()">▶ JUGAR</button>
+        <button class="btn-reglas" onclick="abrirReglas()">📖 Reglas del juego</button>
+
+        <div class="footer">Locutando Online</div>
+    </div>
+
+    <!-- Modal de Reglas -->
+    <div class="modal-overlay" id="modalReglas">
+        <div class="modal-box">
+            <h2>📖 Reglas</h2>
+            <ul>
+                <li>Completa una <b>Línea</b> (horizontal) para cantar línea.</li>
+                <li>Completa todo el <b>Cartón</b> (15 números) para cantar Bingo.</li>
+                <li>El premio es único: la primera línea y el primer bingo ganan.</li>
+                <li>Puedes marcar números manualmente desde la tabla inferior.</li>
+            </ul>
+            <button class="cerrar-modal" onclick="cerrarReglas()">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        function irAlJuego() {
+            window.location.href = "juego.html";
+        }
+        function abrirReglas() {
+            document.getElementById('modalReglas').style.display = 'flex';
+        }
+        function cerrarReglas() {
+            document.getElementById('modalReglas').style.display = 'none';
+        }
+        // Cerrar tocando fuera del cuadro
+        document.getElementById('modalReglas').addEventListener('click', function(e) {
+            if (e.target === this) cerrarReglas();
+        });
+    </script>
+</body>
+</html>
