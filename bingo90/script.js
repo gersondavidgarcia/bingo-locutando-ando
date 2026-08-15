@@ -69,12 +69,9 @@
 
             void circulo.offsetWidth;
 
-            console.log('✅ Círculo creado en:', centroX, centroY);
-
             setTimeout(() => {
                 if (circulo.parentNode) {
                     circulo.remove();
-                    console.log('🗑️ Círculo eliminado');
                 }
                 resolve();
             }, 1800);
@@ -350,6 +347,7 @@
     function actualizarRecientesUI() {
         const contenedor = document.getElementById('recientesLista');
         contenedor.innerHTML = '';
+        // Mostrar las últimas 6 bolas del historial
         const ultimasBolas = historialBolas.slice(-6);
 
         ultimasBolas.forEach(num => {
@@ -405,6 +403,7 @@
             });
         }
 
+        // Actualizar el botón en la tabla
         const bolita = document.getElementById(`bolita-${num}`);
         if (bolita) {
             if (markedNumbers.has(num)) {
@@ -428,6 +427,12 @@
             headerElem.classList.remove('hit-alert');
             void headerElem.offsetWidth;
             headerElem.classList.add('hit-alert');
+        }
+
+        // Actualizar el botón en la tabla
+        const bolita = document.getElementById(`bolita-${num}`);
+        if (bolita) {
+            bolita.classList.add('marcada');
         }
     }
 
@@ -536,15 +541,17 @@
             actualizarRecientesUI();
             // No verificamos premios al desmarcar
         } else {
-            // Para marcar manual desde la tabla, lo hacemos de forma síncrona
+            // Para marcar manual desde la tabla
             markedNumbers.add(num);
             historialBolas.push(num);
             
-            // Verificar premios de forma síncrona (sin animaciones)
-            verificarPremiosManual(num);
-            
+            // Actualizar UI inmediatamente
+            actualizarMarcasCartones(num);
             actualizarEstado(num);
             actualizarRecientesUI();
+            
+            // Verificar premios de forma síncrona (sin animaciones)
+            verificarPremiosManual(num);
         }
     }
 
@@ -594,8 +601,6 @@
             }
         }
 
-        // Actualizar marcas visuales
-        actualizarMarcasCartones(numActual);
         calcularYMostrarAlertasA1();
     }
 
@@ -629,9 +634,11 @@
             // 2. Verificar premios (el número NO se ha marcado aún)
             await verificarPremiosConSincronizacion(num);
 
-            // Actualizar UI
-            actualizarEstado(num);
+            // 3. ACTUALIZAR LAS BOLAS RECIENTES (esto es lo que faltaba)
             actualizarRecientesUI();
+
+            // 4. Actualizar estadísticas
+            actualizarEstado(num);
 
             sphere.classList.remove('rodar-entrada');
             isAnimating = false;
@@ -711,8 +718,6 @@
                 // Buscar la celda ganadora (está en blanco porque no se ha pintado)
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
                 
-                console.log('🎯 LÍNEA! Celda ganadora:', celdaGanadora);
-                
                 // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
                 if (celdaGanadora) {
                     await animarCirculoEnCelda(celdaGanadora);
@@ -720,6 +725,8 @@
                 
                 // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla y la fila
                 markedNumbers.add(numActual);
+                // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
+                historialBolas.push(numActual);
                 pausarMarcadoGeneral = false;
                 actualizarMarcasCartones(numActual);
                 
@@ -736,8 +743,6 @@
                 // Buscar la celda ganadora (está en blanco porque no se ha pintado)
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
                 
-                console.log('🎯 BINGO! Celda ganadora:', celdaGanadora);
-                
                 // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
                 if (celdaGanadora) {
                     await animarCirculoEnCelda(celdaGanadora);
@@ -745,6 +750,8 @@
                 
                 // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla
                 markedNumbers.add(numActual);
+                // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
+                historialBolas.push(numActual);
                 pausarMarcadoGeneral = false;
                 actualizarMarcasCartones(numActual);
                 
@@ -756,16 +763,13 @@
         } else {
             // CASO: JUGADA NORMAL (Sin premio) -> Se marca y se pinta la casilla normalmente
             markedNumbers.add(numActual);
+            // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
+            historialBolas.push(numActual);
             pausarMarcadoGeneral = false;
             actualizarMarcasCartones(numActual);
         }
 
         calcularYMostrarAlertasA1();
-    }
-
-    function verificarPremios(numActual) {
-        // Mantenemos esta función de compatibilidad por si se llama desde el toggle manual de la tabla
-        verificarPremiosConSincronizacion(numActual);
     }
 
     function mostrarBanner(texto, esBingo) {
@@ -814,4 +818,28 @@
     }
 
     init();
+
+    // ==========================================================
+    // 🟢 ESTO FUERZA A QUE LA PANTALLA SE MANTENGA COMPLETA EN LA APP 🟢
+    // ==========================================================
+    function activarPantallaCompleta() {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
+            document.documentElement.msRequestFullscreen();
+        }
+    }
+
+    // Activar al tocar cualquier parte de la pantalla
+    document.addEventListener('click', function() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            activarPantallaCompleta();
+        }
+    });
+
+    // Activar al cargar la página (con un pequeño retraso para que cargue todo)
+    setTimeout(activarPantallaCompleta, 1000);
+    
 })();
