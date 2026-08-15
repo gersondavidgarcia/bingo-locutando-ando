@@ -21,13 +21,7 @@
 <body>
 
     <div class="bingo-app">
-        <div class="header-bar">
-            <h1>🎲 BINGO (10 CARTONES - REGLAS OFICIALES)</h1>
-            <div class="header-actions">
-                <button class="btn-generar" id="btnGenerar">🔄 Cambiar</button>
-                <button class="btn-reset" id="resetBtn">⟲ Limpiar</button>
-            </div>
-        </div>
+        <!-- El título y los botones se han quitado de aquí -->
 
         <div class="banner-premio" id="bannerPremio"></div>
 
@@ -55,6 +49,17 @@
         <div class="panel-numeros-inferior">
             <div class="titulo-tabla">CONTROL (1 - 90)</div>
             <div class="tabla-numeros" id="tablaNumeros"></div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 🟢 BARRA DE TÍTULO Y BOTONES MOVIDA A LA PARTE DE ABAJO 🟢 -->
+    <!-- ========================================================== -->
+    <div style="max-width: 520px; width: 100%; margin: 15px auto 0 auto; background: #ffffff; border-radius: 12px; padding: 10px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+        <h1 style="color: #333; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.2px; margin: 0;">🎲 BINGO (10 CARTONES - REGLAS OFICIALES)</h1>
+        <div style="display: flex; gap: 5px;">
+            <button class="btn-generar" id="btnGenerar" style="background: #2e7d32; border: none; border-radius: 6px; padding: 6px 10px; font-weight: 700; color: white; font-size: 0.75rem; cursor: pointer; transition: background 0.2s;">🔄 Cambiar</button>
+            <button class="btn-reset" id="resetBtn" style="background: #666; border: none; border-radius: 6px; padding: 6px 10px; font-weight: 700; color: white; font-size: 0.75rem; cursor: pointer; transition: background 0.2s;">⟲ Limpiar</button>
         </div>
     </div>
 
