@@ -1,19 +1,20 @@
 {
+  "display_override": ["fullscreen", "standalone"],
+  "display": "standalone",
   "name": "Bingo 90 Locutando",
   "short_name": "Bingo90",
   "description": "Juego de Bingo con 10 cartones",
-  "start_url": "/bingo90/index.html",
-  "display": "standalone",
+  "start_url": "https://bingo-locutando.online/bingo90/index.html",
   "background_color": "#f0f2f5",
   "theme_color": "#2e7d32",
   "icons": [
     {
-      "src": "/bingo90/icono-192.png",
+      "src": "https://bingo-locutando.online/bingo90/icono-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/bingo90/icono-512.png",
+      "src": "https://bingo-locutando.online/bingo90/icono-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
