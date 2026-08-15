@@ -5,9 +5,12 @@
 }
 
 body {
-    background: #f0f2f5; /* Se mantiene tu color gris original */
+    background: #f0f2f5; /* Tu color gris original */
     font-family: 'Segoe UI', Arial, sans-serif;
-    min-height: 100vh;
+    /* 🟢 CAMBIOS CLAVE: Altura forzada y sin scroll */
+    height: 100vh; 
+    overflow: hidden; 
+    /* 🟢 FIN DE CAMBIOS CLAVE */
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -20,10 +23,10 @@ body {
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    padding: 10px 8px; /* 🔴 CAMBIO IMPORTANTE: Quitamos el '0' del final */
+    padding: 10px 8px;
     display: flex;
     flex-direction: column;
-    gap: 0px; /* 🔴 CAMBIO: Dejamos el espacio entre elementos en 0 para que se peguen */
+    gap: 10px;
 }
 
 .header-bar {
