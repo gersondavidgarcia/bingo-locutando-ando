@@ -1,4 +1,5 @@
 {
+  "display_override": ["fullscreen", "standalone"],
   "display": "standalone",
   "name": "Bingo 90 Locutando",
   "short_name": "Bingo90",
