@@ -842,4 +842,17 @@
     // Activar al cargar la página (con un pequeño retraso para que cargue todo)
     setTimeout(activarPantallaCompleta, 1000);
     
+ // ==========================================================
+    // 🟢 TRUCO FINAL PARA QUE NO SE PUEDA DESPLAZAR EN MÓVIL 🟢
+    // ==========================================================
+    // Esto impide que el navegador haga "rebote" al tocar la pantalla
+    document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    }, { passive: false });
+
+    // Asegura que la página siempre esté arriba del todo
+    window.addEventListener('load', function() {
+        window.scrollTo(0, 0);
+    });
+    
 })();
