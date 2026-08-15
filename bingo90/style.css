@@ -5,7 +5,7 @@
 }
 
 body {
-    background: #f0f2f5;
+    background: #f0f2f5; /* Se mantiene tu color gris original */
     font-family: 'Segoe UI', Arial, sans-serif;
     min-height: 100vh;
     display: flex;
@@ -20,10 +20,10 @@ body {
     background: #ffffff;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    padding: 10px 8px 0 8px; /* 🟢 CAMBIO: Quitamos el padding de abajo (10px -> 0px) */
+    padding: 10px 8px; /* 🔴 CAMBIO IMPORTANTE: Quitamos el '0' del final */
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0px; /* 🔴 CAMBIO: Dejamos el espacio entre elementos en 0 para que se peguen */
 }
 
 .header-bar {
