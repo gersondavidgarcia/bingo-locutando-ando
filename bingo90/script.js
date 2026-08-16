@@ -1,6 +1,6 @@
 (function() {
     // 🟢 CARGAR CONFIGURACIÓN DEL MENÚ
-    let configuracion = { totalCartones: 10, vozActiva: true };
+    let configuracion = { totalCartones: 15, vozActiva: true };
     const configGuardada = localStorage.getItem('bingoConfig');
     if (configGuardada) {
         configuracion = JSON.parse(configGuardada);
@@ -278,11 +278,13 @@
         const gridContainer = document.getElementById('cartonesGrid');
         gridContainer.innerHTML = '';
 
-        // 🟢 SI SON 15 O 21, USAMOS EL MISMO ESTILO REDUCIDO
-        if (TOTAL_CARTONES === 15 || TOTAL_CARTONES === 21) {
-            gridContainer.classList.add('modo-15');
-        } else {
+        // 🟢 LÓGICA INTELIGENTE DE COLUMNAS
+        if (TOTAL_CARTONES === 10) {
+            // Modo 10 cartones: 2 columnas, sin reducción
             gridContainer.classList.remove('modo-15');
+        } else {
+            // Cualquier múltiplo de 3: 3 columnas, con reducción
+            gridContainer.classList.add('modo-15');
         }
 
         currentCartones.forEach((carton, idx) => {
