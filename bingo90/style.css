@@ -614,7 +614,7 @@ h1 {
 }
 
 /* =========================================================
-   🟢 CLASE PARA 15 CARTONES (Agregado al final)
+   🟢 CLASE PARA 15 Y 21 CARTONES (Agregado al final)
    ========================================================= */
 .cartones-grid.modo-15 {
     grid-template-columns: repeat(3, 1fr) !important;
