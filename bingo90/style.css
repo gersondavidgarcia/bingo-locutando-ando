@@ -612,3 +612,36 @@ h1 {
         border-width: 4px;
     }
 }
+
+/* =========================================================
+   🟢 CLASE PARA 15 CARTONES (Agregado al final)
+   ========================================================= */
+.cartones-grid.modo-15 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+}
+.cartones-grid.modo-15 .carton {
+    padding: 2px !important;
+    border-width: 1px !important;
+}
+.cartones-grid.modo-15 .carton-header {
+    font-size: 0.5rem !important;
+    padding: 1px 2px !important;
+}
+.cartones-grid.modo-15 .celda {
+    font-size: 0.55rem !important;
+    aspect-ratio: 1 / 1 !important;
+    border-width: 0.5px !important;
+}
+.cartones-grid.modo-15 .num-val {
+    font-size: 0.55rem !important;
+}
+/* Ocultar las celdas vacías para que no se vean cuadros grises */
+.cartones-grid.modo-15 .celda.vacia {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.cartones-grid.modo-15 .carton-grid-inner {
+    border-width: 1px !important;
+}
