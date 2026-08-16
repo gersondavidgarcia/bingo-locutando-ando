@@ -29,17 +29,17 @@
 
         <div class="bolillero-container">
             
-            <!-- 🟢 CONTENEDOR ORIGINAL: LA BOLA, EL BOTÓN Y EL CONTADOR 🟢 -->
+            <!-- CONTENEDOR ORIGINAL: LA BOLA, EL BOTÓN Y EL CONTADOR -->
             <div class="bolillero-top-row" style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
                 
-                <!-- 1. La esfera (Izquierda) -->
+                <!-- 1. La esfera -->
                 <div class="bolillero-stage">
                     <div class="bolillero-sphere" id="bolilleroSphere">
                         <span class="bolillero-numero" id="numeroDisplay">--</span>
                     </div>
                 </div>
                 
-                <!-- 2. El botón SACAR BOLA (Centro) - Más alto y en mayúsculas -->
+                <!-- 2. El botón SACAR BOLA -->
                 <button class="btn-sacar-bola" id="btnSacarBola" style="
                     height: 64px;
                     padding: 0 18px;
@@ -67,13 +67,13 @@
                     SACAR<br>BOLA
                 </button>
 
-                <!-- 3. El contador de Bolas (Arriba a la derecha) - EN UNA SOLA LÍNEA -->
+                <!-- 3. El contador de Bolas -->
                 <div class="stats-box" style="
                     display: flex;
-                    flex-direction: row;              /* 🔴 Pone texto y número en la misma línea */
-                    align-items: center;              /* Centrado vertical */
+                    flex-direction: row;
+                    align-items: center;
                     justify-content: center;
-                    gap: 6px;                         /* Espacio entre "BOLAS" y el número */
+                    gap: 6px;
                     font-size: 0.75rem;
                     font-weight: 700;
                     color: #555;
@@ -97,7 +97,7 @@
             </div>
         </div>
 
-        <!-- 🟢 CONTENEDOR FLEXIBLE: TABLA A LA IZQ, BOTÓN A LA DERECHA 🟢 -->
+        <!-- 🟢 CONTENEDOR FLEXIBLE: TABLA A LA IZQ, BOTONES A LA DERECHA 🟢 -->
         <div style="display: flex; width: 100%; gap: 10px; margin-bottom: 5px;">
             
             <!-- 1. TABLA DE NÚMEROS -->
@@ -107,8 +107,31 @@
             </div>
 
             <!-- 2. CONTENEDOR DEL ESPACIO VACÍO -->
-            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
                 
+                <!-- 🟢 BOTÓN CAMBIAR CARTONES (ARRIBA DEL ATRÁS) 🟢 -->
+                <button onclick="
+                    /* Función que cambia los cartones */
+                    cambiarColorAleatorio();
+                    currentCartones = generar10CartonesGlobales();
+                    reiniciarJuego();
+                " style="
+                    width: 100%;
+                    padding: 10px 0;
+                    background: #3a3a4a;
+                    color: #e0e0e0;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: background 0.2s, transform 0.1s;
+                    letter-spacing: 0.5px;
+                    text-align: center;
+                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                🔄 CAMBIAR
+                </button>
+
                 <!-- 3. BOTÓN DE ATRÁS -->
                 <button onclick="window.location.href='index.html'" style="
                     width: 100%;
