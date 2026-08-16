@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bingo 90 - Menú Principal</title>
     
-    <!-- Configuración PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,10 +12,9 @@
     <meta name="full-screen" content="yes">
     
     <style>
-        /* Estilos exclusivos del menú (no toca tu style.css) */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: #1a1a2e;
+            background: #0a0a12;
             font-family: 'Segoe UI', Arial, sans-serif;
             height: 100vh;
             display: flex;
@@ -25,157 +23,282 @@
             color: white;
             overflow: hidden;
         }
-        .menu-container {
-            text-align: center;
-            padding: 20px;
-            max-width: 400px;
-            width: 100%;
-        }
-        .logo {
-            font-size: 4.5rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #f5c842;
-            text-shadow: 0 4px 15px rgba(245, 200, 66, 0.3);
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        .subtitle {
-            font-size: 1rem;
-            color: #b0b0b0;
-            margin-bottom: 40px;
-        }
-        .btn-jugar {
-            background: #f5c842;
-            color: #1a1a2e;
-            border: none;
-            padding: 18px 0;
-            font-size: 1.4rem;
-            font-weight: 900;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 25px rgba(245, 200, 66, 0.4);
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 100%;
-            display: block;
-            margin-bottom: 15px;
-        }
-        .btn-jugar:active { transform: scale(0.96); }
-        
-        .btn-reglas {
-            background: transparent;
-            color: #888;
-            border: none;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-decoration: underline;
-            transition: color 0.2s;
-        }
-        .btn-reglas:active { color: #fff; }
-        
-        .footer {
-            margin-top: 40px;
-            font-size: 0.8rem;
-            color: #444;
+
+        .bolas-fondo {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; pointer-events: none;
         }
 
-        /* Modal de reglas */
+        .bola-3d {
+            position: absolute; border-radius: 50%;
+            background: var(--bola-exterior, #2196f3);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.25), inset -6px -6px 12px rgba(0,0,0,0.45), inset 5px 5px 10px rgba(255,255,255,0.75);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 15s ease-in-out;
+        }
+        .bola-3d::before {
+            content: ''; position: absolute; width: 66%; height: 66%; border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, #ffffff 0%, #ebebeb 70%, #d2d2d2 100%);
+            box-shadow: inset 2px 3px 6px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.25); z-index: 1;
+        }
+        .bola-3d::after {
+            content: ''; position: absolute; top: 8%; left: 15%; width: 28%; height: 18%; border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 60%, rgba(255,255,255,0) 100%);
+            transform: rotate(-30deg); pointer-events: none; z-index: 4;
+        }
+        .bola-3d span {
+            position: relative; z-index: 5; font-weight: 900; font-size: 0.9rem;
+            color: #000000; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
+        }
+        /* Configuración de bolas */
+        .bola-3d:nth-child(1)  { top: 5%;  left: 5%;  width: 48px;  height: 48px;  --bola-exterior: #1f77b4; }
+        .bola-3d:nth-child(2)  { top: 8%;  right: 10%; width: 35px;  height: 35px;  --bola-exterior: #2ca02c; }
+        .bola-3d:nth-child(3)  { top: 25%; left: 10%; width: 55px;  height: 55px;  --bola-exterior: #d62728; }
+        .bola-3d:nth-child(4)  { top: 85%; right: 5%;  width: 40px;  height: 40px;  --bola-exterior: #9467bd; }
+        .bola-3d:nth-child(5)  { top: 45%; left: 20%; width: 30px;  height: 30px;  --bola-exterior: #17becf; }
+        .bola-3d:nth-child(6)  { top: 15%; left: 50%; width: 42px;  height: 42px;  --bola-exterior: #e377c2; }
+        .bola-3d:nth-child(7)  { top: 65%; left: 48%; width: 52px;  height: 52px;  --bola-exterior: #393b79; }
+        .bola-3d:nth-child(8)  { top: 75%; left: 75%; width: 32px;  height: 32px;  --bola-exterior: #6b6ecf; }
+        .bola-3d:nth-child(9)  { top: 40%; right: 8%; width: 45px;  height: 45px;  --bola-exterior: #e53935; }
+        .bola-3d:nth-child(10) { top: 10%; left: 30%; width: 36px;  height: 36px;  --bola-exterior: #ff7043; }
+        .bola-3d:nth-child(11) { top: 55%; right: 15%; width: 38px;  height: 38px;  --bola-exterior: #ab47bc; }
+        .bola-3d:nth-child(12) { top: 90%; left: 60%; width: 28px;  height: 28px;  --bola-exterior: #26c6da; }
+        .bola-3d:nth-child(13) { top: 30%; left: 85%; width: 33px;  height: 33px;  --bola-exterior: #8d6e63; }
+        .bola-3d:nth-child(14) { top: 70%; left: 15%; width: 44px;  height: 44px;  --bola-exterior: #00838f; }
+        .bola-3d:nth-child(15) { top: 2%;   left: 70%; width: 26px;  height: 26px;  --bola-exterior: #e65100; }
+
+        .menu-container {
+            position: relative; z-index: 1; text-align: center;
+            padding: 20px; max-width: 380px; width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .logo-box {
+            background: rgba(10,10,18,0.65); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 25px 40px; margin-bottom: 25px;
+            backdrop-filter: blur(12px); box-shadow: 0 20px 60px rgba(0,0,0,0.8); width: 100%;
+        }
+        .logo { font-size: 4.2rem; display: block; margin-bottom: 5px; filter: drop-shadow(0 10px 20px rgba(245,200,66,0.2)); }
+        h1 { font-size: 2.6rem; font-weight: 900; color: #f5c842; text-shadow: 0 0 20px rgba(245,200,66,0.2), 0 4px 20px rgba(0,0,0,0.5); letter-spacing: 4px; margin-bottom: 5px; }
+        .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.6); letter-spacing: 2px; margin-bottom: 35px; }
+        
+        .btn-jugar {
+            background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; padding: 18px 0;
+            font-size: 1.4rem; font-weight: 900; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 10px 30px rgba(245,200,66,0.2), inset 0 1px 0 rgba(255,255,255,0.4);
+            transition: transform 0.2s; width: 100%; display: block; margin-bottom: 15px; letter-spacing: 3px;
+            position: relative; overflow: hidden;
+        }
+        .btn-jugar:active { transform: scale(0.95); }
+        .btn-jugar::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg); transition: all 0.6s; opacity: 0;
+        }
+        .btn-jugar:active::after { opacity: 1; left: 100%; }
+
+        .btn-secundario {
+            background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(255,255,255,0.08); padding: 12px 20px;
+            border-radius: 30px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+            width: 100%; margin-bottom: 10px; max-width: 220px;
+        }
+        .btn-secundario:active { background: rgba(245,200,66,0.15); color: #f5c842; border-color: rgba(245,200,66,0.3); }
+
+        .footer { margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.08); letter-spacing: 2px; }
+
+        /* MODAL DE AJUSTES */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 9999;
         }
         .modal-box {
-            background: #1a1a2e;
-            border: 1px solid #f5c842;
-            border-radius: 16px;
-            padding: 25px;
-            max-width: 340px;
-            width: 90%;
-            text-align: left;
-            color: #e0e0e0;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            background: rgba(20,20,30,0.95); border: 1px solid rgba(245,200,66,0.2);
+            border-radius: 24px; padding: 30px 25px; max-width: 360px; width: 90%;
+            text-align: left; color: #e0e0e0; box-shadow: 0 30px 80px rgba(0,0,0,0.9);
+            backdrop-filter: blur(6px);
         }
-        .modal-box h2 {
-            color: #f5c842;
-            margin-bottom: 10px;
-            text-align: center;
+        .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.4rem; margin-bottom: 20px; }
+        .modal-box .opcion-ajuste {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .modal-box ul {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-        .modal-box ul li::before {
-            content: "🎯 ";
-        }
-        .modal-box .cerrar-modal {
-            display: block;
-            width: 100%;
-            margin-top: 15px;
-            padding: 10px;
-            background: #f5c842;
-            color: #1a1a2e;
-            border: none;
-            border-radius: 8px;
-            font-weight: 900;
-            font-size: 1rem;
-            cursor: pointer;
-        }
+        .modal-box .opcion-ajuste:last-child { border-bottom: none; }
+        .modal-box .etiqueta { font-size: 0.95rem; }
+        
+        /* Interruptor (Switch) */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #f5c842; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-cerrar-modal { margin-top: 20px; padding: 12px; background: #f5c842; color: #0a0a12; border: none; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; }
+        .btn-cerrar-modal:active { transform: scale(0.95); }
+
+        .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
     </style>
 </head>
 <body>
 
-    <div class="menu-container">
-        <span class="logo">🎲</span>
-        <h1>BINGO 90</h1>
-        <p class="subtitle">10 Cartones · Premio Único Global</p>
-        
-        <button class="btn-jugar" onclick="irAlJuego()">▶ JUGAR</button>
-        <button class="btn-reglas" onclick="abrirReglas()">📖 Reglas del juego</button>
+    <!-- BOLAS -->
+    <div class="bolas-fondo" id="bolasFondo">
+        <div class="bola-3d"><span>7</span></div><div class="bola-3d"><span>23</span></div>
+        <div class="bola-3d"><span>45</span></div><div class="bola-3d"><span>11</span></div>
+        <div class="bola-3d"><span>68</span></div><div class="bola-3d"><span>34</span></div>
+        <div class="bola-3d"><span>89</span></div><div class="bola-3d"><span>2</span></div>
+        <div class="bola-3d"><span>56</span></div><div class="bola-3d"><span>14</span></div>
+        <div class="bola-3d"><span>77</span></div><div class="bola-3d"><span>41</span></div>
+        <div class="bola-3d"><span>92</span></div><div class="bola-3d"><span>33</span></div>
+        <div class="bola-3d"><span>60</span></div>
+    </div>
 
+    <!-- MENÚ -->
+    <div class="menu-container">
+        <div class="logo-box">
+            <span class="logo">🎲</span>
+            <h1>BINGO 90</h1>
+            <p class="subtitle">10 Cartones · Premio Único Global</p>
+        </div>
+        <button class="btn-jugar" onclick="irAlJuego()">▶ JUGAR</button>
+        <button class="btn-secundario" onclick="abrirAjustes()">⚙️ AJUSTES</button>
+        <button class="btn-secundario" onclick="abrirReglas()">📖 REGLAS</button>
+        <button class="btn-secundario" onclick="salirApp()" style="margin-bottom: 0; color: #ff6b6b; border-color: rgba(255,0,0,0.2);">🚪 SALIR</button>
         <div class="footer">Locutando Online</div>
     </div>
 
-    <!-- Modal de Reglas -->
+    <!-- MODAL REGLAS -->
     <div class="modal-overlay" id="modalReglas">
         <div class="modal-box">
             <h2>📖 Reglas</h2>
-            <ul>
-                <li>Completa una <b>Línea</b> (horizontal) para cantar línea.</li>
-                <li>Completa todo el <b>Cartón</b> (15 números) para cantar Bingo.</li>
-                <li>El premio es único: la primera línea y el primer bingo ganan.</li>
-                <li>Puedes marcar números manualmente desde la tabla inferior.</li>
+            <ul style="list-style: none; padding: 0; margin: 15px 0; font-size: 0.95rem; line-height: 1.8;">
+                <li style="margin-bottom: 8px;">🎯 Completa una <b>Línea</b> horizontal para cantar línea.</li>
+                <li style="margin-bottom: 8px;">🏆 Completa todo el <b>Cartón</b> (15 números) para cantar Bingo.</li>
+                <li style="margin-bottom: 8px;">🥇 El premio es único: la primera línea y el primer bingo ganan.</li>
+                <li style="margin-bottom: 8px;">🖐️ Puedes marcar números manualmente desde la tabla inferior.</li>
             </ul>
-            <button class="cerrar-modal" onclick="cerrarReglas()">Entendido</button>
+            <button class="btn-cerrar-modal" onclick="cerrarModal('modalReglas')">Entendido</button>
         </div>
     </div>
 
+    <!-- MODAL AJUSTES -->
+    <div class="modal-overlay" id="modalAjustes">
+        <div class="modal-box">
+            <h2>⚙️ Ajustes</h2>
+            
+            <div class="opcion-ajuste">
+                <span class="etiqueta">🔊 Voz (Números)</span>
+                <label class="switch">
+                    <input type="checkbox" id="checkVoz" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="opcion-ajuste">
+                <span class="etiqueta">🎵 Música Ambiente</span>
+                <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
+            </div>
+
+            <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <span class="etiqueta">🃏 Selección de Cartones</span>
+                <div style="display: flex; gap: 10px; width: 100%;">
+                    <button id="btn10Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(10)">10</button>
+                    <button id="btn15Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(15)">15</button>
+                </div>
+            </div>
+
+            <button class="btn-cerrar-modal" onclick="cerrarModal('modalAjustes')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
     <script>
+        // Variables Globales (Se guardan en el navegador)
+        let configuracion = {
+            vozActiva: true,
+            musicaActiva: false,
+            totalCartones: 10
+        };
+
+        // Cargar configuración guardada
+        const configGuardada = localStorage.getItem('bingoConfig');
+        if (configGuardada) {
+            configuracion = JSON.parse(configGuardada);
+            if(configuracion.totalCartones === 15) {
+                document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
+                document.getElementById('btn15Cartones').classList.add('btn-musica-activo');
+            }
+        }
+
+        // Navegación
         function irAlJuego() {
+            // Guardamos la configuración antes de ir al juego
+            localStorage.setItem('bingoConfig', JSON.stringify(configuracion));
             window.location.href = "juego.html";
         }
-        function abrirReglas() {
-            document.getElementById('modalReglas').style.display = 'flex';
+
+        function salirApp() {
+            if(confirm("¿Estás seguro de que quieres salir?")) {
+                // Intento de cerrar la app
+                navigator.app?.exitApp?.() || window.close();
+            }
         }
-        function cerrarReglas() {
-            document.getElementById('modalReglas').style.display = 'none';
-        }
-        // Cerrar tocando fuera del cuadro
-        document.getElementById('modalReglas').addEventListener('click', function(e) {
-            if (e.target === this) cerrarReglas();
+
+        // Modales
+        function abrirReglas() { document.getElementById('modalReglas').style.display = 'flex'; }
+        function abrirAjustes() { document.getElementById('modalAjustes').style.display = 'flex'; }
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
         });
+
+        // Ajustes: Voz
+        document.getElementById('checkVoz').addEventListener('change', function() {
+            configuracion.vozActiva = this.checked;
+        });
+
+        // Ajustes: Música (Solo interfaz por ahora)
+        function toggleMusica() {
+            configuracion.musicaActiva = !configuracion.musicaActiva;
+            const btn = document.getElementById('btnMusica');
+            if(configuracion.musicaActiva) {
+                btn.textContent = '⏸️ Activo';
+                btn.classList.add('btn-musica-activo');
+            } else {
+                btn.textContent = '▶ Activar';
+                btn.classList.remove('btn-musica-activo');
+            }
+        }
+
+        // Ajustes: Cambiar Cartones
+        function cambiarCartones(num) {
+            configuracion.totalCartones = num;
+            document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
+            document.getElementById('btn15Cartones').classList.remove('btn-musica-activo');
+            document.getElementById(`btn${num}Cartones`).classList.add('btn-musica-activo');
+        }
+
+        // 🟢 MOVIMIENTO ALEATORIO DE BOLAS
+        const bolas = document.querySelectorAll('.bola-3d');
+        function moverBolasAleatoriamente() {
+            bolas.forEach((bola) => {
+                const maxX = window.innerWidth - bola.offsetWidth - 20;
+                const maxY = window.innerHeight - bola.offsetHeight - 20;
+                const safeMaxX = Math.max(0, maxX);
+                const safeMaxY = Math.max(0, maxY);
+                const x = Math.random() * safeMaxX;
+                const y = Math.random() * safeMaxY;
+                const rotacion = Math.random() * 360;
+                bola.style.transform = `translate(${x}px, ${y}px) rotate(${rotacion}deg)`;
+                const duracion = 12000 + (Math.random() * 13000); 
+                bola.style.transition = `transform ${duracion}ms ease-in-out`;
+            });
+            const siguienteMovimiento = 14000 + (Math.random() * 12000);
+            setTimeout(moverBolasAleatoriamente, siguienteMovimiento);
+        }
+        moverBolasAleatoriamente();
     </script>
 </body>
 </html>
