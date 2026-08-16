@@ -109,13 +109,8 @@
             <!-- 2. CONTENEDOR DEL ESPACIO VACÍO -->
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
                 
-                <!-- 🟢 BOTÓN CAMBIAR CARTONES (ARRIBA DEL ATRÁS) 🟢 -->
-                <button onclick="
-                    /* Función que cambia los cartones */
-                    cambiarColorAleatorio();
-                    currentCartones = generar10CartonesGlobales();
-                    reiniciarJuego();
-                " style="
+                <!-- 🟢 BOTÓN CAMBIAR (RECARGA LA PÁGINA) 🟢 -->
+                <button onclick="location.reload()" style="
                     width: 100%;
                     padding: 10px 0;
                     background: #3a3a4a;
