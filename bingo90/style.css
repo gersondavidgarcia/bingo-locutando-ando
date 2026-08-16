@@ -614,7 +614,7 @@ h1 {
 }
 
 /* =========================================================
-   🟢 CLASE PARA 15 Y 21 CARTONES (Agregado al final)
+   🟢 CLASE PARA 3 COLUMNAS (3, 6, 9... 30)
    ========================================================= */
 .cartones-grid.modo-15 {
     grid-template-columns: repeat(3, 1fr) !important;
@@ -636,9 +636,9 @@ h1 {
 .cartones-grid.modo-15 .num-val {
     font-size: 0.55rem !important;
 }
-/* Ocultar las celdas vacías para que no se vean cuadros grises */
+/* 🟢 NUEVO: Las celdas vacías en 3 columnas ahora tienen el color del tema, sin bordes */
 .cartones-grid.modo-15 .celda.vacia {
-    background-color: transparent !important;
+    background-color: var(--tema-color-bg, #a5d6a7) !important;
     border: none !important;
     box-shadow: none !important;
 }
