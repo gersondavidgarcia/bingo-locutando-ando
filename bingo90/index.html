@@ -73,18 +73,18 @@
         }
         .logo-box {
             background: rgba(10,10,18,0.65); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px; padding: 25px 40px; margin-bottom: 25px;
+            border-radius: 24px; padding: 25px 40px; margin-bottom: 20px;
             backdrop-filter: blur(12px); box-shadow: 0 20px 60px rgba(0,0,0,0.8); width: 100%;
         }
         .logo { font-size: 4.2rem; display: block; margin-bottom: 5px; filter: drop-shadow(0 10px 20px rgba(245,200,66,0.2)); }
         h1 { font-size: 2.6rem; font-weight: 900; color: #f5c842; text-shadow: 0 0 20px rgba(245,200,66,0.2), 0 4px 20px rgba(0,0,0,0.5); letter-spacing: 4px; margin-bottom: 5px; }
-        .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.6); letter-spacing: 2px; margin-bottom: 35px; }
+        .subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.6); letter-spacing: 2px; margin-bottom: 30px; }
         
         .btn-jugar {
             background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; padding: 18px 0;
             font-size: 1.4rem; font-weight: 900; border-radius: 50px; cursor: pointer;
             box-shadow: 0 10px 30px rgba(245,200,66,0.2), inset 0 1px 0 rgba(255,255,255,0.4);
-            transition: transform 0.2s; width: 100%; display: block; margin-bottom: 15px; letter-spacing: 3px;
+            transition: transform 0.2s; width: 100%; display: block; margin-bottom: 12px; letter-spacing: 3px;
             position: relative; overflow: hidden;
         }
         .btn-jugar:active { transform: scale(0.95); }
@@ -99,13 +99,13 @@
             background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.6);
             border: 1px solid rgba(255,255,255,0.08); padding: 12px 20px;
             border-radius: 30px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
-            width: 100%; margin-bottom: 10px; max-width: 220px;
+            width: 100%; margin-bottom: 8px; max-width: 220px;
         }
         .btn-secundario:active { background: rgba(245,200,66,0.15); color: #f5c842; border-color: rgba(245,200,66,0.3); }
 
         .footer { margin-top: 30px; font-size: 0.7rem; color: rgba(255,255,255,0.08); letter-spacing: 2px; }
 
-        /* MODAL DE AJUSTES */
+        /* MODALES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
@@ -113,17 +113,18 @@
         }
         .modal-box {
             background: rgba(20,20,30,0.95); border: 1px solid rgba(245,200,66,0.2);
-            border-radius: 24px; padding: 30px 25px; max-width: 360px; width: 90%;
+            border-radius: 24px; padding: 25px; max-width: 360px; width: 90%;
             text-align: left; color: #e0e0e0; box-shadow: 0 30px 80px rgba(0,0,0,0.9);
             backdrop-filter: blur(6px);
         }
         .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.4rem; margin-bottom: 20px; }
-        .modal-box .opcion-ajuste {
+        
+        .opcion-ajuste {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .modal-box .opcion-ajuste:last-child { border-bottom: none; }
-        .modal-box .etiqueta { font-size: 0.95rem; }
+        .opcion-ajuste:last-child { border-bottom: none; }
+        .etiqueta { font-size: 0.95rem; }
         
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -137,18 +138,86 @@
 
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
 
-        /* Estilo para el selector (dropdown) */
-        select.selector-cartones {
-            background: rgba(255,255,255,0.05); color: #e0e0e0;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
-            padding: 8px 15px; font-size: 0.95rem; cursor: pointer;
-            width: 100%; text-align: center; outline: none;
-            appearance: none; -webkit-appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f5c842%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;
+        /* 🟢 NUEVO DISEÑO DE SELECTOR DE CARTONES */
+        .selector-cartones-container {
+            width: 100%;
+            margin-top: 5px;
         }
-        select.selector-cartones option { background: #1a1a2e; color: #e0e0e0; }
-        select.selector-cartones:focus { border-color: #f5c842; }
+        .selector-botones {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-carton-modo {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            color: #aaa;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn-carton-modo.activo {
+            background: rgba(245,200,66,0.2);
+            color: #f5c842;
+            border-color: #f5c842;
+            font-weight: bold;
+        }
+        .btn-carton-modo:active { transform: scale(0.96); }
+
+        /* Slider Moderno */
+        .slider-container {
+            display: none;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 30px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+            align-items: center;
+            gap: 15px;
+        }
+        .slider-container.mostrar {
+            display: flex;
+        }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        /* Track (barra) */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #333; border-radius: 3px;
+        }
+        input[type=range]::-moz-range-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: #333; border-radius: 3px;
+        }
+        /* Thumb (bolita) */
+        input[type=range]::-webkit-slider-thumb {
+            height: 20px; width: 20px; border-radius: 50%;
+            background: #f5c842; cursor: pointer;
+            -webkit-appearance: none; margin-top: -7px;
+            box-shadow: 0 0 10px rgba(245,200,66,0.3);
+        }
+        input[type=range]::-moz-range-thumb {
+            height: 20px; width: 20px; border-radius: 50%;
+            background: #f5c842; cursor: pointer;
+            border: none;
+        }
+        
+        .slider-valor {
+            color: #f5c842;
+            font-weight: 900;
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -165,7 +234,7 @@
         <div class="bola-3d"><span>60</span></div>
     </div>
 
-    <!-- MENÚ -->
+    <!-- MENÚ PRINCIPAL -->
     <div class="menu-container">
         <div class="logo-box">
             <span class="logo">🎲</span>
@@ -211,22 +280,23 @@
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
-            <!-- 🟢 SELECTOR DE CARTONES (10 o 3 en 3 hasta 30) -->
-            <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-                <span class="etiqueta">🃏 Selección de Cartones</span>
-                <select id="selectorCartones" class="selector-cartones" onchange="cambiarCartones(this.value)">
-                    <option value="10">10 Cartones (2 Columnas)</option>
-                    <option value="3">3 Cartones (3 Columnas)</option>
-                    <option value="6">6 Cartones (3 Columnas)</option>
-                    <option value="9">9 Cartones (3 Columnas)</option>
-                    <option value="12">12 Cartones (3 Columnas)</option>
-                    <option value="15" selected>15 Cartones (3 Columnas)</option>
-                    <option value="18">18 Cartones (3 Columnas)</option>
-                    <option value="21">21 Cartones (3 Columnas)</option>
-                    <option value="24">24 Cartones (3 Columnas)</option>
-                    <option value="27">27 Cartones (3 Columnas)</option>
-                    <option value="30">30 Cartones (3 Columnas)</option>
-                </select>
+            <!-- 🟢 NUEVO SELECTOR: 2 BOTONES + SLIDER -->
+            <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 0;">
+                <span class="etiqueta" style="margin-bottom: 5px;">🃏 Selección de Cartones</span>
+                <div class="selector-cartones-container">
+                    
+                    <div class="selector-botones">
+                        <button id="btnModo10" class="btn-carton-modo" onclick="seleccionarModo(10)">10 Cartones</button>
+                        <button id="btnModo3" class="btn-carton-modo" onclick="seleccionarModo('slider')">Múltiplos de 3</button>
+                    </div>
+
+                    <!-- Slider desplegable -->
+                    <div id="sliderContainer" class="slider-container">
+                        <input type="range" id="sliderCartones" min="3" max="30" step="3" value="15">
+                        <span id="sliderValor" class="slider-valor">15</span>
+                    </div>
+
+                </div>
             </div>
 
             <button class="btn-cerrar-modal" onclick="cerrarModal('modalAjustes')">Cerrar</button>
@@ -239,9 +309,58 @@
         const configGuardada = localStorage.getItem('bingoConfig');
         if (configGuardada) {
             configuracion = JSON.parse(configGuardada);
-            document.getElementById('selectorCartones').value = configuracion.totalCartones;
         }
 
+        // Configuración inicial de los botones
+        const btnModo10 = document.getElementById('btnModo10');
+        const btnModo3 = document.getElementById('btnModo3');
+        const sliderContainer = document.getElementById('sliderContainer');
+        const slider = document.getElementById('sliderCartones');
+        const valorSlider = document.getElementById('sliderValor');
+
+        // Cargar estado guardado
+        if (configuracion.totalCartones === 10) {
+            btnModo10.classList.add('activo');
+            sliderContainer.classList.remove('mostrar');
+            configuracion.totalCartones = 10;
+        } else {
+            btnModo3.classList.add('activo');
+            sliderContainer.classList.add('mostrar');
+            // Asegurar que el slider tenga el valor correcto
+            let val = configuracion.totalCartones;
+            if (val < 3 || val > 30 || val % 3 !== 0) val = 15;
+            slider.value = val;
+            valorSlider.textContent = val;
+            configuracion.totalCartones = val;
+        }
+
+        function seleccionarModo(modo) {
+            if (modo === 10) {
+                btnModo10.classList.add('activo');
+                btnModo3.classList.remove('activo');
+                sliderContainer.classList.remove('mostrar');
+                configuracion.totalCartones = 10;
+            } else { // modo 'slider'
+                btnModo3.classList.add('activo');
+                btnModo10.classList.remove('activo');
+                sliderContainer.classList.add('mostrar');
+                // Tomar el valor actual del slider
+                let val = parseInt(slider.value);
+                configuracion.totalCartones = val;
+            }
+        }
+
+        // Actualizar número al mover el slider
+        slider.addEventListener('input', function() {
+            let val = parseInt(this.value);
+            valorSlider.textContent = val;
+            // Solo actualizamos la configuración si el modo "Múltiplos de 3" está activo
+            if (btnModo3.classList.contains('activo')) {
+                configuracion.totalCartones = val;
+            }
+        });
+
+        // Navegación y demás funciones
         function irAlJuego() {
             localStorage.setItem('bingoConfig', JSON.stringify(configuracion));
             window.location.href = "juego.html";
@@ -276,10 +395,7 @@
             }
         }
 
-        function cambiarCartones(num) {
-            configuracion.totalCartones = parseInt(num);
-        }
-
+        // Movimiento de bolas
         const bolas = document.querySelectorAll('.bola-3d');
         function moverBolasAleatoriamente() {
             bolas.forEach((bola) => {
