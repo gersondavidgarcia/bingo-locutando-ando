@@ -820,39 +820,36 @@
     init();
 
     // ==========================================================
-    // 🟢 ESTO FUERZA A QUE LA PANTALLA SE MANTENGA COMPLETA EN LA APP 🟢
+    // 🟢 CÓDIGO PARA FORZAR LA PANTALLA COMPLETA EN LA APK 🟢
     // ==========================================================
-    function activarPantallaCompleta() {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-            document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
-            document.documentElement.msRequestFullscreen();
+    function forzarPantallaCompleta() {
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE/Edge */
+            elem.msRequestFullscreen();
         }
     }
 
-    // Activar al tocar cualquier parte de la pantalla
+    // Intentar forzar al cargar la página
+    setTimeout(forzarPantallaCompleta, 500);
+    // Intentar de nuevo si falla la primera vez
+    setTimeout(forzarPantallaCompleta, 1500);
+
+    // Forzar cada vez que el usuario toque la pantalla (Chrome sale del modo cuando tocas)
     document.addEventListener('click', function() {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-            activarPantallaCompleta();
+        if (!document.fullscreenElement) {
+            forzarPantallaCompleta();
         }
     });
 
-    // Activar al cargar la página (con un pequeño retraso para que cargue todo)
-    setTimeout(activarPantallaCompleta, 1000);
-    
- // ==========================================================
-    // 🟢 TRUCO FINAL PARA QUE NO SE PUEDA DESPLAZAR EN MÓVIL 🟢
-    // ==========================================================
-    // Esto impide que el navegador haga "rebote" al tocar la pantalla
-    document.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-    }, { passive: false });
-
-    // Asegura que la página siempre esté arriba del todo
-    window.addEventListener('load', function() {
-        window.scrollTo(0, 0);
+    // Forzar si el usuario hace scroll (aunque esté bloqueado, por si acaso)
+    document.addEventListener('touchstart', function() {
+        if (!document.fullscreenElement) {
+            forzarPantallaCompleta();
+        }
     });
-    
+
 })();
