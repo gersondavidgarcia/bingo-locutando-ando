@@ -1,11 +1,10 @@
 (function() {
-    // 🟢 CARGAR CONFIGURACIÓN DEL MENÚ (NUEVO - Solo esto añadido)
+    // 🟢 CARGAR CONFIGURACIÓN DEL MENÚ
     let configuracion = { totalCartones: 10, vozActiva: true };
     const configGuardada = localStorage.getItem('bingoConfig');
     if (configGuardada) {
         configuracion = JSON.parse(configGuardada);
     }
-    // Ajustar variable global TOTAL_CARTONES según el menú
     const TOTAL_CARTONES = configuracion.totalCartones;
 
     let markedNumbers = new Set();
@@ -93,7 +92,7 @@
     }
 
     function decirNumero(numero) {
-        if ('speechSynthesis' in window && configuracion.vozActiva) { // 🟢 CONTROL DE VOZ
+        if ('speechSynthesis' in window && configuracion.vozActiva) {
             window.speechSynthesis.cancel();
             const mensaje = new SpeechSynthesisUtterance(numero.toString());
             mensaje.lang = 'es-ES';
@@ -279,8 +278,8 @@
         const gridContainer = document.getElementById('cartonesGrid');
         gridContainer.innerHTML = '';
 
-        // 🟢 AJUSTE PARA 15 CARTONES (NUEVO - Solo esto añadido)
-        if (TOTAL_CARTONES === 15) {
+        // 🟢 SI SON 15 O 21, USAMOS EL MISMO ESTILO REDUCIDO
+        if (TOTAL_CARTONES === 15 || TOTAL_CARTONES === 21) {
             gridContainer.classList.add('modo-15');
         } else {
             gridContainer.classList.remove('modo-15');
