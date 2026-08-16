@@ -25,8 +25,7 @@
         }
 
         .bolas-fondo {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             overflow: hidden; z-index: 0; pointer-events: none;
         }
 
@@ -51,7 +50,6 @@
             position: relative; z-index: 5; font-weight: 900; font-size: 0.9rem;
             color: #000000; text-shadow: 0px 1px 1px rgba(255,255,255,0.8);
         }
-        /* Configuración de bolas */
         .bola-3d:nth-child(1)  { top: 5%;  left: 5%;  width: 48px;  height: 48px;  --bola-exterior: #1f77b4; }
         .bola-3d:nth-child(2)  { top: 8%;  right: 10%; width: 35px;  height: 35px;  --bola-exterior: #2ca02c; }
         .bola-3d:nth-child(3)  { top: 25%; left: 10%; width: 55px;  height: 55px;  --bola-exterior: #d62728; }
@@ -127,7 +125,6 @@
         .modal-box .opcion-ajuste:last-child { border-bottom: none; }
         .modal-box .etiqueta { font-size: 0.95rem; }
         
-        /* Interruptor (Switch) */
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 24px; }
@@ -201,11 +198,13 @@
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
+            <!-- 🟢 NUEVO: OPCIÓN DE 21 CARTONES -->
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 10px;">
                 <span class="etiqueta">🃏 Selección de Cartones</span>
                 <div style="display: flex; gap: 10px; width: 100%;">
                     <button id="btn10Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(10)">10</button>
                     <button id="btn15Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(15)">15</button>
+                    <button id="btn21Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(21)">21</button>
                 </div>
             </div>
 
@@ -213,40 +212,32 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT DEL MENÚ -->
     <script>
-        // Variables Globales (Se guardan en el navegador)
-        let configuracion = {
-            vozActiva: true,
-            musicaActiva: false,
-            totalCartones: 10
-        };
-
-        // Cargar configuración guardada
+        let configuracion = { totalCartones: 10, vozActiva: true, musicaActiva: false };
         const configGuardada = localStorage.getItem('bingoConfig');
         if (configGuardada) {
             configuracion = JSON.parse(configGuardada);
             if(configuracion.totalCartones === 15) {
                 document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
                 document.getElementById('btn15Cartones').classList.add('btn-musica-activo');
+            } else if(configuracion.totalCartones === 21) {
+                document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
+                document.getElementById('btn21Cartones').classList.add('btn-musica-activo');
             }
         }
 
-        // Navegación
         function irAlJuego() {
-            // Guardamos la configuración antes de ir al juego
             localStorage.setItem('bingoConfig', JSON.stringify(configuracion));
             window.location.href = "juego.html";
         }
 
         function salirApp() {
             if(confirm("¿Estás seguro de que quieres salir?")) {
-                // Intento de cerrar la app
                 navigator.app?.exitApp?.() || window.close();
             }
         }
 
-        // Modales
         function abrirReglas() { document.getElementById('modalReglas').style.display = 'flex'; }
         function abrirAjustes() { document.getElementById('modalAjustes').style.display = 'flex'; }
         function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -254,12 +245,10 @@
             el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
         });
 
-        // Ajustes: Voz
         document.getElementById('checkVoz').addEventListener('change', function() {
             configuracion.vozActiva = this.checked;
         });
 
-        // Ajustes: Música (Solo interfaz por ahora)
         function toggleMusica() {
             configuracion.musicaActiva = !configuracion.musicaActiva;
             const btn = document.getElementById('btnMusica');
@@ -272,15 +261,14 @@
             }
         }
 
-        // Ajustes: Cambiar Cartones
         function cambiarCartones(num) {
             configuracion.totalCartones = num;
             document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
             document.getElementById('btn15Cartones').classList.remove('btn-musica-activo');
+            document.getElementById('btn21Cartones').classList.remove('btn-musica-activo');
             document.getElementById(`btn${num}Cartones`).classList.add('btn-musica-activo');
         }
 
-        // 🟢 MOVIMIENTO ALEATORIO DE BOLAS
         const bolas = document.querySelectorAll('.bola-3d');
         function moverBolasAleatoriamente() {
             bolas.forEach((bola) => {
