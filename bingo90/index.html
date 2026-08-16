@@ -136,6 +136,19 @@
         .btn-cerrar-modal:active { transform: scale(0.95); }
 
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
+
+        /* Estilo para el selector (dropdown) */
+        select.selector-cartones {
+            background: rgba(255,255,255,0.05); color: #e0e0e0;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
+            padding: 8px 15px; font-size: 0.95rem; cursor: pointer;
+            width: 100%; text-align: center; outline: none;
+            appearance: none; -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23f5c842%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat; background-position: right 15px top 50%; background-size: 12px auto;
+        }
+        select.selector-cartones option { background: #1a1a2e; color: #e0e0e0; }
+        select.selector-cartones:focus { border-color: #f5c842; }
     </style>
 </head>
 <body>
@@ -157,7 +170,7 @@
         <div class="logo-box">
             <span class="logo">🎲</span>
             <h1>BINGO 90</h1>
-            <p class="subtitle">10 Cartones · Premio Único Global</p>
+            <p class="subtitle">Múltiples Modalidades</p>
         </div>
         <button class="btn-jugar" onclick="irAlJuego()">▶ JUGAR</button>
         <button class="btn-secundario" onclick="abrirAjustes()">⚙️ AJUSTES</button>
@@ -198,14 +211,22 @@
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
-            <!-- 🟢 NUEVO: OPCIÓN DE 21 CARTONES -->
+            <!-- 🟢 SELECTOR DE CARTONES (10 o 3 en 3 hasta 30) -->
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 10px;">
                 <span class="etiqueta">🃏 Selección de Cartones</span>
-                <div style="display: flex; gap: 10px; width: 100%;">
-                    <button id="btn10Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(10)">10</button>
-                    <button id="btn15Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(15)">15</button>
-                    <button id="btn21Cartones" class="btn-secundario" style="margin: 0; flex: 1;" onclick="cambiarCartones(21)">21</button>
-                </div>
+                <select id="selectorCartones" class="selector-cartones" onchange="cambiarCartones(this.value)">
+                    <option value="10">10 Cartones (2 Columnas)</option>
+                    <option value="3">3 Cartones (3 Columnas)</option>
+                    <option value="6">6 Cartones (3 Columnas)</option>
+                    <option value="9">9 Cartones (3 Columnas)</option>
+                    <option value="12">12 Cartones (3 Columnas)</option>
+                    <option value="15" selected>15 Cartones (3 Columnas)</option>
+                    <option value="18">18 Cartones (3 Columnas)</option>
+                    <option value="21">21 Cartones (3 Columnas)</option>
+                    <option value="24">24 Cartones (3 Columnas)</option>
+                    <option value="27">27 Cartones (3 Columnas)</option>
+                    <option value="30">30 Cartones (3 Columnas)</option>
+                </select>
             </div>
 
             <button class="btn-cerrar-modal" onclick="cerrarModal('modalAjustes')">Cerrar</button>
@@ -214,17 +235,11 @@
 
     <!-- JAVASCRIPT DEL MENÚ -->
     <script>
-        let configuracion = { totalCartones: 10, vozActiva: true, musicaActiva: false };
+        let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false };
         const configGuardada = localStorage.getItem('bingoConfig');
         if (configGuardada) {
             configuracion = JSON.parse(configGuardada);
-            if(configuracion.totalCartones === 15) {
-                document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
-                document.getElementById('btn15Cartones').classList.add('btn-musica-activo');
-            } else if(configuracion.totalCartones === 21) {
-                document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
-                document.getElementById('btn21Cartones').classList.add('btn-musica-activo');
-            }
+            document.getElementById('selectorCartones').value = configuracion.totalCartones;
         }
 
         function irAlJuego() {
@@ -262,11 +277,7 @@
         }
 
         function cambiarCartones(num) {
-            configuracion.totalCartones = num;
-            document.getElementById('btn10Cartones').classList.remove('btn-musica-activo');
-            document.getElementById('btn15Cartones').classList.remove('btn-musica-activo');
-            document.getElementById('btn21Cartones').classList.remove('btn-musica-activo');
-            document.getElementById(`btn${num}Cartones`).classList.add('btn-musica-activo');
+            configuracion.totalCartones = parseInt(num);
         }
 
         const bolas = document.querySelectorAll('.bola-3d');
