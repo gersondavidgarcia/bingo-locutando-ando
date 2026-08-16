@@ -46,12 +46,41 @@
             </div>
         </div>
 
-        <div class="panel-numeros-inferior">
-            <div class="titulo-tabla">CONTROL (1 - 90)</div>
-            <div class="tabla-numeros" id="tablaNumeros"></div>
-        </div>
+        <!-- ========================================================== -->
+        <!-- 🟢 CONTENEDOR FLEXIBLE: TABLA A LA IZQ, BOTÓN A LA DERECHA 🟢 -->
+        <!-- ========================================================== -->
+        <div style="display: flex; width: 100%; gap: 10px; margin-bottom: 5px;">
+            
+            <!-- 1. TABLA DE NÚMEROS (Amarillo en tu dibujo) -->
+            <div class="panel-numeros-inferior" style="flex: 0 0 58%;">
+                <div class="titulo-tabla">CONTROL (1 - 90)</div>
+                <div class="tabla-numeros" id="tablaNumeros"></div>
+            </div>
 
-        <!-- Los botones de "Cambiar" y "Limpiar" ya NO están aquí -->
+            <!-- 2. CONTENEDOR DEL ESPACIO VACÍO (Verde en tu dibujo) -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                
+                <!-- 3. BOTÓN DE ATRÁS (Rojo en tu dibujo, anclado al fondo) -->
+                <button onclick="window.location.href='index.html'" style="
+                    width: 100%;
+                    padding: 10px 0;
+                    background: #2d2d3d;
+                    color: #e0e0e0;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 0.9rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: background 0.2s, transform 0.1s;
+                    letter-spacing: 1px;
+                    text-align: center;
+                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                ⬅ ATRÁS
+                </button>
+                
+            </div>
+            
+        </div>
 
     </div> <!-- Fin del div bingo-app -->
 
