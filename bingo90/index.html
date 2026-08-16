@@ -292,7 +292,7 @@
 
                     <!-- Slider desplegable -->
                     <div id="sliderContainer" class="slider-container">
-                        <input type="range" id="sliderCartones" min="3" max="30" step="3" value="15">
+                        <input type="range" id="sliderCartones" min="3" max="33" step="3" value="15"> <!-- 🟢 CAMBIADO DE 30 A 33 -->
                         <span id="sliderValor" class="slider-valor">15</span>
                     </div>
 
@@ -328,7 +328,7 @@
             sliderContainer.classList.add('mostrar');
             // Asegurar que el slider tenga el valor correcto
             let val = configuracion.totalCartones;
-            if (val < 3 || val > 30 || val % 3 !== 0) val = 15;
+            if (val < 3 || val > 33 || val % 3 !== 0) val = 15; // 🟢 CAMBIADO DE 30 A 33
             slider.value = val;
             valorSlider.textContent = val;
             configuracion.totalCartones = val;
