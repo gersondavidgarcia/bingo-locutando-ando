@@ -364,8 +364,8 @@
         const contenedor = document.getElementById('recientesLista');
         contenedor.innerHTML = '';
         
-        // 🟢 CAMBIO DEFINITIVO: Tomamos las últimas 10 bolas (sin reverse)
-        const ultimasBolas = historialBolas.slice(-10);
+        // 🟢 CAMBIO DEFINITIVO: Tomamos las últimas 6 bolas (sin reverse)
+        const ultimasBolas = historialBolas.slice(-6);
 
         ultimasBolas.forEach(num => {
             const mini = document.createElement('div');
