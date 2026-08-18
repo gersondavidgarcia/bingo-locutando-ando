@@ -472,38 +472,42 @@ h1 {
 
 .recientes-lista {
     display: flex;
-    gap: 6px;
+    gap: 4px;
     align-items: center;
     justify-content: flex-start;
+    width: 100%;
+    padding-left: 6px;
 }
 
 .mini-bola {
-    width: 29px;
-    height: 29px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: var(--bola-bg, #ffeb3b);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 900;
     color: #000000 !important;
     box-shadow: 
-        0 3px 6px rgba(0,0,0,0.4),
-        inset -2px -2px 5px rgba(0,0,0,0.35),
-        inset 1px 1px 4px rgba(255,255,255,0.7);
-    animation: aparecer-mini-bola 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        0 2px 4px rgba(0,0,0,0.3),
+        inset -2px -2px 4px rgba(0,0,0,0.3),
+        inset 1px 1px 3px rgba(255,255,255,0.6);
+    
+    /* 🟢 ANIMACIÓN DE DESLIZAMIENTO DESDE EL BORDE IZQUIERDO */
+    animation: deslizarDesdeBarra 0.4s ease-out forwards;
 }
 
 .mini-bola::before {
     content: '';
     position: absolute;
-    width: 70%;
-    height: 70%;
+    width: 65%;
+    height: 65%;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e6e6e6 100%);
-    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.25);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
     z-index: 1;
 }
 
@@ -513,9 +517,14 @@ h1 {
     color: #000000 !important;
 }
 
-@keyframes aparecer-mini-bola {
-    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+/* 🟢 ANIMACIÓN FINAL DE DESLIZAMIENTO */
+@keyframes deslizarDesdeBarra {
+    0% {
+        transform: translateX(-15px); /* Nace ligeramente a la izquierda (dentro de la barra roja) */
+    }
+    100% {
+        transform: translateX(0);     /* Termina en su lugar */
+    }
 }
 
 .panel-numeros-inferior {
