@@ -363,8 +363,9 @@
     function actualizarRecientesUI() {
         const contenedor = document.getElementById('recientesLista');
         contenedor.innerHTML = '';
-        // Mostrar las últimas 6 bolas del historial
-        const ultimasBolas = historialBolas.slice(-6);
+        
+        // 🟢 CAMBIO DEFINITIVO: Tomamos las últimas 10 bolas (sin reverse)
+        const ultimasBolas = historialBolas.slice(-10);
 
         ultimasBolas.forEach(num => {
             const mini = document.createElement('div');
@@ -375,7 +376,8 @@
             spanNum.textContent = num;
             mini.appendChild(spanNum);
 
-            contenedor.appendChild(mini);
+            // 🟢 prepend inserta la nueva bola a la izquierda (empujando las otras a la derecha)
+            contenedor.prepend(mini);
         });
     }
 
