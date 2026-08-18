@@ -459,7 +459,7 @@ h1 {
 
 .recientes-container {
     width: 100%;
-    max-width: 250px;      /* 🟢 Esto la hace más corta horizontalmente */
+    max-width: 200px;      /* 🟢 Esto la hace más corta horizontalmente */
     margin-left: 0;      
     margin-right: auto;
     background: #7a0000;
