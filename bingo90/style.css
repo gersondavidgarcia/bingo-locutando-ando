@@ -459,6 +459,9 @@ h1 {
 
 .recientes-container {
     width: 100%;
+    max-width: 250px;      /* 🟢 Esto la hace más corta horizontalmente */
+    margin-left: 0;      
+    margin-right: auto;
     background: #7a0000;
     border-radius: 6px;
     padding: 4px 8px;
@@ -466,8 +469,10 @@ h1 {
     align-items: center;
     justify-content: flex-start;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    min-height: 36px;
+    min-height: 36px;      /* 🟢 Mantuve la altura original */
     gap: 6px;
+    position: relative;
+    overflow: hidden;
 }
 
 .recientes-lista {
@@ -496,8 +501,8 @@ h1 {
         inset -2px -2px 4px rgba(0,0,0,0.3),
         inset 1px 1px 3px rgba(255,255,255,0.6);
     
-    /* 🟢 ANIMACIÓN DE DESLIZAMIENTO DESDE EL BORDE IZQUIERDO */
-    animation: deslizarDesdeBarra 0.4s ease-out forwards;
+    /* 🟢 ANIMACIÓN DE DESLIZAMIENTO */
+    animation: deslizarDesdeBarra 0.7s ease-out forwards;
 }
 
 .mini-bola::before {
@@ -517,13 +522,36 @@ h1 {
     color: #000000 !important;
 }
 
-/* 🟢 ANIMACIÓN FINAL DE DESLIZAMIENTO */
 @keyframes deslizarDesdeBarra {
     0% {
-        transform: translateX(-15px); /* Nace ligeramente a la izquierda (dentro de la barra roja) */
+        transform: translateX(-15px);
     }
     100% {
-        transform: translateX(0);     /* Termina en su lugar */
+        transform: translateX(0);
+    }
+}
+
+/* 🟢 EFECTO SHINE (DESTELLO DE LUZ EN LA BARRA ROJA) */
+.recientes-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transform: skewX(-25deg);
+    z-index: 10;
+    pointer-events: none;
+    animation: shine 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 150%;
     }
 }
 
