@@ -362,21 +362,37 @@
 
     function actualizarRecientesUI() {
         const contenedor = document.getElementById('recientesLista');
-        contenedor.innerHTML = '';
-        
-        // 🟢 CAMBIO DEFINITIVO: Tomamos las últimas 6 bolas (sin reverse)
+
+        // 🟢 1. SALIDA TIPO TUBO: Animamos el último elemento antes de sacarlo
+        if (contenedor.children.length >= 6) {
+            const ultimaBola = contenedor.lastElementChild;
+            if (ultimaBola) {
+                // Añadimos la clase 'saliendo' que activa la animación CSS hacia la derecha
+                ultimaBola.classList.add('saliendo');
+                
+                // Esperamos a que termine la animación (0.4s) para removerlo del DOM
+                setTimeout(() => {
+                    if (ultimaBola.parentNode) {
+                        contenedor.removeChild(ultimaBola);
+                    }
+                }, 400);
+            }
+        }
+
+        // 🟢 2. ENTRADA TIPO TUBO: Renderizamos las últimas bolas
         const ultimasBolas = historialBolas.slice(-6);
+        contenedor.innerHTML = ''; 
 
         ultimasBolas.forEach(num => {
             const mini = document.createElement('div');
-            mini.className = 'mini-bola';
+            // Agregamos la clase base y la clase 'entrando' para que aparezca desde la izquierda como un tubo
+            mini.className = 'mini-bola entrando';
             mini.style.setProperty('--bola-bg', obtenerColorExterior(num));
             
             const spanNum = document.createElement('span');
             spanNum.textContent = num;
             mini.appendChild(spanNum);
 
-            // 🟢 prepend inserta la nueva bola a la izquierda (empujando las otras a la derecha)
             contenedor.prepend(mini);
         });
     }
