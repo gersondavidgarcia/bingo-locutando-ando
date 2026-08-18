@@ -7,7 +7,6 @@
 body {
     background: #f0f2f5;
     font-family: 'Segoe UI', Arial, sans-serif;
-    /* 🟢 CAMBIO CLAVE PARA MÓVILES: Usamos 100dvh en lugar de 100vh */
     height: 100dvh; 
     overflow: hidden;
     display: flex;
@@ -469,7 +468,7 @@ h1 {
     align-items: center;
     justify-content: flex-start;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    min-height: 36px;      /* 🟢 Mantuve la altura original */
+    min-height: 36px;
     gap: 6px;
     position: relative;
     overflow: hidden;
@@ -501,8 +500,7 @@ h1 {
         inset -2px -2px 4px rgba(0,0,0,0.3),
         inset 1px 1px 3px rgba(255,255,255,0.6);
     
-    /* 🟢 ANIMACIÓN DE DESLIZAMIENTO */
-    animation: deslizarDesdeBarra 0.7s ease-out forwards;
+    /* 🟢 El JS se encarga de poner la clase, este es el estilo base */
 }
 
 .mini-bola::before {
@@ -522,37 +520,32 @@ h1 {
     color: #000000 !important;
 }
 
-@keyframes deslizarDesdeBarra {
+/* 🟢 ENTRADA: Deslizamiento puro desde el borde izquierdo */
+@keyframes entradaTuberia {
     0% {
-        transform: translateX(-15px);
+        transform: translateX(-26px);
     }
     100% {
         transform: translateX(0);
     }
 }
 
-/* 🟢 EFECTO SHINE (DESTELLO DE LUZ EN LA BARRA ROJA) */
-.recientes-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    transform: skewX(-25deg);
-    z-index: 10;
-    pointer-events: none;
-    animation: shine 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes shine {
+/* 🟢 SALIDA: Deslizamiento puro hacia el borde derecho */
+@keyframes salidaTuberia {
     0% {
-        left: -100%;
+        transform: translateX(0);
     }
     100% {
-        left: 150%;
+        transform: translateX(26px);
     }
+}
+
+/* 🟢 CLASE PARA APLICAR LA ENTRADA Y LA SALIDA (Se añade desde JS) */
+.mini-bola.entrando {
+    animation: entradaTuberia 0.4s ease-out forwards;
+}
+.mini-bola.saliendo {
+    animation: salidaTuberia 0.4s ease-in forwards;
 }
 
 .panel-numeros-inferior {
