@@ -1988,6 +1988,8 @@
     
     const nombresUnicosBingo = Object.keys(conteoBingo);
     const nombresUnicosRuleta = Object.keys(conteoRuleta);
+    
+    // ===== DETECTAR SI ES LA MISMA PERSONA =====
     const esMismaPersona = (nombresUnicosBingo.length === 1 && nombresUnicosRuleta.length === 1 && nombresUnicosBingo[0] === nombresUnicosRuleta[0]);
     const nombreUnico = esMismaPersona ? nombresUnicosBingo[0] : "";
     const cantidadBingo = nombreUnico ? conteoBingo[nombreUnico] || 0 : 0;
@@ -2001,76 +2003,53 @@
     let premioTotal = 0;
     let nombreGanador = "";
     
-    // ===== CASO 1: Misma persona, mismo número, 1 sola línea =====
-    if (esMismoNumero && esMismaPersona && esUnaSolaLinea) {
-        nombreGanador = nombreUnico;
-        premioTotal = 15000 + (entregarAcumulado && acumulado > 0 ? acumuladoPesos : 0);
-        
-        // ===== NUEVO FORMATO =====
-        mensaje += "🏆 *BINGO #" + numBingo + "* 💰$10.000\n";
-        mensaje += "🎰 *RULETA #" + numRuleta + "* 💰$5.000\n";
-        mensaje += "👤 *" + nombreUnico + "* gana 💰$" + premioTotal.toLocaleString() + "\n";
-        mensaje += " \n";
-        
-        if (entregarAcumulado && acumulado > 0) {
-            mensaje += "💰 *¡GANADOR DEL ACUMULADO!* 💰\n";
-            mensaje += "🏆 Lleva $" + acumuladoPesos.toLocaleString() + " EXTRA\n";
-            mensaje += " \n";
-            mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-            mensaje += "Ganaste (Bingo+Ruleta+Acumulado)";
-        } else if (acumulado > 0) {
-            mensaje += "⚠️ *ACUMULADO NO ENTREGADO*\n";
-            mensaje += "📌 No cumple las condiciones (4 rondas diferentes en el día).\n";
-            mensaje += "💰 El acumulado de $" + acumuladoPesos.toLocaleString() + " sigue en juego.\n";
-            mensaje += " \n";
-            mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-            mensaje += "Ganaste (Bingo+Ruleta)";
-        } else {
-            mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-            mensaje += "Ganaste (Bingo+Ruleta)";
-        }
-    
-    // ===== CASO 2: Misma persona, múltiples líneas =====
-    } else if (esMismaPersona) {
+    // ===== CASO 1: Misma persona (aunque sean números diferentes) =====
+    if (esMismaPersona) {
         nombreGanador = nombreUnico;
         premioTotal = (10000 * cantidadBingo) + (5000 * cantidadRuleta);
         
-        // ===== NUEVO FORMATO =====
+        mensaje += "🏆 *BINGO #" + numBingo + "* 💰$" + (10000 * cantidadBingo).toLocaleString();
         if (cantidadBingo > 1) {
-            mensaje += "🏆 *BINGO #" + numBingo + "* 💰$" + (10000 * cantidadBingo).toLocaleString() + " (" + cantidadBingo + " líneas)\n";
-        } else {
-            mensaje += "🏆 *BINGO #" + numBingo + "* 💰$10.000\n";
+            mensaje += " (" + cantidadBingo + " líneas)";
         }
+        mensaje += "\n";
         
+        mensaje += "🎰 *RULETA #" + numRuleta + "* 💰$" + (5000 * cantidadRuleta).toLocaleString();
         if (cantidadRuleta > 1) {
-            mensaje += "🎰 *RULETA #" + numRuleta + "* 💰$" + (5000 * cantidadRuleta).toLocaleString() + " (" + cantidadRuleta + " líneas)\n";
-        } else {
-            mensaje += "🎰 *RULETA #" + numRuleta + "* 💰$5.000\n";
+            mensaje += " (" + cantidadRuleta + " líneas)";
         }
+        mensaje += "\n";
         
         mensaje += "👤 *" + nombreUnico + "* gana 💰$" + premioTotal.toLocaleString() + "\n";
         mensaje += " \n";
         
-        if (entregarAcumulado && acumulado > 0) {
-            mensaje += "💰 *¡GANADOR DEL ACUMULADO!* 💰\n";
-            mensaje += "🏆 Lleva $" + acumuladoPesos.toLocaleString() + " EXTRA\n";
-            mensaje += " \n";
-            premioTotal += acumuladoPesos;
-            mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-            mensaje += "Ganaste (Bingo+Ruleta+Acumulado)";
-        } else if (acumulado > 0 && entregarAcumulado === false) {
-            mensaje += "⚠️ *ACUMULADO NO ENTREGADO*\n";
-            mensaje += "📌 No cumple las condiciones (4 rondas diferentes en el día).\n";
-            mensaje += "💰 El acumulado de $" + acumuladoPesos.toLocaleString() + " sigue en juego.\n";
-            mensaje += " \n";
-            mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-            mensaje += "Ganaste (Bingo+Ruleta)";
+        // ===== ACUMULADO: SOLO SI ES EL MISMO NÚMERO =====
+        if (esMismoNumero) {
+            if (entregarAcumulado && acumulado > 0) {
+                mensaje += "💰 *¡GANADOR DEL ACUMULADO!* 💰\n";
+                mensaje += "🏆 Lleva $" + acumuladoPesos.toLocaleString() + " EXTRA\n";
+                mensaje += " \n";
+                premioTotal += acumuladoPesos;
+                mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
+                mensaje += "Ganaste (Bingo+Ruleta+Acumulado)";
+            } else if (acumulado > 0) {
+                mensaje += "⚠️ *ACUMULADO NO ENTREGADO*\n";
+                mensaje += "📌 No cumple las condiciones (4 rondas diferentes en el día).\n";
+                mensaje += "💰 El acumulado de $" + acumuladoPesos.toLocaleString() + " sigue en juego.\n";
+                mensaje += " \n";
+                mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
+                mensaje += "Ganaste (Bingo+Ruleta)";
+            } else {
+                mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
+                mensaje += "Ganaste (Bingo+Ruleta)";
+            }
         } else {
+            // ===== NÚMEROS DIFERENTES: NO SE MUESTRA NADA DEL ACUMULADO =====
             mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
             mensaje += "Ganaste (Bingo+Ruleta)";
         }
     
-    // ===== CASO 3: Múltiples ganadores =====
+    // ===== CASO 2: Múltiples ganadores (personas diferentes) =====
     } else {
         nombreGanador = Array.from(todosLosGanadoresSet).join(", ");
         
