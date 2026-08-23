@@ -1,6 +1,6 @@
 (function() {
     // 🟢 CARGAR CONFIGURACIÓN DEL MENÚ
-    let configuracion = { totalCartones: 15, vozActiva: true };
+    let configuracion = { totalCartones: 15, vozActiva: true, scrollActivo: false };
     const configGuardada = localStorage.getItem('bingoConfig');
     if (configGuardada) {
         configuracion = JSON.parse(configGuardada);
@@ -101,11 +101,57 @@
         }
     }
 
+        // 🟢 FUNCIÓN: COLOR ALEATORIO + COLOR OPUESTO VIVO
     function cambiarColorAleatorio() {
         const idx = Math.floor(Math.random() * paletasColores.length);
         const colorActual = paletasColores[idx];
+        
+        // Variables CSS principales
         document.documentElement.style.setProperty('--tema-color', colorActual.border);
         document.documentElement.style.setProperty('--tema-color-bg', colorActual.bg);
+
+        // 🟢 Función para oscurecer un color (para que el degradado sea más profundo)
+        function oscurecerColor(hex, porcentaje) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            
+            r = Math.round(r * (1 - porcentaje));
+            g = Math.round(g * (1 - porcentaje));
+            b = Math.round(b * (1 - porcentaje));
+            
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        // 🟢 Función para calcular el color OPUESTO puro (Vivo)
+        function invertirColor(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            
+            // Inversión total (255 - valor) = Color complementario vivo
+            r = 255 - r;
+            g = 255 - g;
+            b = 255 - b;
+            
+            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+        }
+
+        // Calculamos el color oscuro del tema (borde) y el color opuesto vivo
+        const colorOscuro = oscurecerColor(colorActual.border, 0.3); // Oscurecer un 30%
+        const colorVivoOpuesto = invertirColor(colorActual.border);
+        
+        // Guardamos los colores en variables CSS
+        document.documentElement.style.setProperty('--tema-contraste', colorVivoOpuesto);
+        document.documentElement.style.setProperty('--tema-oscuro', colorOscuro);
     }
 
     function shuffle(array) {
@@ -280,10 +326,8 @@
 
         // 🟢 LÓGICA INTELIGENTE DE COLUMNAS
         if (TOTAL_CARTONES === 10) {
-            // Modo 10 cartones: 2 columnas, sin reducción
             gridContainer.classList.remove('modo-15');
         } else {
-            // Cualquier múltiplo de 3: 3 columnas, con reducción
             gridContainer.classList.add('modo-15');
         }
 
@@ -363,14 +407,12 @@
     function actualizarRecientesUI() {
         const contenedor = document.getElementById('recientesLista');
 
-        // 🟢 1. SALIDA TIPO TUBO: Animamos el último elemento antes de sacarlo
         if (contenedor.children.length >= 6) {
             const ultimaBola = contenedor.lastElementChild;
             if (ultimaBola) {
-                // Añadimos la clase 'saliendo' que activa la animación CSS hacia la derecha
-                ultimaBola.classList.add('saliendo');
-                
-                // Esperamos a que termine la animación (0.4s) para removerlo del DOM
+                ultimaBola.style.transition = 'transform 0.4s ease-out, opacity 0.4s ease-out';
+                ultimaBola.style.transform = 'translateX(30px)';
+                ultimaBola.style.opacity = '0';
                 setTimeout(() => {
                     if (ultimaBola.parentNode) {
                         contenedor.removeChild(ultimaBola);
@@ -379,21 +421,26 @@
             }
         }
 
-        // 🟢 2. ENTRADA TIPO TUBO: Renderizamos las últimas bolas
         const ultimasBolas = historialBolas.slice(-6);
-        contenedor.innerHTML = ''; 
+        contenedor.innerHTML = '';
 
         ultimasBolas.forEach(num => {
             const mini = document.createElement('div');
-            // Agregamos la clase base y la clase 'entrando' para que aparezca desde la izquierda como un tubo
-            mini.className = 'mini-bola entrando';
+            mini.className = 'mini-bola';
             mini.style.setProperty('--bola-bg', obtenerColorExterior(num));
+            
+            mini.style.transition = 'transform 0.4s ease-out';
+            mini.style.transform = 'translateX(-30px)';
             
             const spanNum = document.createElement('span');
             spanNum.textContent = num;
             mini.appendChild(spanNum);
 
             contenedor.prepend(mini);
+
+            requestAnimationFrame(() => {
+                mini.style.transform = 'translateX(0)';
+            });
         });
     }
 
@@ -437,7 +484,6 @@
             });
         }
 
-        // Actualizar el botón en la tabla
         const bolita = document.getElementById(`bolita-${num}`);
         if (bolita) {
             if (markedNumbers.has(num)) {
@@ -463,7 +509,6 @@
             headerElem.classList.add('hit-alert');
         }
 
-        // Actualizar el botón en la tabla
         const bolita = document.getElementById(`bolita-${num}`);
         if (bolita) {
             bolita.classList.add('marcada');
@@ -573,24 +618,19 @@
             actualizarMarcasCartones(num);
             actualizarEstado(num);
             actualizarRecientesUI();
-            // No verificamos premios al desmarcar
         } else {
-            // Para marcar manual desde la tabla
             markedNumbers.add(num);
             historialBolas.push(num);
             
-            // Actualizar UI inmediatamente
             actualizarMarcasCartones(num);
             actualizarEstado(num);
             actualizarRecientesUI();
             
-            // Verificar premios de forma síncrona (sin animaciones)
             verificarPremiosManual(num);
         }
     }
 
     function verificarPremiosManual(numActual) {
-        // Verificar si hay premio después de marcar manualmente
         let hayLinea = false;
         let hayBingo = false;
         let ganadorLinea = null;
@@ -652,7 +692,6 @@
         const ejecutarEntradaNuevaBola = async () => {
             const num = bolasDisponibles.pop();
             
-            // 1. Mostrar la bola en el bolillero
             display.textContent = num;
             sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
 
@@ -662,16 +701,12 @@
 
             decirNumero(num);
 
-            // Esperar a que la bola termine la animación
             await new Promise(r => setTimeout(r, 650));
 
-            // 2. Verificar premios (el número NO se ha marcado aún)
             await verificarPremiosConSincronizacion(num);
 
-            // 3. ACTUALIZAR LAS BOLAS RECIENTES (esto es lo que faltaba)
             actualizarRecientesUI();
 
-            // 4. Actualizar estadísticas
             actualizarEstado(num);
 
             sphere.classList.remove('rodar-entrada');
@@ -698,36 +733,29 @@
     }
 
     async function verificarPremiosConSincronizacion(numActual) {
-        // PRIMERO: Buscar candidatos a premio ANTES de pintar
         let candidatosLinea = [];
         let candidatosBingo = [];
 
-        // Verificar si hay premio con el número actual (sin marcarlo aún)
         for (let idx = 0; idx < currentCartones.length; idx++) {
             const carton = currentCartones[idx];
             let numerosMarcadosTotal = 0;
 
             for (let r = 0; r < 3; r++) {
                 const numerosFila = carton[r].filter(n => n !== null);
-                // Verificar si con el número actual se completa la fila
                 const filaCompletada = numerosFila.every(n => markedNumbers.has(n) || n === numActual);
 
                 if (filaCompletada && !lineaCantadaGlobal) {
-                    // Solo si la fila NO estaba completa antes de este número
                     const filaCompletaSinActual = numerosFila.every(n => markedNumbers.has(n));
                     if (!filaCompletaSinActual) {
                         candidatosLinea.push({ idx, r, idCarton: idx + 1 });
                     }
                 }
 
-                // Contar marcados incluyendo el actual
                 const marcadosEnFila = numerosFila.filter(n => markedNumbers.has(n) || n === numActual).length;
                 numerosMarcadosTotal += marcadosEnFila;
             }
 
-            // Verificar bingo incluyendo el número actual
             if (numerosMarcadosTotal === 15 && !bingoCantadoGlobal) {
-                // Solo si NO estaba completo antes
                 let marcadosPrevios = 0;
                 for (let r = 0; r < 3; r++) {
                     const numerosFila = carton[r].filter(n => n !== null);
@@ -739,27 +767,19 @@
             }
         }
 
-        // CASO: HAY PREMIO (Línea o Bingo)
         if ((candidatosLinea.length > 0 && !lineaCantadaGlobal) || (candidatosBingo.length > 0 && !bingoCantadoGlobal)) {
             
-            // La casilla NO se pinta aún - permanece en blanco
-            
-            // Si hay línea
             if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
                 lineaCantadaGlobal = true;
                 const ganador = candidatosLinea[0];
                 
-                // Buscar la celda ganadora (está en blanco porque no se ha pintado)
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
                 
-                // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
                 if (celdaGanadora) {
                     await animarCirculoEnCelda(celdaGanadora);
                 }
                 
-                // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla y la fila
                 markedNumbers.add(numActual);
-                // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
                 historialBolas.push(numActual);
                 pausarMarcadoGeneral = false;
                 actualizarMarcasCartones(numActual);
@@ -769,22 +789,17 @@
                 agregarBadgePremio(ganador.idCarton, 'linea');
                 mostrarBanner(`¡LÍNEA EN CARTÓN ${ganador.idCarton}! 📐`, false);
                 
-            // Si hay bingo
             } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
                 bingoCantadoGlobal = true;
                 const ganador = candidatosBingo[0];
                 
-                // Buscar la celda ganadora (está en blanco porque no se ha pintado)
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
                 
-                // 1. BAJA EL CÍRCULO sobre la casilla en BLANCO
                 if (celdaGanadora) {
                     await animarCirculoEnCelda(celdaGanadora);
                 }
                 
-                // 2. DESPUÉS del círculo: Se MARCA el número, se PINTA y se RAYA la casilla
                 markedNumbers.add(numActual);
-                // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
                 historialBolas.push(numActual);
                 pausarMarcadoGeneral = false;
                 actualizarMarcasCartones(numActual);
@@ -795,9 +810,7 @@
             }
 
         } else {
-            // CASO: JUGADA NORMAL (Sin premio) -> Se marca y se pinta la casilla normalmente
             markedNumbers.add(numActual);
-            // AGREGAR AL HISTORIAL DE BOLAS RECIENTES
             historialBolas.push(numActual);
             pausarMarcadoGeneral = false;
             actualizarMarcasCartones(numActual);
@@ -835,7 +848,7 @@
     }
 
     function init() {
-        cambiarColorAleatorio();
+        cambiarColorAleatorio(); // 🟢 COLOR ALEATORIO ORIGINAL
         currentCartones = generar10CartonesGlobales();
         reiniciarJuego();
 
@@ -854,6 +867,35 @@
     init();
 
     // ==========================================================
+    // 🟢 CONFIGURAR SCROLL SEGÚN EL MENÚ
+    // ==========================================================
+    
+    // Definir la función de bloqueo
+    function bloquearScroll(e) {
+        e.preventDefault();
+    }
+
+    const scrollPermitido = configuracion.scrollActivo;
+
+    if (scrollPermitido) {
+        // Permitir scroll
+        document.documentElement.style.overflowY = 'auto';
+        document.body.style.overflowY = 'auto';
+        document.documentElement.style.height = 'auto';
+        document.body.style.height = 'auto';
+        
+        document.removeEventListener('touchmove', bloquearScroll);
+        document.removeEventListener('wheel', bloquearScroll);
+    } else {
+        // Bloquear scroll
+        document.documentElement.style.overflowY = 'hidden';
+        document.body.style.overflowY = 'hidden';
+        
+        document.addEventListener('touchmove', bloquearScroll, { passive: false });
+        document.addEventListener('wheel', bloquearScroll, { passive: false });
+    }
+
+    // ==========================================================
     // 🟢 CÓDIGO PARA FORZAR LA PANTALLA COMPLETA EN LA APK 🟢
     // ==========================================================
     function forzarPantallaCompleta() {
@@ -867,19 +909,15 @@
         }
     }
 
-    // Intentar forzar al cargar la página
     setTimeout(forzarPantallaCompleta, 500);
-    // Intentar de nuevo si falla la primera vez
     setTimeout(forzarPantallaCompleta, 1500);
 
-    // Forzar cada vez que el usuario toque la pantalla (Chrome sale del modo cuando tocas)
     document.addEventListener('click', function() {
         if (!document.fullscreenElement) {
             forzarPantallaCompleta();
         }
     });
 
-    // Forzar si el usuario hace scroll (aunque esté bloqueado, por si acaso)
     document.addEventListener('touchstart', function() {
         if (!document.fullscreenElement) {
             forzarPantallaCompleta();
