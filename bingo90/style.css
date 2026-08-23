@@ -21,33 +21,13 @@ body {
 .bingo-app {
     width: 100%;
     max-width: 520px;
-    /* 🟢 DEGRADADO ANIMADO: Color oscuro del tema → Opuesto vivo → Color oscuro del tema */
-    background: linear-gradient(135deg, 
-        var(--tema-oscuro, #1a1a1a) 0%, 
-        var(--tema-contraste, #ff5722) 50%, 
-        var(--tema-oscuro, #1a1a1a) 100%
-    );
-    background-size: 300% 300%;
+    background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4); /* Sombra más fuerte para darle profundidad */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     padding: 10px 8px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    animation: degradadoMovimiento 6s ease infinite;
-}
-
-/* 🟢 Definimos los keyframes para el movimiento */
-@keyframes degradadoMovimiento {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
 }
 
 .header-bar {
@@ -321,27 +301,70 @@ h1 {
 }
 
 .bolillero-container {
-    /* 🟢 DEGRADADO SUAVE DEL TEMA CON ANIMACIÓN */
+    /* 🟢 DEGRADADO ANIMADO MUY LENTO (ELEGANTE) */
     background: linear-gradient(135deg, 
-        var(--tema-color-bg, #e0f7fa) 0%, 
-        #ffffff 25%, 
-        var(--tema-color-bg, #e0f7fa) 50%, 
-        #ffffff 75%, 
-        var(--tema-color-bg, #e0f7fa) 100%
+        var(--tema-color, #2e7d32) 0%, 
+        var(--tema-color-bg, #4caf50) 25%, 
+        var(--tema-color, #2e7d32) 50%, 
+        var(--tema-color-bg, #4caf50) 75%, 
+        var(--tema-color, #2e7d32) 100%
     );
-    background-size: 400% 400%; /* Hace que el degradado sea gigante para poder moverlo */
-    border: 2px solid var(--tema-oscuro, #1a1a1a);
-    border-radius: 12px;
-    padding: 8px 10px;
+    background-size: 400% 400%;
+    
+    /* 🟢 BORDE DOBLE: Blanco + Neón del tema */
+    border: 4px solid #ffffff;
+    outline: 3px solid var(--tema-color, #2e7d32);
+    outline-offset: -8px; /* Hace que el borde de color quede DENTRO del panel */
+    border-radius: 22px;
+    padding: 10px 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    position: relative;
     
-    /* 🟢 LA ANIMACIÓN */
-    animation: degradadoMovimiento 30s ease infinite;
+    /* 🟢 Sombra sutil + Brillo interno */
+    box-shadow: 
+        0 6px 18px rgba(0, 0, 0, 0.25),
+        inset 0 0 25px var(--tema-color, #2e7d32);
+    
+    animation: ondasColoridas 12s ease-in-out infinite; /* 🟢 12 SEGUNDOS = MUY LENTO */
+}
+
+/* 🟢 REFLEJO DE CRISTAL SUTIL */
+.bolillero-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 🟢 ONDAS ANIMADAS (LENTAS) */
+@keyframes ondasColoridas {
+    0% {
+        background-position: 0% 50%;
+        box-shadow: 
+            0 6px 18px rgba(0, 0, 0, 0.25),
+            inset 0 0 25px var(--tema-color, #2e7d32);
+    }
+    50% {
+        background-position: 100% 50%;
+        box-shadow: 
+            0 6px 18px rgba(0, 0, 0, 0.25),
+            inset 0 0 40px var(--tema-color, #2e7d32);
+    }
+    100% {
+        background-position: 0% 50%;
+        box-shadow: 
+            0 6px 18px rgba(0, 0, 0, 0.25),
+            inset 0 0 25px var(--tema-color, #2e7d32);
+    }
 }
 
 /* 🟢 Usamos la MISMA animación del fondo principal */
@@ -470,19 +493,23 @@ h1 {
 }
 
 .btn-sacar-bola {
-    background: var(--tema-oscuro, #2e7d32); /* Usa el color oscuro del tema */
-    border: 2px solid #ffffff;
+    background: var(--tema-color, #2e7d32); /* Color estático del tema */
+    border: 40px solid #ffffff; /* Borde blanco grueso */
     color: white;
-    font-weight: 800;
+    font-weight: 900;
     font-size: 0.78rem;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 14px;
+    border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
 }
 
-.btn-sacar-bola:active { transform: scale(0.96); }
+/* Solo reacciona físicamente al presionar, sin animaciones de color */
+.btn-sacar-bola:active {
+    transform: scale(0.95);
+}
 
 .stats-box {
     display: flex;
@@ -509,7 +536,8 @@ h1 {
     max-width: 200px;      
     margin-left: 0;      
     margin-right: auto;
-    background: #7a0000;
+    background: #7a0000; /* Fondo rojo original */
+    border: 2px solid #ffffff; /* 🟢 SOLO LE AGREGAMOS ESTO */
     border-radius: 6px;
     padding: 4px 8px;
     display: flex;
@@ -531,6 +559,7 @@ h1 {
     padding-left: 6px;
 }
 
+/* 🟢 Las mini bolas quedan EXACTAMENTE como las tenías */
 .mini-bola {
     width: 26px;
     height: 26px;
@@ -547,8 +576,6 @@ h1 {
         0 2px 4px rgba(0,0,0,0.3),
         inset -2px -2px 4px rgba(0,0,0,0.3),
         inset 1px 1px 3px rgba(255,255,255,0.6);
-    
-    /* 🟢 El JS se encarga de poner la clase, este es el estilo base */
 }
 
 .mini-bola::before {
@@ -597,9 +624,9 @@ h1 {
 }
 
 .panel-numeros-inferior {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid var(--tema-oscuro, #1a1a1a);
-    border-radius: 6px;
+    background: #f8f9fa;
+    border: 2px solid var(--tema-color, #2e7d32); /* Borde del color del tema */
+    border-radius: 10px;
     padding: 3px;
     display: flex;
     flex-direction: column;
