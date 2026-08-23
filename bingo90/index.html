@@ -280,6 +280,15 @@
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
+            <!-- 🟢 NUEVO: ACTIVAR/DESACTIVAR SCROLL -->
+            <div class="opcion-ajuste">
+                <span class="etiqueta">📜 Scroll de página</span>
+                <label class="switch">
+                    <input type="checkbox" id="checkScroll">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
             <!-- 🟢 NUEVO SELECTOR: 2 BOTONES + SLIDER -->
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 0;">
                 <span class="etiqueta" style="margin-bottom: 5px;">🃏 Selección de Cartones</span>
@@ -292,7 +301,7 @@
 
                     <!-- Slider desplegable -->
                     <div id="sliderContainer" class="slider-container">
-                        <input type="range" id="sliderCartones" min="3" max="33" step="3" value="15"> <!-- 🟢 CAMBIADO DE 30 A 33 -->
+                        <input type="range" id="sliderCartones" min="3" max="33" step="3" value="15">
                         <span id="sliderValor" class="slider-valor">15</span>
                     </div>
 
@@ -305,7 +314,7 @@
 
     <!-- JAVASCRIPT DEL MENÚ -->
     <script>
-        let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false };
+        let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false, scrollActivo: false };
         const configGuardada = localStorage.getItem('bingoConfig');
         if (configGuardada) {
             configuracion = JSON.parse(configGuardada);
@@ -318,6 +327,10 @@
         const slider = document.getElementById('sliderCartones');
         const valorSlider = document.getElementById('sliderValor');
 
+        // Cargar estado inicial del Scroll
+        const checkScroll = document.getElementById('checkScroll');
+        checkScroll.checked = configuracion.scrollActivo;
+
         // Cargar estado guardado
         if (configuracion.totalCartones === 10) {
             btnModo10.classList.add('activo');
@@ -326,9 +339,8 @@
         } else {
             btnModo3.classList.add('activo');
             sliderContainer.classList.add('mostrar');
-            // Asegurar que el slider tenga el valor correcto
             let val = configuracion.totalCartones;
-            if (val < 3 || val > 33 || val % 3 !== 0) val = 15; // 🟢 CAMBIADO DE 30 A 33
+            if (val < 3 || val > 33 || val % 3 !== 0) val = 15;
             slider.value = val;
             valorSlider.textContent = val;
             configuracion.totalCartones = val;
@@ -340,21 +352,18 @@
                 btnModo3.classList.remove('activo');
                 sliderContainer.classList.remove('mostrar');
                 configuracion.totalCartones = 10;
-            } else { // modo 'slider'
+            } else {
                 btnModo3.classList.add('activo');
                 btnModo10.classList.remove('activo');
                 sliderContainer.classList.add('mostrar');
-                // Tomar el valor actual del slider
                 let val = parseInt(slider.value);
                 configuracion.totalCartones = val;
             }
         }
 
-        // Actualizar número al mover el slider
         slider.addEventListener('input', function() {
             let val = parseInt(this.value);
             valorSlider.textContent = val;
-            // Solo actualizamos la configuración si el modo "Múltiplos de 3" está activo
             if (btnModo3.classList.contains('activo')) {
                 configuracion.totalCartones = val;
             }
@@ -382,6 +391,25 @@
         document.getElementById('checkVoz').addEventListener('change', function() {
             configuracion.vozActiva = this.checked;
         });
+
+        // 🟢 NUEVO: Lógica para bloquear el scroll táctil
+        checkScroll.addEventListener('change', function() {
+            configuracion.scrollActivo = this.checked;
+        });
+
+        // Bloquear el movimiento táctil si el scroll está desactivado
+        document.addEventListener('touchmove', function(e) {
+            if (!configuracion.scrollActivo) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Bloquear la rueda del ratón si el scroll está desactivado
+        document.addEventListener('wheel', function(e) {
+            if (!configuracion.scrollActivo) {
+                e.preventDefault();
+            }
+        }, { passive: false });
 
         function toggleMusica() {
             configuracion.musicaActiva = !configuracion.musicaActiva;
