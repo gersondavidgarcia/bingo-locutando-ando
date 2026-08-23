@@ -7,24 +7,47 @@
 body {
     background: #f0f2f5;
     font-family: 'Segoe UI', Arial, sans-serif;
-    height: 100dvh; 
-    overflow: hidden;
+    /* 🟢 CAMBIO CLAVE: Ya no usamos height: 100dvh ni overflow: hidden aquí. 
+       Usamos min-height para que si hay scroll, el fondo crezca. */
+    min-height: 100dvh; 
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 8px 4px;
+    overflow-x: hidden; 
+    /* El scroll vertical lo controla el JS */
 }
 
 .bingo-app {
     width: 100%;
     max-width: 520px;
-    background: #ffffff;
+    /* 🟢 DEGRADADO ANIMADO: Color oscuro del tema → Opuesto vivo → Color oscuro del tema */
+    background: linear-gradient(135deg, 
+        var(--tema-oscuro, #1a1a1a) 0%, 
+        var(--tema-contraste, #ff5722) 50%, 
+        var(--tema-oscuro, #1a1a1a) 100%
+    );
+    background-size: 300% 300%;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); /* Sombra más fuerte para darle profundidad */
     padding: 10px 8px;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    animation: degradadoMovimiento 6s ease infinite;
+}
+
+/* 🟢 Definimos los keyframes para el movimiento */
+@keyframes degradadoMovimiento {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .header-bar {
@@ -298,15 +321,40 @@ h1 {
 }
 
 .bolillero-container {
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
+    /* 🟢 DEGRADADO SUAVE DEL TEMA CON ANIMACIÓN */
+    background: linear-gradient(135deg, 
+        var(--tema-color-bg, #e0f7fa) 0%, 
+        #ffffff 25%, 
+        var(--tema-color-bg, #e0f7fa) 50%, 
+        #ffffff 75%, 
+        var(--tema-color-bg, #e0f7fa) 100%
+    );
+    background-size: 400% 400%; /* Hace que el degradado sea gigante para poder moverlo */
+    border: 2px solid var(--tema-oscuro, #1a1a1a);
+    border-radius: 12px;
     padding: 8px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    
+    /* 🟢 LA ANIMACIÓN */
+    animation: degradadoMovimiento 30s ease infinite;
+}
+
+/* 🟢 Usamos la MISMA animación del fondo principal */
+@keyframes degradadoMovimiento {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .bolillero-top-row {
@@ -422,15 +470,15 @@ h1 {
 }
 
 .btn-sacar-bola {
-    background: var(--tema-color, #2e7d32);
-    border: none;
+    background: var(--tema-oscuro, #2e7d32); /* Usa el color oscuro del tema */
+    border: 2px solid #ffffff;
     color: white;
     font-weight: 800;
     font-size: 0.78rem;
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     transition: background 0.2s, transform 0.1s;
 }
 
@@ -458,7 +506,7 @@ h1 {
 
 .recientes-container {
     width: 100%;
-    max-width: 200px;      /* 🟢 Esto la hace más corta horizontalmente */
+    max-width: 200px;      
     margin-left: 0;      
     margin-right: auto;
     background: #7a0000;
@@ -549,10 +597,10 @@ h1 {
 }
 
 .panel-numeros-inferior {
-    background: #f8f9fa;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--tema-oscuro, #1a1a1a);
     border-radius: 6px;
     padding: 3px;
-    border: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
     gap: 2px;
