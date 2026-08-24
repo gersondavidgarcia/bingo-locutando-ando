@@ -477,17 +477,215 @@ h1 {
     100% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset -6px -6px 12px rgba(0, 0, 0, 0.45), inset 5px 5px 10px rgba(255, 255, 255, 0.75); }
 }
 
+/* =========================================================
+   🎰 BOTÓN CASINO - BORDE NEÓN + PARTÍCULAS INTERNAS
+   ========================================================= */
+
 .btn-sacar-bola {
-    background: var(--tema-color, #2e7d32);
-    border: none;
-    color: white;
-    font-weight: 800;
-    font-size: 0.78rem;
-    padding: 8px 12px;
-    border-radius: 6px;
+    background: #0a0a12;
+    border: 3px solid #ffd700 !important;  /* 🔥 FUERZA EL BORDE */
+    border-radius: 14px;
+    color: #ffd700;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px 10px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
-    transition: background 0.2s, transform 0.1s;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.5s ease;
+    min-height: 52px;
+    min-width: 76px;
+    width: auto;
+    /* 🔥 BRILLO NEÓN EXTERIOR E INTERIOR */
+    box-shadow: 
+        0 0 25px rgba(255, 215, 0, 0.25),
+        0 0 50px rgba(255, 215, 0, 0.08),
+        inset 0 0 30px rgba(255, 215, 0, 0.05);
+    animation: bordeNeon 2.5s ease-in-out infinite alternate;
+}
+
+/* 🔥 ANIMACIÓN DEL BORDE NEÓN - SOLO CAMBIA EL COLOR Y EL BRILLO */
+@keyframes bordeNeon {
+    0% { 
+        border-color: #ffd700 !important;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), 0 0 50px rgba(255, 215, 0, 0.1), inset 0 0 30px rgba(255, 215, 0, 0.08);
+    }
+    25% { 
+        border-color: #ff6b6b !important;
+        box-shadow: 0 0 25px rgba(255, 107, 107, 0.3), 0 0 50px rgba(255, 107, 107, 0.1), inset 0 0 30px rgba(255, 107, 107, 0.08);
+    }
+    50% { 
+        border-color: #4ecdc4 !important;
+        box-shadow: 0 0 25px rgba(78, 205, 196, 0.3), 0 0 50px rgba(78, 205, 196, 0.1), inset 0 0 30px rgba(78, 205, 196, 0.08);
+    }
+    75% { 
+        border-color: #a29bfe !important;
+        box-shadow: 0 0 25px rgba(162, 155, 254, 0.3), 0 0 50px rgba(162, 155, 254, 0.1), inset 0 0 30px rgba(162, 155, 254, 0.08);
+    }
+    100% { 
+        border-color: #ffd700 !important;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), 0 0 50px rgba(255, 215, 0, 0.1), inset 0 0 30px rgba(255, 215, 0, 0.08);
+    }
+}
+
+/* =========================================================
+   PARTÍCULAS INTERNAS
+   ========================================================= */
+.btn-sacar-bola .particula {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #ffd700;
+    box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.btn-sacar-bola .particula:nth-child(1) {
+    top: 15%;
+    left: 10%;
+    animation: particulaFloat 4s ease-in-out 0s infinite;
+}
+.btn-sacar-bola .particula:nth-child(2) {
+    top: 70%;
+    right: 12%;
+    animation: particulaFloat 4.5s ease-in-out 1.2s infinite;
+}
+.btn-sacar-bola .particula:nth-child(3) {
+    bottom: 20%;
+    left: 25%;
+    animation: particulaFloat 3.8s ease-in-out 2.5s infinite;
+}
+.btn-sacar-bola .particula:nth-child(4) {
+    top: 10%;
+    right: 22%;
+    animation: particulaFloat 5s ease-in-out 0.8s infinite;
+}
+.btn-sacar-bola .particula:nth-child(5) {
+    bottom: 30%;
+    right: 28%;
+    animation: particulaFloat 4.2s ease-in-out 3s infinite;
+}
+
+@keyframes particulaFloat {
+    0% { 
+        opacity: 0; 
+        transform: scale(0) translateY(0px);
+    }
+    20% { 
+        opacity: 1; 
+        transform: scale(1.5) translateY(-5px);
+    }
+    40% { 
+        opacity: 0.8; 
+        transform: scale(0.8) translateY(-10px);
+    }
+    60% { 
+        opacity: 1; 
+        transform: scale(1.2) translateY(-3px);
+    }
+    80% { 
+        opacity: 0.6; 
+        transform: scale(0.9) translateY(-7px);
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0) translateY(0px);
+    }
+}
+
+/* =========================================================
+   BRILLO INTERNO
+   ========================================================= */
+.btn-sacar-bola .glow-inner {
+    position: absolute;
+    inset: 4px;
+    border-radius: 11px;
+    background: radial-gradient(
+        ellipse at 50% 50%,
+        rgba(255, 215, 0, 0.06) 0%,
+        rgba(255, 215, 0, 0.02) 40%,
+        transparent 80%
+    );
+    z-index: 0;
+    animation: glowPulse 3s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes glowPulse {
+    0% { 
+        opacity: 0.3;
+        transform: scale(0.95);
+    }
+    50% { 
+        opacity: 0.9;
+        transform: scale(1.04);
+    }
+    100% { 
+        opacity: 0.3;
+        transform: scale(0.95);
+    }
+}
+
+/* =========================================================
+   LUZ DESLIZANTE
+   ========================================================= */
+.btn-sacar-bola .glow-scan {
+    position: absolute;
+    inset: 4px;
+    border-radius: 11px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 215, 0, 0) 0%,
+        rgba(255, 215, 0, 0.06) 30%,
+        rgba(255, 215, 0, 0.15) 50%,
+        rgba(255, 215, 0, 0.06) 70%,
+        rgba(255, 215, 0, 0) 100%
+    );
+    background-size: 300% 100%;
+    animation: scanLight 5s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes scanLight {
+    0% { background-position: -100% 0%; opacity: 0.2; }
+    30% { opacity: 0.7; }
+    50% { background-position: 100% 0%; opacity: 0.9; }
+    70% { opacity: 0.7; }
+    100% { background-position: 300% 0%; opacity: 0.2; }
+}
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+.btn-sacar-bola:hover {
+    transform: scale(1.05) !important;
+    animation-duration: 1s !important;
+}
+
+/* =========================================================
+   TEXTO DORADO
+   ========================================================= */
+.btn-sacar-bola .text-glow {
+    position: relative;
+    z-index: 3;
+    background: linear-gradient(
+        180deg,
+        #ffd700 0%,
+        #ffb300 40%,
+        #ff8f00 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    font-size: 0.9rem;
+    text-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
+    letter-spacing: 2px;
+    line-height: 1.1;
 }
 
 .btn-sacar-bola:active { transform: scale(0.96); }
@@ -555,8 +753,6 @@ h1 {
         0 2px 4px rgba(0,0,0,0.3),
         inset -2px -2px 4px rgba(0,0,0,0.3),
         inset 1px 1px 3px rgba(255,255,255,0.6);
-    
-    /* 🟢 El JS se encarga de poner la clase, este es el estilo base */
 }
 
 .mini-bola::before {
@@ -694,7 +890,7 @@ h1 {
     }
     100% {
         transform: translate(-50%, -50%) scale(1.05);
-        opacity: 0; /* Se desvanece suavemente al finalizar */
+        opacity: 0;
         border-width: 4px;
     }
 }
@@ -722,7 +918,6 @@ h1 {
 .cartones-grid.modo-15 .num-val {
     font-size: 0.55rem !important;
 }
-/* 🟢 NUEVO: Las celdas vacías en 3 columnas ahora tienen el color del tema, sin bordes */
 .cartones-grid.modo-15 .celda.vacia {
     background-color: var(--tema-color-bg, #a5d6a7) !important;
     border: none !important;
@@ -733,108 +928,56 @@ h1 {
 }
 
 /* =========================================================
-   🟢 BOLA ENCIMA DEL BOTÓN SACAR BOLA
+   💥 ANIMACIÓN DE EXPLOSIÓN AL PRESIONAR
    ========================================================= */
-.bola-encima {
+
+/* Contenedor de partículas de explosión */
+.explosion-container {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.particula-explosion {
     position: absolute;
-    top: -7px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28px;
-    height: 28px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #888 0%, #1a1a1a 50%, #000 80%);
-    border: 3px solid #ffffff;
-    box-shadow: 
-        0 6px 0 #063c32,
-        0 10px 20px rgba(0, 0, 0, 0.4),
-        inset 0 3px 6px rgba(255, 255, 255, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: transform 1.6s ease, top 0.6s ease;  /* 🔴 Cambiado de 0.15s a 0.6s */
+    pointer-events: none;
+    animation: explosionFly 0.8s ease-out forwards;
 }
 
-/* ARO LUMINOSO */
-.bola-encima::after {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 2px solid var(--tema-color-bg, #4caf50);
-    box-shadow: 0 0 15px var(--tema-color-bg, #4caf50);
-    z-index: -1;
-    opacity: 0.6;
-    animation: pulsar-aro 2s ease-in-out infinite;
-}
-
-@keyframes pulsar-aro {
-    0%, 100% { opacity: 0.4; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.1); }
-}
-
-/* NÚMERO DENTRO DE LA BOLA */
-/* 🟢 TRANSICIÓN MÁS LENTA PARA LA BOLA ENCIMA */
-.bola-encima span {
-    font-size: 0.9rem;
-    font-weight: 900;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
-    line-height: 1;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    transition: opacity 1s ease, transform 1s ease, filter 1s ease;  /* 🔴 Cambiado de 0.6s a 1s */
-}
-
-/* 🟢 CUANDO EL NÚMERO ESTÁ CAMBIANDO (se difumina lentamente) */
-.bola-encima span.cambiando {
-    opacity: 0;
-    transform: scale(0.6);
-    filter: blur(6px);
-    transition: opacity 1s ease, transform 1s ease, filter 1s ease;  /* 🔴 NUEVO */
-}
-
-@keyframes numero-encima-entra {
+@keyframes explosionFly {
     0% {
-        opacity: 0;
-        transform: scale(0.2) rotate(-30deg);
-        filter: blur(12px);
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
     }
     100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-        filter: blur(0px);
-    }
-}
-
-/* 🟢 CUANDO ENTRA EL NUEVO NÚMERO */
-.bola-encima span.entrando {
-    animation: numero-encima-entra 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-@keyframes numero-encima-entra {
-    0% {
         opacity: 0;
-        transform: scale(0.3) rotate(-15deg);
-        filter: blur(8px);
+        transform: translate(var(--tx), var(--ty)) scale(0);
     }
-    60% {
-        filter: blur(2px);
+}
+
+/* Efecto de flash al presionar */
+.btn-sacar-bola.presionado {
+    animation: botonFlash 0.3s ease-out !important;
+}
+
+@keyframes botonFlash {
+    0% {
+        transform: scale(0.85);
+        border-color: #ffffff !important;
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.6), 0 0 120px rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        transform: scale(0.95);
+        border-color: #ffd700 !important;
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
     }
     100% {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-        filter: blur(0px);
+        transform: scale(1);
+        border-color: var(--color-neon, #ffd700) !important;
     }
-}
-
-/* AL PRESIONAR EL BOTÓN, LA BOLA BAJA */
-.btn-sacar-bola:active ~ .bola-encima,
-div:has(.btn-sacar-bola:active) .bola-encima {
-    box-shadow: 
-        0 6px 0 #063c32,
-        0 10px 20px rgba(0, 0, 0, 0.4),
-        inset 0 3px 6px rgba(255, 255, 255, 0.3),
-        0 0 30px var(--tema-color-bg, #4caf50);  /* 🔴 ARO DE LUZ */
-    border-color: var(--tema-color-bg, #4caf50);
 }
