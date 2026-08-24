@@ -631,78 +631,58 @@
         calcularYMostrarAlertasA1();
     }
 
-   function sacarBolaConAnimacion() {
-    if (isAnimating) return;
-    if (bolasDisponibles.length === 0) {
-        alert('¡Ya se han extraído todas las bolas!');
-        return;
-    }
+    function sacarBolaConAnimacion() {
+        if (isAnimating) return;
+        if (bolasDisponibles.length === 0) {
+            alert('¡Ya se han extraído todas las bolas!');
+            return;
+        }
 
-    isAnimating = true;
-    const sphere = document.getElementById('bolilleroSphere');
-    const display = document.getElementById('numeroDisplay');
+        isAnimating = true;
+        const sphere = document.getElementById('bolilleroSphere');
+        const display = document.getElementById('numeroDisplay');
 
-  const ejecutarEntradaNuevaBola = async () => {
-    const num = bolasDisponibles.pop();
-    
-    const numeroBolaEncima = document.getElementById('numeroBolaEncima');
-    numeroBolaEncima.classList.remove('entrando');
-    numeroBolaEncima.classList.add('cambiando');
-    
-    // 🟢 ESPERAR MÁS TIEMPO PARA QUE SE DESVANEZCA LENTAMENTE
-    await new Promise(r => setTimeout(r, 700));  // 🔴 Cambiado de 400ms a 700ms
-    
-    numeroBolaEncima.textContent = num;
-    numeroBolaEncima.classList.remove('cambiando');
-    numeroBolaEncima.classList.add('entrando');
-    
-    // También actualizar el número grande del bolillero
-    const display = document.getElementById('numeroDisplay');
-    display.textContent = num;
-    sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
+        const ejecutarEntradaNuevaBola = async () => {
+            const num = bolasDisponibles.pop();
+            
+            display.textContent = num;
+            sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
 
-    sphere.classList.remove('rodar-salida', 'rodar-entrada');
-    void sphere.offsetWidth;
-    sphere.classList.add('rodar-entrada');
+            sphere.classList.remove('rodar-salida', 'rodar-entrada');
+            void sphere.offsetWidth;
+            sphere.classList.add('rodar-entrada');
 
-    decirNumero(num);
+            decirNumero(num);
 
-    await new Promise(r => setTimeout(r, 650));
+            await new Promise(r => setTimeout(r, 650));
 
-    actualizarRecientesUI();
-    actualizarEstado(num);
+            actualizarRecientesUI();
+            actualizarEstado(num);
 
-    await verificarPremiosConSincronizacion(num);
+            await verificarPremiosConSincronizacion(num);
 
-    sphere.classList.remove('rodar-entrada');
-    isAnimating = false;
-};
+            sphere.classList.remove('rodar-entrada');
+            isAnimating = false;
+        };
 
-    if (esPrimeraBola) {
-        esPrimeraBola = false;
-        ejecutarEntradaNuevaBola();
-    } else {
-        sphere.classList.remove('rodar-entrada', 'rodar-salida');
-        void sphere.offsetWidth;
-        sphere.classList.add('rodar-salida');
-
-        setTimeout(() => {
+        if (esPrimeraBola) {
+            esPrimeraBola = false;
             ejecutarEntradaNuevaBola();
-        }, 480);
-    }
-}
+        } else {
+            sphere.classList.remove('rodar-entrada', 'rodar-salida');
+            void sphere.offsetWidth;
+            sphere.classList.add('rodar-salida');
 
-function actualizarEstado(num) {
-    document.getElementById('numeroDisplay').textContent = num || '--';
-    
-    // 🟢 ACTUALIZAR EL NÚMERO EN LA BOLA ENCIMA DEL BOTÓN
-    const numeroBolaEncima = document.getElementById('numeroBolaEncima');
-    if (numeroBolaEncima) {
-        numeroBolaEncima.textContent = num || '8';
+            setTimeout(() => {
+                ejecutarEntradaNuevaBola();
+            }, 480);
+        }
     }
-    
-    document.getElementById('statsDisplay').textContent = `${markedNumbers.size}/90`;
-}
+
+    function actualizarEstado(num) {
+        document.getElementById('numeroDisplay').textContent = num || '--';
+        document.getElementById('statsDisplay').textContent = `${markedNumbers.size}/90`;
+    }
 
     async function verificarPremiosConSincronizacion(numActual) {
         let candidatosLinea = [];
@@ -872,9 +852,9 @@ function actualizarEstado(num) {
         var elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
+        } else if (elem.webkitRequestFullscreen) {
             elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE/Edge */
+        } else if (elem.msRequestFullscreen) {
             elem.msRequestFullscreen();
         }
     }
@@ -893,5 +873,60 @@ function actualizarEstado(num) {
             forzarPantallaCompleta();
         }
     });
+
+    // =========================================================
+    // 💥 FUNCIÓN DE EXPLOSIÓN DE PARTÍCULAS - CORREGIDA DENTRO DEL CLOSURE
+    // =========================================================
+    window.crearExplosion = function(event) {
+        const btn = document.getElementById('btnSacarBola');
+        if (!btn) return;
+
+        // Obtener posición del botón
+        const rect = btn.getBoundingClientRect();
+        const centroX = rect.left + rect.width / 2;
+        const centroY = rect.top + rect.height / 2;
+
+        // Crear contenedor
+        const container = document.createElement('div');
+        container.className = 'explosion-container';
+        document.body.appendChild(container);
+
+        // Colores de las partículas
+        const colores = ['#ffd700', '#ff6b6b', '#4ecdc4', '#a29bfe', '#ffffff', '#ffeb3b', '#ff4081'];
+
+        // Crear 30 partículas
+        for (let i = 0; i < 30; i++) {
+            const particula = document.createElement('div');
+            particula.className = 'particula-explosion';
+            
+            const size = 4 + Math.random() * 8;
+            const angle = Math.random() * 360;
+            const distance = 80 + Math.random() * 150;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            particula.style.width = size + 'px';
+            particula.style.height = size + 'px';
+            particula.style.left = centroX + 'px';
+            particula.style.top = centroY + 'px';
+            particula.style.setProperty('--tx', tx + 'px');
+            particula.style.setProperty('--ty', ty + 'px');
+            particula.style.background = colores[Math.floor(Math.random() * colores.length)];
+            particula.style.boxShadow = `0 0 ${size * 2}px ${particula.style.background}`;
+            
+            container.appendChild(particula);
+        }
+
+        // Limpiar después de la animación
+        setTimeout(() => {
+            container.remove();
+        }, 1000);
+
+        // Efecto flash en el botón
+        btn.classList.add('presionado');
+        setTimeout(() => {
+            btn.classList.remove('presionado');
+        }, 300);
+    };
 
 })();
