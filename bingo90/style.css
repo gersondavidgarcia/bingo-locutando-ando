@@ -7,15 +7,12 @@
 body {
     background: #f0f2f5;
     font-family: 'Segoe UI', Arial, sans-serif;
-    /* 🟢 CAMBIO CLAVE: Ya no usamos height: 100dvh ni overflow: hidden aquí. 
-       Usamos min-height para que si hay scroll, el fondo crezca. */
-    min-height: 100dvh; 
+    min-height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 8px 4px;
-    overflow-x: hidden; 
-    /* El scroll vertical lo controla el JS */
+    overflow: visible; /* 🟢 ESTO PERMITE QUE EL SCROLL FUNCIONE */
 }
 
 .bingo-app {
@@ -311,12 +308,10 @@ h1 {
     );
     background-size: 400% 400%;
     
-    /* 🟢 BORDE DOBLE: Blanco + Neón del tema */
-    border: 4px solid #ffffff;
-    outline: 3px solid var(--tema-color, #2e7d32);
-    outline-offset: -8px; /* Hace que el borde de color quede DENTRO del panel */
-    border-radius: 22px;
-    padding: 10px 14px;
+    /* 🟢 NO HAY BORDE EXTERNO: El borde se dibuja en el centro */
+    border: none;
+    border-radius: 16px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -324,15 +319,18 @@ h1 {
     overflow: hidden;
     position: relative;
     
-    /* 🟢 Sombra sutil + Brillo interno */
-    box-shadow: 
-        0 6px 18px rgba(0, 0, 0, 0.25),
-        inset 0 0 25px var(--tema-color, #2e7d32);
+    /* 🟢 BORDE CENTRADO: Blanco y de color */
+    outline: 4px solid #ffffff;
+    outline-offset: -2px;
     
-    animation: ondasColoridas 12s ease-in-out infinite; /* 🟢 12 SEGUNDOS = MUY LENTO */
+    box-shadow: 
+        0 5px 12px rgba(0, 0, 0, 0.2),
+        inset 0 0 15px var(--tema-color, #2e7d32);
+    
+    animation: ondasColoridas 12s ease-in-out infinite;
 }
 
-/* 🟢 REFLEJO DE CRISTAL SUTIL */
+/* 🟢 REFLEJO DE CRISTAL SUTIL (FUERA del contenedor) */
 .bolillero-container::before {
     content: '';
     position: absolute;
@@ -340,43 +338,30 @@ h1 {
     left: 0;
     width: 100%;
     height: 35%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
     pointer-events: none;
     z-index: 1;
 }
 
-/* 🟢 ONDAS ANIMADAS (LENTAS) */
+/* 🟢 ONDAS ANIMADAS (FUERA del contenedor) */
 @keyframes ondasColoridas {
     0% {
         background-position: 0% 50%;
         box-shadow: 
-            0 6px 18px rgba(0, 0, 0, 0.25),
-            inset 0 0 25px var(--tema-color, #2e7d32);
+            0 5px 12px rgba(0, 0, 0, 0.2),
+            inset 0 0 15px var(--tema-color, #2e7d32);
     }
     50% {
         background-position: 100% 50%;
         box-shadow: 
-            0 6px 18px rgba(0, 0, 0, 0.25),
-            inset 0 0 40px var(--tema-color, #2e7d32);
+            0 5px 12px rgba(0, 0, 0, 0.2),
+            inset 0 0 25px var(--tema-color, #2e7d32);
     }
     100% {
         background-position: 0% 50%;
         box-shadow: 
-            0 6px 18px rgba(0, 0, 0, 0.25),
-            inset 0 0 25px var(--tema-color, #2e7d32);
-    }
-}
-
-/* 🟢 Usamos la MISMA animación del fondo principal */
-@keyframes degradadoMovimiento {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
+            0 5px 12px rgba(0, 0, 0, 0.2),
+            inset 0 0 15px var(--tema-color, #2e7d32);
     }
 }
 
@@ -493,23 +478,19 @@ h1 {
 }
 
 .btn-sacar-bola {
-    background: var(--tema-color, #2e7d32); /* Color estático del tema */
-    border: 40px solid #ffffff; /* Borde blanco grueso */
+    background: var(--tema-color, #2e7d32);
+    border: none;
     color: white;
-    font-weight: 900;
+    font-weight: 800;
     font-size: 0.78rem;
-    padding: 10px 14px;
-    border-radius: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    letter-spacing: 2px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+    transition: background 0.2s, transform 0.1s;
 }
 
-/* Solo reacciona físicamente al presionar, sin animaciones de color */
-.btn-sacar-bola:active {
-    transform: scale(0.95);
-}
+.btn-sacar-bola:active { transform: scale(0.96); }
 
 .stats-box {
     display: flex;
@@ -536,8 +517,7 @@ h1 {
     max-width: 200px;      
     margin-left: 0;      
     margin-right: auto;
-    background: #7a0000; /* Fondo rojo original */
-    border: 2px solid #ffffff; /* 🟢 SOLO LE AGREGAMOS ESTO */
+    background: #7a0000;
     border-radius: 6px;
     padding: 4px 8px;
     display: flex;
@@ -559,7 +539,6 @@ h1 {
     padding-left: 6px;
 }
 
-/* 🟢 Las mini bolas quedan EXACTAMENTE como las tenías */
 .mini-bola {
     width: 26px;
     height: 26px;
@@ -576,6 +555,8 @@ h1 {
         0 2px 4px rgba(0,0,0,0.3),
         inset -2px -2px 4px rgba(0,0,0,0.3),
         inset 1px 1px 3px rgba(255,255,255,0.6);
+    
+    /* 🟢 El JS se encarga de poner la clase, este es el estilo base */
 }
 
 .mini-bola::before {
@@ -625,9 +606,9 @@ h1 {
 
 .panel-numeros-inferior {
     background: #f8f9fa;
-    border: 2px solid var(--tema-color, #2e7d32); /* Borde del color del tema */
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 3px;
+    border: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -749,4 +730,111 @@ h1 {
 }
 .cartones-grid.modo-15 .carton-grid-inner {
     border-width: 1px !important;
+}
+
+/* =========================================================
+   🟢 BOLA ENCIMA DEL BOTÓN SACAR BOLA
+   ========================================================= */
+.bola-encima {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #888 0%, #1a1a1a 50%, #000 80%);
+    border: 3px solid #ffffff;
+    box-shadow: 
+        0 6px 0 #063c32,
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        inset 0 3px 6px rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 1.6s ease, top 0.6s ease;  /* 🔴 Cambiado de 0.15s a 0.6s */
+}
+
+/* ARO LUMINOSO */
+.bola-encima::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--tema-color-bg, #4caf50);
+    box-shadow: 0 0 15px var(--tema-color-bg, #4caf50);
+    z-index: -1;
+    opacity: 0.6;
+    animation: pulsar-aro 2s ease-in-out infinite;
+}
+
+@keyframes pulsar-aro {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* NÚMERO DENTRO DE LA BOLA */
+/* 🟢 TRANSICIÓN MÁS LENTA PARA LA BOLA ENCIMA */
+.bola-encima span {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    line-height: 1;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    transition: opacity 1s ease, transform 1s ease, filter 1s ease;  /* 🔴 Cambiado de 0.6s a 1s */
+}
+
+/* 🟢 CUANDO EL NÚMERO ESTÁ CAMBIANDO (se difumina lentamente) */
+.bola-encima span.cambiando {
+    opacity: 0;
+    transform: scale(0.6);
+    filter: blur(6px);
+    transition: opacity 1s ease, transform 1s ease, filter 1s ease;  /* 🔴 NUEVO */
+}
+
+@keyframes numero-encima-entra {
+    0% {
+        opacity: 0;
+        transform: scale(0.2) rotate(-30deg);
+        filter: blur(12px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: blur(0px);
+    }
+}
+
+/* 🟢 CUANDO ENTRA EL NUEVO NÚMERO */
+.bola-encima span.entrando {
+    animation: numero-encima-entra 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes numero-encima-entra {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-15deg);
+        filter: blur(8px);
+    }
+    60% {
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: blur(0px);
+    }
+}
+
+/* AL PRESIONAR EL BOTÓN, LA BOLA BAJA */
+.btn-sacar-bola:active ~ .bola-encima,
+div:has(.btn-sacar-bola:active) .bola-encima {
+    box-shadow: 
+        0 6px 0 #063c32,
+        0 10px 20px rgba(0, 0, 0, 0.4),
+        inset 0 3px 6px rgba(255, 255, 255, 0.3),
+        0 0 30px var(--tema-color-bg, #4caf50);  /* 🔴 ARO DE LUZ */
+    border-color: var(--tema-color-bg, #4caf50);
 }
