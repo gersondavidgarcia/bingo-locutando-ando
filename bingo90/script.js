@@ -101,57 +101,11 @@
         }
     }
 
-        // 🟢 FUNCIÓN: COLOR ALEATORIO + COLOR OPUESTO VIVO
     function cambiarColorAleatorio() {
         const idx = Math.floor(Math.random() * paletasColores.length);
         const colorActual = paletasColores[idx];
-        
-        // Variables CSS principales
         document.documentElement.style.setProperty('--tema-color', colorActual.border);
         document.documentElement.style.setProperty('--tema-color-bg', colorActual.bg);
-
-        // 🟢 Función para oscurecer un color (para que el degradado sea más profundo)
-        function oscurecerColor(hex, porcentaje) {
-            hex = hex.replace('#', '');
-            if (hex.length === 3) {
-                hex = hex.split('').map(c => c + c).join('');
-            }
-            let r = parseInt(hex.substring(0, 2), 16);
-            let g = parseInt(hex.substring(2, 4), 16);
-            let b = parseInt(hex.substring(4, 6), 16);
-            
-            r = Math.round(r * (1 - porcentaje));
-            g = Math.round(g * (1 - porcentaje));
-            b = Math.round(b * (1 - porcentaje));
-            
-            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-        }
-
-        // 🟢 Función para calcular el color OPUESTO puro (Vivo)
-        function invertirColor(hex) {
-            hex = hex.replace('#', '');
-            if (hex.length === 3) {
-                hex = hex.split('').map(c => c + c).join('');
-            }
-            let r = parseInt(hex.substring(0, 2), 16);
-            let g = parseInt(hex.substring(2, 4), 16);
-            let b = parseInt(hex.substring(4, 6), 16);
-            
-            // Inversión total (255 - valor) = Color complementario vivo
-            r = 255 - r;
-            g = 255 - g;
-            b = 255 - b;
-            
-            return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-        }
-
-        // Calculamos el color oscuro del tema (borde) y el color opuesto vivo
-        const colorOscuro = oscurecerColor(colorActual.border, 0.3); // Oscurecer un 30%
-        const colorVivoOpuesto = invertirColor(colorActual.border);
-        
-        // Guardamos los colores en variables CSS
-        document.documentElement.style.setProperty('--tema-contraste', colorVivoOpuesto);
-        document.documentElement.style.setProperty('--tema-oscuro', colorOscuro);
     }
 
     function shuffle(array) {
@@ -324,7 +278,6 @@
         const gridContainer = document.getElementById('cartonesGrid');
         gridContainer.innerHTML = '';
 
-        // 🟢 LÓGICA INTELIGENTE DE COLUMNAS
         if (TOTAL_CARTONES === 10) {
             gridContainer.classList.remove('modo-15');
         } else {
@@ -678,59 +631,78 @@
         calcularYMostrarAlertasA1();
     }
 
-    function sacarBolaConAnimacion() {
-        if (isAnimating) return;
-        if (bolasDisponibles.length === 0) {
-            alert('¡Ya se han extraído todas las bolas!');
-            return;
-        }
+   function sacarBolaConAnimacion() {
+    if (isAnimating) return;
+    if (bolasDisponibles.length === 0) {
+        alert('¡Ya se han extraído todas las bolas!');
+        return;
+    }
 
-        isAnimating = true;
-        const sphere = document.getElementById('bolilleroSphere');
-        const display = document.getElementById('numeroDisplay');
+    isAnimating = true;
+    const sphere = document.getElementById('bolilleroSphere');
+    const display = document.getElementById('numeroDisplay');
 
-        const ejecutarEntradaNuevaBola = async () => {
-            const num = bolasDisponibles.pop();
-            
-            display.textContent = num;
-            sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
+  const ejecutarEntradaNuevaBola = async () => {
+    const num = bolasDisponibles.pop();
+    
+    const numeroBolaEncima = document.getElementById('numeroBolaEncima');
+    numeroBolaEncima.classList.remove('entrando');
+    numeroBolaEncima.classList.add('cambiando');
+    
+    // 🟢 ESPERAR MÁS TIEMPO PARA QUE SE DESVANEZCA LENTAMENTE
+    await new Promise(r => setTimeout(r, 700));  // 🔴 Cambiado de 400ms a 700ms
+    
+    numeroBolaEncima.textContent = num;
+    numeroBolaEncima.classList.remove('cambiando');
+    numeroBolaEncima.classList.add('entrando');
+    
+    // También actualizar el número grande del bolillero
+    const display = document.getElementById('numeroDisplay');
+    display.textContent = num;
+    sphere.style.setProperty('--bola-exterior', obtenerColorExterior(num));
 
-            sphere.classList.remove('rodar-salida', 'rodar-entrada');
-            void sphere.offsetWidth;
-            sphere.classList.add('rodar-entrada');
+    sphere.classList.remove('rodar-salida', 'rodar-entrada');
+    void sphere.offsetWidth;
+    sphere.classList.add('rodar-entrada');
 
-            decirNumero(num);
+    decirNumero(num);
 
-            await new Promise(r => setTimeout(r, 650));
+    await new Promise(r => setTimeout(r, 650));
 
-            await verificarPremiosConSincronizacion(num);
+    actualizarRecientesUI();
+    actualizarEstado(num);
 
-            actualizarRecientesUI();
+    await verificarPremiosConSincronizacion(num);
 
-            actualizarEstado(num);
+    sphere.classList.remove('rodar-entrada');
+    isAnimating = false;
+};
 
-            sphere.classList.remove('rodar-entrada');
-            isAnimating = false;
-        };
+    if (esPrimeraBola) {
+        esPrimeraBola = false;
+        ejecutarEntradaNuevaBola();
+    } else {
+        sphere.classList.remove('rodar-entrada', 'rodar-salida');
+        void sphere.offsetWidth;
+        sphere.classList.add('rodar-salida');
 
-        if (esPrimeraBola) {
-            esPrimeraBola = false;
+        setTimeout(() => {
             ejecutarEntradaNuevaBola();
-        } else {
-            sphere.classList.remove('rodar-entrada', 'rodar-salida');
-            void sphere.offsetWidth;
-            sphere.classList.add('rodar-salida');
-
-            setTimeout(() => {
-                ejecutarEntradaNuevaBola();
-            }, 480);
-        }
+        }, 480);
     }
+}
 
-    function actualizarEstado(num) {
-        document.getElementById('numeroDisplay').textContent = num || '--';
-        document.getElementById('statsDisplay').textContent = `${markedNumbers.size}/90`;
+function actualizarEstado(num) {
+    document.getElementById('numeroDisplay').textContent = num || '--';
+    
+    // 🟢 ACTUALIZAR EL NÚMERO EN LA BOLA ENCIMA DEL BOTÓN
+    const numeroBolaEncima = document.getElementById('numeroBolaEncima');
+    if (numeroBolaEncima) {
+        numeroBolaEncima.textContent = num || '8';
     }
+    
+    document.getElementById('statsDisplay').textContent = `${markedNumbers.size}/90`;
+}
 
     async function verificarPremiosConSincronizacion(numActual) {
         let candidatosLinea = [];
@@ -848,7 +820,7 @@
     }
 
     function init() {
-        cambiarColorAleatorio(); // 🟢 COLOR ALEATORIO ORIGINAL
+        cambiarColorAleatorio();
         currentCartones = generar10CartonesGlobales();
         reiniciarJuego();
 
@@ -864,13 +836,9 @@
         document.getElementById('resetBtn').addEventListener('click', reiniciarJuego);
     }
 
-    init();
-
     // ==========================================================
     // 🟢 CONFIGURAR SCROLL SEGÚN EL MENÚ
     // ==========================================================
-    
-    // Definir la función de bloqueo
     function bloquearScroll(e) {
         e.preventDefault();
     }
@@ -878,7 +846,6 @@
     const scrollPermitido = configuracion.scrollActivo;
 
     if (scrollPermitido) {
-        // Permitir scroll
         document.documentElement.style.overflowY = 'auto';
         document.body.style.overflowY = 'auto';
         document.documentElement.style.height = 'auto';
@@ -887,13 +854,16 @@
         document.removeEventListener('touchmove', bloquearScroll);
         document.removeEventListener('wheel', bloquearScroll);
     } else {
-        // Bloquear scroll
         document.documentElement.style.overflowY = 'hidden';
         document.body.style.overflowY = 'hidden';
+        document.documentElement.style.height = '100dvh';
+        document.body.style.height = '100dvh';
         
         document.addEventListener('touchmove', bloquearScroll, { passive: false });
         document.addEventListener('wheel', bloquearScroll, { passive: false });
     }
+
+    init();
 
     // ==========================================================
     // 🟢 CÓDIGO PARA FORZAR LA PANTALLA COMPLETA EN LA APK 🟢
