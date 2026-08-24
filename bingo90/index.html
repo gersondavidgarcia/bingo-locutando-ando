@@ -392,24 +392,10 @@
             configuracion.vozActiva = this.checked;
         });
 
-        // 🟢 NUEVO: Lógica para bloquear el scroll táctil
+        // 🟢 CORREGIDO: El checkbox guarda bien la configuración
         checkScroll.addEventListener('change', function() {
             configuracion.scrollActivo = this.checked;
         });
-
-        // Bloquear el movimiento táctil si el scroll está desactivado
-        document.addEventListener('touchmove', function(e) {
-            if (!configuracion.scrollActivo) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Bloquear la rueda del ratón si el scroll está desactivado
-        document.addEventListener('wheel', function(e) {
-            if (!configuracion.scrollActivo) {
-                e.preventDefault();
-            }
-        }, { passive: false });
 
         function toggleMusica() {
             configuracion.musicaActiva = !configuracion.musicaActiva;
