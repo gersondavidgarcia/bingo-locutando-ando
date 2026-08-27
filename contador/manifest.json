@@ -2,7 +2,7 @@
   "name": "Contador COP - Billetes y Monedas",
   "short_name": "Contador COP",
   "description": "Contador de dinero en pesos colombianos con billetes y monedas",
-  "start_url": ".",
+  "start_url": "index.html",
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#0d0d0d",
