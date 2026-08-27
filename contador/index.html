@@ -253,6 +253,7 @@
             flex-wrap: wrap;
         }
 
+        /* ===== INPUT CONFIGURADO PARA NO SALTAR ===== */
         .input-cantidad {
             width: 70px;
             padding: 10px 4px;
@@ -267,9 +268,9 @@
             transition: 0.2s;
             min-height: 48px;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
-            /* EVITA EL TECLADO DE TEXTO EN MÓVIL */
-            inputmode: numeric;
-            enterkeyhint: done;
+            /* CLAVE: type="text" + inputmode numérico */
+            -moz-appearance: textfield;
+            appearance: textfield;
         }
         .input-cantidad::placeholder {
             color: #b0a89e;
@@ -280,13 +281,11 @@
             border-color: #f9b83c;
             box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.15), inset 0 2px 8px rgba(0,0,0,0.04);
         }
-        .input-cantidad::-webkit-inner-spin-button,
-        .input-cantidad::-webkit-outer-spin-button {
-            opacity: 1;
-            height: 30px;
-        }
-        .input-cantidad[type="number"] {
-            -moz-appearance: textfield;
+        /* Ocultar flechas en navegadores que aún las muestran */
+        .input-cantidad::-webkit-outer-spin-button,
+        .input-cantidad::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .subtotal-fila {
@@ -412,7 +411,7 @@
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP11 <span>en vivo</span></h1>
+        <h1>💰 Contador COP22 <span>en vivo</span></h1>
         <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
         <div class="grid-billetes col-1" id="gridBilletes"></div>
@@ -559,19 +558,24 @@
                     const filaInput = document.createElement('div');
                     filaInput.className = 'fila-input-subtotal';
 
+                    // ===== INPUT TIPO TEXT (NO number) =====
                     const input = document.createElement('input');
-                    input.type = 'number';
-                    input.min = 0;
-                    input.step = 1;
+                    input.type = 'text';
+                    input.inputMode = 'numeric';
+                    input.pattern = '[0-9]*';
                     input.value = '';
                     input.placeholder = 'x';
                     input.className = 'input-cantidad';
                     input.dataset.denominacion = den;
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
-                    
-                    // ===== PROPIEDADES CLAVE PARA MÓVIL =====
-                    input.setAttribute('inputmode', 'numeric');
                     input.setAttribute('enterkeyhint', 'done');
+
+                    // ===== FILTRAR SOLO NÚMEROS =====
+                    input.addEventListener('input', function() {
+                        // Eliminar cualquier cosa que no sea número
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        calcularTodo();
+                    });
 
                     // ===== BLOQUEO DE ENTER =====
                     input.addEventListener('keydown', function(e) {
@@ -579,7 +583,6 @@
                             e.preventDefault();
                             e.stopPropagation();
                             this.blur();
-                            // Forzar blur en cualquier elemento activo
                             if (document.activeElement) {
                                 document.activeElement.blur();
                             }
@@ -591,20 +594,14 @@
                     subtotalSpan.className = 'subtotal-fila';
                     subtotalSpan.textContent = '0';
 
-                    input.addEventListener('input', function() {
-                        const val = this.value.trim();
-                        if (val !== '') {
-                            const num = Number(val);
-                            if (!Number.isInteger(num) || num < 0) { calcularTodo(); return; }
-                        }
-                        calcularTodo();
-                    });
-
                     input.addEventListener('blur', function() {
                         const val = this.value.trim();
-                        if (val === '') { calcularTodo(); return; }
+                        if (val === '') { 
+                            calcularTodo(); 
+                            return; 
+                        }
                         const num = Number(val);
-                        if (!Number.isInteger(num) || num < 0) {
+                        if (!Number.isInteger(num) || num < 0 || isNaN(num)) {
                             this.value = '';
                         } else {
                             this.value = Math.floor(num).toString();
@@ -647,7 +644,7 @@
 
             // ===== BLOQUEO GLOBAL DE ENTER =====
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                if (e.key === 'Enter' && e.target.classList.contains('input-cantidad')) {
                     e.preventDefault();
                     e.target.blur();
                     if (document.activeElement) {
