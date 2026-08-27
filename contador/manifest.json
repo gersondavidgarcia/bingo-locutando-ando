@@ -1,24 +1,920 @@
-{
-  "name": "Contador COP - Billetes y Monedas",
-  "short_name": "Contador COP",
-  "description": "Contador de dinero en pesos colombianos con billetes y monedas",
-  "start_url": "index.html",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>💰 Contador de dinero COP</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d0d0d">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0d0d0d;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            margin: 0;
+            transition: background 0.3s;
+        }
+        body.modo-captura {
+            background: #f5f0eb;
+            padding: 0;
+            overflow: hidden;
+            align-items: flex-start;
+        }
+        body.modo-captura .card {
+            transform: scale(0.95);
+            transform-origin: top center;
+            max-width: 100%;
+            border-radius: 0;
+            padding: 10px 8px 12px;
+            box-shadow: none;
+            min-height: 100vh;
+            border: none;
+            background: #f5f0eb;
+        }
+        body.modo-captura .card h1 { font-size: 1.4rem; }
+        body.modo-captura .card .sub { font-size: 0.7rem; padding: 4px 10px; margin-bottom: 6px; }
+        body.modo-captura .card .grid-billetes { gap: 6px; margin-bottom: 6px; }
+        body.modo-captura .card .grid-billetes.col-2 { grid-template-columns: 1fr 1fr 1fr; }
+        body.modo-captura .card .cuadro-billete { padding: 8px 4px 8px; min-height: 80px; border-radius: 8px; border-width: 2px; }
+        body.modo-captura .card .cuadro-notas { padding: 8px 4px 8px; min-height: 80px; border-radius: 8px; border-width: 2px; gap: 4px; }
+        body.modo-captura .card .billete-imagen { max-width: 110px; margin-bottom: 4px; border-radius: 6px; }
+        body.modo-captura .card .valor-billete { font-size: 1.1rem; margin: 2px 0; }
+        body.modo-captura .card .input-cantidad { width: 56px; font-size: 1.4rem; min-height: 34px; padding: 4px 2px; border-radius: 8px; }
+        body.modo-captura .card .subtotal-fila { font-size: 0.95rem; min-width: 32px; padding: 3px 6px; border-radius: 8px; }
+        body.modo-captura .card .cuadro-notas .icono-notas { font-size: 1.2rem; display: inline-block; }
+        body.modo-captura .card .cuadro-notas .titulo-notas { font-size: 0.75rem; display: inline-block; vertical-align: middle; }
+        body.modo-captura .card .cuadro-notas .subtitulo-notas { display: none; }
+        body.modo-captura .card .textarea-notas { min-height: 32px; font-size: 0.75rem; padding: 4px 6px; border-radius: 6px; }
+        body.modo-captura .card .btn-nota { font-size: 0.6rem; padding: 4px 6px; min-width: 40px; border-radius: 12px; }
+        body.modo-captura .card .botones-notas { gap: 4px; margin-top: 2px; }
+        body.modo-captura .card .btn-nada { display: none; }
+        body.modo-captura .card .total-sticky-wrapper { padding: 4px 0 0 0; margin: 0 -4px; position: relative; }
+        body.modo-captura .card .total-section { padding: 5px 10px; border-radius: 8px; }
+        body.modo-captura .card .total-label { font-size: 0.75rem; }
+        body.modo-captura .card .total-monto { font-size: 1.3rem; min-width: 60px; padding: 0 8px; border-radius: 8px; }
+        body.modo-captura .card .total-monto::before { font-size: 0.7rem; }
+        body.modo-captura .card .reset-btn { font-size: 0.65rem; padding: 3px 8px; }
+        body.modo-captura .card .slider-container { padding: 3px 6px; min-width: 40px; }
+        body.modo-captura .card .slider-container label { font-size: 0.6rem; }
+        body.modo-captura .card .slider-valor { font-size: 0.65rem; }
+        body.modo-captura .card .hint { font-size: 0.6rem; padding: 3px 6px; }
+        body.modo-captura .card .footer-extra { gap: 4px; margin-top: 3px; }
+        body.modo-captura .card .fila-input-subtotal { gap: 4px; margin-top: 2px; }
+        body.modo-captura .card .input-fantasma { display: none; }
+        body.modo-captura::-webkit-scrollbar { display: none; }
+        body.modo-captura { overflow: hidden; }
+
+        .card {
+            max-width: 550px;
+            width: 100%;
+            background: linear-gradient(145deg, #f5f0eb 0%, #e8e0d8 100%);
+            border-radius: 28px;
+            padding: 18px 14px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            border: 1px solid #ddd5cc;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 1.7rem;
+            color: #1e2a3a;
+            margin: 0 0 2px 0;
+            padding-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: font-size 0.3s;
+        }
+        h1 span {
+            background: #f9b83c;
+            color: #1a1a1a;
+            font-size: 0.9rem;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+        .sub {
+            color: #3d4e62;
+            font-size: 0.8rem;
+            margin: 0 0 16px 0;
+            border-left: 4px solid #f9b83c;
+            padding-left: 14px;
+            background: #fef7ed;
+            border-radius: 0 10px 10px 0;
+            padding: 8px 14px;
+            transition: all 0.3s;
+        }
+        .sub strong {
+            color: #1e2a3a;
+        }
+
+        .footer-extra {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
+            transition: all 0.3s;
+        }
+
+        .reset-btn {
+            background: #2d3e52;
+            border: none;
+            color: #e5edf5;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 1px solid #4d637b;
+            box-shadow: 0 3px 0 #141e2b;
+            touch-action: manipulation;
+            flex-shrink: 0;
+            transition: 0.15s;
+        }
+        .reset-btn:hover {
+            background: #3e556d;
+        }
+        .reset-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0px 0 #141e2b;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #eae3db;
+            padding: 4px 14px;
+            border-radius: 40px;
+            flex: 1;
+            min-width: 100px;
+            border: 1px solid #d6cdc2;
+            transition: all 0.3s;
+        }
+        .slider-container label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #2d3e52;
+            white-space: nowrap;
+        }
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: #b8b0a6;
+            outline: none;
+            transition: 0.2s;
+            min-width: 60px;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1e2a3a;
+            cursor: pointer;
+            border: 2px solid #f9b83c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1e2a3a;
+            cursor: pointer;
+            border: 2px solid #f9b83c;
+        }
+        .slider-valor {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e2a3a;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .hint {
+            color: #5f6f7f;
+            font-size: 0.7rem;
+            background: #eae3db;
+            padding: 4px 12px;
+            border-radius: 40px;
+            flex-shrink: 0;
+            border: 1px solid #d6cdc2;
+            transition: all 0.3s;
+        }
+
+        .grid-billetes {
+            display: grid;
+            gap: 12px;
+            flex: 1;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        .grid-billetes.col-1 {
+            grid-template-columns: 1fr;
+        }
+        .grid-billetes.col-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .cuadro-billete {
+            background: white;
+            border-radius: 18px;
+            padding: 18px 14px 14px;
+            border: 2px solid #ddd5cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-height: 180px;
+            position: relative;
+        }
+
+        .cuadro-billete:focus-within {
+            transform: scale(1.03);
+            background: #fffdf7;
+            z-index: 2;
+            border-color: currentColor;
+        }
+
+        .cuadro-billete.glow-1:focus-within { box-shadow: 0 0 35px rgba(60, 148, 124, 0.7), 0 0 70px rgba(60, 148, 124, 0.25); border-color: #3c947c; }
+        .cuadro-billete.glow-2:focus-within { box-shadow: 0 0 35px rgba(151, 115, 163, 0.7), 0 0 70px rgba(151, 115, 163, 0.25); border-color: #9773a3; }
+        .cuadro-billete.glow-3:focus-within { box-shadow: 0 0 35px rgba(231, 140, 96, 0.7), 0 0 70px rgba(231, 140, 96, 0.25); border-color: #e78c60; }
+        .cuadro-billete.glow-4:focus-within { box-shadow: 0 0 35px rgba(207, 95, 71, 0.7), 0 0 70px rgba(207, 95, 71, 0.25); border-color: #cf5f47; }
+        .cuadro-billete.glow-5:focus-within { box-shadow: 0 0 35px rgba(93, 74, 67, 0.7), 0 0 70px rgba(93, 74, 67, 0.25); border-color: #5d4a43; }
+        .cuadro-billete.glow-6:focus-within { box-shadow: 0 0 35px rgba(45, 122, 178, 0.7), 0 0 70px rgba(45, 122, 178, 0.25); border-color: #2d7ab2; }
+        .cuadro-billete.glow-7:focus-within { box-shadow: 0 0 35px rgba(199, 167, 120, 0.7), 0 0 70px rgba(199, 167, 120, 0.25); border-color: #c7a778; }
+        .cuadro-billete.glow-8:focus-within { box-shadow: 0 0 35px rgba(204, 193, 187, 0.7), 0 0 70px rgba(204, 193, 187, 0.25); border-color: #ccc1bb; }
+        .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(190, 169, 122, 0.7), 0 0 70px rgba(190, 169, 122, 0.25); border-color: #bea97a; }
+        .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(207, 180, 99, 0.7), 0 0 70px rgba(207, 180, 99, 0.25); border-color: #cfb463; }
+        .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(194, 184, 174, 0.7), 0 0 70px rgba(194, 184, 174, 0.25); border-color: #c2b8ae; }
+
+        .billete-imagen {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            aspect-ratio: 2.2 / 1;
+            object-fit: cover;
+            border-radius: 10px;
+            background: #e8e0d8;
+            border: 1px solid #ccc3b8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: block;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .grid-billetes.col-1 .billete-imagen {
+            max-width: 280px;
+        }
+
+        .valor-billete {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: #1e2a3a;
+            margin: 4px 0 6px 0;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+        }
+
+        .fila-input-subtotal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            width: 100%;
+            margin-top: 4px;
+            transition: all 0.3s;
+        }
+
+        .input-cantidad {
+            width: 70px;
+            padding: 10px 4px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 2px solid #d6cdc2;
+            border-radius: 14px;
+            background: white;
+            color: #1e2a3a;
+            outline: none;
+            transition: all 0.3s;
+            min-height: 48px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        .input-cantidad::placeholder {
+            color: #b0a89e;
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+        .input-cantidad:focus {
+            border-color: #f9b83c;
+            box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.15), inset 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .input-cantidad::-webkit-outer-spin-button,
+        .input-cantidad::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .subtotal-fila {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1e2a3a;
+            background: #e8e0d8;
+            padding: 4px 14px;
+            border-radius: 16px;
+            text-align: center;
+            font-feature-settings: "tnum";
+            opacity: 0.4;
+            min-width: 55px;
+            border: 1px solid #ddd5cc;
+            width: auto;
+            transition: all 0.3s;
+        }
+        .subtotal-fila.activo {
+            opacity: 1;
+            background: #f9d77e;
+            color: #1a232f;
+            border-color: #f9b83c;
+            box-shadow: 0 0 20px rgba(249, 184, 60, 0.15);
+        }
+        .subtotal-fila::before {
+            content: "$";
+            font-weight: 400;
+            margin-right: 2px;
+            font-size: 0.75rem;
+        }
+
+        .cuadro-notas {
+            background: white;
+            border-radius: 18px;
+            padding: 16px 14px 14px;
+            border: 2px solid #ddd5cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-height: 180px;
+            position: relative;
+            gap: 6px;
+        }
+        .cuadro-notas:focus-within {
+            border-color: #f9b83c;
+            box-shadow: 0 0 35px rgba(249, 184, 60, 0.4), 0 0 70px rgba(249, 184, 60, 0.15);
+            transform: scale(1.02);
+            background: #fffdf7;
+            z-index: 2;
+        }
+
+        /* ===== CAMBIO CLAVE: 📝 Notas en la misma línea ===== */
+        .cuadro-notas .icono-notas {
+            display: inline-block;
+            font-size: 2.5rem;
+            margin-right: 4px;
+            transition: all 0.3s;
+            vertical-align: middle;
+        }
+        .cuadro-notas .titulo-notas {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1e2a3a;
+            transition: all 0.3s;
+            vertical-align: middle;
+        }
+        .cuadro-notas .subtitulo-notas {
+            display: none;
+        }
+        .textarea-notas {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid #d6cdc2;
+            border-radius: 14px;
+            background: white;
+            color: #1e2a3a;
+            font-size: 0.95rem;
+            font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+            outline: none;
+            resize: vertical;
+            transition: all 0.3s;
+            line-height: 1.5;
+        }
+        .textarea-notas:focus {
+            border-color: #f9b83c;
+            box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.12);
+        }
+        .textarea-notas::placeholder {
+            color: #b0a89e;
+        }
+
+        .botones-notas {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2px;
+            transition: all 0.3s;
+        }
+        .btn-nota {
+            background: #2d7ab2;
+            border: none;
+            color: #e5edf5;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid #3c947c;
+            box-shadow: 0 2px 0 #1a4a6a;
+            touch-action: manipulation;
+            transition: all 0.15s;
+            flex: 1;
+            min-width: 100px;
+        }
+        .btn-nota:active {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0 #1a4a6a;
+        }
+        .btn-nota:hover {
+            background: #3c947c;
+        }
+        .btn-nota.btn-captura {
+            background: #2d7ab2;
+            border-color: #3c947c;
+        }
+        .btn-nota.btn-captura:hover {
+            background: #3c947c;
+        }
+        .btn-nada {
+            display: none;
+        }
+
+        .total-sticky-wrapper {
+            position: sticky;
+            bottom: 0;
+            padding: 12px 0 4px 0;
+            background: transparent;
+            z-index: 10;
+            border-radius: 0 0 28px 28px;
+            margin: 0 -14px;
+            padding-left: 14px;
+            padding-right: 14px;
+            transition: all 0.3s;
+        }
+        .total-section {
+            background: #1e2a3a;
+            border-radius: 20px;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 0 #0f1620;
+            border: 1px solid #3a4a5e;
+            transition: all 0.3s;
+        }
+        .total-label {
+            color: #cddae6;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .total-monto {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f9d77e;
+            background: #0b121b;
+            padding: 0 16px;
+            border-radius: 20px;
+            line-height: 1.3;
+            letter-spacing: 1px;
+            font-feature-settings: "tnum";
+            border: 1px solid #f9b83c55;
+            min-width: 110px;
+            text-align: right;
+            transition: all 0.3s;
+        }
+        .total-monto::before {
+            content: "$ ";
+            font-weight: 300;
+            color: #b8c7d9;
+            font-size: 1.3rem;
+            margin-right: 2px;
+            transition: all 0.3s;
+        }
+
+        .input-fantasma {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .btn-salir-captura {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f9b83c;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: none;
+            touch-action: manipulation;
+        }
+        body.modo-captura .btn-salir-captura {
+            display: block;
+        }
+        .btn-salir-captura:active {
+            transform: translateX(-50%) scale(0.95);
+        }
+
+        @media (max-width: 450px) {
+            body.modo-captura .card { transform: scale(0.92); padding: 5px 3px 8px; }
+            body.modo-captura .card .grid-billetes.col-2 { grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+            body.modo-captura .card .billete-imagen { max-width: 90px; }
+            body.modo-captura .card .input-cantidad { width: 48px; font-size: 1.1rem; min-height: 28px; padding: 2px 2px; }
+            body.modo-captura .card .subtotal-fila { font-size: 1.0rem; min-width: 30px; padding: 2px 4px; }
+            body.modo-captura .card .cuadro-billete { min-height: 60px; padding: 5px 2px 5px; }
+            body.modo-captura .card .cuadro-notas { min-height: 60px; padding: 5px 2px 5px; }
+            body.modo-captura .card .valor-billete { font-size: 0.85rem; }
+            body.modo-captura .card .cuadro-notas .icono-notas { font-size: 0.9rem; display: inline-block; }
+            body.modo-captura .card .cuadro-notas .titulo-notas { font-size: 0.6rem; display: inline-block; vertical-align: middle; }
+            body.modo-captura .card .textarea-notas { min-height: 28px; font-size: 1.0rem; padding: 2px 4px; }
+            body.modo-captura .card .btn-nota { font-size: 0.6rem; padding: 4px 8px; min-width: 60px; }
+            body.modo-captura .card .total-monto { font-size: 1.6rem; min-width: 50px; padding: 0 4px; }
+            body.modo-captura .card .total-monto::before { font-size: 0.65rem; }
+            body.modo-captura .card .total-label { font-size: 0.6rem; }
+            body.modo-captura .card .total-section { padding: 3px 6px; }
+            body.modo-captura .card .reset-btn { font-size: 0.5rem; padding: 2px 5px; }
+            body.modo-captura .card .hint { font-size: 0.45rem; padding: 2px 4px; }
+            body.modo-captura .card .slider-container { padding: 2px 4px; min-width: 28px; }
+            body.modo-captura .card .slider-container label { font-size: 0.45rem; }
+            body.modo-captura .card .slider-valor { font-size: 0.5rem; }
+            body.modo-captura .card .footer-extra { gap: 2px; margin-top: 2px; }
+            .btn-salir-captura { font-size: 0.6rem; padding: 4px 12px; bottom: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" role="main">
+        <h1>💰 Contador COP <span>Wicho</span></h1>
+        <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
+
+        <div class="grid-billetes col-2" id="gridBilletes"></div>
+
+        <input type="text" class="input-fantasma" aria-hidden="true" tabindex="-1">
+
+        <div class="total-sticky-wrapper">
+            <div class="total-section">
+                <span class="total-label">💵 TOTAL</span>
+                <span class="total-monto" id="totalDisplay">0</span>
+            </div>
+
+            <div class="footer-extra">
+                <button class="reset-btn" id="resetButton"><span>⟳</span> Reiniciar</button>
+
+                <div class="slider-container">
+                    <label>📐</label>
+                    <input type="range" id="sliderColumnas" min="1" max="2" value="2" step="1">
+                    <span class="slider-valor" id="sliderValor">2</span>
+                </div>
+
+                <span class="hint">Cant × valor</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-salir-captura" id="btnSalirCaptura">✕ Cerrar vista captura</button>
+
+    <script>
+        (function() {
+            const DENOMINACIONES = [
+                { valor: 100000, nombre: '100mil' },
+                { valor: 50000, nombre: '50mil' },
+                { valor: 20000, nombre: '20mil' },
+                { valor: 10000, nombre: '10mil' },
+                { valor: 5000, nombre: '5mil' },
+                { valor: 2000, nombre: '2mil' },
+                { valor: 1000, nombre: '1mil' },
+                { valor: 500, nombre: '500' },
+                { valor: 200, nombre: '200' },
+                { valor: 100, nombre: '100' },
+                { valor: 50, nombre: '50' }
+            ];
+
+            const IMAGENES = {
+                100000: 'billete100mil.jpeg',
+                50000:  'billete50mil.jpeg',
+                20000:  'billete20mil.jpeg',
+                10000:  'billete10mil.jpeg',
+                5000:   'billete5mil.jpeg',
+                2000:   'billete2mil.jpeg',
+                1000:   'moneda1000.jpeg',
+                500:    'moneda500.jpeg',
+                200:    'moneda200.jpeg',
+                100:    'moneda100.jpeg',
+                50:     'moneda50.jpeg'
+            };
+
+            const GLOW_CLASSES = [
+                'glow-1', 'glow-2', 'glow-3', 'glow-4', 'glow-5',
+                'glow-6', 'glow-7', 'glow-8', 'glow-9', 'glow-10', 'glow-11'
+            ];
+
+            const gridContainer = document.getElementById('gridBilletes');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const slider = document.getElementById('sliderColumnas');
+            const sliderValor = document.getElementById('sliderValor');
+            const cuadros = [];
+            const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            let notasContent = '';
+
+            function calcularTodo() {
+                let totalGeneral = 0;
+                for (let i = 0; i < cuadros.length; i++) {
+                    const c = cuadros[i];
+                    const input = c.input;
+                    const subtotalSpan = c.subtotal;
+                    const denominacion = parseInt(input.dataset.denominacion, 10);
+                    const rawValue = input.value.trim();
+                    let cantidad = 0;
+                    if (rawValue !== '') {
+                        const parsed = parseInt(rawValue, 10);
+                        if (!isNaN(parsed) && parsed >= 0) cantidad = parsed;
+                    }
+                    const subtotal = cantidad * denominacion;
+                    totalGeneral += subtotal;
+                    if (subtotal > 0) {
+                        subtotalSpan.textContent = subtotal.toLocaleString('es-CO');
+                        subtotalSpan.classList.add('activo');
+                    } else {
+                        subtotalSpan.textContent = '0';
+                        subtotalSpan.classList.remove('activo');
+                    }
+                }
+                totalDisplay.textContent = totalGeneral.toLocaleString('es-CO');
+                return totalGeneral;
+            }
+
+            function cambiarColumnas(num) {
+                gridContainer.className = 'grid-billetes col-' + num;
+                sliderValor.textContent = num;
+                slider.value = num;
+            }
+
+            function activarModoCaptura() {
+                const body = document.body;
+                body.classList.add('modo-captura');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function desactivarModoCaptura() {
+                const body = document.body;
+                body.classList.remove('modo-captura');
+            }
+
+            function construirGrid() {
+                gridContainer.innerHTML = '';
+                cuadros.length = 0;
+
+                DENOMINACIONES.forEach((item, index) => {
+                    const den = item.valor;
+                    const nombre = item.nombre;
+                    const glowClass = GLOW_CLASSES[index % GLOW_CLASSES.length];
+
+                    const cuadro = document.createElement('div');
+                    cuadro.className = `cuadro-billete ${glowClass}`;
+
+                    const img = document.createElement('img');
+                    img.className = 'billete-imagen';
+                    img.src = IMAGENES[den] || '';
+                    img.alt = `${nombre} - ${formatter.format(den)}`;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        const fallback = document.createElement('span');
+                        fallback.textContent = '💵';
+                        fallback.style.fontSize = '3rem';
+                        fallback.style.opacity = '0.5';
+                        this.parentNode.insertBefore(fallback, this);
+                    };
+                    cuadro.appendChild(img);
+
+                    const valor = document.createElement('div');
+                    valor.className = 'valor-billete';
+                    valor.textContent = formatter.format(den);
+                    cuadro.appendChild(valor);
+
+                    const filaInput = document.createElement('div');
+                    filaInput.className = 'fila-input-subtotal';
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.inputMode = 'numeric';
+                    input.pattern = '[0-9]*';
+                    input.value = '';
+                    input.placeholder = 'x';
+                    input.className = 'input-cantidad';
+                    input.dataset.denominacion = den;
+                    input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
+                    input.setAttribute('enterkeyhint', 'done');
+
+                    input.addEventListener('input', function() {
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        calcularTodo();
+                    });
+
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.blur();
+                            if (document.activeElement) {
+                                document.activeElement.blur();
+                            }
+                            return false;
+                        }
+                    });
+
+                    const subtotalSpan = document.createElement('span');
+                    subtotalSpan.className = 'subtotal-fila';
+                    subtotalSpan.textContent = '0';
+
+                    input.addEventListener('blur', function() {
+                        const val = this.value.trim();
+                        if (val === '') { 
+                            calcularTodo(); 
+                            return; 
+                        }
+                        const num = Number(val);
+                        if (!Number.isInteger(num) || num < 0 || isNaN(num)) {
+                            this.value = '';
+                        } else {
+                            this.value = Math.floor(num).toString();
+                        }
+                        calcularTodo();
+                    });
+
+                    filaInput.appendChild(input);
+                    filaInput.appendChild(subtotalSpan);
+                    cuadro.appendChild(filaInput);
+
+                    gridContainer.appendChild(cuadro);
+
+                    cuadros.push({ input, subtotal: subtotalSpan });
+                });
+
+                // ===== CUADRO DE NOTAS =====
+                const cuadroNotas = document.createElement('div');
+                cuadroNotas.className = 'cuadro-notas';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.style.display = 'flex';
+                headerDiv.style.alignItems = 'center';
+                headerDiv.style.justifyContent = 'center';
+                headerDiv.style.gap = '4px';
+
+                const icono = document.createElement('span');
+                icono.className = 'icono-notas';
+                icono.textContent = '📝';
+
+                const titulo = document.createElement('span');
+                titulo.className = 'titulo-notas';
+                titulo.textContent = 'Notas';
+
+                headerDiv.appendChild(icono);
+                headerDiv.appendChild(titulo);
+                cuadroNotas.appendChild(headerDiv);
+
+                const textarea = document.createElement('textarea');
+                textarea.className = 'textarea-notas';
+                textarea.placeholder = 'Escribe aquí tus notas...';
+                textarea.value = notasContent;
+                textarea.addEventListener('input', function() {
+                    notasContent = this.value;
+                });
+                cuadroNotas.appendChild(textarea);
+
+                const botonesDiv = document.createElement('div');
+                botonesDiv.className = 'botones-notas';
+
+                const btnCaptura = document.createElement('button');
+                btnCaptura.className = 'btn-nota btn-captura';
+                btnCaptura.textContent = '📸 Capturar pantalla';
+                btnCaptura.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    activarModoCaptura();
+                });
+
+                botonesDiv.appendChild(btnCaptura);
+                cuadroNotas.appendChild(botonesDiv);
+
+                gridContainer.appendChild(cuadroNotas);
+            }
+
+            function resetearContador() {
+                for (let c of cuadros) c.input.value = '';
+                const textarea = document.querySelector('.textarea-notas');
+                if (textarea) {
+                    textarea.value = '';
+                    notasContent = '';
+                }
+                calcularTodo();
+            }
+
+            construirGrid();
+            calcularTodo();
+
+            slider.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                cambiarColumnas(val);
+            });
+
+            document.getElementById('resetButton').addEventListener('click', resetearContador);
+
+            document.getElementById('btnSalirCaptura').addEventListener('click', desactivarModoCaptura);
+
+            document.querySelectorAll('.cuadro-billete').forEach(cuadro => {
+                cuadro.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'INPUT') return;
+                    if (e.target.tagName === 'BUTTON') return;
+                    if (e.target.tagName === 'TEXTAREA') return;
+                    const input = this.querySelector('.input-cantidad');
+                    if (input) { input.focus(); input.click(); }
+                });
+            });
+
+            const cuadroNotasElement = document.querySelector('.cuadro-notas');
+            if (cuadroNotasElement) {
+                cuadroNotasElement.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'TEXTAREA') return;
+                    if (e.target.tagName === 'BUTTON') return;
+                    const textarea = this.querySelector('.textarea-notas');
+                    if (textarea) { textarea.focus(); }
+                });
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.classList.contains('input-cantidad')) {
+                    e.preventDefault();
+                    e.target.blur();
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                    return false;
+                }
+            }, true);
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    desactivarModoCaptura();
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>
