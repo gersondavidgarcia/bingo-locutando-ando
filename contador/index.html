@@ -21,9 +21,61 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
+            align-items: center;
             padding: 10px;
             margin: 0;
+            transition: background 0.3s;
         }
+        /* MODO CAPTURA - la app ocupa toda la pantalla sin espacios negros */
+        body.modo-captura {
+            background: #f5f0eb;
+            padding: 0;
+            overflow: hidden;
+            align-items: flex-start;
+        }
+        body.modo-captura .card {
+            transform: scale(0.55);
+            transform-origin: top center;
+            max-width: 100%;
+            border-radius: 0;
+            padding: 8px 6px 10px;
+            box-shadow: none;
+            min-height: 100vh;
+            border: none;
+            background: #f5f0eb;
+        }
+        body.modo-captura .card h1 { font-size: 0.9rem; }
+        body.modo-captura .card .sub { font-size: 0.45rem; padding: 2px 6px; margin-bottom: 4px; }
+        body.modo-captura .card .grid-billetes { gap: 3px; margin-bottom: 3px; }
+        body.modo-captura .card .grid-billetes.col-2 { grid-template-columns: 1fr 1fr 1fr; }
+        body.modo-captura .card .cuadro-billete { padding: 3px 1px 3px; min-height: 40px; border-radius: 4px; border-width: 1px; }
+        body.modo-captura .card .cuadro-notas { padding: 3px 1px 3px; min-height: 40px; border-radius: 4px; border-width: 1px; gap: 1px; }
+        body.modo-captura .card .billete-imagen { max-width: 40px; margin-bottom: 1px; border-radius: 2px; }
+        body.modo-captura .card .valor-billete { font-size: 0.4rem; margin: 0; }
+        body.modo-captura .card .input-cantidad { width: 28px; font-size: 0.6rem; min-height: 18px; padding: 1px 1px; border-radius: 4px; }
+        body.modo-captura .card .subtotal-fila { font-size: 0.4rem; min-width: 16px; padding: 1px 2px; border-radius: 4px; }
+        body.modo-captura .card .cuadro-notas .icono-notas { font-size: 0.6rem; }
+        body.modo-captura .card .cuadro-notas .titulo-notas { font-size: 0.35rem; }
+        body.modo-captura .card .cuadro-notas .subtitulo-notas { font-size: 0.3rem; }
+        body.modo-captura .card .textarea-notas { min-height: 16px; font-size: 0.35rem; padding: 1px 2px; border-radius: 3px; }
+        body.modo-captura .card .btn-nota { font-size: 0.3rem; padding: 1px 3px; min-width: 20px; border-radius: 8px; }
+        body.modo-captura .card .botones-notas { gap: 1px; margin-top: 0; }
+        body.modo-captura .card .total-sticky-wrapper { padding: 2px 0 0 0; margin: 0 -2px; position: relative; }
+        body.modo-captura .card .total-section { padding: 2px 4px; border-radius: 4px; }
+        body.modo-captura .card .total-label { font-size: 0.4rem; }
+        body.modo-captura .card .total-monto { font-size: 0.6rem; min-width: 30px; padding: 0 2px; border-radius: 4px; }
+        body.modo-captura .card .total-monto::before { font-size: 0.4rem; }
+        body.modo-captura .card .reset-btn { font-size: 0.35rem; padding: 1px 4px; }
+        body.modo-captura .card .slider-container { padding: 1px 3px; min-width: 20px; }
+        body.modo-captura .card .slider-container label { font-size: 0.3rem; }
+        body.modo-captura .card .slider-valor { font-size: 0.35rem; }
+        body.modo-captura .card .hint { font-size: 0.3rem; padding: 1px 2px; }
+        body.modo-captura .card .footer-extra { gap: 1px; margin-top: 1px; }
+        body.modo-captura .card .fila-input-subtotal { gap: 1px; margin-top: 0; }
+        body.modo-captura .card .input-fantasma { display: none; }
+        body.modo-captura::-webkit-scrollbar { display: none; }
+        body.modo-captura { overflow: hidden; }
+
         .card {
             max-width: 550px;
             width: 100%;
@@ -35,6 +87,7 @@
             flex-direction: column;
             min-height: 100vh;
             border: 1px solid #ddd5cc;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         h1 {
             font-weight: 700;
@@ -45,6 +98,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: font-size 0.3s;
         }
         h1 span {
             background: #f9b83c;
@@ -63,6 +117,7 @@
             background: #fef7ed;
             border-radius: 0 10px 10px 0;
             padding: 8px 14px;
+            transition: all 0.3s;
         }
         .sub strong {
             color: #1e2a3a;
@@ -75,6 +130,7 @@
             margin-top: 10px;
             gap: 12px;
             flex-wrap: wrap;
+            transition: all 0.3s;
         }
 
         .reset-btn {
@@ -113,6 +169,7 @@
             flex: 1;
             min-width: 100px;
             border: 1px solid #d6cdc2;
+            transition: all 0.3s;
         }
         .slider-container label {
             font-weight: 600;
@@ -166,6 +223,7 @@
             border-radius: 40px;
             flex-shrink: 0;
             border: 1px solid #d6cdc2;
+            transition: all 0.3s;
         }
 
         .grid-billetes {
@@ -173,7 +231,7 @@
             gap: 12px;
             flex: 1;
             margin-bottom: 16px;
-            transition: 0.2s ease;
+            transition: all 0.3s;
         }
         .grid-billetes.col-1 {
             grid-template-columns: 1fr;
@@ -216,7 +274,6 @@
         .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(190, 169, 122, 0.7), 0 0 70px rgba(190, 169, 122, 0.25); border-color: #bea97a; }
         .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(207, 180, 99, 0.7), 0 0 70px rgba(207, 180, 99, 0.25); border-color: #cfb463; }
         .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(194, 184, 174, 0.7), 0 0 70px rgba(194, 184, 174, 0.25); border-color: #c2b8ae; }
-        /* Cuadro de notas - glow especial */
         .cuadro-billete.glow-notas:focus-within { box-shadow: 0 0 35px rgba(249, 184, 60, 0.6), 0 0 70px rgba(249, 184, 60, 0.2); border-color: #f9b83c; }
 
         .billete-imagen {
@@ -231,7 +288,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: block;
             margin-bottom: 8px;
-            transition: 0.3s ease;
+            transition: all 0.3s;
         }
 
         .grid-billetes.col-1 .billete-imagen {
@@ -244,6 +301,7 @@
             color: #1e2a3a;
             margin: 4px 0 6px 0;
             letter-spacing: 0.5px;
+            transition: all 0.3s;
         }
 
         .fila-input-subtotal {
@@ -253,6 +311,7 @@
             gap: 6px;
             width: 100%;
             margin-top: 4px;
+            transition: all 0.3s;
         }
 
         .input-cantidad {
@@ -266,7 +325,7 @@
             background: white;
             color: #1e2a3a;
             outline: none;
-            transition: 0.2s;
+            transition: all 0.3s;
             min-height: 48px;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
             -moz-appearance: textfield;
@@ -300,6 +359,7 @@
             min-width: 55px;
             border: 1px solid #ddd5cc;
             width: auto;
+            transition: all 0.3s;
         }
         .subtotal-fila.activo {
             opacity: 1;
@@ -329,7 +389,7 @@
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             min-height: 180px;
             position: relative;
-            gap: 8px;
+            gap: 6px;
         }
         .cuadro-notas:focus-within {
             border-color: #f9b83c;
@@ -342,16 +402,19 @@
         .cuadro-notas .icono-notas {
             font-size: 2.5rem;
             margin-bottom: 2px;
+            transition: all 0.3s;
         }
         .cuadro-notas .titulo-notas {
             font-weight: 700;
             font-size: 1.1rem;
             color: #1e2a3a;
+            transition: all 0.3s;
         }
         .cuadro-notas .subtitulo-notas {
             font-size: 0.75rem;
             color: #7a8a9a;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            transition: all 0.3s;
         }
         .textarea-notas {
             width: 100%;
@@ -365,7 +428,7 @@
             font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
             outline: none;
             resize: vertical;
-            transition: 0.2s;
+            transition: all 0.3s;
             line-height: 1.5;
         }
         .textarea-notas:focus {
@@ -382,7 +445,8 @@
             width: 100%;
             justify-content: center;
             flex-wrap: wrap;
-            margin-top: 4px;
+            margin-top: 2px;
+            transition: all 0.3s;
         }
         .btn-nota {
             background: #2d3e52;
@@ -396,7 +460,7 @@
             border: 1px solid #4d637b;
             box-shadow: 0 2px 0 #141e2b;
             touch-action: manipulation;
-            transition: 0.15s;
+            transition: all 0.15s;
             flex: 1;
             min-width: 100px;
         }
@@ -432,6 +496,7 @@
             margin: 0 -14px;
             padding-left: 14px;
             padding-right: 14px;
+            transition: all 0.3s;
         }
         .total-section {
             background: #1e2a3a;
@@ -442,12 +507,14 @@
             justify-content: space-between;
             box-shadow: 0 4px 0 #0f1620;
             border: 1px solid #3a4a5e;
+            transition: all 0.3s;
         }
         .total-label {
             color: #cddae6;
             font-size: 1rem;
             font-weight: 600;
             letter-spacing: 1px;
+            transition: all 0.3s;
         }
         .total-monto {
             font-size: 2.2rem;
@@ -462,6 +529,7 @@
             border: 1px solid #f9b83c55;
             min-width: 110px;
             text-align: right;
+            transition: all 0.3s;
         }
         .total-monto::before {
             content: "$ ";
@@ -469,9 +537,9 @@
             color: #b8c7d9;
             font-size: 1.3rem;
             margin-right: 2px;
+            transition: all 0.3s;
         }
 
-        /* Input fantasma oculto */
         .input-fantasma {
             position: absolute;
             width: 1px;
@@ -485,54 +553,67 @@
             pointer-events: none;
         }
 
-        @media (max-width: 450px) {
-            .card { padding: 14px 10px 16px; }
-            .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .cuadro-billete { padding: 14px 8px 10px; min-height: 150px; }
-            .cuadro-notas { padding: 12px 8px 12px; min-height: 150px; }
-            .billete-imagen { max-width: 150px; }
-            .grid-billetes.col-1 .billete-imagen { max-width: 220px; }
-            .valor-billete { font-size: 1.1rem; }
-            .input-cantidad { width: 58px; font-size: 1.3rem; min-height: 42px; padding: 8px 2px; }
-            .subtotal-fila { font-size: 0.95rem; min-width: 45px; padding: 3px 10px; }
-            .total-monto { font-size: 1.6rem; min-width: 80px; }
-            .total-monto::before { font-size: 1rem; }
-            .footer-extra { gap: 8px; }
-            .slider-container { padding: 4px 10px; min-width: 80px; }
-            .cuadro-billete:focus-within { transform: scale(1.02); }
-            .cuadro-notas:focus-within { transform: scale(1.02); }
-            .btn-nota { font-size: 0.75rem; padding: 6px 12px; min-width: 80px; }
-            .textarea-notas { min-height: 60px; font-size: 0.85rem; }
+        /* Botón flotante para salir del modo captura */
+        .btn-salir-captura {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f9b83c;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: none;
+            touch-action: manipulation;
+        }
+        body.modo-captura .btn-salir-captura {
+            display: block;
+        }
+        .btn-salir-captura:active {
+            transform: translateX(-50%) scale(0.95);
         }
 
-        @media (max-width: 370px) {
-            .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .cuadro-billete { padding: 10px 4px 8px; min-height: 130px; }
-            .cuadro-notas { padding: 10px 4px 10px; min-height: 130px; }
-            .billete-imagen { max-width: 110px; }
-            .grid-billetes.col-1 .billete-imagen { max-width: 160px; }
-            .valor-billete { font-size: 0.95rem; }
-            .input-cantidad { width: 50px; font-size: 1.1rem; min-height: 36px; padding: 6px 2px; }
-            .subtotal-fila { font-size: 0.8rem; min-width: 38px; padding: 2px 6px; }
-            .total-monto { font-size: 1.3rem; min-width: 60px; padding: 0 10px; }
-            .slider-container { padding: 4px 8px; min-width: 60px; }
-            .slider-container label { font-size: 0.65rem; }
-            .cuadro-billete:focus-within { transform: scale(1.02); }
-            .cuadro-notas:focus-within { transform: scale(1.02); }
-            .btn-nota { font-size: 0.65rem; padding: 4px 8px; min-width: 60px; }
-            .textarea-notas { min-height: 50px; font-size: 0.8rem; }
+        @media (max-width: 450px) {
+            body.modo-captura .card { transform: scale(0.42); padding: 4px 2px 6px; }
+            body.modo-captura .card .grid-billetes.col-2 { grid-template-columns: 1fr 1fr 1fr; gap: 2px; }
+            body.modo-captura .card .billete-imagen { max-width: 30px; }
+            body.modo-captura .card .input-cantidad { width: 22px; font-size: 0.5rem; min-height: 14px; padding: 0; }
+            body.modo-captura .card .subtotal-fila { font-size: 0.35rem; min-width: 12px; padding: 0 1px; }
+            body.modo-captura .card .cuadro-billete { min-height: 30px; padding: 2px 1px 2px; }
+            body.modo-captura .card .cuadro-notas { min-height: 30px; padding: 2px 1px 2px; }
+            body.modo-captura .card .valor-billete { font-size: 0.35rem; }
+            body.modo-captura .card .cuadro-notas .icono-notas { font-size: 0.5rem; }
+            body.modo-captura .card .cuadro-notas .titulo-notas { font-size: 0.3rem; }
+            body.modo-captura .card .cuadro-notas .subtitulo-notas { font-size: 0.25rem; }
+            body.modo-captura .card .textarea-notas { min-height: 12px; font-size: 0.3rem; padding: 1px 1px; }
+            body.modo-captura .card .btn-nota { font-size: 0.25rem; padding: 1px 2px; min-width: 16px; }
+            body.modo-captura .card .total-monto { font-size: 0.5rem; min-width: 20px; padding: 0 2px; }
+            body.modo-captura .card .total-monto::before { font-size: 0.3rem; }
+            body.modo-captura .card .total-label { font-size: 0.35rem; }
+            body.modo-captura .card .total-section { padding: 2px 3px; }
+            body.modo-captura .card .reset-btn { font-size: 0.3rem; padding: 1px 3px; }
+            body.modo-captura .card .hint { font-size: 0.25rem; padding: 1px 2px; }
+            body.modo-captura .card .slider-container { padding: 1px 2px; min-width: 16px; }
+            body.modo-captura .card .slider-container label { font-size: 0.25rem; }
+            body.modo-captura .card .slider-valor { font-size: 0.3rem; }
+            body.modo-captura .card .footer-extra { gap: 1px; margin-top: 1px; }
+            .btn-salir-captura { font-size: 0.6rem; padding: 4px 12px; bottom: 8px; }
         }
     </style>
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP <span>en vivo</span></h1>
+        <h1>💰 Contador COP11 <span>en vivo</span></h1>
         <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
-        <!-- EMPIEZA EN MODO 2 COLUMNAS (clase col-2) -->
         <div class="grid-billetes col-2" id="gridBilletes"></div>
 
-        <!-- INPUT FANTASMA AL FINAL DE LA LISTA -->
         <input type="text" class="input-fantasma" aria-hidden="true" tabindex="-1">
 
         <div class="total-sticky-wrapper">
@@ -554,6 +635,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Botón flotante para salir del modo captura -->
+    <button class="btn-salir-captura" id="btnSalirCaptura">✕ Cerrar vista captura</button>
 
     <script>
         (function() {
@@ -586,17 +670,8 @@
             };
 
             const GLOW_CLASSES = [
-                'glow-1',  // 100mil #3c947c
-                'glow-2',  // 50mil  #9773a3
-                'glow-3',  // 20mil  #e78c60
-                'glow-4',  // 10mil  #cf5f47
-                'glow-5',  // 5mil   #5d4a43
-                'glow-6',  // 2mil   #2d7ab2
-                'glow-7',  // 1mil   #c7a778
-                'glow-8',  // 500    #ccc1bb
-                'glow-9',  // 200    #bea97a
-                'glow-10', // 100    #cfb463
-                'glow-11'  // 50     #c2b8ae
+                'glow-1', 'glow-2', 'glow-3', 'glow-4', 'glow-5',
+                'glow-6', 'glow-7', 'glow-8', 'glow-9', 'glow-10', 'glow-11'
             ];
 
             const gridContainer = document.getElementById('gridBilletes');
@@ -605,8 +680,6 @@
             const sliderValor = document.getElementById('sliderValor');
             const cuadros = [];
             const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-            // Variable para guardar el contenido del textarea de notas
             let notasContent = '';
 
             function calcularTodo() {
@@ -642,41 +715,23 @@
                 slider.value = num;
             }
 
-            function capturarPantalla() {
-                // Usar html2canvas para capturar toda la app
-                // Como no queremos agregar librerías externas, usamos la función nativa
-                // o mostramos un mensaje con instrucciones
-                const card = document.querySelector('.card');
-                
-                // Verificar si existe html2canvas
-                if (typeof html2canvas !== 'undefined') {
-                    html2canvas(card, {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        backgroundColor: '#f5f0eb'
-                    }).then(canvas => {
-                        const link = document.createElement('a');
-                        link.download = 'contador-cop-captura.png';
-                        link.href = canvas.toDataURL('image/png');
-                        link.click();
-                    }).catch(err => {
-                        alert('Error al capturar: ' + err.message);
-                    });
-                } else {
-                    // Mensaje para instalar html2canvas
-                    alert('📸 Para capturar la pantalla completa, necesitas instalar html2canvas.\n\n' +
-                          'Puedes agregar esta línea en el HTML:\n' +
-                          '<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"><\/script>\n\n' +
-                          'O usa la captura nativa de tu dispositivo (Volumen - + Power)');
-                }
+            // ===== MODO CAPTURA =====
+            function activarModoCaptura() {
+                const body = document.body;
+                body.classList.add('modo-captura');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
+            function desactivarModoCaptura() {
+                const body = document.body;
+                body.classList.remove('modo-captura');
+            }
+
+            // ===== CONSTRUIR GRID =====
             function construirGrid() {
                 gridContainer.innerHTML = '';
                 cuadros.length = 0;
 
-                // Primero los billetes/monedas
                 DENOMINACIONES.forEach((item, index) => {
                     const den = item.valor;
                     const nombre = item.nombre;
@@ -764,7 +819,7 @@
                     cuadros.push({ input, subtotal: subtotalSpan });
                 });
 
-                // ===== CUADRO DE NOTAS (como si fuera otro billete) =====
+                // ===== CUADRO DE NOTAS =====
                 const cuadroNotas = document.createElement('div');
                 cuadroNotas.className = 'cuadro-notas';
 
@@ -792,7 +847,6 @@
                 });
                 cuadroNotas.appendChild(textarea);
 
-                // Botones
                 const botonesDiv = document.createElement('div');
                 botonesDiv.className = 'botones-notas';
 
@@ -801,7 +855,7 @@
                 btnCaptura.textContent = '📸 Capturar pantalla';
                 btnCaptura.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    capturarPantalla();
+                    activarModoCaptura();
                 });
 
                 const btnNada = document.createElement('button');
@@ -809,7 +863,6 @@
                 btnNada.textContent = '❌ NADA';
                 btnNada.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    // No hace nada, solo existe para cumplir con el diseño
                 });
 
                 botonesDiv.appendChild(btnCaptura);
@@ -821,7 +874,6 @@
 
             function resetearContador() {
                 for (let c of cuadros) c.input.value = '';
-                // Limpiar notas también
                 const textarea = document.querySelector('.textarea-notas');
                 if (textarea) {
                     textarea.value = '';
@@ -840,6 +892,8 @@
 
             document.getElementById('resetButton').addEventListener('click', resetearContador);
 
+            document.getElementById('btnSalirCaptura').addEventListener('click', desactivarModoCaptura);
+
             document.querySelectorAll('.cuadro-billete').forEach(cuadro => {
                 cuadro.addEventListener('click', function(e) {
                     if (e.target.tagName === 'INPUT') return;
@@ -850,7 +904,6 @@
                 });
             });
 
-            // Click en el cuadro de notas enfoca el textarea
             const cuadroNotasElement = document.querySelector('.cuadro-notas');
             if (cuadroNotasElement) {
                 cuadroNotasElement.addEventListener('click', function(e) {
@@ -872,8 +925,11 @@
                 }
             }, true);
 
-            // Exponer función de captura globalmente
-            window.capturarPantalla = capturarPantalla;
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    desactivarModoCaptura();
+                }
+            });
 
         })();
     </script>
