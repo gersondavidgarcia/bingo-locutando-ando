@@ -13,7 +13,7 @@
             padding: 0;
         }
         body {
-            background: #e8e0d8;
+            background: #0d0d0d;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,33 +23,45 @@
         .card {
             max-width: 550px;
             width: 100%;
-            background: #f5f0eb;
-            border-radius: 24px;
-            padding: 16px 12px 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            background: linear-gradient(145deg, #f5f0eb 0%, #e8e0d8 100%);
+            border-radius: 28px;
+            padding: 18px 14px 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            border: 1px solid #ddd5cc;
         }
         h1 {
             font-weight: 700;
-            font-size: 1.6rem;
+            font-size: 1.7rem;
             color: #1e2a3a;
             margin: 0 0 2px 0;
             padding-left: 4px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+        }
+        h1 span {
+            background: #f9b83c;
+            color: #1a1a1a;
+            font-size: 0.9rem;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-weight: 600;
         }
         .sub {
             color: #3d4e62;
             font-size: 0.8rem;
-            margin: 0 0 14px 0;
+            margin: 0 0 16px 0;
             border-left: 4px solid #f9b83c;
-            padding-left: 12px;
+            padding-left: 14px;
             background: #fef7ed;
-            border-radius: 0 8px 8px 0;
-            padding: 6px 12px;
+            border-radius: 0 10px 10px 0;
+            padding: 8px 14px;
+        }
+        .sub strong {
+            color: #1e2a3a;
         }
 
         /* FOOTER CON SLIDER Y REINICIAR */
@@ -78,6 +90,10 @@
             box-shadow: 0 3px 0 #141e2b;
             touch-action: manipulation;
             flex-shrink: 0;
+            transition: 0.15s;
+        }
+        .reset-btn:hover {
+            background: #3e556d;
         }
         .reset-btn:active {
             transform: translateY(3px);
@@ -93,6 +109,7 @@
             border-radius: 40px;
             flex: 1;
             min-width: 100px;
+            border: 1px solid #d6cdc2;
         }
         .slider-container label {
             font-weight: 600;
@@ -145,6 +162,7 @@
             padding: 4px 12px;
             border-radius: 40px;
             flex-shrink: 0;
+            border: 1px solid #d6cdc2;
         }
 
         /* GRID DINÁMICO */
@@ -164,132 +182,143 @@
 
         .cuadro-billete {
             background: white;
-            border-radius: 16px;
-            padding: 16px 12px 14px;
-            border: 1px solid #ddd5cc;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 18px;
+            padding: 18px 14px 14px;
+            border: 2px solid #ddd5cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            transition: 0.1s;
-            min-height: 170px;
-        }
-        .cuadro-billete:focus-within {
-            border-color: #f9b83c;
-            box-shadow: 0 2px 8px rgba(249, 184, 60, 0.3);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-height: 180px;
+            position: relative;
         }
 
-        /* IMAGENES GRANDES EN AMBAS COLUMNAS */
+        /* EFECTO DE ILUMINACIÓN CUANDO ESTÁ FOCUS */
+        .cuadro-billete:focus-within {
+            border-color: #f9b83c;
+            box-shadow: 0 0 30px rgba(249, 184, 60, 0.3), 0 0 60px rgba(249, 184, 60, 0.1);
+            transform: scale(1.03);
+            background: #fffdf7;
+            z-index: 2;
+        }
+
+        /* IMAGENES */
         .billete-imagen {
             width: 100%;
-            max-width: 180px;
+            max-width: 200px;
             height: auto;
             aspect-ratio: 2.2 / 1;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 10px;
             background: #e8e0d8;
             border: 1px solid #ccc3b8;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: block;
-            margin-bottom: 6px;
-            transition: 0.2s ease;
+            margin-bottom: 8px;
+            transition: 0.3s ease;
         }
 
-        /* En 1 columna la imagen crece aún más */
+        /* En 1 columna la imagen es un poco más pequeña (antes 320px, ahora 280px) */
         .grid-billetes.col-1 .billete-imagen {
-            max-width: 240px;
+            max-width: 280px;
         }
 
         .valor-billete {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 1.0rem;
             color: #1e2a3a;
-            margin: 2px 0 4px 0;
+            margin: 4px 0 6px 0;
+            letter-spacing: 0.5px;
         }
 
         .fila-input-subtotal {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             width: 100%;
             justify-content: center;
-            margin-top: 2px;
+            margin-top: 4px;
             flex-wrap: wrap;
         }
 
         .input-cantidad {
-            width: 64px;
+            width: 70px;
             padding: 10px 4px;
             text-align: center;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 700;
             border: 2px solid #d6cdc2;
-            border-radius: 12px;
+            border-radius: 14px;
             background: white;
             color: #1e2a3a;
             outline: none;
-            transition: 0.15s;
-            min-height: 44px;
-        }
-        .input-cantidad:focus {
-            border-color: #f9b83c;
-            box-shadow: 0 0 0 3px #f9b83c40;
-        }
-        .input-cantidad::-webkit-inner-spin-button,
-        .input-cantidad::-webkit-outer-spin-button {
-            opacity: 1;
-            height: 28px;
-        }
-        .input-cantidad[type="number"] {
-            -moz-appearance: textfield;
+            transition: 0.2s;
+            min-height: 48px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
         }
         .input-cantidad::placeholder {
             color: #b0a89e;
             font-weight: 400;
-            font-size: 1rem;
+            font-size: 1.1rem;
+        }
+        .input-cantidad:focus {
+            border-color: #f9b83c;
+            box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.15), inset 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .input-cantidad::-webkit-inner-spin-button,
+        .input-cantidad::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 30px;
+        }
+        .input-cantidad[type="number"] {
+            -moz-appearance: textfield;
         }
 
         .subtotal-fila {
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: #1e2a3a;
             background: #e8e0d8;
-            padding: 4px 10px;
-            border-radius: 14px;
+            padding: 4px 14px;
+            border-radius: 16px;
             text-align: center;
             font-feature-settings: "tnum";
-            opacity: 0.5;
-            min-width: 50px;
+            opacity: 0.4;
+            min-width: 55px;
+            border: 1px solid #ddd5cc;
         }
         .subtotal-fila.activo {
             opacity: 1;
             background: #f9d77e;
             color: #1a232f;
+            border-color: #f9b83c;
+            box-shadow: 0 0 20px rgba(249, 184, 60, 0.15);
         }
         .subtotal-fila::before {
             content: "$";
             font-weight: 400;
             margin-right: 2px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
         }
 
         /* TOTAL STICKY */
         .total-sticky-wrapper {
             position: sticky;
             bottom: 0;
-            padding: 10px 0 4px 0;
-            background: #f5f0eb;
+            padding: 12px 0 4px 0;
+            background: transparent;
             z-index: 10;
-            border-radius: 0 0 24px 24px;
-            margin: 0 -12px;
-            padding-left: 12px;
-            padding-right: 12px;
+            border-radius: 0 0 28px 28px;
+            margin: 0 -14px;
+            padding-left: 14px;
+            padding-right: 14px;
         }
         .total-section {
             background: #1e2a3a;
             border-radius: 20px;
-            padding: 14px 20px;
+            padding: 16px 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -299,21 +328,21 @@
         .total-label {
             color: #cddae6;
             font-size: 1rem;
-            font-weight: 400;
+            font-weight: 600;
             letter-spacing: 1px;
         }
         .total-monto {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #f9d77e;
             background: #0b121b;
-            padding: 0 14px;
+            padding: 0 16px;
             border-radius: 20px;
             line-height: 1.3;
             letter-spacing: 1px;
             font-feature-settings: "tnum";
             border: 1px solid #f9b83c55;
-            min-width: 100px;
+            min-width: 110px;
             text-align: right;
         }
         .total-monto::before {
@@ -325,37 +354,40 @@
         }
 
         @media (max-width: 450px) {
-            .card { padding: 12px 8px 16px; }
+            .card { padding: 14px 10px 16px; }
             .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .cuadro-billete { padding: 12px 6px 10px; min-height: 140px; }
-            .billete-imagen { max-width: 140px; }
-            .grid-billetes.col-1 .billete-imagen { max-width: 200px; }
+            .cuadro-billete { padding: 14px 8px 10px; min-height: 150px; }
+            .billete-imagen { max-width: 150px; }
+            .grid-billetes.col-1 .billete-imagen { max-width: 220px; }
             .valor-billete { font-size: 0.85rem; }
-            .input-cantidad { width: 56px; font-size: 1.2rem; min-height: 38px; padding: 8px 2px; }
-            .subtotal-fila { font-size: 0.7rem; min-width: 40px; padding: 3px 8px; }
-            .total-monto { font-size: 1.5rem; min-width: 70px; }
+            .input-cantidad { width: 58px; font-size: 1.3rem; min-height: 42px; padding: 8px 2px; }
+            .subtotal-fila { font-size: 0.8rem; min-width: 45px; padding: 3px 10px; }
+            .total-monto { font-size: 1.6rem; min-width: 80px; }
             .total-monto::before { font-size: 1rem; }
             .footer-extra { gap: 8px; }
             .slider-container { padding: 4px 10px; min-width: 80px; }
+            .cuadro-billete:focus-within { transform: scale(1.02); }
         }
 
         @media (max-width: 370px) {
             .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .cuadro-billete { padding: 10px 4px 8px; min-height: 120px; }
-            .billete-imagen { max-width: 100px; }
-            .grid-billetes.col-1 .billete-imagen { max-width: 150px; }
+            .cuadro-billete { padding: 10px 4px 8px; min-height: 130px; }
+            .billete-imagen { max-width: 110px; }
+            .grid-billetes.col-1 .billete-imagen { max-width: 160px; }
             .valor-billete { font-size: 0.75rem; }
-            .input-cantidad { width: 48px; font-size: 1rem; min-height: 34px; padding: 6px 2px; }
-            .subtotal-fila { font-size: 0.6rem; min-width: 34px; padding: 2px 6px; }
+            .input-cantidad { width: 50px; font-size: 1.1rem; min-height: 36px; padding: 6px 2px; }
+            .subtotal-fila { font-size: 0.65rem; min-width: 38px; padding: 2px 6px; }
+            .total-monto { font-size: 1.3rem; min-width: 60px; padding: 0 10px; }
             .slider-container { padding: 4px 8px; min-width: 60px; }
             .slider-container label { font-size: 0.65rem; }
+            .cuadro-billete:focus-within { transform: scale(1.02); }
         }
     </style>
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP</h1>
-        <div class="sub">⚡ Ingresa la cantidad · <strong>total en vivo</strong></div>
+        <h1>💰 Contador COP <span>en vivo</span></h1>
+        <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
         <div class="grid-billetes col-1" id="gridBilletes"></div>
 
@@ -398,9 +430,7 @@
                 { valor: 50, nombre: '50' }
             ];
 
-            // MAPA DE IMÁGENES - Nombres como pediste:
-            // billete100mil.jpg, billete50mil.jpg, billete20mil.jpg, billete10mil.jpg, billete5mil.jpg, billete2mil.jpg
-            // moneda1mil.jpg, moneda500.jpg, moneda200.jpg, moneda100.jpg, moneda50.jpg
+            // MAPA DE IMÁGENES
             const IMAGENES = {
                 100000: 'billete100mil.jpeg',
                 50000:  'billete50mil.jpeg',
@@ -476,7 +506,8 @@
                         this.style.display = 'none';
                         const fallback = document.createElement('span');
                         fallback.textContent = '💵';
-                        fallback.style.fontSize = '2.5rem';
+                        fallback.style.fontSize = '3rem';
+                        fallback.style.opacity = '0.5';
                         this.parentNode.insertBefore(fallback, this);
                     };
                     cuadro.appendChild(img);
@@ -496,7 +527,7 @@
                     input.min = 0;
                     input.step = 1;
                     input.value = '';
-                    input.placeholder = '0';
+                    input.placeholder = 'x';
                     input.className = 'input-cantidad';
                     input.dataset.denominacion = den;
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
