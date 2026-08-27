@@ -204,17 +204,18 @@
             border-color: currentColor;
         }
 
-        .cuadro-billete.glow-1:focus-within { box-shadow: 0 0 35px rgba(255, 215, 0, 0.6), 0 0 70px rgba(255, 215, 0, 0.2); border-color: #ffd700; }
-        .cuadro-billete.glow-2:focus-within { box-shadow: 0 0 35px rgba(0, 150, 255, 0.6), 0 0 70px rgba(0, 150, 255, 0.2); border-color: #0096ff; }
-        .cuadro-billete.glow-3:focus-within { box-shadow: 0 0 35px rgba(255, 100, 100, 0.6), 0 0 70px rgba(255, 100, 100, 0.2); border-color: #ff6464; }
-        .cuadro-billete.glow-4:focus-within { box-shadow: 0 0 35px rgba(0, 230, 118, 0.6), 0 0 70px rgba(0, 230, 118, 0.2); border-color: #00e676; }
-        .cuadro-billete.glow-5:focus-within { box-shadow: 0 0 35px rgba(255, 0, 255, 0.6), 0 0 70px rgba(255, 0, 255, 0.2); border-color: #ff00ff; }
-        .cuadro-billete.glow-6:focus-within { box-shadow: 0 0 35px rgba(255, 165, 0, 0.6), 0 0 70px rgba(255, 165, 0, 0.2); border-color: #ffa500; }
-        .cuadro-billete.glow-7:focus-within { box-shadow: 0 0 35px rgba(0, 255, 255, 0.6), 0 0 70px rgba(0, 255, 255, 0.2); border-color: #00ffff; }
-        .cuadro-billete.glow-8:focus-within { box-shadow: 0 0 35px rgba(255, 20, 147, 0.6), 0 0 70px rgba(255, 20, 147, 0.2); border-color: #ff1493; }
-        .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(50, 205, 50, 0.6), 0 0 70px rgba(50, 205, 50, 0.2); border-color: #32cd32; }
-        .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(255, 69, 0, 0.6), 0 0 70px rgba(255, 69, 0, 0.2); border-color: #ff4500; }
-        .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(138, 43, 226, 0.6), 0 0 70px rgba(138, 43, 226, 0.2); border-color: #8a2be2; }
+        /* ===== COLORES DE GLOW PERSONALIZADOS ===== */
+        .cuadro-billete.glow-1:focus-within { box-shadow: 0 0 35px rgba(60, 148, 124, 0.7), 0 0 70px rgba(60, 148, 124, 0.25); border-color: #3c947c; }
+        .cuadro-billete.glow-2:focus-within { box-shadow: 0 0 35px rgba(151, 115, 163, 0.7), 0 0 70px rgba(151, 115, 163, 0.25); border-color: #9773a3; }
+        .cuadro-billete.glow-3:focus-within { box-shadow: 0 0 35px rgba(231, 140, 96, 0.7), 0 0 70px rgba(231, 140, 96, 0.25); border-color: #e78c60; }
+        .cuadro-billete.glow-4:focus-within { box-shadow: 0 0 35px rgba(207, 95, 71, 0.7), 0 0 70px rgba(207, 95, 71, 0.25); border-color: #cf5f47; }
+        .cuadro-billete.glow-5:focus-within { box-shadow: 0 0 35px rgba(93, 74, 67, 0.7), 0 0 70px rgba(93, 74, 67, 0.25); border-color: #5d4a43; }
+        .cuadro-billete.glow-6:focus-within { box-shadow: 0 0 35px rgba(45, 122, 178, 0.7), 0 0 70px rgba(45, 122, 178, 0.25); border-color: #2d7ab2; }
+        .cuadro-billete.glow-7:focus-within { box-shadow: 0 0 35px rgba(199, 167, 120, 0.7), 0 0 70px rgba(199, 167, 120, 0.25); border-color: #c7a778; }
+        .cuadro-billete.glow-8:focus-within { box-shadow: 0 0 35px rgba(204, 193, 187, 0.7), 0 0 70px rgba(204, 193, 187, 0.25); border-color: #ccc1bb; }
+        .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(190, 169, 122, 0.7), 0 0 70px rgba(190, 169, 122, 0.25); border-color: #bea97a; }
+        .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(207, 180, 99, 0.7), 0 0 70px rgba(207, 180, 99, 0.25); border-color: #cfb463; }
+        .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(194, 184, 174, 0.7), 0 0 70px rgba(194, 184, 174, 0.25); border-color: #c2b8ae; }
 
         .billete-imagen {
             width: 100%;
@@ -235,9 +236,10 @@
             max-width: 280px;
         }
 
+        /* ===== LETRA MÁS GRANDE PARA LOS VALORES ===== */
         .valor-billete {
             font-weight: 700;
-            font-size: 1.0rem;
+            font-size: 1.3rem;
             color: #1e2a3a;
             margin: 4px 0 6px 0;
             letter-spacing: 0.5px;
@@ -253,7 +255,6 @@
             flex-wrap: wrap;
         }
 
-        /* ===== INPUT CONFIGURADO PARA NO SALTAR ===== */
         .input-cantidad {
             width: 70px;
             padding: 10px 4px;
@@ -268,7 +269,6 @@
             transition: 0.2s;
             min-height: 48px;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
-            /* CLAVE: type="text" + inputmode numérico */
             -moz-appearance: textfield;
             appearance: textfield;
         }
@@ -281,7 +281,6 @@
             border-color: #f9b83c;
             box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.15), inset 0 2px 8px rgba(0,0,0,0.04);
         }
-        /* Ocultar flechas en navegadores que aún las muestran */
         .input-cantidad::-webkit-outer-spin-button,
         .input-cantidad::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -384,7 +383,7 @@
             .cuadro-billete { padding: 14px 8px 10px; min-height: 150px; }
             .billete-imagen { max-width: 150px; }
             .grid-billetes.col-1 .billete-imagen { max-width: 220px; }
-            .valor-billete { font-size: 0.85rem; }
+            .valor-billete { font-size: 1.1rem; }
             .input-cantidad { width: 58px; font-size: 1.3rem; min-height: 42px; padding: 8px 2px; }
             .subtotal-fila { font-size: 0.95rem; min-width: 45px; padding: 3px 10px; }
             .total-monto { font-size: 1.6rem; min-width: 80px; }
@@ -399,7 +398,7 @@
             .cuadro-billete { padding: 10px 4px 8px; min-height: 130px; }
             .billete-imagen { max-width: 110px; }
             .grid-billetes.col-1 .billete-imagen { max-width: 160px; }
-            .valor-billete { font-size: 0.75rem; }
+            .valor-billete { font-size: 0.95rem; }
             .input-cantidad { width: 50px; font-size: 1.1rem; min-height: 36px; padding: 6px 2px; }
             .subtotal-fila { font-size: 0.8rem; min-width: 38px; padding: 2px 6px; }
             .total-monto { font-size: 1.3rem; min-width: 60px; padding: 0 10px; }
@@ -411,10 +410,11 @@
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP22 <span>en vivo</span></h1>
+        <h1>💰 Contador COP <span>en vivo</span></h1>
         <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
-        <div class="grid-billetes col-1" id="gridBilletes"></div>
+        <!-- EMPIEZA EN MODO 2 COLUMNAS (clase col-2) -->
+        <div class="grid-billetes col-2" id="gridBilletes"></div>
 
         <!-- INPUT FANTASMA AL FINAL DE LA LISTA -->
         <input type="text" class="input-fantasma" aria-hidden="true" tabindex="-1">
@@ -430,8 +430,8 @@
 
                 <div class="slider-container">
                     <label>📐</label>
-                    <input type="range" id="sliderColumnas" min="1" max="2" value="1" step="1">
-                    <span class="slider-valor" id="sliderValor">1</span>
+                    <input type="range" id="sliderColumnas" min="1" max="2" value="2" step="1">
+                    <span class="slider-valor" id="sliderValor">2</span>
                 </div>
 
                 <span class="hint">Cant × valor</span>
@@ -469,18 +469,19 @@
                 50:     'moneda50.jpeg'
             };
 
+            // ===== COLORES DE GLOW PERSONALIZADOS =====
             const GLOW_CLASSES = [
-                'glow-1',  // 100mil - dorado
-                'glow-2',  // 50mil  - azul
-                'glow-3',  // 20mil  - rojo
-                'glow-4',  // 10mil  - verde
-                'glow-5',  // 5mil   - magenta
-                'glow-6',  // 2mil   - naranja
-                'glow-7',  // 1mil   - cian
-                'glow-8',  // 500    - rosa
-                'glow-9',  // 200    - verde lima
-                'glow-10', // 100    - naranja rojo
-                'glow-11'  // 50     - morado
+                'glow-1',  // 100mil #3c947c
+                'glow-2',  // 50mil  #9773a3
+                'glow-3',  // 20mil  #e78c60
+                'glow-4',  // 10mil  #cf5f47
+                'glow-5',  // 5mil   #5d4a43
+                'glow-6',  // 2mil   #2d7ab2
+                'glow-7',  // 1mil   #c7a778
+                'glow-8',  // 500    #ccc1bb
+                'glow-9',  // 200    #bea97a
+                'glow-10', // 100    #cfb463
+                'glow-11'  // 50     #c2b8ae
             ];
 
             const gridContainer = document.getElementById('gridBilletes');
@@ -558,7 +559,6 @@
                     const filaInput = document.createElement('div');
                     filaInput.className = 'fila-input-subtotal';
 
-                    // ===== INPUT TIPO TEXT (NO number) =====
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.inputMode = 'numeric';
@@ -570,14 +570,11 @@
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
                     input.setAttribute('enterkeyhint', 'done');
 
-                    // ===== FILTRAR SOLO NÚMEROS =====
                     input.addEventListener('input', function() {
-                        // Eliminar cualquier cosa que no sea número
                         this.value = this.value.replace(/[^0-9]/g, '');
                         calcularTodo();
                     });
 
-                    // ===== BLOQUEO DE ENTER =====
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
@@ -627,6 +624,7 @@
             construirGrid();
             calcularTodo();
 
+            // Slider empieza en 2 (value="2" en el HTML)
             slider.addEventListener('input', function() {
                 const val = parseInt(this.value);
                 cambiarColumnas(val);
@@ -642,7 +640,6 @@
                 });
             });
 
-            // ===== BLOQUEO GLOBAL DE ENTER =====
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.target.classList.contains('input-cantidad')) {
                     e.preventDefault();
