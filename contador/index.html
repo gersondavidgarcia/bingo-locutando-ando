@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>💰 Contador de dinero COP</title>
-    <!-- LINK AL MANIFEST PARA PWA -->
     <link rel="manifest" href="manifest.json">
-    <!-- COLOR DE LA BARRA DE ESTADO EN CELULAR -->
     <meta name="theme-color" content="#0d0d0d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -199,13 +197,26 @@
             position: relative;
         }
 
+        /* EFECTO DE ILUMINACIÓN CON COLORES POR BILLETE - se asigna dinámicamente con JS */
         .cuadro-billete:focus-within {
-            border-color: #f9b83c;
-            box-shadow: 0 0 30px rgba(249, 184, 60, 0.3), 0 0 60px rgba(249, 184, 60, 0.1);
             transform: scale(1.03);
             background: #fffdf7;
             z-index: 2;
+            border-color: currentColor;
         }
+
+        /* La sombra se asigna dinámicamente con JS usando box-shadow personalizado */
+        .cuadro-billete.glow-1:focus-within { box-shadow: 0 0 35px rgba(255, 215, 0, 0.6), 0 0 70px rgba(255, 215, 0, 0.2); border-color: #ffd700; }
+        .cuadro-billete.glow-2:focus-within { box-shadow: 0 0 35px rgba(0, 150, 255, 0.6), 0 0 70px rgba(0, 150, 255, 0.2); border-color: #0096ff; }
+        .cuadro-billete.glow-3:focus-within { box-shadow: 0 0 35px rgba(255, 100, 100, 0.6), 0 0 70px rgba(255, 100, 100, 0.2); border-color: #ff6464; }
+        .cuadro-billete.glow-4:focus-within { box-shadow: 0 0 35px rgba(0, 230, 118, 0.6), 0 0 70px rgba(0, 230, 118, 0.2); border-color: #00e676; }
+        .cuadro-billete.glow-5:focus-within { box-shadow: 0 0 35px rgba(255, 0, 255, 0.6), 0 0 70px rgba(255, 0, 255, 0.2); border-color: #ff00ff; }
+        .cuadro-billete.glow-6:focus-within { box-shadow: 0 0 35px rgba(255, 165, 0, 0.6), 0 0 70px rgba(255, 165, 0, 0.2); border-color: #ffa500; }
+        .cuadro-billete.glow-7:focus-within { box-shadow: 0 0 35px rgba(0, 255, 255, 0.6), 0 0 70px rgba(0, 255, 255, 0.2); border-color: #00ffff; }
+        .cuadro-billete.glow-8:focus-within { box-shadow: 0 0 35px rgba(255, 20, 147, 0.6), 0 0 70px rgba(255, 20, 147, 0.2); border-color: #ff1493; }
+        .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(50, 205, 50, 0.6), 0 0 70px rgba(50, 205, 50, 0.2); border-color: #32cd32; }
+        .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(255, 69, 0, 0.6), 0 0 70px rgba(255, 69, 0, 0.2); border-color: #ff4500; }
+        .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(138, 43, 226, 0.6), 0 0 70px rgba(138, 43, 226, 0.2); border-color: #8a2be2; }
 
         .billete-imagen {
             width: 100%;
@@ -441,6 +452,21 @@
                 50:     'moneda50.jpeg'
             };
 
+            // DIFERENTES COLORES DE GLOW PARA CADA BILLETE (más intensos)
+            const GLOW_CLASSES = [
+                'glow-1',  // 100mil - dorado
+                'glow-2',  // 50mil  - azul
+                'glow-3',  // 20mil  - rojo
+                'glow-4',  // 10mil  - verde
+                'glow-5',  // 5mil   - magenta
+                'glow-6',  // 2mil   - naranja
+                'glow-7',  // 1mil   - cian
+                'glow-8',  // 500    - rosa
+                'glow-9',  // 200    - verde lima
+                'glow-10', // 100    - naranja rojo
+                'glow-11'  // 50     - morado
+            ];
+
             const gridContainer = document.getElementById('gridBilletes');
             const totalDisplay = document.getElementById('totalDisplay');
             const slider = document.getElementById('sliderColumnas');
@@ -485,12 +511,13 @@
                 gridContainer.innerHTML = '';
                 cuadros.length = 0;
 
-                DENOMINACIONES.forEach(item => {
+                DENOMINACIONES.forEach((item, index) => {
                     const den = item.valor;
                     const nombre = item.nombre;
+                    const glowClass = GLOW_CLASSES[index % GLOW_CLASSES.length];
 
                     const cuadro = document.createElement('div');
-                    cuadro.className = 'cuadro-billete';
+                    cuadro.className = `cuadro-billete ${glowClass}`;
 
                     const img = document.createElement('img');
                     img.className = 'billete-imagen';
