@@ -362,6 +362,20 @@
             margin-right: 2px;
         }
 
+        /* Input fantasma oculto */
+        .input-fantasma {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         @media (max-width: 450px) {
             .card { padding: 14px 10px 16px; }
             .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -395,10 +409,13 @@
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP11 <span>en vivo</span></h1>
+        <h1>💰 Contador COP <span>en vivo</span></h1>
         <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
         <div class="grid-billetes col-1" id="gridBilletes"></div>
+
+        <!-- INPUT FANTASMA AL FINAL DE LA LISTA -->
+        <input type="text" class="input-fantasma" aria-hidden="true" tabindex="-1">
 
         <div class="total-sticky-wrapper">
             <div class="total-section">
@@ -549,15 +566,16 @@
                     input.dataset.denominacion = den;
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
 
-                    // PREVENIR ENTER - VERSIÓN MEJORADA
+                    // PREVENIR ENTER (AHORA CON blur)
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            e.stopPropagation();
-                            // Quita el foco del input y cierra el teclado en móvil
+                            // Quita el foco y cierra el teclado en móvil
                             this.blur();
-                            // Forzar blur en móvil (opcional)
-                            document.activeElement?.blur();
+                            // Forzar blur en cualquier elemento activo
+                            if (document.activeElement) {
+                                document.activeElement.blur();
+                            }
                             return false;
                         }
                     });
@@ -619,6 +637,25 @@
                     if (input) { input.focus(); input.click(); }
                 });
             });
+
+            // ===== SOLUCIÓN DEFINITIVA: INPUT FANTASMA =====
+            // El input fantasma ya está en el HTML, pero además
+            // aseguramos que cualquier Enter en cualquier input
+            // se capture y se cierre el teclado.
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                    // Si es un input numérico, prevenimos y hacemos blur
+                    if (e.target.type === 'number' || e.target.type === 'text') {
+                        e.preventDefault();
+                        e.target.blur();
+                        if (document.activeElement) {
+                            document.activeElement.blur();
+                        }
+                        return false;
+                    }
+                }
+            }, true); // Captura en fase de captura para mayor control
+
         })();
     </script>
 </body>
