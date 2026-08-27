@@ -267,6 +267,9 @@
             transition: 0.2s;
             min-height: 48px;
             box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+            /* EVITA EL TECLADO DE TEXTO EN MÓVIL */
+            inputmode: numeric;
+            enterkeyhint: done;
         }
         .input-cantidad::placeholder {
             color: #b0a89e;
@@ -565,12 +568,16 @@
                     input.className = 'input-cantidad';
                     input.dataset.denominacion = den;
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
+                    
+                    // ===== PROPIEDADES CLAVE PARA MÓVIL =====
+                    input.setAttribute('inputmode', 'numeric');
+                    input.setAttribute('enterkeyhint', 'done');
 
-                    // PREVENIR ENTER (AHORA CON blur)
+                    // ===== BLOQUEO DE ENTER =====
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            // Quita el foco y cierra el teclado en móvil
+                            e.stopPropagation();
                             this.blur();
                             // Forzar blur en cualquier elemento activo
                             if (document.activeElement) {
@@ -638,23 +645,17 @@
                 });
             });
 
-            // ===== SOLUCIÓN DEFINITIVA: INPUT FANTASMA =====
-            // El input fantasma ya está en el HTML, pero además
-            // aseguramos que cualquier Enter en cualquier input
-            // se capture y se cierre el teclado.
+            // ===== BLOQUEO GLOBAL DE ENTER =====
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
-                    // Si es un input numérico, prevenimos y hacemos blur
-                    if (e.target.type === 'number' || e.target.type === 'text') {
-                        e.preventDefault();
-                        e.target.blur();
-                        if (document.activeElement) {
-                            document.activeElement.blur();
-                        }
-                        return false;
+                    e.preventDefault();
+                    e.target.blur();
+                    if (document.activeElement) {
+                        document.activeElement.blur();
                     }
+                    return false;
                 }
-            }, true); // Captura en fase de captura para mayor control
+            }, true);
 
         })();
     </script>
