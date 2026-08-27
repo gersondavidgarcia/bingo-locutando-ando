@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>💰 Contador de dinero COP</title>
+    <!-- LINK AL MANIFEST PARA PWA -->
+    <link rel="manifest" href="manifest.json">
+    <!-- COLOR DE LA BARRA DE ESTADO EN CELULAR -->
+    <meta name="theme-color" content="#0d0d0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         * {
             box-sizing: border-box;
@@ -64,7 +70,6 @@
             color: #1e2a3a;
         }
 
-        /* FOOTER CON SLIDER Y REINICIAR */
         .footer-extra {
             display: flex;
             align-items: center;
@@ -165,7 +170,6 @@
             border: 1px solid #d6cdc2;
         }
 
-        /* GRID DINÁMICO */
         .grid-billetes {
             display: grid;
             gap: 12px;
@@ -195,7 +199,6 @@
             position: relative;
         }
 
-        /* EFECTO DE ILUMINACIÓN CUANDO ESTÁ FOCUS */
         .cuadro-billete:focus-within {
             border-color: #f9b83c;
             box-shadow: 0 0 30px rgba(249, 184, 60, 0.3), 0 0 60px rgba(249, 184, 60, 0.1);
@@ -204,7 +207,6 @@
             z-index: 2;
         }
 
-        /* IMAGENES */
         .billete-imagen {
             width: 100%;
             max-width: 200px;
@@ -220,7 +222,6 @@
             transition: 0.3s ease;
         }
 
-        /* En 1 columna la imagen es un poco más pequeña (antes 320px, ahora 280px) */
         .grid-billetes.col-1 .billete-imagen {
             max-width: 280px;
         }
@@ -278,7 +279,7 @@
 
         .subtotal-fila {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
             color: #1e2a3a;
             background: #e8e0d8;
             padding: 4px 14px;
@@ -303,7 +304,6 @@
             font-size: 0.75rem;
         }
 
-        /* TOTAL STICKY */
         .total-sticky-wrapper {
             position: sticky;
             bottom: 0;
@@ -361,7 +361,7 @@
             .grid-billetes.col-1 .billete-imagen { max-width: 220px; }
             .valor-billete { font-size: 0.85rem; }
             .input-cantidad { width: 58px; font-size: 1.3rem; min-height: 42px; padding: 8px 2px; }
-            .subtotal-fila { font-size: 0.8rem; min-width: 45px; padding: 3px 10px; }
+            .subtotal-fila { font-size: 0.95rem; min-width: 45px; padding: 3px 10px; }
             .total-monto { font-size: 1.6rem; min-width: 80px; }
             .total-monto::before { font-size: 1rem; }
             .footer-extra { gap: 8px; }
@@ -376,7 +376,7 @@
             .grid-billetes.col-1 .billete-imagen { max-width: 160px; }
             .valor-billete { font-size: 0.75rem; }
             .input-cantidad { width: 50px; font-size: 1.1rem; min-height: 36px; padding: 6px 2px; }
-            .subtotal-fila { font-size: 0.65rem; min-width: 38px; padding: 2px 6px; }
+            .subtotal-fila { font-size: 0.8rem; min-width: 38px; padding: 2px 6px; }
             .total-monto { font-size: 1.3rem; min-width: 60px; padding: 0 10px; }
             .slider-container { padding: 4px 8px; min-width: 60px; }
             .slider-container label { font-size: 0.65rem; }
@@ -413,9 +413,6 @@
 
     <script>
         (function() {
-            // Denominaciones en orden inverso (de mayor a menor)
-            // BILLETES: 100mil, 50mil, 20mil, 10mil, 5mil, 2mil
-            // MONEDAS: 1mil, 500, 200, 100, 50
             const DENOMINACIONES = [
                 { valor: 100000, nombre: '100mil' },
                 { valor: 50000, nombre: '50mil' },
@@ -430,7 +427,6 @@
                 { valor: 50, nombre: '50' }
             ];
 
-            // MAPA DE IMÁGENES
             const IMAGENES = {
                 100000: 'billete100mil.jpeg',
                 50000:  'billete50mil.jpeg',
@@ -496,7 +492,6 @@
                     const cuadro = document.createElement('div');
                     cuadro.className = 'cuadro-billete';
 
-                    // Imagen
                     const img = document.createElement('img');
                     img.className = 'billete-imagen';
                     img.src = IMAGENES[den] || '';
@@ -512,13 +507,11 @@
                     };
                     cuadro.appendChild(img);
 
-                    // Valor
                     const valor = document.createElement('div');
                     valor.className = 'valor-billete';
                     valor.textContent = formatter.format(den);
                     cuadro.appendChild(valor);
 
-                    // Fila: input + subtotal
                     const filaInput = document.createElement('div');
                     filaInput.className = 'fila-input-subtotal';
 
@@ -531,6 +524,13 @@
                     input.className = 'input-cantidad';
                     input.dataset.denominacion = den;
                     input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
+
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
 
                     const subtotalSpan = document.createElement('span');
                     subtotalSpan.className = 'subtotal-fila';
@@ -575,7 +575,6 @@
             construirGrid();
             calcularTodo();
 
-            // Slider para columnas (solo 1 o 2)
             slider.addEventListener('input', function() {
                 const val = parseInt(this.value);
                 cambiarColumnas(val);
@@ -583,7 +582,6 @@
 
             document.getElementById('resetButton').addEventListener('click', resetearContador);
 
-            // Click en el cuadro enfoca el input
             document.querySelectorAll('.cuadro-billete').forEach(cuadro => {
                 cuadro.addEventListener('click', function(e) {
                     if (e.target.tagName === 'INPUT') return;
