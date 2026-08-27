@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>💰 Contador de dinero COP</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #e8e0d8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            margin: 0;
+        }
+        .card {
+            max-width: 550px;
+            width: 100%;
+            background: #f5f0eb;
+            border-radius: 24px;
+            padding: 16px 12px 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #1e2a3a;
+            margin: 0 0 2px 0;
+            padding-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sub {
+            color: #3d4e62;
+            font-size: 0.8rem;
+            margin: 0 0 14px 0;
+            border-left: 4px solid #f9b83c;
+            padding-left: 12px;
+            background: #fef7ed;
+            border-radius: 0 8px 8px 0;
+            padding: 6px 12px;
+        }
+
+        /* FOOTER CON SLIDER Y REINICIAR */
+        .footer-extra {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .reset-btn {
+            background: #2d3e52;
+            border: none;
+            color: #e5edf5;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: 1px solid #4d637b;
+            box-shadow: 0 3px 0 #141e2b;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+        .reset-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0px 0 #141e2b;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #eae3db;
+            padding: 4px 14px;
+            border-radius: 40px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .slider-container label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #2d3e52;
+            white-space: nowrap;
+        }
+        .slider-container input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: #b8b0a6;
+            outline: none;
+            transition: 0.2s;
+            min-width: 60px;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1e2a3a;
+            cursor: pointer;
+            border: 2px solid #f9b83c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1e2a3a;
+            cursor: pointer;
+            border: 2px solid #f9b83c;
+        }
+        .slider-valor {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1e2a3a;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .hint {
+            color: #5f6f7f;
+            font-size: 0.7rem;
+            background: #eae3db;
+            padding: 4px 12px;
+            border-radius: 40px;
+            flex-shrink: 0;
+        }
+
+        /* GRID DINÁMICO */
+        .grid-billetes {
+            display: grid;
+            gap: 12px;
+            flex: 1;
+            margin-bottom: 16px;
+            transition: 0.2s ease;
+        }
+        .grid-billetes.col-1 {
+            grid-template-columns: 1fr;
+        }
+        .grid-billetes.col-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .cuadro-billete {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 12px 14px;
+            border: 1px solid #ddd5cc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: 0.1s;
+            min-height: 170px;
+        }
+        .cuadro-billete:focus-within {
+            border-color: #f9b83c;
+            box-shadow: 0 2px 8px rgba(249, 184, 60, 0.3);
+        }
+
+        /* IMAGENES GRANDES EN AMBAS COLUMNAS */
+        .billete-imagen {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            aspect-ratio: 2.2 / 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #e8e0d8;
+            border: 1px solid #ccc3b8;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            display: block;
+            margin-bottom: 6px;
+            transition: 0.2s ease;
+        }
+
+        /* En 1 columna la imagen crece aún más */
+        .grid-billetes.col-1 .billete-imagen {
+            max-width: 240px;
+        }
+
+        .valor-billete {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1e2a3a;
+            margin: 2px 0 4px 0;
+        }
+
+        .fila-input-subtotal {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+            margin-top: 2px;
+            flex-wrap: wrap;
+        }
+
+        .input-cantidad {
+            width: 64px;
+            padding: 10px 4px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 700;
+            border: 2px solid #d6cdc2;
+            border-radius: 12px;
+            background: white;
+            color: #1e2a3a;
+            outline: none;
+            transition: 0.15s;
+            min-height: 44px;
+        }
+        .input-cantidad:focus {
+            border-color: #f9b83c;
+            box-shadow: 0 0 0 3px #f9b83c40;
+        }
+        .input-cantidad::-webkit-inner-spin-button,
+        .input-cantidad::-webkit-outer-spin-button {
+            opacity: 1;
+            height: 28px;
+        }
+        .input-cantidad[type="number"] {
+            -moz-appearance: textfield;
+        }
+        .input-cantidad::placeholder {
+            color: #b0a89e;
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        .subtotal-fila {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1e2a3a;
+            background: #e8e0d8;
+            padding: 4px 10px;
+            border-radius: 14px;
+            text-align: center;
+            font-feature-settings: "tnum";
+            opacity: 0.5;
+            min-width: 50px;
+        }
+        .subtotal-fila.activo {
+            opacity: 1;
+            background: #f9d77e;
+            color: #1a232f;
+        }
+        .subtotal-fila::before {
+            content: "$";
+            font-weight: 400;
+            margin-right: 2px;
+            font-size: 0.7rem;
+        }
+
+        /* TOTAL STICKY */
+        .total-sticky-wrapper {
+            position: sticky;
+            bottom: 0;
+            padding: 10px 0 4px 0;
+            background: #f5f0eb;
+            z-index: 10;
+            border-radius: 0 0 24px 24px;
+            margin: 0 -12px;
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+        .total-section {
+            background: #1e2a3a;
+            border-radius: 20px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 0 #0f1620;
+            border: 1px solid #3a4a5e;
+        }
+        .total-label {
+            color: #cddae6;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .total-monto {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f9d77e;
+            background: #0b121b;
+            padding: 0 14px;
+            border-radius: 20px;
+            line-height: 1.3;
+            letter-spacing: 1px;
+            font-feature-settings: "tnum";
+            border: 1px solid #f9b83c55;
+            min-width: 100px;
+            text-align: right;
+        }
+        .total-monto::before {
+            content: "$ ";
+            font-weight: 300;
+            color: #b8c7d9;
+            font-size: 1.3rem;
+            margin-right: 2px;
+        }
+
+        @media (max-width: 450px) {
+            .card { padding: 12px 8px 16px; }
+            .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .cuadro-billete { padding: 12px 6px 10px; min-height: 140px; }
+            .billete-imagen { max-width: 140px; }
+            .grid-billetes.col-1 .billete-imagen { max-width: 200px; }
+            .valor-billete { font-size: 0.85rem; }
+            .input-cantidad { width: 56px; font-size: 1.2rem; min-height: 38px; padding: 8px 2px; }
+            .subtotal-fila { font-size: 0.7rem; min-width: 40px; padding: 3px 8px; }
+            .total-monto { font-size: 1.5rem; min-width: 70px; }
+            .total-monto::before { font-size: 1rem; }
+            .footer-extra { gap: 8px; }
+            .slider-container { padding: 4px 10px; min-width: 80px; }
+        }
+
+        @media (max-width: 370px) {
+            .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .cuadro-billete { padding: 10px 4px 8px; min-height: 120px; }
+            .billete-imagen { max-width: 100px; }
+            .grid-billetes.col-1 .billete-imagen { max-width: 150px; }
+            .valor-billete { font-size: 0.75rem; }
+            .input-cantidad { width: 48px; font-size: 1rem; min-height: 34px; padding: 6px 2px; }
+            .subtotal-fila { font-size: 0.6rem; min-width: 34px; padding: 2px 6px; }
+            .slider-container { padding: 4px 8px; min-width: 60px; }
+            .slider-container label { font-size: 0.65rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card" role="main">
+        <h1>💰 Contador COP</h1>
+        <div class="sub">⚡ Ingresa la cantidad · <strong>total en vivo</strong></div>
+
+        <div class="grid-billetes col-1" id="gridBilletes"></div>
+
+        <div class="total-sticky-wrapper">
+            <div class="total-section">
+                <span class="total-label">💵 TOTAL</span>
+                <span class="total-monto" id="totalDisplay">0</span>
+            </div>
+
+            <div class="footer-extra">
+                <button class="reset-btn" id="resetButton"><span>⟳</span> Reiniciar</button>
+
+                <div class="slider-container">
+                    <label>📐</label>
+                    <input type="range" id="sliderColumnas" min="1" max="2" value="1" step="1">
+                    <span class="slider-valor" id="sliderValor">1</span>
+                </div>
+
+                <span class="hint">Cant × valor</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Denominaciones en orden inverso (de mayor a menor)
+            // BILLETES: 100mil, 50mil, 20mil, 10mil, 5mil, 2mil
+            // MONEDAS: 1mil, 500, 200, 100, 50
+            const DENOMINACIONES = [
+                { valor: 100000, nombre: '100mil' },
+                { valor: 50000, nombre: '50mil' },
+                { valor: 20000, nombre: '20mil' },
+                { valor: 10000, nombre: '10mil' },
+                { valor: 5000, nombre: '5mil' },
+                { valor: 2000, nombre: '2mil' },
+                { valor: 1000, nombre: '1mil' },
+                { valor: 500, nombre: '500' },
+                { valor: 200, nombre: '200' },
+                { valor: 100, nombre: '100' },
+                { valor: 50, nombre: '50' }
+            ];
+
+            // MAPA DE IMÁGENES - Nombres como pediste:
+            // billete100mil.jpg, billete50mil.jpg, billete20mil.jpg, billete10mil.jpg, billete5mil.jpg, billete2mil.jpg
+            // moneda1mil.jpg, moneda500.jpg, moneda200.jpg, moneda100.jpg, moneda50.jpg
+            const IMAGENES = {
+                100000: 'billete100mil.jpeg',
+                50000:  'billete50mil.jpeg',
+                20000:  'billete20mil.jpeg',
+                10000:  'billete10mil.jpeg',
+                5000:   'billete5mil.jpeg',
+                2000:   'billete2mil.jpeg',
+                1000:   'moneda1mil.jpeg',
+                500:    'moneda500.jpeg',
+                200:    'moneda200.jpeg',
+                100:    'moneda100.jpeg',
+                50:     'moneda50.jpeg'
+            };
+
+            const gridContainer = document.getElementById('gridBilletes');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const slider = document.getElementById('sliderColumnas');
+            const sliderValor = document.getElementById('sliderValor');
+            const cuadros = [];
+            const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+            function calcularTodo() {
+                let totalGeneral = 0;
+                for (let i = 0; i < cuadros.length; i++) {
+                    const c = cuadros[i];
+                    const input = c.input;
+                    const subtotalSpan = c.subtotal;
+                    const denominacion = parseInt(input.dataset.denominacion, 10);
+                    const rawValue = input.value.trim();
+                    let cantidad = 0;
+                    if (rawValue !== '') {
+                        const parsed = parseInt(rawValue, 10);
+                        if (!isNaN(parsed) && parsed >= 0) cantidad = parsed;
+                    }
+                    const subtotal = cantidad * denominacion;
+                    totalGeneral += subtotal;
+                    if (subtotal > 0) {
+                        subtotalSpan.textContent = subtotal.toLocaleString('es-CO');
+                        subtotalSpan.classList.add('activo');
+                    } else {
+                        subtotalSpan.textContent = '0';
+                        subtotalSpan.classList.remove('activo');
+                    }
+                }
+                totalDisplay.textContent = totalGeneral.toLocaleString('es-CO');
+                return totalGeneral;
+            }
+
+            function cambiarColumnas(num) {
+                gridContainer.className = 'grid-billetes col-' + num;
+                sliderValor.textContent = num;
+                slider.value = num;
+            }
+
+            function construirGrid() {
+                gridContainer.innerHTML = '';
+                cuadros.length = 0;
+
+                DENOMINACIONES.forEach(item => {
+                    const den = item.valor;
+                    const nombre = item.nombre;
+
+                    const cuadro = document.createElement('div');
+                    cuadro.className = 'cuadro-billete';
+
+                    // Imagen
+                    const img = document.createElement('img');
+                    img.className = 'billete-imagen';
+                    img.src = IMAGENES[den] || '';
+                    img.alt = `${nombre} - ${formatter.format(den)}`;
+                    img.loading = 'lazy';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                        const fallback = document.createElement('span');
+                        fallback.textContent = '💵';
+                        fallback.style.fontSize = '2.5rem';
+                        this.parentNode.insertBefore(fallback, this);
+                    };
+                    cuadro.appendChild(img);
+
+                    // Valor
+                    const valor = document.createElement('div');
+                    valor.className = 'valor-billete';
+                    valor.textContent = formatter.format(den);
+                    cuadro.appendChild(valor);
+
+                    // Fila: input + subtotal
+                    const filaInput = document.createElement('div');
+                    filaInput.className = 'fila-input-subtotal';
+
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = 0;
+                    input.step = 1;
+                    input.value = '';
+                    input.placeholder = '0';
+                    input.className = 'input-cantidad';
+                    input.dataset.denominacion = den;
+                    input.setAttribute('aria-label', `Cantidad de ${formatter.format(den)}`);
+
+                    const subtotalSpan = document.createElement('span');
+                    subtotalSpan.className = 'subtotal-fila';
+                    subtotalSpan.textContent = '0';
+
+                    input.addEventListener('input', function() {
+                        const val = this.value.trim();
+                        if (val !== '') {
+                            const num = Number(val);
+                            if (!Number.isInteger(num) || num < 0) { calcularTodo(); return; }
+                        }
+                        calcularTodo();
+                    });
+
+                    input.addEventListener('blur', function() {
+                        const val = this.value.trim();
+                        if (val === '') { calcularTodo(); return; }
+                        const num = Number(val);
+                        if (!Number.isInteger(num) || num < 0) {
+                            this.value = '';
+                        } else {
+                            this.value = Math.floor(num).toString();
+                        }
+                        calcularTodo();
+                    });
+
+                    filaInput.appendChild(input);
+                    filaInput.appendChild(subtotalSpan);
+                    cuadro.appendChild(filaInput);
+
+                    gridContainer.appendChild(cuadro);
+
+                    cuadros.push({ input, subtotal: subtotalSpan });
+                });
+            }
+
+            function resetearContador() {
+                for (let c of cuadros) c.input.value = '';
+                calcularTodo();
+            }
+
+            construirGrid();
+            calcularTodo();
+
+            // Slider para columnas (solo 1 o 2)
+            slider.addEventListener('input', function() {
+                const val = parseInt(this.value);
+                cambiarColumnas(val);
+            });
+
+            document.getElementById('resetButton').addEventListener('click', resetearContador);
+
+            // Click en el cuadro enfoca el input
+            document.querySelectorAll('.cuadro-billete').forEach(cuadro => {
+                cuadro.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'INPUT') return;
+                    const input = this.querySelector('.input-cantidad');
+                    if (input) { input.focus(); input.click(); }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
