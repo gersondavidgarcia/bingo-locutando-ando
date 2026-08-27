@@ -216,6 +216,8 @@
         .cuadro-billete.glow-9:focus-within { box-shadow: 0 0 35px rgba(190, 169, 122, 0.7), 0 0 70px rgba(190, 169, 122, 0.25); border-color: #bea97a; }
         .cuadro-billete.glow-10:focus-within { box-shadow: 0 0 35px rgba(207, 180, 99, 0.7), 0 0 70px rgba(207, 180, 99, 0.25); border-color: #cfb463; }
         .cuadro-billete.glow-11:focus-within { box-shadow: 0 0 35px rgba(194, 184, 174, 0.7), 0 0 70px rgba(194, 184, 174, 0.25); border-color: #c2b8ae; }
+        /* Cuadro de notas - glow especial */
+        .cuadro-billete.glow-notas:focus-within { box-shadow: 0 0 35px rgba(249, 184, 60, 0.6), 0 0 70px rgba(249, 184, 60, 0.2); border-color: #f9b83c; }
 
         .billete-imagen {
             width: 100%;
@@ -236,7 +238,6 @@
             max-width: 280px;
         }
 
-        /* ===== LETRA MÁS GRANDE PARA LOS VALORES ===== */
         .valor-billete {
             font-weight: 700;
             font-size: 1.3rem;
@@ -247,12 +248,11 @@
 
         .fila-input-subtotal {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             width: 100%;
-            justify-content: center;
             margin-top: 4px;
-            flex-wrap: wrap;
         }
 
         .input-cantidad {
@@ -299,6 +299,7 @@
             opacity: 0.4;
             min-width: 55px;
             border: 1px solid #ddd5cc;
+            width: auto;
         }
         .subtotal-fila.activo {
             opacity: 1;
@@ -312,6 +313,113 @@
             font-weight: 400;
             margin-right: 2px;
             font-size: 0.75rem;
+        }
+
+        /* ===== CUADRO DE NOTAS ===== */
+        .cuadro-notas {
+            background: white;
+            border-radius: 18px;
+            padding: 16px 14px 14px;
+            border: 2px solid #ddd5cc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-height: 180px;
+            position: relative;
+            gap: 8px;
+        }
+        .cuadro-notas:focus-within {
+            border-color: #f9b83c;
+            box-shadow: 0 0 35px rgba(249, 184, 60, 0.4), 0 0 70px rgba(249, 184, 60, 0.15);
+            transform: scale(1.02);
+            background: #fffdf7;
+            z-index: 2;
+        }
+
+        .cuadro-notas .icono-notas {
+            font-size: 2.5rem;
+            margin-bottom: 2px;
+        }
+        .cuadro-notas .titulo-notas {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #1e2a3a;
+        }
+        .cuadro-notas .subtitulo-notas {
+            font-size: 0.75rem;
+            color: #7a8a9a;
+            margin-bottom: 4px;
+        }
+        .textarea-notas {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid #d6cdc2;
+            border-radius: 14px;
+            background: white;
+            color: #1e2a3a;
+            font-size: 0.95rem;
+            font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+            outline: none;
+            resize: vertical;
+            transition: 0.2s;
+            line-height: 1.5;
+        }
+        .textarea-notas:focus {
+            border-color: #f9b83c;
+            box-shadow: 0 0 0 4px rgba(249, 184, 60, 0.12);
+        }
+        .textarea-notas::placeholder {
+            color: #b0a89e;
+        }
+
+        .botones-notas {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .btn-nota {
+            background: #2d3e52;
+            border: none;
+            color: #e5edf5;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: 1px solid #4d637b;
+            box-shadow: 0 2px 0 #141e2b;
+            touch-action: manipulation;
+            transition: 0.15s;
+            flex: 1;
+            min-width: 100px;
+        }
+        .btn-nota:active {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0 #141e2b;
+        }
+        .btn-nota:hover {
+            background: #3e556d;
+        }
+        .btn-nota.btn-captura {
+            background: #2d7ab2;
+            border-color: #3c947c;
+        }
+        .btn-nota.btn-captura:hover {
+            background: #3c947c;
+        }
+        .btn-nota.btn-nada {
+            background: #5d4a43;
+            border-color: #7a6a63;
+        }
+        .btn-nota.btn-nada:hover {
+            background: #7a6a63;
         }
 
         .total-sticky-wrapper {
@@ -381,6 +489,7 @@
             .card { padding: 14px 10px 16px; }
             .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 8px; }
             .cuadro-billete { padding: 14px 8px 10px; min-height: 150px; }
+            .cuadro-notas { padding: 12px 8px 12px; min-height: 150px; }
             .billete-imagen { max-width: 150px; }
             .grid-billetes.col-1 .billete-imagen { max-width: 220px; }
             .valor-billete { font-size: 1.1rem; }
@@ -391,11 +500,15 @@
             .footer-extra { gap: 8px; }
             .slider-container { padding: 4px 10px; min-width: 80px; }
             .cuadro-billete:focus-within { transform: scale(1.02); }
+            .cuadro-notas:focus-within { transform: scale(1.02); }
+            .btn-nota { font-size: 0.75rem; padding: 6px 12px; min-width: 80px; }
+            .textarea-notas { min-height: 60px; font-size: 0.85rem; }
         }
 
         @media (max-width: 370px) {
             .grid-billetes.col-2 { grid-template-columns: 1fr 1fr; gap: 6px; }
             .cuadro-billete { padding: 10px 4px 8px; min-height: 130px; }
+            .cuadro-notas { padding: 10px 4px 10px; min-height: 130px; }
             .billete-imagen { max-width: 110px; }
             .grid-billetes.col-1 .billete-imagen { max-width: 160px; }
             .valor-billete { font-size: 0.95rem; }
@@ -405,12 +518,15 @@
             .slider-container { padding: 4px 8px; min-width: 60px; }
             .slider-container label { font-size: 0.65rem; }
             .cuadro-billete:focus-within { transform: scale(1.02); }
+            .cuadro-notas:focus-within { transform: scale(1.02); }
+            .btn-nota { font-size: 0.65rem; padding: 4px 8px; min-width: 60px; }
+            .textarea-notas { min-height: 50px; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
     <div class="card" role="main">
-        <h1>💰 Contador COP 33 <span>en vivo</span></h1>
+        <h1>💰 Contador COP <span>en vivo</span></h1>
         <div class="sub">⚡ Ingresa la cantidad · <strong>total se actualiza automáticamente</strong></div>
 
         <!-- EMPIEZA EN MODO 2 COLUMNAS (clase col-2) -->
@@ -469,7 +585,6 @@
                 50:     'moneda50.jpeg'
             };
 
-            // ===== COLORES DE GLOW PERSONALIZADOS =====
             const GLOW_CLASSES = [
                 'glow-1',  // 100mil #3c947c
                 'glow-2',  // 50mil  #9773a3
@@ -490,6 +605,9 @@
             const sliderValor = document.getElementById('sliderValor');
             const cuadros = [];
             const formatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+            // Variable para guardar el contenido del textarea de notas
+            let notasContent = '';
 
             function calcularTodo() {
                 let totalGeneral = 0;
@@ -524,10 +642,41 @@
                 slider.value = num;
             }
 
+            function capturarPantalla() {
+                // Usar html2canvas para capturar toda la app
+                // Como no queremos agregar librerías externas, usamos la función nativa
+                // o mostramos un mensaje con instrucciones
+                const card = document.querySelector('.card');
+                
+                // Verificar si existe html2canvas
+                if (typeof html2canvas !== 'undefined') {
+                    html2canvas(card, {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#f5f0eb'
+                    }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.download = 'contador-cop-captura.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    }).catch(err => {
+                        alert('Error al capturar: ' + err.message);
+                    });
+                } else {
+                    // Mensaje para instalar html2canvas
+                    alert('📸 Para capturar la pantalla completa, necesitas instalar html2canvas.\n\n' +
+                          'Puedes agregar esta línea en el HTML:\n' +
+                          '<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"><\/script>\n\n' +
+                          'O usa la captura nativa de tu dispositivo (Volumen - + Power)');
+                }
+            }
+
             function construirGrid() {
                 gridContainer.innerHTML = '';
                 cuadros.length = 0;
 
+                // Primero los billetes/monedas
                 DENOMINACIONES.forEach((item, index) => {
                     const den = item.valor;
                     const nombre = item.nombre;
@@ -614,17 +763,76 @@
 
                     cuadros.push({ input, subtotal: subtotalSpan });
                 });
+
+                // ===== CUADRO DE NOTAS (como si fuera otro billete) =====
+                const cuadroNotas = document.createElement('div');
+                cuadroNotas.className = 'cuadro-notas';
+
+                const icono = document.createElement('div');
+                icono.className = 'icono-notas';
+                icono.textContent = '📝';
+                cuadroNotas.appendChild(icono);
+
+                const titulo = document.createElement('div');
+                titulo.className = 'titulo-notas';
+                titulo.textContent = 'Notas / Paradas';
+                cuadroNotas.appendChild(titulo);
+
+                const subtitulo = document.createElement('div');
+                subtitulo.className = 'subtitulo-notas';
+                subtitulo.textContent = 'Escribe aquí tus notas o paradas';
+                cuadroNotas.appendChild(subtitulo);
+
+                const textarea = document.createElement('textarea');
+                textarea.className = 'textarea-notas';
+                textarea.placeholder = 'Escribe tus notas aquí...';
+                textarea.value = notasContent;
+                textarea.addEventListener('input', function() {
+                    notasContent = this.value;
+                });
+                cuadroNotas.appendChild(textarea);
+
+                // Botones
+                const botonesDiv = document.createElement('div');
+                botonesDiv.className = 'botones-notas';
+
+                const btnCaptura = document.createElement('button');
+                btnCaptura.className = 'btn-nota btn-captura';
+                btnCaptura.textContent = '📸 Capturar pantalla';
+                btnCaptura.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    capturarPantalla();
+                });
+
+                const btnNada = document.createElement('button');
+                btnNada.className = 'btn-nota btn-nada';
+                btnNada.textContent = '❌ NADA';
+                btnNada.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // No hace nada, solo existe para cumplir con el diseño
+                });
+
+                botonesDiv.appendChild(btnCaptura);
+                botonesDiv.appendChild(btnNada);
+                cuadroNotas.appendChild(botonesDiv);
+
+                gridContainer.appendChild(cuadroNotas);
             }
 
             function resetearContador() {
                 for (let c of cuadros) c.input.value = '';
+                // Limpiar notas también
+                const textarea = document.querySelector('.textarea-notas');
+                if (textarea) {
+                    textarea.value = '';
+                    notasContent = '';
+                }
                 calcularTodo();
             }
 
             construirGrid();
             calcularTodo();
 
-            // Slider empieza en 2 (value="2" en el HTML)
             slider.addEventListener('input', function() {
                 const val = parseInt(this.value);
                 cambiarColumnas(val);
@@ -635,10 +843,23 @@
             document.querySelectorAll('.cuadro-billete').forEach(cuadro => {
                 cuadro.addEventListener('click', function(e) {
                     if (e.target.tagName === 'INPUT') return;
+                    if (e.target.tagName === 'BUTTON') return;
+                    if (e.target.tagName === 'TEXTAREA') return;
                     const input = this.querySelector('.input-cantidad');
                     if (input) { input.focus(); input.click(); }
                 });
             });
+
+            // Click en el cuadro de notas enfoca el textarea
+            const cuadroNotasElement = document.querySelector('.cuadro-notas');
+            if (cuadroNotasElement) {
+                cuadroNotasElement.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'TEXTAREA') return;
+                    if (e.target.tagName === 'BUTTON') return;
+                    const textarea = this.querySelector('.textarea-notas');
+                    if (textarea) { textarea.focus(); }
+                });
+            }
 
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.target.classList.contains('input-cantidad')) {
@@ -650,6 +871,9 @@
                     return false;
                 }
             }, true);
+
+            // Exponer función de captura globalmente
+            window.capturarPantalla = capturarPantalla;
 
         })();
     </script>
