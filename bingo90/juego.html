@@ -11,6 +11,30 @@
     <meta name="x5-full-screen" content="true">
     <meta name="full-screen" content="yes">
     
+    <!-- 🔥 ELIMINAR RESALTADO AZUL EN ANDROID - ESTILO INLINE -->
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent !important;
+            tap-highlight-color: transparent !important;
+            -webkit-focus-ring-color: transparent !important;
+            outline: none !important;
+        }
+        *:focus, *:active, *:focus-visible {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+        button, button:focus, button:active {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-focus-ring-color: transparent !important;
+        }
+        .btn-sacar-bola, .btn-sacar-bola:focus, .btn-sacar-bola:active {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-focus-ring-color: transparent !important;
+        }
+    </style>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,8 +55,8 @@
                     </div>
                 </div>
                 
-                <!-- BOTÓN OPTIMIZADO -->
-                <button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" style="
+                <!-- BOTÓN OPTIMIZADO CON onfocus="this.blur()" -->
+                <button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" onfocus="this.blur()" ontouchstart="" style="
                     height: 58px;
                     padding: 0 10px;
                     min-width: 76px;
@@ -59,7 +83,7 @@
                     <span class="particula"></span>
                     <span class="particula"></span>
 
-                    <span class="text-glow">SACAR<br>BOLA</span>
+                    <span class="text-glow">SACAR<br>BOLAS</span>
                 </button>
 
                 <div class="stats-box" style="
@@ -113,7 +137,7 @@
                     transition: background 0.2s, transform 0.1s;
                     letter-spacing: 0.5px;
                     text-align: center;
-                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'" onfocus="this.blur()">
                 🔄 CAMBIAR
                 </button>
 
@@ -130,7 +154,7 @@
                     transition: background 0.2s, transform 0.1s;
                     letter-spacing: 1px;
                     text-align: center;
-                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'">
+                " onmousedown="this.style.transform='scale(0.96)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.96)'" ontouchend="this.style.transform='scale(1)'" onfocus="this.blur()">
                 ⬅ ATRÁS
                 </button>
                 
