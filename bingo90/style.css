@@ -12,7 +12,7 @@ body {
     justify-content: center;
     align-items: flex-start;
     padding: 8px 4px;
-    overflow: visible; /* 🟢 ESTO PERMITE QUE EL SCROLL FUNCIONE */
+    overflow: visible;
 }
 
 .bingo-app {
@@ -138,7 +138,6 @@ h1 {
     align-items: center;
 }
 
-/* EMOJI DE ALERTA A 1 */
 .raya-alerta {
     font-size: 0.95rem;
     margin-left: 4px;
@@ -148,7 +147,6 @@ h1 {
     transition: all 0.3s ease;
 }
 
-/* Estado discreto / reducido cuando la bola pasa y sigue a 1 */
 .raya-alerta.pequeno {
     transform: scale(0.65);
     opacity: 0.8;
@@ -160,7 +158,6 @@ h1 {
     100% { transform: scale(1.25); opacity: 1; }
 }
 
-/* BRILLO Y ANIMACIÓN DEL CARTÓN AL MENCIONAR SU NÚMERO */
 .carton-header.hit-alert {
     animation: header-low-opacity-glow 1.2s ease-in-out forwards;
 }
@@ -298,7 +295,6 @@ h1 {
 }
 
 .bolillero-container {
-    /* 🟢 DEGRADADO ANIMADO MUY LENTO (ELEGANTE) */
     background: linear-gradient(135deg, 
         var(--tema-color, #2e7d32) 0%, 
         var(--tema-color-bg, #4caf50) 25%, 
@@ -307,8 +303,6 @@ h1 {
         var(--tema-color, #2e7d32) 100%
     );
     background-size: 400% 400%;
-    
-    /* 🟢 NO HAY BORDE EXTERNO: El borde se dibuja en el centro */
     border: none;
     border-radius: 16px;
     padding: 8px 10px;
@@ -318,19 +312,14 @@ h1 {
     gap: 8px;
     overflow: hidden;
     position: relative;
-    
-    /* 🟢 BORDE CENTRADO: Blanco y de color */
     outline: 4px solid #ffffff;
     outline-offset: -2px;
-    
     box-shadow: 
         0 5px 12px rgba(0, 0, 0, 0.2),
         inset 0 0 15px var(--tema-color, #2e7d32);
-    
     animation: ondasColoridas 12s ease-in-out infinite;
 }
 
-/* 🟢 REFLEJO DE CRISTAL SUTIL (FUERA del contenedor) */
 .bolillero-container::before {
     content: '';
     position: absolute;
@@ -343,7 +332,6 @@ h1 {
     z-index: 1;
 }
 
-/* 🟢 ONDAS ANIMADAS (FUERA del contenedor) */
 @keyframes ondasColoridas {
     0% {
         background-position: 0% 50%;
@@ -394,13 +382,11 @@ h1 {
     align-items: center;
     justify-content: center;
     transition: background 0.4s ease;
-    overflow: hidden; 
-
+    overflow: hidden;
     box-shadow: 
         0 8px 16px rgba(0, 0, 0, 0.25),
         inset -6px -6px 12px rgba(0, 0, 0, 0.45),
         inset 5px 5px 10px rgba(255, 255, 255, 0.75);
-
     animation: sombra-3d-infinita-lenta 6s linear infinite;
 }
 
@@ -478,12 +464,12 @@ h1 {
 }
 
 /* =========================================================
-   🎰 BOTÓN CASINO - BORDE NEÓN + PARTÍCULAS INTERNAS
+   🎰 BOTÓN SACAR BOLA - VERSIÓN OPTIMIZADA
    ========================================================= */
 
 .btn-sacar-bola {
     background: #0a0a12;
-    border: 3px solid #ffd700 !important;  /* 🔥 FUERZA EL BORDE */
+    border: 2px solid #ffd700;
     border-radius: 14px;
     color: #ffd700;
     font-weight: 900;
@@ -493,202 +479,78 @@ h1 {
     cursor: pointer;
     position: relative;
     z-index: 1;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.5s ease;
+    transition: transform 0.15s ease;
     min-height: 52px;
     min-width: 76px;
     width: auto;
-    /* 🔥 BRILLO NEÓN EXTERIOR E INTERIOR */
-    box-shadow: 
-        0 0 25px rgba(255, 215, 0, 0.25),
-        0 0 50px rgba(255, 215, 0, 0.08),
-        inset 0 0 30px rgba(255, 215, 0, 0.05);
-    animation: bordeNeon 2.5s ease-in-out infinite alternate;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15);
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
 }
 
-/* 🔥 ANIMACIÓN DEL BORDE NEÓN - SOLO CAMBIA EL COLOR Y EL BRILLO */
-@keyframes bordeNeon {
-    0% { 
-        border-color: #ffd700 !important;
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), 0 0 50px rgba(255, 215, 0, 0.1), inset 0 0 30px rgba(255, 215, 0, 0.08);
-    }
-    25% { 
-        border-color: #ff6b6b !important;
-        box-shadow: 0 0 25px rgba(255, 107, 107, 0.3), 0 0 50px rgba(255, 107, 107, 0.1), inset 0 0 30px rgba(255, 107, 107, 0.08);
-    }
-    50% { 
-        border-color: #4ecdc4 !important;
-        box-shadow: 0 0 25px rgba(78, 205, 196, 0.3), 0 0 50px rgba(78, 205, 196, 0.1), inset 0 0 30px rgba(78, 205, 196, 0.08);
-    }
-    75% { 
-        border-color: #a29bfe !important;
-        box-shadow: 0 0 25px rgba(162, 155, 254, 0.3), 0 0 50px rgba(162, 155, 254, 0.1), inset 0 0 30px rgba(162, 155, 254, 0.08);
-    }
-    100% { 
-        border-color: #ffd700 !important;
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.3), 0 0 50px rgba(255, 215, 0, 0.1), inset 0 0 30px rgba(255, 215, 0, 0.08);
-    }
+.btn-sacar-bola:active {
+    transform: scale(0.92);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+    border-color: #ffffff;
 }
 
-/* =========================================================
-   PARTÍCULAS INTERNAS
-   ========================================================= */
+/* PARTÍCULAS INTERNAS (12) */
 .btn-sacar-bola .particula {
     position: absolute;
-    width: 4px;
-    height: 4px;
+    width: 3px;
+    height: 3px;
     border-radius: 50%;
     background: #ffd700;
-    box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+    box-shadow: 0 0 6px #ffd700;
     opacity: 0;
     z-index: 2;
     pointer-events: none;
 }
 
-.btn-sacar-bola .particula:nth-child(1) {
-    top: 15%;
-    left: 10%;
-    animation: particulaFloat 4s ease-in-out 0s infinite;
-}
-.btn-sacar-bola .particula:nth-child(2) {
-    top: 70%;
-    right: 12%;
-    animation: particulaFloat 4.5s ease-in-out 1.2s infinite;
-}
-.btn-sacar-bola .particula:nth-child(3) {
-    bottom: 20%;
-    left: 25%;
-    animation: particulaFloat 3.8s ease-in-out 2.5s infinite;
-}
-.btn-sacar-bola .particula:nth-child(4) {
-    top: 10%;
-    right: 22%;
-    animation: particulaFloat 5s ease-in-out 0.8s infinite;
-}
-.btn-sacar-bola .particula:nth-child(5) {
-    bottom: 30%;
-    right: 28%;
-    animation: particulaFloat 4.2s ease-in-out 3s infinite;
-}
+.btn-sacar-bola .particula:nth-child(1) { top: 15%; left: 10%; animation: particulaFloat 4s ease-in-out 0s infinite; }
+.btn-sacar-bola .particula:nth-child(2) { top: 70%; right: 12%; animation: particulaFloat 4.5s ease-in-out 1.2s infinite; }
+.btn-sacar-bola .particula:nth-child(3) { bottom: 20%; left: 25%; animation: particulaFloat 3.8s ease-in-out 2.5s infinite; }
+.btn-sacar-bola .particula:nth-child(4) { top: 10%; right: 22%; animation: particulaFloat 5s ease-in-out 0.8s infinite; }
+.btn-sacar-bola .particula:nth-child(5) { bottom: 30%; right: 28%; animation: particulaFloat 4.2s ease-in-out 3s infinite; }
+.btn-sacar-bola .particula:nth-child(6) { top: 45%; left: 5%; animation: particulaFloat 3.5s ease-in-out 1.5s infinite; }
+.btn-sacar-bola .particula:nth-child(7) { top: 5%; left: 45%; animation: particulaFloat 4.8s ease-in-out 0.3s infinite; }
+.btn-sacar-bola .particula:nth-child(8) { bottom: 10%; left: 40%; animation: particulaFloat 4.1s ease-in-out 2.2s infinite; }
+.btn-sacar-bola .particula:nth-child(9) { top: 50%; right: 5%; animation: particulaFloat 3.9s ease-in-out 1.8s infinite; }
+.btn-sacar-bola .particula:nth-child(10) { top: 25%; right: 35%; animation: particulaFloat 4.3s ease-in-out 0.6s infinite; }
+.btn-sacar-bola .particula:nth-child(11) { bottom: 35%; left: 8%; animation: particulaFloat 3.6s ease-in-out 2.8s infinite; }
+.btn-sacar-bola .particula:nth-child(12) { top: 8%; left: 75%; animation: particulaFloat 4.7s ease-in-out 1.1s infinite; }
 
 @keyframes particulaFloat {
-    0% { 
-        opacity: 0; 
-        transform: scale(0) translateY(0px);
-    }
-    20% { 
-        opacity: 1; 
-        transform: scale(1.5) translateY(-5px);
-    }
-    40% { 
-        opacity: 0.8; 
-        transform: scale(0.8) translateY(-10px);
-    }
-    60% { 
-        opacity: 1; 
-        transform: scale(1.2) translateY(-3px);
-    }
-    80% { 
-        opacity: 0.6; 
-        transform: scale(0.9) translateY(-7px);
-    }
-    100% { 
-        opacity: 0; 
-        transform: scale(0) translateY(0px);
-    }
+    0% { opacity: 0; transform: scale(0) translateY(0px); }
+    20% { opacity: 1; transform: scale(1.5) translateY(-4px); }
+    40% { opacity: 0.8; transform: scale(0.8) translateY(-8px); }
+    60% { opacity: 1; transform: scale(1.2) translateY(-2px); }
+    80% { opacity: 0.6; transform: scale(0.9) translateY(-5px); }
+    100% { opacity: 0; transform: scale(0) translateY(0px); }
 }
 
-/* =========================================================
-   BRILLO INTERNO
-   ========================================================= */
-.btn-sacar-bola .glow-inner {
-    position: absolute;
-    inset: 4px;
-    border-radius: 11px;
-    background: radial-gradient(
-        ellipse at 50% 50%,
-        rgba(255, 215, 0, 0.06) 0%,
-        rgba(255, 215, 0, 0.02) 40%,
-        transparent 80%
-    );
-    z-index: 0;
-    animation: glowPulse 3s ease-in-out infinite alternate;
-    pointer-events: none;
-}
-
-@keyframes glowPulse {
-    0% { 
-        opacity: 0.3;
-        transform: scale(0.95);
-    }
-    50% { 
-        opacity: 0.9;
-        transform: scale(1.04);
-    }
-    100% { 
-        opacity: 0.3;
-        transform: scale(0.95);
-    }
-}
-
-/* =========================================================
-   LUZ DESLIZANTE
-   ========================================================= */
-.btn-sacar-bola .glow-scan {
-    position: absolute;
-    inset: 4px;
-    border-radius: 11px;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 215, 0, 0) 0%,
-        rgba(255, 215, 0, 0.06) 30%,
-        rgba(255, 215, 0, 0.15) 50%,
-        rgba(255, 215, 0, 0.06) 70%,
-        rgba(255, 215, 0, 0) 100%
-    );
-    background-size: 300% 100%;
-    animation: scanLight 5s ease-in-out infinite;
-    z-index: 0;
-    pointer-events: none;
-}
-
-@keyframes scanLight {
-    0% { background-position: -100% 0%; opacity: 0.2; }
-    30% { opacity: 0.7; }
-    50% { background-position: 100% 0%; opacity: 0.9; }
-    70% { opacity: 0.7; }
-    100% { background-position: 300% 0%; opacity: 0.2; }
-}
-
-/* =========================================================
-   HOVER
-   ========================================================= */
-.btn-sacar-bola:hover {
-    transform: scale(1.05) !important;
-    animation-duration: 1s !important;
-}
-
-/* =========================================================
-   TEXTO DORADO
-   ========================================================= */
+/* TEXTO DORADO */
 .btn-sacar-bola .text-glow {
     position: relative;
     z-index: 3;
-    background: linear-gradient(
-        180deg,
-        #ffd700 0%,
-        #ffb300 40%,
-        #ff8f00 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #ffd700;
     font-weight: 900;
     font-size: 0.9rem;
-    text-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
     letter-spacing: 2px;
     line-height: 1.1;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
 }
 
-.btn-sacar-bola:active { transform: scale(0.96); }
+/* EFECTO AL PRESIONAR */
+.btn-sacar-bola.presionado {
+    animation: botonFlash 0.3s ease-out !important;
+}
+
+@keyframes botonFlash {
+    0% { transform: scale(0.88); border-color: #ffffff; box-shadow: 0 0 40px rgba(255,255,255,0.3); }
+    50% { transform: scale(0.96); border-color: #ff6b6b; box-shadow: 0 0 30px rgba(255,107,107,0.2); }
+    100% { transform: scale(1); border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+}
 
 .stats-box {
     display: flex;
@@ -712,8 +574,8 @@ h1 {
 
 .recientes-container {
     width: 100%;
-    max-width: 200px;      
-    margin-left: 0;      
+    max-width: 200px;
+    margin-left: 0;
     margin-right: auto;
     background: #7a0000;
     border-radius: 6px;
@@ -772,27 +634,16 @@ h1 {
     color: #000000 !important;
 }
 
-/* 🟢 ENTRADA: Deslizamiento puro desde el borde izquierdo */
 @keyframes entradaTuberia {
-    0% {
-        transform: translateX(-26px);
-    }
-    100% {
-        transform: translateX(0);
-    }
+    0% { transform: translateX(-26px); }
+    100% { transform: translateX(0); }
 }
 
-/* 🟢 SALIDA: Deslizamiento puro hacia el borde derecho */
 @keyframes salidaTuberia {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(26px);
-    }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(26px); }
 }
 
-/* 🟢 CLASE PARA APLICAR LA ENTRADA Y LA SALIDA (Se añade desde JS) */
 .mini-bola.entrando {
     animation: entradaTuberia 0.4s ease-out forwards;
 }
@@ -856,9 +707,6 @@ h1 {
     border-color: var(--tema-color, #1b5e20);
 }
 
-/* =========================================================
-   ANIMACIÓN MIRA TELESCÓPICA (USA EL COLOR DEL TEMA)
-   ========================================================= */
 .circulo-foco-ganador {
     position: fixed;
     transform: translate(-50%, -50%) scale(1);
@@ -871,33 +719,13 @@ h1 {
 }
 
 @keyframes encoger-hacia-numero {
-    0% {
-        transform: translate(-50%, -50%) scale(7);
-        opacity: 0;
-        border-width: 12px;
-    }
-    15% {
-        opacity: 1;
-    }
-    70% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-        border-width: 5px;
-    }
-    85% {
-        transform: translate(-50%, -50%) scale(1.25);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.05);
-        opacity: 0;
-        border-width: 4px;
-    }
+    0% { transform: translate(-50%, -50%) scale(7); opacity: 0; border-width: 12px; }
+    15% { opacity: 1; }
+    70% { transform: translate(-50%, -50%) scale(1); opacity: 1; border-width: 5px; }
+    85% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.05); opacity: 0; border-width: 4px; }
 }
 
-/* =========================================================
-   🟢 CLASE PARA 3 COLUMNAS (3, 6, 9... 30)
-   ========================================================= */
 .cartones-grid.modo-15 {
     grid-template-columns: repeat(3, 1fr) !important;
     gap: 4px !important;
@@ -927,11 +755,7 @@ h1 {
     border-width: 1px !important;
 }
 
-/* =========================================================
-   💥 ANIMACIÓN DE EXPLOSIÓN AL PRESIONAR
-   ========================================================= */
-
-/* Contenedor de partículas de explosión */
+/* EXPLOSIÓN DE PARTÍCULAS */
 .explosion-container {
     position: fixed;
     pointer-events: none;
@@ -950,263 +774,44 @@ h1 {
 }
 
 @keyframes explosionFly {
-    0% {
-        opacity: 1;
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(var(--tx), var(--ty)) scale(0);
-    }
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
 }
 
 /* =========================================================
-   🔥 ANIMACIÓN COMPLETA DEL BOTÓN - INTERIOR Y EXTERIOR
+   🔥 ELIMINAR CONTORNO AZUL Y RESALTADO
    ========================================================= */
-
-.btn-sacar-bola.presionado {
-    animation: botonFlash 0.5s ease-out !important;
-}
-
-@keyframes botonFlash {
-    0% {
-        transform: scale(0.88);
-        border-color: #ffffff !important;
-        box-shadow: 0 0 60px rgba(255, 255, 255, 0.6), 0 0 120px rgba(255, 215, 0, 0.3);
-        background: #1a1a2e;
-    }
-    40% {
-        transform: scale(1.02);
-        border-color: #ff6b6b !important;
-        box-shadow: 0 0 40px rgba(255, 107, 107, 0.5);
-        background: #2a1a2e;
-    }
-    70% {
-        transform: scale(0.96);
-        border-color: #4ecdc4 !important;
-        box-shadow: 0 0 40px rgba(78, 205, 196, 0.4);
-        background: #0a1a2e;
-    }
-    100% {
-        transform: scale(1);
-        border-color: #ffd700 !important;
-        background: #0a0a12;
-        box-shadow: 0 0 25px rgba(255, 215, 0, 0.25), 0 0 50px rgba(255, 215, 0, 0.08), inset 0 0 30px rgba(255, 215, 0, 0.05);
-    }
-}
-
-/* 🔥 ANIMACIÓN DE LAS PARTÍCULAS INTERNAS AL PRESIONAR */
-.btn-sacar-bola.presionado .particula {
-    animation: particulaExplosion 0.6s ease-out forwards !important;
-}
-
-@keyframes particulaExplosion {
-    0% {
-        opacity: 0;
-        transform: scale(0) translate(0, 0);
-    }
-    30% {
-        opacity: 1;
-        transform: scale(2) translate(var(--px), var(--py));
-    }
-    70% {
-        opacity: 0.8;
-        transform: scale(1.5) translate(var(--px2), var(--py2));
-    }
-    100% {
-        opacity: 0;
-        transform: scale(0) translate(var(--px3), var(--py3));
-    }
-}
-
-/* 🔥 DESTELLO INTERIOR AL PRESIONAR */
-.btn-sacar-bola.presionado .glow-inner {
-    animation: glowBurst 0.5s ease-out forwards !important;
-}
-
-@keyframes glowBurst {
-    0% {
-        opacity: 0.2;
-        transform: scale(0.8);
-        background: radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.8) 0%, rgba(255, 215, 0, 0.2) 60%, transparent 100%);
-    }
-    40% {
-        opacity: 1;
-        transform: scale(1.3);
-        background: radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 215, 0, 0.5) 50%, transparent 100%);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(1.8);
-        background: radial-gradient(ellipse at 50% 50%, rgba(255, 215, 0, 0.3) 0%, transparent 100%);
-    }
-}
-
-/* 🔥 LUZ DESLIZANTE ACELERADA AL PRESIONAR */
-.btn-sacar-bola.presionado .glow-scan {
-    animation: scanBurst 0.4s ease-out forwards !important;
-}
-
-@keyframes scanBurst {
-    0% {
-        background-position: -100% 0%;
-        opacity: 0;
-    }
-    20% {
-        opacity: 1;
-    }
-    50% {
-        background-position: 100% 0%;
-        opacity: 0.9;
-    }
-    100% {
-        background-position: 200% 0%;
-        opacity: 0;
-    }
-}
-
-/* 🔥 TEXTO QUE BRILLA AL PRESIONAR */
-.btn-sacar-bola.presionado .text-glow {
-    animation: textFlash 0.4s ease-out forwards !important;
-}
-
-@keyframes textFlash {
-    0% {
-        -webkit-text-fill-color: #ffffff;
-        text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
-        transform: scale(0.9);
-    }
-    40% {
-        -webkit-text-fill-color: #ffd700;
-        text-shadow: 0 0 60px rgba(255, 215, 0, 0.9);
-        transform: scale(1.15);
-    }
-    70% {
-        -webkit-text-fill-color: #ff6b6b;
-        text-shadow: 0 0 40px rgba(255, 107, 107, 0.6);
-        transform: scale(0.95);
-    }
-    100% {
-        -webkit-text-fill-color: #ffd700;
-        text-shadow: 0 0 40px rgba(255, 215, 0, 0.15);
-        transform: scale(1);
-    }
-}
-
-/* 🔥 BOTÓN CON RAYOS INTERNOS (EFECTO ESTRELLA) */
-.btn-sacar-bola .rayos {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-    border-radius: 14px;
-}
-
-.btn-sacar-bola .rayo {
-    position: absolute;
-    width: 2px;
-    height: 30%;
-    background: linear-gradient(180deg, transparent, rgba(255, 215, 0, 0.3), transparent);
-    left: 50%;
-    transform-origin: center bottom;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.btn-sacar-bola.presionado .rayo {
-    animation: rayoFlash 0.6s ease-out forwards;
-}
-
-.btn-sacar-bola .rayo:nth-child(1) { transform: translateX(-50%) rotate(0deg); animation-delay: 0s; }
-.btn-sacar-bola .rayo:nth-child(2) { transform: translateX(-50%) rotate(45deg); animation-delay: 0.05s; }
-.btn-sacar-bola .rayo:nth-child(3) { transform: translateX(-50%) rotate(90deg); animation-delay: 0.1s; }
-.btn-sacar-bola .rayo:nth-child(4) { transform: translateX(-50%) rotate(135deg); animation-delay: 0.15s; }
-.btn-sacar-bola .rayo:nth-child(5) { transform: translateX(-50%) rotate(180deg); animation-delay: 0s; }
-.btn-sacar-bola .rayo:nth-child(6) { transform: translateX(-50%) rotate(225deg); animation-delay: 0.05s; }
-.btn-sacar-bola .rayo:nth-child(7) { transform: translateX(-50%) rotate(270deg); animation-delay: 0.1s; }
-.btn-sacar-bola .rayo:nth-child(8) { transform: translateX(-50%) rotate(315deg); animation-delay: 0.15s; }
-
-@keyframes rayoFlash {
-    0% {
-        opacity: 0;
-        transform: translateX(-50%) rotate(var(--rot)) scaleY(0);
-    }
-    30% {
-        opacity: 1;
-        transform: translateX(-50%) rotate(var(--rot)) scaleY(1.5);
-    }
-    70% {
-        opacity: 0.8;
-        transform: translateX(-50%) rotate(var(--rot)) scaleY(1.2);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-50%) rotate(var(--rot)) scaleY(0);
-    }
-}
-
-@keyframes botonFlash {
-    0% {
-        transform: scale(0.85);
-        border-color: #ffffff !important;
-        box-shadow: 0 0 60px rgba(255, 255, 255, 0.6), 0 0 120px rgba(255, 215, 0, 0.3);
-    }
-    50% {
-        transform: scale(0.95);
-        border-color: #ffd700 !important;
-        box-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
-    }
-    100% {
-        transform: scale(1);
-        border-color: var(--color-neon, #ffd700) !important;
-    }
-
-    /* =========================================================
-   🔥 ELIMINAR CONTORNO AZUL EN BOTONES Y ELEMENTOS INTERACTIVOS
-   ========================================================= */
-
-/* Elimina el outline azul en todos los elementos */
-*:focus {
+* {
     outline: none !important;
     -webkit-tap-highlight-color: transparent !important;
+    -webkit-focus-ring-color: transparent !important;
 }
 
-/* Para botones específicamente */
+*:focus,
+*:active {
+    outline: none !important;
+}
+
 button:focus,
 button:active,
 .btn-sacar-bola:focus,
-.btn-sacar-bola:active {
-    outline: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-}
-
-/* Para todos los elementos clickeables */
+.btn-sacar-bola:active,
 a:focus,
 a:active,
 input:focus,
 input:active,
-select:focus,
-select:active,
-textarea:focus,
-textarea:active,
 div:focus,
 div:active {
     outline: none !important;
     -webkit-tap-highlight-color: transparent !important;
 }
 
-/* Específico para Android/Chrome */
-* {
+.btn-sacar-bola {
     -webkit-tap-highlight-color: transparent !important;
-    -webkit-focus-ring-color: transparent !important;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-touch-callout: none !important;
 }
 
-/* Permite seleccionar texto en la tabla si es necesario */
 .tabla-numeros * {
     -webkit-user-select: text;
     user-select: text;
-}
 }
