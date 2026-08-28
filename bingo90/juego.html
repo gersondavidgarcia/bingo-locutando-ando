@@ -5,22 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bingo Tradicional · Premio Único Global</title>
     
-    <!-- ========================================================== -->
-    <!-- 🟢 CONFIGURACIÓN PARA QUE FUNCIONE COMO APP 🟢 -->
-    <!-- ========================================================== -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <!-- ESTA LÍNEA ES LA QUE FUERZA A OCULTAR LA BARRA DE ANDROID -->
     <meta name="x5-full-screen" content="true">
     <meta name="full-screen" content="yes">
-    <!-- ========================================================== -->
     
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Inicio de la app -->
     <div class="bingo-app">
         
         <div class="banner-premio" id="bannerPremio"></div>
@@ -29,66 +23,45 @@
 
         <div class="bolillero-container">
             
-            <!-- CONTENEDOR ORIGINAL: LA BOLA, EL BOTÓN Y EL CONTADOR -->
             <div class="bolillero-top-row" style="display: flex; align-items: flex-start; justify-content: space-between; width: 100%;">
                 
-                <!-- 1. La esfera -->
                 <div class="bolillero-stage">
                     <div class="bolillero-sphere" id="bolilleroSphere">
                         <span class="bolillero-numero" id="numeroDisplay">--</span>
                     </div>
                 </div>
                 
-                <!-- 2. El botón SACAR BOLA - COMPLETO CON TODAS LAS CAPAS -->
-<button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" style="
-    height: 58px;
-    padding: 0 10px;
-    width: auto;
-    min-width: 76px;
-    background: #0a0a12;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-top: 8px;
-    position: relative;
-    overflow: hidden;
-">
+                <!-- BOTÓN OPTIMIZADO -->
+                <button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" style="
+                    height: 58px;
+                    padding: 0 10px;
+                    min-width: 76px;
+                    width: auto;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    margin-top: 8px;
+                    position: relative;
+                ">
 
-    <!-- 🔥 RAYOS (ESTRELLA) -->
-    <span class="rayos">
-        <span class="rayo" style="--rot: 0deg;"></span>
-        <span class="rayo" style="--rot: 45deg;"></span>
-        <span class="rayo" style="--rot: 90deg;"></span>
-        <span class="rayo" style="--rot: 135deg;"></span>
-        <span class="rayo" style="--rot: 180deg;"></span>
-        <span class="rayo" style="--rot: 225deg;"></span>
-        <span class="rayo" style="--rot: 270deg;"></span>
-        <span class="rayo" style="--rot: 315deg;"></span>
-    </span>
+                    <!-- 12 PARTÍCULAS -->
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
+                    <span class="particula"></span>
 
-    <!-- 🔥 PARTÍCULAS INTERNAS -->
-    <span class="particula" style="--px: -20px; --py: -30px; --px2: -35px; --py2: -50px; --px3: -20px; --py3: -60px;"></span>
-    <span class="particula" style="--px: 25px; --py: -20px; --px2: 40px; --py2: -40px; --px3: 25px; --py3: -50px;"></span>
-    <span class="particula" style="--px: -15px; --py: 25px; --px2: -30px; --py2: 45px; --px3: -15px; --py3: 55px;"></span>
-    <span class="particula" style="--px: 20px; --py: 20px; --px2: 35px; --py2: 40px; --px3: 20px; --py3: 50px;"></span>
-    <span class="particula" style="--px: 0px; --py: -35px; --px2: 0px; --py2: -55px; --px3: 0px; --py3: -70px;"></span>
+                    <span class="text-glow">SACAR<br>BOLA</span>
+                </button>
 
-    <!-- 🔥 BRILLO INTERNO -->
-    <span class="glow-inner"></span>
-
-    <!-- LUZ DESLIZANTE -->
-    <span class="glow-scan"></span>
-
-    <!-- TEXTO PRINCIPAL -->
-    <span class="text-glow">SACAR<br>BOLA</span>
-</button>
-
-                <!-- 3. El contador de Bolas -->
                 <div class="stats-box" style="
                     display: flex;
                     flex-direction: row;
@@ -118,19 +91,15 @@
             </div>
         </div>
 
-        <!-- 🟢 CONTENEDOR FLEXIBLE: TABLA A LA IZQ, BOTONES A LA DERECHA 🟢 -->
         <div style="display: flex; width: 100%; gap: 10px; margin-bottom: 5px;">
             
-            <!-- 1. TABLA DE NÚMEROS -->
             <div class="panel-numeros-inferior" style="flex: 0 0 58%;">
                 <div class="titulo-tabla">CONTROL (1 - 90)</div>
                 <div class="tabla-numeros" id="tablaNumeros"></div>
             </div>
 
-            <!-- 2. CONTENEDOR DEL ESPACIO VACÍO -->
             <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px;">
                 
-                <!-- 🟢 BOTÓN CAMBIAR (RECARGA LA PÁGINA) 🟢 -->
                 <button onclick="location.reload()" style="
                     width: 100%;
                     padding: 10px 0;
@@ -148,7 +117,6 @@
                 🔄 CAMBIAR
                 </button>
 
-                <!-- 3. BOTÓN DE ATRÁS -->
                 <button onclick="window.location.href='index.html'" style="
                     width: 100%;
                     padding: 10px 0;
@@ -170,7 +138,7 @@
             
         </div>
 
-    </div> <!-- Fin del div bingo-app -->
+    </div>
 
     <script src="script.js"></script>
 </body>
