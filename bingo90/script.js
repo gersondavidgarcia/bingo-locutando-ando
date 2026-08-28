@@ -892,44 +892,45 @@
     // 💥 FUNCIÓN DE EXPLOSIÓN DE PARTÍCULAS
     // =========================================================
     window.crearExplosion = function(event) {
-        const btn = document.getElementById('btnSacarBola');
-        if (!btn) return;
+    const btn = document.getElementById('btnSacarBola');
+    if (!btn) return;
 
-        const rect = btn.getBoundingClientRect();
-        const centroX = rect.left + rect.width / 2;
-        const centroY = rect.top + rect.height / 2;
+    const rect = btn.getBoundingClientRect();
+    const centroX = rect.left + rect.width / 2;
+    const centroY = rect.top + rect.height / 2;
 
-        const container = document.createElement('div');
-        container.className = 'explosion-container';
-        document.body.appendChild(container);
+    const container = document.createElement('div');
+    container.className = 'explosion-container';
+    document.body.appendChild(container);
 
-        const colores = ['#ffd700', '#ff6b6b', '#4ecdc4', '#a29bfe', '#ffffff', '#ffeb3b', '#ff4081'];
+    const colores = ['#ffd700', '#ff6b6b', '#4ecdc4', '#a29bfe', '#ffffff'];
 
-        for (let i = 0; i < 30; i++) {
-            const particula = document.createElement('div');
-            particula.className = 'particula-explosion';
-            
-            const size = 4 + Math.random() * 8;
-            const angle = Math.random() * 360;
-            const distance = 80 + Math.random() * 150;
-            const tx = Math.cos(angle) * distance;
-            const ty = Math.sin(angle) * distance;
-            
-            particula.style.width = size + 'px';
-            particula.style.height = size + 'px';
-            particula.style.left = centroX + 'px';
-            particula.style.top = centroY + 'px';
-            particula.style.setProperty('--tx', tx + 'px');
-            particula.style.setProperty('--ty', ty + 'px');
-            particula.style.background = colores[Math.floor(Math.random() * colores.length)];
-            particula.style.boxShadow = `0 0 ${size * 2}px ${particula.style.background}`;
-            
-            container.appendChild(particula);
-        }
+    // 🔥 REDUCIDO DE 30 A 12 PARTÍCULAS
+    for (let i = 0; i < 12; i++) {
+        const particula = document.createElement('div');
+        particula.className = 'particula-explosion';
+        
+        const size = 4 + Math.random() * 6;
+        const angle = Math.random() * 360;
+        const distance = 60 + Math.random() * 100;
+        const tx = Math.cos(angle) * distance;
+        const ty = Math.sin(angle) * distance;
+        
+        particula.style.width = size + 'px';
+        particula.style.height = size + 'px';
+        particula.style.left = centroX + 'px';
+        particula.style.top = centroY + 'px';
+        particula.style.setProperty('--tx', tx + 'px');
+        particula.style.setProperty('--ty', ty + 'px');
+        particula.style.background = colores[Math.floor(Math.random() * colores.length)];
+        particula.style.boxShadow = `0 0 ${size * 2}px ${particula.style.background}`;
+        
+        container.appendChild(particula);
+    }
 
-        setTimeout(() => {
-            container.remove();
-        }, 1000);
-    };
+    setTimeout(() => {
+        container.remove();
+    }, 800);
+};
 
 })();
