@@ -933,4 +933,28 @@
     }, 800);
 };
 
+    // =========================================================
+    // 🔥 ELIMINAR RESALTADO AZUL EN ANDROID - FORZADO
+    // =========================================================
+    document.addEventListener('touchstart', function() {
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
+    }, { passive: true });
+
+    // Para el botón específicamente
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('btnSacarBola');
+        if (btn) {
+            btn.addEventListener('touchstart', function(e) {
+                this.style.webkitTapHighlightColor = 'transparent';
+                setTimeout(() => {
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                }, 10);
+            }, { passive: true });
+        }
+    });
+
 })();
