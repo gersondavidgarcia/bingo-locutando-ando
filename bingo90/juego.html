@@ -40,41 +40,53 @@
                 </div>
                 
                 <!-- 2. El botón SACAR BOLA - COMPLETO CON TODAS LAS CAPAS -->
-                <button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" style="
-                    height: 58px;
-                    padding: 0 10px;
-                    width: auto;
-                    min-width: 76px;
-                    background: #0a0a12;
-                    border: none;
-                    border-radius: 14px;
-                    cursor: pointer;
-                    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    margin-top: 8px;
-                    position: relative;
-                    overflow: hidden;
-                " onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
+<button class="btn-sacar-bola" id="btnSacarBola" onclick="crearExplosion(event)" style="
+    height: 58px;
+    padding: 0 10px;
+    width: auto;
+    min-width: 76px;
+    background: #0a0a12;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+">
 
-                    <!-- 🔥 PARTÍCULAS INTERNAS -->
-                    <span class="particula"></span>
-                    <span class="particula"></span>
-                    <span class="particula"></span>
-                    <span class="particula"></span>
-                    <span class="particula"></span>
+    <!-- 🔥 RAYOS (ESTRELLA) -->
+    <span class="rayos">
+        <span class="rayo" style="--rot: 0deg;"></span>
+        <span class="rayo" style="--rot: 45deg;"></span>
+        <span class="rayo" style="--rot: 90deg;"></span>
+        <span class="rayo" style="--rot: 135deg;"></span>
+        <span class="rayo" style="--rot: 180deg;"></span>
+        <span class="rayo" style="--rot: 225deg;"></span>
+        <span class="rayo" style="--rot: 270deg;"></span>
+        <span class="rayo" style="--rot: 315deg;"></span>
+    </span>
 
-                    <!-- 🔥 BRILLO INTERNO -->
-                    <span class="glow-inner"></span>
+    <!-- 🔥 PARTÍCULAS INTERNAS -->
+    <span class="particula" style="--px: -20px; --py: -30px; --px2: -35px; --py2: -50px; --px3: -20px; --py3: -60px;"></span>
+    <span class="particula" style="--px: 25px; --py: -20px; --px2: 40px; --py2: -40px; --px3: 25px; --py3: -50px;"></span>
+    <span class="particula" style="--px: -15px; --py: 25px; --px2: -30px; --py2: 45px; --px3: -15px; --py3: 55px;"></span>
+    <span class="particula" style="--px: 20px; --py: 20px; --px2: 35px; --py2: 40px; --px3: 20px; --py3: 50px;"></span>
+    <span class="particula" style="--px: 0px; --py: -35px; --px2: 0px; --py2: -55px; --px3: 0px; --py3: -70px;"></span>
 
-                    <!-- LUZ DESLIZANTE -->
-                    <span class="glow-scan"></span>
+    <!-- 🔥 BRILLO INTERNO -->
+    <span class="glow-inner"></span>
 
-                    <!-- TEXTO PRINCIPAL -->
-                    <span class="text-glow">SACAR<br>BOLA</span>
-                </button>
+    <!-- LUZ DESLIZANTE -->
+    <span class="glow-scan"></span>
+
+    <!-- TEXTO PRINCIPAL -->
+    <span class="text-glow">SACAR<br>BOLA</span>
+</button>
 
                 <!-- 3. El contador de Bolas -->
                 <div class="stats-box" style="
