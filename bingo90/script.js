@@ -631,12 +631,21 @@
         calcularYMostrarAlertasA1();
     }
 
+    // ==========================================================
+    // 🎰 FUNCIÓN SACAR BOLA CON ANIMACIÓN COMPLETA
+    // ==========================================================
     function sacarBolaConAnimacion() {
         if (isAnimating) return;
         if (bolasDisponibles.length === 0) {
             alert('¡Ya se han extraído todas las bolas!');
             return;
         }
+
+        // 🔥 ANIMACIÓN DEL BOTÓN AL PRESIONAR
+        const btn = document.getElementById('btnSacarBola');
+        btn.classList.remove('presionado');
+        void btn.offsetWidth;
+        btn.classList.add('presionado');
 
         isAnimating = true;
         const sphere = document.getElementById('bolilleroSphere');
@@ -663,6 +672,11 @@
 
             sphere.classList.remove('rodar-entrada');
             isAnimating = false;
+
+            // 🔥 QUITAR LA CLASE DE PRESIONADO DESPUÉS DE LA ANIMACIÓN
+            setTimeout(() => {
+                btn.classList.remove('presionado');
+            }, 500);
         };
 
         if (esPrimeraBola) {
@@ -875,26 +889,22 @@
     });
 
     // =========================================================
-    // 💥 FUNCIÓN DE EXPLOSIÓN DE PARTÍCULAS - CORREGIDA DENTRO DEL CLOSURE
+    // 💥 FUNCIÓN DE EXPLOSIÓN DE PARTÍCULAS
     // =========================================================
     window.crearExplosion = function(event) {
         const btn = document.getElementById('btnSacarBola');
         if (!btn) return;
 
-        // Obtener posición del botón
         const rect = btn.getBoundingClientRect();
         const centroX = rect.left + rect.width / 2;
         const centroY = rect.top + rect.height / 2;
 
-        // Crear contenedor
         const container = document.createElement('div');
         container.className = 'explosion-container';
         document.body.appendChild(container);
 
-        // Colores de las partículas
         const colores = ['#ffd700', '#ff6b6b', '#4ecdc4', '#a29bfe', '#ffffff', '#ffeb3b', '#ff4081'];
 
-        // Crear 30 partículas
         for (let i = 0; i < 30; i++) {
             const particula = document.createElement('div');
             particula.className = 'particula-explosion';
@@ -917,16 +927,9 @@
             container.appendChild(particula);
         }
 
-        // Limpiar después de la animación
         setTimeout(() => {
             container.remove();
         }, 1000);
-
-        // Efecto flash en el botón
-        btn.classList.add('presionado');
-        setTimeout(() => {
-            btn.classList.remove('presionado');
-        }, 300);
     };
 
 })();
