@@ -32,9 +32,10 @@
             overflow-y: auto;
             position: relative;
             padding: 20px 0;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Viñeta cinematográfica profunda con destello ambiental */
+        /* Viñeta cinematográfica profunda */
         body::after {
             content: '';
             position: fixed;
@@ -44,7 +45,7 @@
             pointer-events: none;
         }
 
-        /* Lienzo de Partículas Dinámicas y Estela Estelar */
+        /* Lienzo de Partículas Dinámicas */
         #canvasParticulas {
             position: fixed;
             top: 0;
@@ -55,7 +56,7 @@
             pointer-events: none;
         }
 
-        /* Núcleo de luz central flotante y suntuoso */
+        /* Núcleo de luz central flotante */
         .ambient-glow {
             position: fixed;
             width: min(700px, 95vw); height: min(700px, 95vw);
@@ -63,6 +64,7 @@
             border-radius: 50%;
             z-index: 2;
             pointer-events: none;
+            will-change: transform, opacity;
             animation: pulsoAmbiente 7s infinite alternate ease-in-out;
         }
 
@@ -71,37 +73,37 @@
             100% { transform: scale(1.3); opacity: 1; }
         }
 
-        /* Tarjeta Menú Principal con Cristal Líquido, Neón y Profundidad Suprema */
+        /* Tarjeta Menú Principal con Cristal Líquido y Profundidad */
         .menu-container {
             position: relative; z-index: 10; text-align: center;
             width: 100%;
             max-width: 420px;
             margin: auto;
-            background: linear-gradient(145deg, rgba(15, 18, 28, 0.85), rgba(7, 9, 14, 0.95));
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: linear-gradient(145deg, rgba(15, 18, 28, 0.88), rgba(7, 9, 14, 0.96));
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 215, 0, 0.25);
             border-radius: 32px;
             padding: 40px 28px;
             display: flex; flex-direction: column; align-items: center;
             box-shadow: 
-                0 40px 100px rgba(0, 0, 0, 0.95),
-                inset 0 1px 4px rgba(255, 255, 255, 0.25),
-                0 0 60px rgba(243, 185, 33, 0.15),
-                0 0 140px rgba(138, 43, 226, 0.1);
+                0 30px 80px rgba(0, 0, 0, 0.9),
+                inset 0 1px 3px rgba(255, 255, 255, 0.2),
+                0 0 50px rgba(243, 185, 33, 0.12),
+                0 0 100px rgba(138, 43, 226, 0.08);
+            will-change: transform;
             animation: flotarTarjeta 6s ease-in-out infinite;
         }
 
         @keyframes flotarTarjeta {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-5px); }
         }
 
-        /* Dado superior con Aura Espectral y Destello Dinámico */
+        /* Dado superior con Aura Espectral */
         .dice-container {
             position: relative;
             margin-bottom: 8px;
-            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.6));
         }
 
         .dice {
@@ -115,12 +117,13 @@
             padding: 10px;
             box-shadow: inset 0 3px 6px rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,0.4);
             transform: rotate(-6deg);
+            will-change: transform;
             animation: girarDado 7s ease-in-out infinite;
         }
 
         @keyframes girarDado {
             0%, 100% { transform: rotate(-6deg); }
-            50% { transform: rotate(6deg) scale(1.06); }
+            50% { transform: rotate(6deg) scale(1.05); }
         }
 
         .dot {
@@ -130,7 +133,6 @@
             height: 10px;
             align-self: center;
             justify-self: center;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
         }
 
         .dot-top-left { grid-area: 1 / 1; }
@@ -148,14 +150,8 @@
             background: #ffea79;
             border-radius: 50%;
             z-index: -1;
-            filter: blur(22px);
             opacity: 0.9;
-            animation: destelloLuzConstante 1.8s infinite alternate ease-in-out;
-        }
-
-        @keyframes destelloLuzConstante {
-            0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.85); filter: blur(16px); }
-            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); filter: blur(30px); }
+            filter: blur(20px);
         }
 
         .logo-box {
@@ -180,13 +176,7 @@
             background: linear-gradient(135deg, #fff5b8 0%, #ffea79 40%, #f5af19 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 25px rgba(245, 175, 25, 0.85);
-            animation: brilloTextoConstante 1.6s infinite alternate ease-in-out;
-        }
-
-        @keyframes brilloTextoConstante {
-            0% { filter: brightness(0.8); text-shadow: 0 0 10px rgba(245, 175, 25, 0.4); }
-            100% { filter: brightness(1.4); text-shadow: 0 0 35px rgba(255, 220, 100, 0.95); }
+            text-shadow: 0 0 25px rgba(245, 175, 25, 0.7);
         }
 
         .subtitle { 
@@ -214,18 +204,18 @@
             align-items: center;
             gap: 14px;
             box-shadow: 
-                0 8px 25px rgba(243, 156, 18, 0.55),
+                0 8px 25px rgba(243, 156, 18, 0.5),
                 inset 0 2px 4px rgba(255, 255, 255, 0.9),
                 inset 0 -4px 4px rgba(160, 80, 0, 0.4);
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
             margin-bottom: 25px;
             letter-spacing: 1.5px;
             position: relative;
             overflow: hidden;
         }
         .btn-jugar:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 35px rgba(243, 156, 18, 0.85), inset 0 2px 6px rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.75), inset 0 2px 6px rgba(255, 255, 255, 1);
         }
         .btn-jugar:active { transform: translateY(1px) scale(0.97); }
         
@@ -236,13 +226,13 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.6), transparent);
             transform: rotate(30deg) translateX(-100%);
-            animation: destelloBotonConstante 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            animation: destelloBoton 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
         }
-        @keyframes destelloBotonConstante {
+        @keyframes destelloBoton {
             0% { transform: rotate(30deg) translateX(-100%); }
-            45% { transform: rotate(30deg) translateX(100%); }
+            40% { transform: rotate(30deg) translateX(100%); }
             100% { transform: rotate(30deg) translateX(100%); }
         }
 
@@ -258,6 +248,7 @@
             width: 100%;
             background: rgba(20, 24, 36, 0.75);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 15px 20px;
@@ -268,22 +259,19 @@
             font-size: 0.98rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
-            max-width: none;
-            margin-bottom: 0;
         }
         .btn-secundario:hover {
             background: rgba(32, 38, 56, 0.9);
-            border-color: rgba(245, 175, 25, 0.5);
-            transform: translateX(5px);
-            box-shadow: 0 0 25px rgba(245, 175, 25, 0.2), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(245, 175, 25, 0.4);
+            transform: translateX(4px);
+            box-shadow: 0 0 20px rgba(245, 175, 25, 0.15), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .btn-secundario:active { transform: scale(0.98); }
 
         /* Footer Dinámico Luminoso */
         .footer { 
-            margin-top: 0; 
             font-size: 0.68rem; 
             color: #64748b; 
             letter-spacing: 2px; 
@@ -295,7 +283,7 @@
             text-transform: uppercase;
             font-weight: 700;
         }
-        .footer span.online-text { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.8); }
+        .footer span.online-text { color: #10b981; text-shadow: 0 0 8px rgba(16, 185, 129, 0.7); }
 
         .audio-wave {
             display: flex;
@@ -323,7 +311,7 @@
             height: 8px;
             background-color: #10b981;
             border-radius: 50%;
-            box-shadow: 0 0 12px #10b981;
+            box-shadow: 0 0 10px #10b981;
             animation: parpadeoPunto 2s infinite;
         }
 
@@ -336,26 +324,16 @@
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 9999;
-            animation: fadeInModal 0.25s ease-out;
-        }
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         .modal-box {
             background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98)); 
             border: 1px solid rgba(245,200,66,0.35);
             border-radius: 28px; padding: 28px; max-width: 380px; width: 90%;
-            text-align: left; color: #e2e8f0; box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 30px rgba(245,200,66,0.15);
-            backdrop-filter: blur(8px);
-            animation: scaleModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left; color: #e2e8f0; box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
         }
-        @keyframes scaleModal {
-            from { transform: scale(0.75); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.5rem; margin-bottom: 20px; text-shadow: 0 0 15px rgba(245,200,66,0.4); }
+        .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.5rem; margin-bottom: 20px; text-shadow: 0 0 12px rgba(245,200,66,0.3); }
         
         .opcion-ajuste {
             display: flex; justify-content: space-between; align-items: center;
@@ -366,95 +344,44 @@
         
         .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 26px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        input:checked + .slider { background-color: #f5c842; box-shadow: 0 0 15px rgba(245,200,66,0.6); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 26px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        input:checked + .slider { background-color: #f5c842; box-shadow: 0 0 12px rgba(245,200,66,0.5); }
         input:checked + .slider:before { transform: translateX(22px); }
 
-        .btn-cerrar-modal { margin-top: 22px; padding: 14px; background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; border-radius: 14px; font-weight: 900; font-size: 1.05rem; cursor: pointer; width: 100%; box-shadow: 0 6px 20px rgba(245,200,66,0.4); transition: transform 0.15s; }
+        .btn-cerrar-modal { margin-top: 22px; padding: 14px; background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; border-radius: 14px; font-weight: 900; font-size: 1.05rem; cursor: pointer; width: 100%; box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
         .btn-cerrar-modal:active { transform: scale(0.96); }
 
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
 
         /* SELECTOR DE CARTONES */
-        .selector-cartones-container {
-            width: 100%;
-            margin-top: 8px;
-        }
-        .selector-botones {
-            display: flex;
-            gap: 10px;
-            width: 100%;
-        }
+        .selector-cartones-container { width: 100%; margin-top: 8px; }
+        .selector-botones { display: flex; gap: 10px; width: 100%; }
         .btn-carton-modo {
-            flex: 1;
-            background: rgba(255,255,255,0.04);
-            color: #94a3b8;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 30px;
-            padding: 10px 0;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.25s;
-            text-align: center;
+            flex: 1; background: rgba(255,255,255,0.04); color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
+            padding: 10px 0; font-size: 0.9rem; cursor: pointer; text-align: center; transition: all 0.2s;
         }
         .btn-carton-modo.activo {
-            background: rgba(245,200,66,0.2);
-            color: #f5c842;
-            border-color: #f5c842;
-            font-weight: bold;
-            box-shadow: 0 0 15px rgba(245,200,66,0.2);
+            background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; font-weight: bold;
+            box-shadow: 0 0 12px rgba(245,200,66,0.15);
         }
-        .btn-carton-modo:active { transform: scale(0.96); }
 
-        /* Slider Moderno */
         .slider-container {
-            display: none;
-            margin-top: 15px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 30px;
-            padding: 12px 18px;
-            border: 1px solid rgba(255,255,255,0.06);
-            align-items: center;
-            gap: 15px;
+            display: none; margin-top: 15px; background: rgba(255,255,255,0.04);
+            border-radius: 30px; padding: 12px 18px; border: 1px solid rgba(255,255,255,0.06);
+            align-items: center; gap: 15px;
         }
-        .slider-container.mostrar {
-            display: flex;
-        }
+        .slider-container.mostrar { display: flex; }
         
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; cursor: pointer;
-            background: #1e293b; border-radius: 3px;
-        }
-        input[type=range]::-moz-range-track {
-            width: 100%; height: 6px; cursor: pointer;
-            background: #1e293b; border-radius: 3px;
-        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #1e293b; border-radius: 3px; }
         input[type=range]::-webkit-slider-thumb {
-            height: 20px; width: 20px; border-radius: 50%;
-            background: #f5c842; cursor: pointer;
-            -webkit-appearance: none; margin-top: -7px;
-            box-shadow: 0 0 15px rgba(245,200,66,0.8);
+            height: 20px; width: 20px; border-radius: 50%; background: #f5c842; cursor: pointer;
+            -webkit-appearance: none; margin-top: -7px; box-shadow: 0 0 12px rgba(245,200,66,0.7);
         }
-        input[type=range]::-moz-range-thumb {
-            height: 20px; width: 20px; border-radius: 50%;
-            background: #f5c842; cursor: pointer;
-            border: none;
-        }
-        
-        .slider-valor {
-            color: #f5c842;
-            font-weight: 900;
-            font-size: 1.25rem;
-            min-width: 32px;
-            text-align: center;
-        }
+        .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.25rem; min-width: 32px; text-align: center; }
     </style>
 </head>
 <body>
@@ -462,13 +389,12 @@
     <!-- LUZ DE AMBIENTE CENTRAL -->
     <div class="ambient-glow"></div>
 
-    <!-- LIENZO DE PARTÍCULAS HOLOGRÁFICAS Y CAMBIO DE COLOR FLUIDO -->
+    <!-- LIENZO DE PARTÍCULAS FLUIDO Y ELEGANTE -->
     <canvas id="canvasParticulas"></canvas>
 
     <!-- MENÚ PRINCIPAL -->
     <div class="menu-container">
         
-        <!-- Dado superior con efectos constantes -->
         <div class="dice-container">
             <div class="dice">
                 <div class="dot dot-top-left"></div>
@@ -544,7 +470,7 @@
 
             <div class="opcion-ajuste">
                 <span class="etiqueta">🎵 Música Ambiente</span>
-                <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0; max-width: none;" onclick="toggleMusica()">▶ Activar</button>
+                <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
             <div class="opcion-ajuste">
@@ -558,17 +484,14 @@
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 0;">
                 <span class="etiqueta" style="margin-bottom: 5px;">🃏 Selección de Cartones</span>
                 <div class="selector-cartones-container">
-                    
                     <div class="selector-botones">
                         <button id="btnModo10" class="btn-carton-modo" onclick="seleccionarModo(10)">10 Cartones</button>
                         <button id="btnModo3" class="btn-carton-modo" onclick="seleccionarModo('slider')">Múltiplos de 3</button>
                     </div>
-
                     <div id="sliderContainer" class="slider-container">
                         <input type="range" id="sliderCartones" min="3" max="33" step="3" value="15">
                         <span id="sliderValor" class="slider-valor">15</span>
                     </div>
-
                 </div>
             </div>
 
@@ -576,27 +499,23 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
+    <!-- JAVASCRIPT OPTIMIZADO PERO VISUALMENTE RICO -->
     <script>
         let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false, scrollActivo: false };
         const configGuardada = localStorage.getItem('bingoConfig');
-        if (configGuardada) {
-            configuracion = JSON.parse(configGuardada);
-        }
+        if (configGuardada) { configuracion = JSON.parse(configGuardada); }
 
         const btnModo10 = document.getElementById('btnModo10');
         const btnModo3 = document.getElementById('btnModo3');
         const sliderContainer = document.getElementById('sliderContainer');
         const slider = document.getElementById('sliderCartones');
         const valorSlider = document.getElementById('sliderValor');
-
         const checkScroll = document.getElementById('checkScroll');
         checkScroll.checked = configuracion.scrollActivo;
 
         if (configuracion.totalCartones === 10) {
             btnModo10.classList.add('activo');
             sliderContainer.classList.remove('mostrar');
-            configuracion.totalCartones = 10;
         } else {
             btnModo3.classList.add('activo');
             sliderContainer.classList.add('mostrar');
@@ -617,17 +536,14 @@
                 btnModo3.classList.add('activo');
                 btnModo10.classList.remove('activo');
                 sliderContainer.classList.add('mostrar');
-                let val = parseInt(slider.value);
-                configuracion.totalCartones = val;
+                configuracion.totalCartones = parseInt(slider.value);
             }
         }
 
         slider.addEventListener('input', function() {
             let val = parseInt(this.value);
             valorSlider.textContent = val;
-            if (btnModo3.classList.contains('activo')) {
-                configuracion.totalCartones = val;
-            }
+            if (btnModo3.classList.contains('activo')) { configuracion.totalCartones = val; }
         });
 
         function irAlJuego() {
@@ -648,13 +564,8 @@
             el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
         });
 
-        document.getElementById('checkVoz').addEventListener('change', function() {
-            configuracion.vozActiva = this.checked;
-        });
-
-        checkScroll.addEventListener('change', function() {
-            configuracion.scrollActivo = this.checked;
-        });
+        document.getElementById('checkVoz').addEventListener('change', function() { configuracion.vozActiva = this.checked; });
+        checkScroll.addEventListener('change', function() { configuracion.scrollActivo = this.checked; });
 
         function toggleMusica() {
             configuracion.musicaActiva = !configuracion.musicaActiva;
@@ -668,9 +579,9 @@
             }
         }
 
-        /* MOTOR DE PARTÍCULAS / DESTELLOS ESTELARES CREADO PARA MÁXIMA CALIDAD VISUAL EN PC Y MÓVIL */
+        /* MOTOR DE PARTÍCULAS DE ALTO RENDIMIENTO (Mantiene la magia visual sin lag) */
         const canvas = document.getElementById('canvasParticulas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: true });
 
         let ancho = canvas.width = window.innerWidth;
         let alto = canvas.height = window.innerHeight;
@@ -680,17 +591,15 @@
             alto = canvas.height = window.innerHeight;
         });
 
-        // Paleta vibrante optimizada de colores tipo neón cósmico
         const paletaColores = [
-            { r: 255, g: 215, b: 0 },    // Oro brillante estelar
-            { r: 255, g: 45,  b: 138 },  // Magenta neón furioso
-            { r: 0,   g: 242, b: 154 },  // Esmeralda láser vivo
-            { r: 0,   g: 212, b: 255 },  // Azul cian hiperluminoso
-            { r: 180, g: 90,  b: 255 },  // Violeta espectral
-            { r: 255, g: 120, b: 50 }    // Naranja solar chispeante
+            { r: 255, g: 215, b: 0 },    // Oro
+            { r: 255, g: 45,  b: 138 },  // Magenta
+            { r: 0,   g: 242, b: 154 },  // Esmeralda
+            { r: 0,   g: 212, b: 255 },  // Cian
+            { r: 180, g: 90,  b: 255 }   // Violeta
         ];
 
-        class DestelloEstelar {
+        class DestelloMagico {
             constructor() {
                 this.reiniciar();
             }
@@ -698,109 +607,57 @@
             reiniciar() {
                 this.x = Math.random() * ancho;
                 this.y = Math.random() * alto;
-                
-                // Variedad de tamaños: micro puntos estelares, esferas medianas y destellos grandes brillantes
-                this.radio = Math.random() * 4.2 + 0.8;
-                
-                // Movimiento libre en cualquier dirección por toda la página
-                this.velocidadX = (Math.random() - 0.5) * 0.75;
-                this.velocidadY = (Math.random() - 0.5) * 0.75;
-                
-                // Sistema avanzado de transición cromática fluida entre colores
-                this.colorActual = paletaColores[Math.floor(Math.random() * paletaColores.length)];
-                this.colorDestino = paletaColores[Math.floor(Math.random() * paletaColores.length)];
-                this.progresoColor = Math.random();
-                this.velocidadCambioColor = 0.003 + Math.random() * 0.008;
-
-                this.opacidadMax = Math.random() * 0.8 + 0.2;
+                this.radio = Math.random() * 3 + 1;
+                this.velocidadX = (Math.random() - 0.5) * 0.5;
+                this.velocidadY = (Math.random() - 0.5) * 0.5;
+                this.color = paletaColores[Math.floor(Math.random() * paletaColores.length)];
+                this.opacidadMax = Math.random() * 0.7 + 0.3;
                 this.opacidad = this.opacidadMax;
-                this.pulso = Math.random() * 0.035 + 0.008;
-                this.anguloPulso = Math.random() * Math.PI * 2;
-                
-                // Propiedad para destellos con destello en cruz opcional
-                this.esDestelloCruz = Math.random() < 0.25; 
+                this.pulso = Math.random() * 0.025 + 0.008;
+                this.angulo = Math.random() * Math.PI * 2;
             }
 
             actualizar() {
                 this.x += this.velocidadX;
                 this.y += this.velocidadY;
 
-                // Parpadeo de brillo dinámico intenso
-                this.anguloPulso += this.pulso;
-                this.opacidad = this.opacidadMax * (0.25 + 0.75 * Math.abs(Math.sin(this.anguloPulso)));
+                this.angulo += this.pulso;
+                this.opacidad = this.opacidadMax * (0.3 + 0.7 * Math.abs(Math.sin(this.angulo)));
 
-                // Transición continua de colores vivos
-                this.progresoColor += this.velocidadCambioColor;
-                if (this.progresoColor >= 1) {
-                    this.progresoColor = 0;
-                    this.colorActual = this.colorDestino;
-                    this.colorDestino = paletaColores[Math.floor(Math.random() * paletaColores.length)];
-                }
-
-                // Reaparecer al cruzar los límites para mantener el escenario lleno en PC y Móvil
-                if (this.x < -40) this.x = ancho + 40;
-                if (this.x > ancho + 40) this.x = -40;
-                if (this.y < -40) this.y = alto + 40;
-                if (this.y > alto + 40) this.y = -40;
+                if (this.x < 0) this.x = ancho;
+                if (this.x > ancho) this.x = 0;
+                if (this.y < 0) this.y = alto;
+                if (this.y > alto) this.y = 0;
             }
 
             dibujar() {
-                // Cálculo de interpolación RGB de color fluido
-                const r = Math.round(this.colorActual.r + (this.colorDestino.r - this.colorActual.r) * this.progresoColor);
-                const g = Math.round(this.colorActual.g + (this.colorDestino.g - this.colorActual.g) * this.progresoColor);
-                const b = Math.round(this.colorActual.b + (this.colorDestino.b - this.colorActual.b) * this.progresoColor);
-
                 ctx.save();
                 ctx.globalAlpha = this.opacidad;
-
-                // Si es un destello especial, dibuja una estrella de destello de alta gama
-                if (this.esDestelloCruz && this.radio > 2.5) {
-                    ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.85)`;
-                    ctx.lineWidth = 1.2;
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = `rgba(${r}, ${g}, ${b}, 1)`;
-                    
-                    const tamCruz = this.radio * 3.5;
-                    ctx.beginPath();
-                    // Línea vertical
-                    ctx.moveTo(this.x, this.y - tamCruz);
-                    ctx.lineTo(this.x, this.y + tamCruz);
-                    // Línea horizontal
-                    ctx.moveTo(this.x - tamCruz, this.y);
-                    ctx.lineTo(this.x + tamCruz, this.y);
-                    ctx.stroke();
-                }
-
-                // Núcleo del destello con brillo ultra nítido
+                ctx.fillStyle = `rgb(${this.color.r}, ${this.color.g}, ${this.color.b})`;
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radio, 0, Math.PI * 2);
-                ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-                ctx.shadowBlur = 22;
-                ctx.shadowColor = `rgb(${r}, ${g}, ${b})`;
                 ctx.fill();
-                ctx.closePath();
-
                 ctx.restore();
             }
         }
 
-        // Densidad escalada para PC (pantallas grandes) y dispositivos móviles
-        const cantidadDestellos = window.innerWidth > 768 ? 130 : 75;
+        // Cantidad equilibrada: suficiente para verse mágico en cualquier cel sin saturar el procesador
+        const totalDestellos = window.innerWidth > 768 ? 80 : 40;
         const destellos = [];
-        for (let i = 0; i < cantidadDestellos; i++) {
-            destellos.push(new DestelloEstelar());
+        for (let i = 0; i < totalDestellos; i++) {
+            destellos.push(new DestelloMagico());
         }
 
-        function animarDestellos() {
+        function animar() {
             ctx.clearRect(0, 0, ancho, alto);
-            destellos.forEach(d => {
-                d.actualizar();
-                d.dibujar();
-            });
-            requestAnimationFrame(animarDestellos);
+            for (let i = 0; i < destellos.length; i++) {
+                destellos[i].actualizar();
+                destellos[i].dibujar();
+            }
+            requestAnimationFrame(animar);
         }
 
-        animarDestellos();
+        animar();
     </script>
 </body>
 </html>
