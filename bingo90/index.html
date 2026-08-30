@@ -56,88 +56,69 @@
             pointer-events: none;
         }
 
-        /* Núcleo de luz central flotante */
+        /* Núcleo de luz central estático */
         .ambient-glow {
             position: fixed;
-            width: min(700px, 95vw); height: min(700px, 95vw);
-            background: radial-gradient(circle, rgba(245, 175, 25, 0.09) 0%, rgba(138, 43, 226, 0.05) 40%, transparent 70%);
+            width: min(600px, 90vw); height: min(600px, 90vw);
+            background: radial-gradient(circle, rgba(245, 175, 25, 0.08) 0%, rgba(138, 43, 226, 0.04) 40%, transparent 70%);
             border-radius: 50%;
             z-index: 2;
             pointer-events: none;
-            will-change: transform, opacity;
-            animation: pulsoAmbiente 7s infinite alternate ease-in-out;
+            will-change: opacity;
         }
 
-        @keyframes pulsoAmbiente {
-            0% { transform: scale(0.8); opacity: 0.5; }
-            100% { transform: scale(1.3); opacity: 1; }
-        }
-
-        /* Tarjeta Menú Principal con Cristal Líquido y Profundidad */
+        /* Tarjeta Menú Principal con Ancho Reducido y Estática */
         .menu-container {
             position: relative; z-index: 10; text-align: center;
-            width: 100%;
-            max-width: 420px;
+            width: 95%;
+            max-width: 385px;
             margin: auto;
-            background: linear-gradient(145deg, rgba(15, 18, 28, 0.88), rgba(7, 9, 14, 0.96));
+            background: linear-gradient(145deg, rgba(15, 18, 28, 0.9), rgba(7, 9, 14, 0.98));
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 215, 0, 0.25);
-            border-radius: 32px;
-            padding: 40px 28px;
+            border-radius: 28px;
+            padding: 32px 22px;
             display: flex; flex-direction: column; align-items: center;
             box-shadow: 
                 0 30px 80px rgba(0, 0, 0, 0.9),
                 inset 0 1px 3px rgba(255, 255, 255, 0.2),
-                0 0 50px rgba(243, 185, 33, 0.12),
-                0 0 100px rgba(138, 43, 226, 0.08);
+                0 0 50px rgba(243, 185, 33, 0.1),
+                0 0 100px rgba(138, 43, 226, 0.06);
             will-change: transform;
-            animation: flotarTarjeta 6s ease-in-out infinite;
         }
 
-        @keyframes flotarTarjeta {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        /* Dado superior con Aura Espectral */
+        /* Dado superior compacto */
         .dice-container {
             position: relative;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .dice {
-            width: 78px;
-            height: 78px;
+            width: 68px;
+            height: 68px;
             background: linear-gradient(135deg, #ffffff 0%, #d8d8d8 100%);
-            border-radius: 18px;
+            border-radius: 16px;
             position: relative;
             display: grid;
             grid-template: repeat(3, 1fr) / repeat(3, 1fr);
-            padding: 10px;
+            padding: 8px;
             box-shadow: inset 0 3px 6px rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,0.4);
             transform: rotate(-6deg);
-            will-change: transform;
-            animation: girarDado 7s ease-in-out infinite;
-        }
-
-        @keyframes girarDado {
-            0%, 100% { transform: rotate(-6deg); }
-            50% { transform: rotate(6deg) scale(1.05); }
         }
 
         .dot {
             background-color: #222;
             border-radius: 50%;
-            width: 10px;
-            height: 10px;
+            width: 9px;
+            height: 9px;
             align-self: center;
             justify-self: center;
         }
 
         .dot-top-left { grid-area: 1 / 1; }
         .dot-top-right { grid-area: 1 / 3; }
-        .dot-center { grid-area: 2 / 2; background-color: #e53935; width: 12px; height: 12px; }
+        .dot-center { grid-area: 2 / 2; background-color: #e53935; width: 11px; height: 11px; }
         .dot-bottom-left { grid-area: 3 / 1; }
         .dot-bottom-right { grid-area: 3 / 3; }
 
@@ -146,30 +127,30 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 50px; height: 50px;
+            width: 40px; height: 40px;
             background: #ffea79;
             border-radius: 50%;
             z-index: -1;
             opacity: 0.9;
-            filter: blur(20px);
+            filter: blur(18px);
         }
 
         .logo-box {
             background: transparent; border: none;
-            border-radius: 0; padding: 0; margin-bottom: 5px;
+            border-radius: 0; padding: 0; margin-bottom: 4px;
             box-shadow: none; width: 100%; text-align: center;
         }
         .logo { display: none; }
         
         h1 { 
-            font-size: 2.7rem; 
+            font-size: 2.3rem; 
             font-weight: 900; 
             letter-spacing: 1.5px; 
             line-height: 1; 
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 8px; 
+            gap: 8px;
+            margin-bottom: 6px; 
         }
         h1 span.bingo-text { color: #ffffff; text-shadow: 0 3px 6px rgba(0,0,0,0.6); }
         h1 span.ninety-text {
@@ -181,51 +162,48 @@
 
         .subtitle { 
             color: #94a3b8; 
-            font-size: 0.75rem; 
+            font-size: 0.7rem; 
             font-weight: 700; 
-            letter-spacing: 3px; 
-            margin-bottom: 28px; 
+            letter-spacing: 2.5px; 
+            margin-bottom: 22px; 
             text-transform: uppercase;
         }
         
-        /* Botón JUGAR Supremo con Destello Holográfico */
+        /* Botón JUGAR Supremo */
         .btn-jugar {
             width: 100%;
             background: linear-gradient(180deg, #ffe556 0%, #f39c12 100%);
             border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 18px;
-            padding: 18px;
-            font-size: 1.4rem;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1.25rem;
             font-weight: 900;
             color: #120d02;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             box-shadow: 
-                0 8px 25px rgba(243, 156, 18, 0.5),
+                0 8px 25px rgba(243, 156, 18, 0.45),
                 inset 0 2px 4px rgba(255, 255, 255, 0.9),
                 inset 0 -4px 4px rgba(160, 80, 0, 0.4);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
-            margin-bottom: 25px;
+            transition: transform 0.15s ease, box-shadow 0.15s;
+            margin-bottom: 20px;
             letter-spacing: 1.5px;
             position: relative;
             overflow: hidden;
         }
         .btn-jugar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(243, 156, 18, 0.75), inset 0 2px 6px rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.7), inset 0 2px 6px rgba(255, 255, 255, 1);
         }
         .btn-jugar:active { transform: translateY(1px) scale(0.97); }
         
         .btn-jugar::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
+            top: -50%; left: -50%; width: 200%; height: 200%;
             background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.6), transparent);
             transform: rotate(30deg) translateX(-100%);
             animation: destelloBoton 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
@@ -240,8 +218,8 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 22px;
         }
 
         .btn-secundario {
@@ -250,13 +228,13 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 15px 20px;
+            border-radius: 14px;
+            padding: 13px 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             color: #f1f5f9;
-            font-size: 0.98rem;
+            font-size: 0.92rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -265,20 +243,20 @@
         .btn-secundario:hover {
             background: rgba(32, 38, 56, 0.9);
             border-color: rgba(245, 175, 25, 0.4);
-            transform: translateX(4px);
-            box-shadow: 0 0 20px rgba(245, 175, 25, 0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+            transform: translateX(3px);
+            box-shadow: 0 0 18px rgba(245, 175, 25, 0.15), inset 0 1px 0 rgba(255,255,255,0.2);
         }
         .btn-secundario:active { transform: scale(0.98); }
 
         /* Footer Dinámico Luminoso */
         .footer { 
-            font-size: 0.68rem; 
+            font-size: 0.65rem; 
             color: #64748b; 
-            letter-spacing: 2px; 
+            letter-spacing: 1.5px; 
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             width: 100%;
             text-transform: uppercase;
             font-weight: 700;
@@ -289,7 +267,7 @@
             display: flex;
             align-items: center;
             gap: 2px;
-            height: 12px;
+            height: 10px;
         }
         .audio-wave span {
             width: 2px;
@@ -297,9 +275,9 @@
             border-radius: 2px;
             animation: wave 1.2s infinite ease-in-out;
         }
-        .audio-wave span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-        .audio-wave span:nth-child(2) { height: 12px; animation-delay: 0.3s; }
-        .audio-wave span:nth-child(3) { height: 8px; animation-delay: 0.2s; }
+        .audio-wave span:nth-child(1) { height: 5px; animation-delay: 0.1s; }
+        .audio-wave span:nth-child(2) { height: 10px; animation-delay: 0.3s; }
+        .audio-wave span:nth-child(3) { height: 7px; animation-delay: 0.2s; }
 
         @keyframes wave {
             0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
@@ -307,11 +285,11 @@
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background-color: #10b981;
             border-radius: 50%;
-            box-shadow: 0 0 10px #10b981;
+            box-shadow: 0 0 8px #10b981;
             animation: parpadeoPunto 2s infinite;
         }
 
@@ -330,58 +308,58 @@
         .modal-box {
             background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98)); 
             border: 1px solid rgba(245,200,66,0.35);
-            border-radius: 28px; padding: 28px; max-width: 380px; width: 90%;
+            border-radius: 24px; padding: 24px; max-width: 340px; width: 90%;
             text-align: left; color: #e2e8f0; box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
         }
-        .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.5rem; margin-bottom: 20px; text-shadow: 0 0 12px rgba(245,200,66,0.3); }
+        .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.35rem; margin-bottom: 16px; text-shadow: 0 0 12px rgba(245,200,66,0.3); }
         
         .opcion-ajuste {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
         }
         .opcion-ajuste:last-child { border-bottom: none; }
-        .etiqueta { font-size: 0.98rem; font-weight: 500; }
+        .etiqueta { font-size: 0.92rem; font-weight: 500; }
         
-        .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 26px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        input:checked + .slider { background-color: #f5c842; box-shadow: 0 0 12px rgba(245,200,66,0.5); }
-        input:checked + .slider:before { transform: translateX(22px); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        input:checked + .slider { background-color: #f5c842; box-shadow: 0 0 10px rgba(245,200,66,0.5); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
-        .btn-cerrar-modal { margin-top: 22px; padding: 14px; background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; border-radius: 14px; font-weight: 900; font-size: 1.05rem; cursor: pointer; width: 100%; box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
+        .btn-cerrar-modal { margin-top: 18px; padding: 12px; background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
         .btn-cerrar-modal:active { transform: scale(0.96); }
 
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
 
         /* SELECTOR DE CARTONES */
-        .selector-cartones-container { width: 100%; margin-top: 8px; }
-        .selector-botones { display: flex; gap: 10px; width: 100%; }
+        .selector-cartones-container { width: 100%; margin-top: 6px; }
+        .selector-botones { display: flex; gap: 8px; width: 100%; }
         .btn-carton-modo {
             flex: 1; background: rgba(255,255,255,0.04); color: #94a3b8;
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 30px;
-            padding: 10px 0; font-size: 0.9rem; cursor: pointer; text-align: center; transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 8px 0; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.2s;
         }
         .btn-carton-modo.activo {
             background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; font-weight: bold;
-            box-shadow: 0 0 12px rgba(245,200,66,0.15);
+            box-shadow: 0 0 10px rgba(245,200,66,0.15);
         }
 
         .slider-container {
-            display: none; margin-top: 15px; background: rgba(255,255,255,0.04);
-            border-radius: 30px; padding: 12px 18px; border: 1px solid rgba(255,255,255,0.06);
-            align-items: center; gap: 15px;
+            display: none; margin-top: 12px; background: rgba(255,255,255,0.04);
+            border-radius: 24px; padding: 10px 15px; border: 1px solid rgba(255,255,255,0.06);
+            align-items: center; gap: 12px;
         }
         .slider-container.mostrar { display: flex; }
         
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #1e293b; border-radius: 3px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; cursor: pointer; background: #1e293b; border-radius: 3px; }
         input[type=range]::-webkit-slider-thumb {
-            height: 20px; width: 20px; border-radius: 50%; background: #f5c842; cursor: pointer;
-            -webkit-appearance: none; margin-top: -7px; box-shadow: 0 0 12px rgba(245,200,66,0.7);
+            height: 18px; width: 18px; border-radius: 50%; background: #f5c842; cursor: pointer;
+            -webkit-appearance: none; margin-top: -6.5px; box-shadow: 0 0 10px rgba(245,200,66,0.7);
         }
-        .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.25rem; min-width: 32px; text-align: center; }
+        .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.1rem; min-width: 28px; text-align: center; }
     </style>
 </head>
 <body>
@@ -420,16 +398,16 @@
 
         <div class="menu-options-wrapper">
             <button class="btn-secundario" onclick="abrirAjustes()">
-                <span style="display: flex; align-items: center; gap: 14px;"><i class="fa-solid fa-gear" style="color: #a78bfa; font-size: 1.1rem; width: 20px; text-align: center;"></i> AJUSTES</span>
-                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 0.8rem;"></i>
+                <span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-gear" style="color: #a78bfa; font-size: 1.05rem; width: 18px; text-align: center;"></i> AJUSTES</span>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 0.75rem;"></i>
             </button>
             <button class="btn-secundario" onclick="abrirReglas()">
-                <span style="display: flex; align-items: center; gap: 14px;"><i class="fa-solid fa-book-open" style="color: #60a5fa; font-size: 1.1rem; width: 20px; text-align: center;"></i> REGLAS</span>
-                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 0.8rem;"></i>
+                <span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-book-open" style="color: #60a5fa; font-size: 1.05rem; width: 18px; text-align: center;"></i> REGLAS</span>
+                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 0.75rem;"></i>
             </button>
             <button class="btn-secundario" onclick="salirApp()" style="background: rgba(45, 20, 25, 0.4); border-color: rgba(239, 68, 68, 0.3);">
-                <span style="display: flex; align-items: center; gap: 14px;"><i class="fa-solid fa-door-open" style="color: #f87171; font-size: 1.1rem; width: 20px; text-align: center;"></i> <span style="color: #f87171;">SALIR</span></span>
-                <i class="fa-solid fa-chevron-right" style="color: #f87171; font-size: 0.8rem;"></i>
+                <span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-door-open" style="color: #f87171; font-size: 1.05rem; width: 18px; text-align: center;"></i> <span style="color: #f87171;">SALIR</span></span>
+                <i class="fa-solid fa-chevron-right" style="color: #f87171; font-size: 0.75rem;"></i>
             </button>
         </div>
 
@@ -445,11 +423,11 @@
     <div class="modal-overlay" id="modalReglas">
         <div class="modal-box">
             <h2>📖 Reglas</h2>
-            <ul style="list-style: none; padding: 0; margin: 15px 0; font-size: 0.95rem; line-height: 1.8;">
-                <li style="margin-bottom: 8px;">🎯 Completa una <b>Línea</b> horizontal para cantar línea.</li>
-                <li style="margin-bottom: 8px;">🏆 Completa todo el <b>Cartón</b> (15 números) para cantar Bingo.</li>
-                <li style="margin-bottom: 8px;">🥇 El premio es único: la primera línea y el primer bingo ganan.</li>
-                <li style="margin-bottom: 8px;">🖐️ Puedes marcar números manualmente desde la tabla inferior.</li>
+            <ul style="list-style: none; padding: 0; margin: 12px 0; font-size: 0.9rem; line-height: 1.7;">
+                <li style="margin-bottom: 6px;">🎯 Completa una <b>Línea</b> horizontal para cantar línea.</li>
+                <li style="margin-bottom: 6px;">🏆 Completa todo el <b>Cartón</b> (15 números) para cantar Bingo.</li>
+                <li style="margin-bottom: 6px;">🥇 El premio es único: la primera línea y el primer bingo ganan.</li>
+                <li style="margin-bottom: 6px;">🖐️ Puedes marcar números manualmente desde la tabla inferior.</li>
             </ul>
             <button class="btn-cerrar-modal" onclick="cerrarModal('modalReglas')">Entendido</button>
         </div>
@@ -470,7 +448,7 @@
 
             <div class="opcion-ajuste">
                 <span class="etiqueta">🎵 Música Ambiente</span>
-                <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 6px 15px; margin: 0;" onclick="toggleMusica()">▶ Activar</button>
+                <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 5px 12px; margin: 0; font-size: 0.85rem;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
             <div class="opcion-ajuste">
@@ -482,7 +460,7 @@
             </div>
 
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 0;">
-                <span class="etiqueta" style="margin-bottom: 5px;">🃏 Selección de Cartones</span>
+                <span class="etiqueta" style="margin-bottom: 4px;">🃏 Selección de Cartones</span>
                 <div class="selector-cartones-container">
                     <div class="selector-botones">
                         <button id="btnModo10" class="btn-carton-modo" onclick="seleccionarModo(10)">10 Cartones</button>
@@ -499,7 +477,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT OPTIMIZADO PERO VISUALMENTE RICO -->
+    <!-- JAVASCRIPT -->
     <script>
         let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false, scrollActivo: false };
         const configGuardada = localStorage.getItem('bingoConfig');
@@ -579,7 +557,7 @@
             }
         }
 
-        /* MOTOR DE PARTÍCULAS DE ALTO RENDIMIENTO (Mantiene la magia visual sin lag) */
+        /* MOTOR DE PARTÍCULAS */
         const canvas = document.getElementById('canvasParticulas');
         const ctx = canvas.getContext('2d', { alpha: true });
 
@@ -592,11 +570,11 @@
         });
 
         const paletaColores = [
-            { r: 255, g: 215, b: 0 },    // Oro
-            { r: 255, g: 45,  b: 138 },  // Magenta
-            { r: 0,   g: 242, b: 154 },  // Esmeralda
-            { r: 0,   g: 212, b: 255 },  // Cian
-            { r: 180, g: 90,  b: 255 }   // Violeta
+            { r: 255, g: 215, b: 0 },
+            { r: 255, g: 45,  b: 138 },
+            { r: 0,   g: 242, b: 154 },
+            { r: 0,   g: 212, b: 255 },
+            { r: 180, g: 90,  b: 255 }
         ];
 
         class DestelloMagico {
@@ -641,8 +619,7 @@
             }
         }
 
-        // Cantidad equilibrada: suficiente para verse mágico en cualquier cel sin saturar el procesador
-        const totalDestellos = window.innerWidth > 768 ? 80 : 40;
+        const totalDestellos = window.innerWidth > 768 ? 70 : 35;
         const destellos = [];
         for (let i = 0; i < totalDestellos; i++) {
             destellos.push(new DestelloMagico());
