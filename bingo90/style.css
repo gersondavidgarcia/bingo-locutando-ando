@@ -139,8 +139,8 @@ h1 {
 }
 
 .raya-alerta {
-    font-size: 0.95rem;
-    margin-left: 4px;
+    font-size: 0.75rem;
+    margin-left: 3px;
     line-height: 1;
     display: inline-block;
     animation: titilar-emoji 0.7s infinite alternate cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -148,7 +148,7 @@ h1 {
 }
 
 .raya-alerta.pequeno {
-    transform: scale(0.65);
+    transform: scale(0.60);
     opacity: 0.8;
     animation: none;
 }
@@ -170,7 +170,7 @@ h1 {
 }
 
 .carton-badge {
-    font-size: 0.65rem;
+    font-size: 0.55rem;
     padding: 1px 4px;
     border-radius: 4px;
     animation: pop-icon 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -183,13 +183,14 @@ h1 {
     background: #fff3cd;
     color: #856404;
     border: 1px solid #ffeeba;
+    font-weight: 700;          /* ← REDUCIDO de 900 a 700 */
 }
 
 .carton-badge.bingo {
     background: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
-    font-weight: 900;
+    font-weight: 700;          /* ← REDUCIDO de 900 a 00 */
 }
 
 @keyframes pop-icon {
@@ -489,9 +490,14 @@ h1 {
 }
 
 .btn-sacar-bola:active {
-    transform: scale(0.92);
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-    border-color: #ffffff;
+    transform: scale(0.80) !important;
+    border-width: 6px !important;
+    border-color: #ffffff !important;
+    box-shadow: 
+        0 0 50px rgba(255, 215, 0, 0.5),
+        0 0 80px rgba(255, 215, 0, 0.2),
+        inset 0 0 30px rgba(255, 215, 0, 0.1);
+    transition: all 0.05s ease;
 }
 
 /* PARTÍCULAS INTERNAS (12) */
@@ -547,9 +553,24 @@ h1 {
 }
 
 @keyframes botonFlash {
-    0% { transform: scale(0.88); border-color: #ffffff; box-shadow: 0 0 40px rgba(255,255,255,0.3); }
-    50% { transform: scale(0.96); border-color: #ff6b6b; box-shadow: 0 0 30px rgba(255,107,107,0.2); }
-    100% { transform: scale(1); border-color: #ffd700; box-shadow: 0 0 20px rgba(255,215,0,0.15); }
+    0% { 
+        transform: scale(0.75);
+        border-width: 8px;
+        border-color: #ffffff;
+        box-shadow: 0 0 60px rgba(255,255,255,0.4);
+    }
+    50% { 
+        transform: scale(0.85);
+        border-width: 6px;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 50px rgba(255,107,107,0.3);
+    }
+    100% { 
+        transform: scale(1);
+        border-width: 4px;
+        border-color: #ffd700;
+        box-shadow: 0 0 20px rgba(255,215,0,0.15);
+    }
 }
 
 .stats-box {
