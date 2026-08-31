@@ -11,7 +11,6 @@
     <meta name="x5-full-screen" content="true">
     <meta name="full-screen" content="yes">
     
-    <!-- Fuentes e Iconos -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -35,7 +34,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Viñeta cinematográfica profunda */
         body::after {
             content: '';
             position: fixed;
@@ -45,7 +43,6 @@
             pointer-events: none;
         }
 
-        /* Lienzo de Partículas Dinámicas */
         #canvasParticulas {
             position: fixed;
             top: 0;
@@ -56,7 +53,6 @@
             pointer-events: none;
         }
 
-        /* Núcleo de luz central estático */
         .ambient-glow {
             position: fixed;
             width: min(600px, 90vw); height: min(600px, 90vw);
@@ -67,7 +63,6 @@
             will-change: opacity;
         }
 
-        /* Tarjeta Menú Principal con Ancho Reducido y Estática */
         .menu-container {
             position: relative; z-index: 10; text-align: center;
             width: 95%;
@@ -88,7 +83,6 @@
             will-change: transform;
         }
 
-        /* Dado superior compacto */
         .dice-container {
             position: relative;
             margin-bottom: 6px;
@@ -169,7 +163,6 @@
             text-transform: uppercase;
         }
         
-        /* Botón JUGAR Supremo */
         .btn-jugar {
             width: 100%;
             background: linear-gradient(180deg, #ffe556 0%, #f39c12 100%);
@@ -248,7 +241,6 @@
         }
         .btn-secundario:active { transform: scale(0.98); }
 
-        /* Footer Dinámico Luminoso */
         .footer { 
             font-size: 0.65rem; 
             color: #64748b; 
@@ -298,7 +290,6 @@
             50% { opacity: 0.3; }
         }
 
-        /* MODALES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
@@ -332,7 +323,6 @@
 
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
 
-        /* SELECTOR DE CARTONES */
         .selector-cartones-container { width: 100%; margin-top: 6px; }
         .selector-botones { display: flex; gap: 8px; width: 100%; }
         .btn-carton-modo {
@@ -360,17 +350,32 @@
             -webkit-appearance: none; margin-top: -6.5px; box-shadow: 0 0 10px rgba(245,200,66,0.7);
         }
         .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.1rem; min-width: 28px; text-align: center; }
+
+        select#selectorVozAjustes {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.06);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        select#selectorVozAjustes option {
+            background: #1a1a2e;
+            color: white;
+        }
+        select#selectorVozAjustes:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LUZ DE AMBIENTE CENTRAL -->
     <div class="ambient-glow"></div>
-
-    <!-- LIENZO DE PARTÍCULAS FLUIDO Y ELEGANTE -->
     <canvas id="canvasParticulas"></canvas>
 
-    <!-- MENÚ PRINCIPAL -->
     <div class="menu-container">
         
         <div class="dice-container">
@@ -446,6 +451,13 @@
                 </label>
             </div>
 
+            <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+                <span class="etiqueta">🗣️ Seleccionar Voz</span>
+                <select id="selectorVozAjustes">
+                    <option value="">⏳ Cargando voces...</option>
+                </select>
+            </div>
+
             <div class="opcion-ajuste">
                 <span class="etiqueta">🎵 Música Ambiente</span>
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 5px 12px; margin: 0; font-size: 0.85rem;" onclick="toggleMusica()">▶ Activar</button>
@@ -477,8 +489,182 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT -->
     <script>
+        // ============================================================
+        // 🗣️ SISTEMA DE VOCES - CON NOMBRES FIJOS
+        // ============================================================
+
+        let vocesMenu = [];
+        let vozSeleccionadaMenu = null;
+        let vozSeleccionadaNombreMenu = localStorage.getItem('vozSeleccionada') || null;
+
+        function cargarVocesMenu() {
+            if (!window.speechSynthesis) {
+                const selector = document.getElementById('selectorVozAjustes');
+                if (selector) {
+                    selector.innerHTML = '<option value="">❌ Navegador no soporta voz</option>';
+                    selector.disabled = true;
+                }
+                return;
+            }
+            
+            const vocesDisponibles = window.speechSynthesis.getVoices();
+            
+            if (vocesDisponibles.length > 0) {
+                procesarVocesMenu(vocesDisponibles);
+                return;
+            }
+            
+            window.speechSynthesis.onvoiceschanged = function() {
+                const nuevasVoces = window.speechSynthesis.getVoices();
+                if (nuevasVoces.length > 0) {
+                    procesarVocesMenu(nuevasVoces);
+                }
+            };
+            
+            setTimeout(() => {
+                const reintentar = window.speechSynthesis.getVoices();
+                if (reintentar.length > 0 && vocesMenu.length === 0) {
+                    procesarVocesMenu(reintentar);
+                }
+            }, 1000);
+            
+            setTimeout(() => {
+                const reintentar = window.speechSynthesis.getVoices();
+                if (reintentar.length > 0 && vocesMenu.length === 0) {
+                    procesarVocesMenu(reintentar);
+                }
+            }, 2000);
+        }
+
+        function procesarVocesMenu(vocesDisponibles) {
+            let vocesEspanol = vocesDisponibles.filter(v => v.lang.startsWith('es'));
+            if (vocesEspanol.length === 0) vocesEspanol = vocesDisponibles;
+            if (vocesEspanol.length === 0) {
+                const selector = document.getElementById('selectorVozAjustes');
+                if (selector) {
+                    selector.innerHTML = '<option value="">❌ No hay voces</option>';
+                    selector.disabled = true;
+                }
+                return;
+            }
+            
+            vocesEspanol.sort((a, b) => {
+                const orden = { 'Google': 0, 'Microsoft': 1, 'Samantha': 2, 'Jorge': 2 };
+                const aKey = Object.keys(orden).find(k => a.name.includes(k)) || 'zzz';
+                const bKey = Object.keys(orden).find(k => b.name.includes(k)) || 'zzz';
+                if (orden[aKey] !== undefined && orden[bKey] !== undefined) {
+                    return orden[aKey] - orden[bKey];
+                }
+                if (orden[aKey] !== undefined) return -1;
+                if (orden[bKey] !== undefined) return 1;
+                return a.name.localeCompare(b.name);
+            });
+            
+            vocesMenu = vocesEspanol;
+            
+            const selector = document.getElementById('selectorVozAjustes');
+            if (selector) {
+                selector.innerHTML = '';
+                selector.disabled = false;
+                
+                let contadorMicrosoft = 0;
+                let contadorGoogle = 0;
+                
+                vocesMenu.forEach((v, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    
+                    let nombreMostrado = '';
+                    const nombreCompleto = v.name;
+                    
+                    // ================================================================
+                    // 🔥 NOMBRES FIJOS - GOOGLE 1, GOOGLE 2, MICROSOFT 1, 2, 3...
+                    // ================================================================
+                    
+                    if (nombreCompleto.includes('Google')) {
+                        contadorGoogle++;
+                        if (contadorGoogle === 1) {
+                            nombreMostrado = '1️⃣ Hombre Google ';
+                        } else if (contadorGoogle === 2) {
+                            nombreMostrado = '2️⃣ Mujer Google ';
+                        } else {
+                            nombreMostrado = '🇬 Google ' + contadorGoogle + ' ⭐⭐⭐⭐⭐';
+                        }
+                    }
+                    else if (nombreCompleto.includes('Microsoft')) {
+                        contadorMicrosoft++;
+                        if (contadorMicrosoft === 1) {
+                            nombreMostrado = '3️⃣ Mujer 1 Microsoft  ';
+                        } else if (contadorMicrosoft === 2) {
+                            nombreMostrado = '4️⃣ Mujer 2 Microsoft  ';
+                        } else if (contadorMicrosoft === 3) {
+                            nombreMostrado = '5️⃣ Hombre Microsoft  ';
+                        } else {
+                            nombreMostrado = '🪟 Microsoft ' + contadorMicrosoft + ' ⭐⭐⭐⭐';
+                        }
+                    }
+                    else if (nombreCompleto.includes('Samantha') || nombreCompleto.includes('Jorge')) {
+                        nombreMostrado = '🍎 Apple ⭐⭐⭐⭐⭐';
+                    }
+                    else {
+                        nombreMostrado = '🎤 ' + nombreCompleto;
+                    }
+                    
+                    opt.textContent = nombreMostrado;
+                    selector.appendChild(opt);
+                });
+                
+                if (vozSeleccionadaNombreMenu) {
+                    const idx = vocesMenu.findIndex(v => v.name === vozSeleccionadaNombreMenu);
+                    if (idx !== -1) {
+                        selector.value = idx;
+                        seleccionarVozMenu(idx);
+                    } else {
+                        selector.value = 0;
+                        seleccionarVozMenu(0);
+                    }
+                } else {
+                    selector.value = 0;
+                    seleccionarVozMenu(0);
+                }
+            }
+        }
+
+        function seleccionarVozMenu(index) {
+            if (index >= 0 && index < vocesMenu.length) {
+                vozSeleccionadaMenu = vocesMenu[index];
+                vozSeleccionadaNombreMenu = vozSeleccionadaMenu.name;
+                localStorage.setItem('vozSeleccionada', vozSeleccionadaNombreMenu);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const selector = document.getElementById('selectorVozAjustes');
+            if (selector) {
+                selector.addEventListener('change', function() {
+                    const idx = parseInt(this.value);
+                    if (!isNaN(idx) && idx >= 0 && idx < vocesMenu.length) {
+                        seleccionarVozMenu(idx);
+                    }
+                });
+            }
+            
+            setTimeout(cargarVocesMenu, 300);
+            setTimeout(cargarVocesMenu, 1000);
+            setTimeout(cargarVocesMenu, 2000);
+        });
+
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = function() {
+                cargarVocesMenu();
+            };
+        }
+
+        // ============================================================
+        // 🎯 CONFIGURACIÓN DEL MENÚ
+        // ============================================================
+
         let configuracion = { totalCartones: 15, vozActiva: true, musicaActiva: false, scrollActivo: false };
         const configGuardada = localStorage.getItem('bingoConfig');
         if (configGuardada) { configuracion = JSON.parse(configGuardada); }
@@ -536,7 +722,10 @@
         }
 
         function abrirReglas() { document.getElementById('modalReglas').style.display = 'flex'; }
-        function abrirAjustes() { document.getElementById('modalAjustes').style.display = 'flex'; }
+        function abrirAjustes() { 
+            document.getElementById('modalAjustes').style.display = 'flex';
+            setTimeout(cargarVocesMenu, 200);
+        }
         function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
         document.querySelectorAll('.modal-overlay').forEach(el => {
             el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
@@ -557,7 +746,9 @@
             }
         }
 
-        /* MOTOR DE PARTÍCULAS */
+        // ============================================================
+        // 🎨 MOTOR DE PARTÍCULAS
+        // ============================================================
         const canvas = document.getElementById('canvasParticulas');
         const ctx = canvas.getContext('2d', { alpha: true });
 
