@@ -19,6 +19,10 @@
     let pausarMarcadoGeneral = false;
 
     let estadoAlertasA1 = new Map();
+    
+    let cartonesFaltaUnoAnunciados = new Set();
+    let anuncioEnProgreso = false;
+    let bloquearBoton = false;
 
     const paletasColores = [
         { border: '#0d47a1', bg: '#42a5f5' },
@@ -54,32 +58,171 @@
     ];
 
     // ==========================================================
-    // 🎙️ FUNCIÓN PRINCIPAL - DECIR NÚMERO CON AUDIOS PREGRABADOS
+    // 🎛️ CONTROLES DE AUDIO - VALORES GLOBALES
     // ==========================================================
 
-    function decirNumero(numero) {
-        // Verificar si la voz está activada en la configuración
-        if (!configuracion.vozActiva) return;
+    let audioVolumen = parseFloat(localStorage.getItem('audioVolumen')) || 1.0;
+    let audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
+    let audioFadeIn = parseInt(localStorage.getItem('audioFadeIn')) || 200;
+    let audioFadeOut = parseInt(localStorage.getItem('audioFadeOut')) || 200;
+
+    // ==========================================================
+    // 🎙️ FUNCIÓN PRINCIPAL - DECIR NÚMERO CON FADE + CALLBACK
+    // ==========================================================
+
+    function decirNumero(numero, callback) {
+        if (!configuracion.vozActiva) {
+            if (callback) callback();
+            return;
+        }
         
         try {
-            // Ruta de tu archivo de audio (carpeta Audios/David/)
-            const ruta = `Audios/David/${numero}.mp3`;
+            const ruta = `Audios/David/0. Numeros del 1 al 90/${numero}.mp3`;
             
-            // Crear el elemento de audio
-            const audio = new Audio(ruta);
-            
-            // Reproducir
-            audio.play();
+            if (typeof Howl !== 'undefined') {
+                const sound = new Howl({
+                    src: [ruta],
+                    volume: 0,
+                    rate: audioVelocidad,
+                    html5: true,
+                    onload: function() {
+                        sound.fade(0, audioVolumen, audioFadeIn);
+                        const duracion = sound.duration() * 1000 / audioVelocidad;
+                        const tiempoFadeOut = Math.max(duracion - audioFadeOut, 0);
+                        setTimeout(() => {
+                            sound.fade(audioVolumen, 0, audioFadeOut);
+                        }, tiempoFadeOut);
+                    },
+                    onplayerror: function() {
+                        fallbackVozSistema(numero);
+                        if (callback) callback();
+                    },
+                    onend: function() {
+                        if (callback) {
+                            setTimeout(callback, 5);
+                        }
+                    }
+                });
+                sound.play();
+                console.log('🔊 Audio con fade:', numero);
+            } else {
+                const audio = new Audio(ruta);
+                audio.volume = 0;
+                audio.playbackRate = audioVelocidad;
+                audio.play();
+                
+                try {
+                    const gainNode = audioContext.createGain();
+                    const source = audioContext.createMediaElementSource(audio);
+                    source.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(audioVolumen, audioContext.currentTime + audioFadeIn / 1000);
+                } catch(e) {}
+                
+                audio.onended = function() {
+                    if (callback) {
+                        setTimeout(callback, 10);
+                    }
+                };
+            }
             
         } catch (error) {
             console.warn('❌ Error al reproducir audio:', error);
-            // Fallback: usar voz del sistema si falla
             fallbackVozSistema(numero);
+            if (callback) callback();
         }
     }
 
     // ==========================================================
-    // 🔄 FALLBACK - VOZ DEL SISTEMA (por si falta algún audio)
+    // 🆕 REPRODUCIR COLA DE AUDIOS EN SECUENCIA
+    // ==========================================================
+
+    function reproducirColaAudios(colaAudios, callback) {
+        if (colaAudios.length === 0) {
+            if (callback) callback();
+            return;
+        }
+        
+        let index = 0;
+        
+        function playNext() {
+            if (index >= colaAudios.length) {
+                if (callback) callback();
+                return;
+            }
+            
+            const ruta = colaAudios[index];
+            const audio = new Audio(ruta);
+            audio.volume = audioVolumen;
+            audio.playbackRate = audioVelocidad;
+            audio.play();
+            
+            audio.onended = function() {
+                index++;
+                setTimeout(playNext, 10);
+            };
+            
+            audio.onerror = function() {
+                console.warn('❌ Error en audio:', ruta);
+                index++;
+                playNext();
+            };
+        }
+        
+        playNext();
+    }
+
+    // ==========================================================
+    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO
+    // ==========================================================
+
+    function anunciarMultiplesCartones(cartones) {
+        if (cartones.length === 0) return;
+        if (!configuracion.vozActiva) return;
+        
+        let cartonesFiltrados = cartones.filter(c => {
+            const clave = `${c.id}-${c.numeroFaltante}`;
+            if (cartonesFaltaUnoAnunciados.has(clave)) return false;
+            cartonesFaltaUnoAnunciados.add(clave);
+            return true;
+        });
+        
+        if (cartonesFiltrados.length === 0) return;
+        
+        bloquearBoton = true;
+        anuncioEnProgreso = true;
+        
+        const base = 'Audios/David/';
+        let colaAudios = [];
+        
+        colaAudios.push(base + '1. Amarrar/Amarra.mp3');
+        
+        cartonesFiltrados.forEach((carton, index) => {
+            colaAudios.push(base + `2. Cartones/Carton ${carton.id}.mp3`);
+        });
+        
+        colaAudios.push(base + '3. Conector/Le falta el numero.mp3');
+        
+        cartonesFiltrados.forEach((carton, index) => {
+            colaAudios.push(base + `0. Numeros del 1 al 90/${carton.numeroFaltante}.mp3`);
+        });
+        
+        const todosBingo = cartonesFiltrados.every(c => c.tipo === 'bingo');
+        const tipoArchivo = todosBingo ? 'Para completar bingo.mp3' : 'Para completar Linea.mp3';
+        colaAudios.push(base + '4. Para ganar/' + tipoArchivo);
+        
+        reproducirColaAudios(colaAudios, function() {
+            anuncioEnProgreso = false;
+            bloquearBoton = false;
+            console.log('📢 Anuncio completado');
+        });
+        
+        console.log(`📢 Anunciando ${cartonesFiltrados.length} cartón(es) a 1 número`);
+    }
+
+    // ==========================================================
+    // 🔄 FALLBACK - VOZ DEL SISTEMA
     // ==========================================================
 
     function fallbackVozSistema(numero) {
@@ -89,12 +232,28 @@
         window.speechSynthesis.cancel();
         const mensaje = new SpeechSynthesisUtterance(numero.toString());
         mensaje.lang = 'es-ES';
-        mensaje.rate = 0.9;
+        mensaje.rate = audioVelocidad * 0.9;
         window.speechSynthesis.speak(mensaje);
     }
 
     // ==========================================================
-    // 🔥 RESTO DEL CÓDIGO (SIN CAMBIOS)
+    // 🎛️ ECUALIZADOR - EXPORTAR FUNCIONES
+    // ==========================================================
+
+    window.aplicarEcualizador = function(audioElement) {
+        try {
+            if (typeof audioContext !== 'undefined' && audioContext) {
+                const source = audioContext.createMediaElementSource(audioElement);
+                source.connect(ecualizador.bajas);
+                ecualizador.gain.connect(audioContext.destination);
+            }
+        } catch(e) {
+            console.warn('Ecualizador no disponible');
+        }
+    };
+
+    // ==========================================================
+    // 🔥 RESTO DEL CÓDIGO
     // ==========================================================
 
     function animarCirculoEnCelda(celda) {
@@ -543,9 +702,12 @@
     }
 
     function calcularYMostrarAlertasA1() {
+        if (anuncioEnProgreso) return;
+        
         borrarAlertasA1Total();
-
         if (bingoCantadoGlobal) return;
+
+        let cartonesAFaltaUno = [];
 
         currentCartones.forEach((carton, idx) => {
             const idCarton = idx + 1;
@@ -560,6 +722,8 @@
 
             let totalMarcadosCarton = 0;
             let filasA1Actuales = [];
+            let numeroFaltanteBingo = null;
+            let numeroFaltanteLinea = null;
 
             for (let r = 0; r < 3; r++) {
                 const numerosFila = carton[r].filter(n => n !== null);
@@ -568,11 +732,39 @@
 
                 if (marcadosEnFila === 4 && !lineaCantadaGlobal) {
                     filasA1Actuales.push(r);
+                    const faltante = numerosFila.find(n => !markedNumbers.has(n));
+                    if (faltante) numeroFaltanteLinea = faltante;
                 }
             }
 
             let faltaUnoParaBingo = (totalMarcadosCarton === 14 && !bingoCantadoGlobal);
             let faltaUnoParaLinea = (filasA1Actuales.length > 0 && !lineaCantadaGlobal);
+
+            if (faltaUnoParaBingo) {
+                let faltanteBingo = null;
+                for (let r = 0; r < 3; r++) {
+                    const numerosFila = carton[r].filter(n => n !== null);
+                    const faltante = numerosFila.find(n => !markedNumbers.has(n));
+                    if (faltante) {
+                        faltanteBingo = faltante;
+                        break;
+                    }
+                }
+                if (faltanteBingo) {
+                    cartonesAFaltaUno.push({
+                        id: idCarton,
+                        numeroFaltante: faltanteBingo,
+                        tipo: 'bingo'
+                    });
+                }
+            }
+            else if (faltaUnoParaLinea && numeroFaltanteLinea) {
+                cartonesAFaltaUno.push({
+                    id: idCarton,
+                    numeroFaltante: numeroFaltanteLinea,
+                    tipo: 'linea'
+                });
+            }
 
             if (faltaUnoParaBingo || faltaUnoParaLinea) {
                 let esNuevaAlerta = false;
@@ -596,6 +788,10 @@
                 badgeContainer.insertAdjacentHTML('beforeend', `<span class="raya-alerta ${tipoClase} ${claseTamanio}">⚫</span>`);
             }
         });
+
+        if (cartonesAFaltaUno.length > 0) {
+            anunciarMultiplesCartones(cartonesAFaltaUno);
+        }
     }
 
     function toggleNumero(num) {
@@ -674,6 +870,7 @@
             alert('¡Ya se han extraído todas las bolas!');
             return;
         }
+        if (bloquearBoton) return;
 
         const btn = document.getElementById('btnSacarBola');
         btn.classList.remove('presionado');
@@ -694,9 +891,13 @@
             void sphere.offsetWidth;
             sphere.classList.add('rodar-entrada');
 
-            decirNumero(num);
+            await new Promise((resolve) => {
+                decirNumero(num, () => {
+                    resolve();
+                });
+            });
 
-            await new Promise(r => setTimeout(r, 650));
+            await new Promise(r => setTimeout(r, 10));
 
             actualizarRecientesUI();
             actualizarEstado(num);
@@ -833,6 +1034,9 @@
         bingoCantadoGlobal = false;
         pausarMarcadoGeneral = false;
         estadoAlertasA1.clear();
+        cartonesFaltaUnoAnunciados.clear();
+        anuncioEnProgreso = false;
+        bloquearBoton = false;
         inicializarBolillero();
         document.getElementById('numeroDisplay').textContent = '--';
         const sphere = document.getElementById('bolilleroSphere');
