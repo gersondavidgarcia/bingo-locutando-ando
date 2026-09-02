@@ -24,7 +24,6 @@
     let anuncioEnProgreso = false;
     let bloquearBoton = false;
 
-    // 🔥 CONTADORES DE FRASES PARA LÍNEA Y BINGO (SE REINICIAN AL CANTAR)
     let contadorLinea = 0;
     let contadorBingo = 0;
 
@@ -69,6 +68,24 @@
     let audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
     let audioFadeIn = parseInt(localStorage.getItem('audioFadeIn')) || 200;
     let audioFadeOut = parseInt(localStorage.getItem('audioFadeOut')) || 200;
+
+    // ==========================================================
+    // 🛠️ FUNCIÓN PARA BLOQUEAR/DESBLOQUEAR EL BOTÓN FÍSICAMENTE
+    // ==========================================================
+
+    function setBotonBloqueado(estado) {
+        const btn = document.getElementById('btnSacarBola');
+        if (!btn) return;
+        if (estado) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.6';
+            btn.style.transform = 'scale(0.95)';
+        } else {
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+            btn.style.transform = 'scale(1)';
+        }
+    }
 
     // ==========================================================
     // 🎙️ FUNCIÓN PRINCIPAL - DECIR NÚMERO CON FADE + CALLBACK
@@ -139,7 +156,7 @@
     }
 
     // ==========================================================
-    // 🆕 REPRODUCIR COLA DE AUDIOS EN SECUENCIA
+    // 🆕 REPRODUCIR COLA DE AUDIOS EN SECUENCIA (SIN PAUSA)
     // ==========================================================
 
     function reproducirColaAudios(colaAudios, callback) {
@@ -149,50 +166,57 @@
         }
         
         let index = 0;
+        let audios = [];
         
-        function playNext() {
-            if (index >= colaAudios.length) {
-                if (callback) callback();
-                return;
-            }
-            
-            const ruta = colaAudios[index];
+        colaAudios.forEach((ruta, i) => {
             const audio = new Audio(ruta);
             audio.volume = audioVolumen;
             audio.playbackRate = audioVelocidad;
-            audio.play();
+            audio.preload = 'auto';
+            audios[i] = audio;
             
-            audio.onended = function() {
-                index++;
-                setTimeout(playNext, 0);
-            };
+            audio.addEventListener('ended', function() {
+                if (i + 1 < colaAudios.length) {
+                    audios[i + 1].play();
+                } else {
+                    if (callback) callback();
+                }
+            });
             
-            audio.onerror = function() {
+            audio.addEventListener('error', function() {
                 console.warn('❌ Error en audio:', ruta);
-                index++;
-                playNext();
-            };
-        }
+                if (i + 1 < colaAudios.length) {
+                    audios[i + 1].play();
+                } else {
+                    if (callback) callback();
+                }
+            });
+        });
         
-        playNext();
+        if (audios.length > 0) {
+            audios[0].play();
+        } else {
+            if (callback) callback();
+        }
     }
 
     // ==========================================================
-    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO (CON PATRÓN POR TIPO)
+    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO (CORREGIDO)
     // ==========================================================
 
     function anunciarMultiplesCartones(cartones) {
         if (cartones.length === 0) return;
         if (!configuracion.vozActiva) return;
         
-        // Determinar el tipo (todos deberían ser del mismo tipo)
-        const tipo = cartones[0].tipo; // 'linea' o 'bingo'
+        const tipo = cartones[0].tipo;
         
-        // 🔥 INCREMENTAR EL CONTADOR SEGÚN EL TIPO
+        // 🔥 INCREMENTAR CONTADOR
         if (tipo === 'linea') {
             contadorLinea++;
+            console.log(`📊 Contador LÍNEA: ${contadorLinea}`);
         } else {
             contadorBingo++;
+            console.log(`📊 Contador BINGO: ${contadorBingo}`);
         }
         
         let cartonesFiltrados = cartones.filter(c => {
@@ -205,15 +229,13 @@
         if (cartonesFiltrados.length === 0) return;
         
         bloquearBoton = true;
+        setBotonBloqueado(true);
         anuncioEnProgreso = true;
         
         const base = 'Audios/David/';
         let colaAudios = [];
         
-        // ================================================================
-        // 🔥 DETERMINAR EL NIVEL DE FRASE SEGÚN EL CONTADOR
-        // ================================================================
-        
+        // 🔥 DETERMINAR NIVEL
         let nivel;
         if (tipo === 'linea') {
             if (contadorLinea === 1) nivel = 'completa';
@@ -234,22 +256,27 @@
         // SIEMPRE: "Amarra"
         colaAudios.push(base + '1. Amarrar/Amarra.mp3');
         
-        // SIEMPRE: "el cartón X" (para cada cartón)
-        cartonesFiltrados.forEach((carton, index) => {
+        // SIEMPRE: "el cartón X"
+        cartonesFiltrados.forEach((carton) => {
             colaAudios.push(base + `2. Cartones/Carton ${carton.id}.mp3`);
         });
         
-        // Si hay MÁS DE 1 cartón, la frase TERMINA AQUÍ (no importa el nivel)
+        // Si hay MÁS DE 1 cartón, TERMINA AQUÍ
         if (cartonesFiltrados.length > 1) {
             console.log(`📢 Múltiples cartones (${cartonesFiltrados.length}): solo "Amarra + cartones"`);
             reproducirColaAudios(colaAudios, function() {
                 anuncioEnProgreso = false;
                 bloquearBoton = false;
+                setBotonBloqueado(false);
             });
             return;
         }
         
-        // 🔥 PARA 1 CARTÓN: AGREGAR SEGÚN EL NIVEL
+        // 🔥 PARA 1 CARTÓN:
+        // Nivel COMPLETA: "Amarra, cartón X le falta el número Y para completar línea/bingo"
+        // Nivel MEDIA: "Amarra, cartón X le falta el número Y"
+        // Nivel CORTA: "Amarra, cartón X"
+        
         if (nivel === 'completa' || nivel === 'media') {
             // "le falta el número"
             colaAudios.push(base + '3. Conector/Le falta el numero.mp3');
@@ -272,6 +299,7 @@
         reproducirColaAudios(colaAudios, function() {
             anuncioEnProgreso = false;
             bloquearBoton = false;
+            setBotonBloqueado(false);
             console.log('📢 Anuncio completado');
         });
     }
@@ -898,8 +926,7 @@
 
         if (hayLinea && !lineaCantadaGlobal) {
             lineaCantadaGlobal = true;
-            // 🔥 REINICIAR CONTADOR DE LÍNEA
-            contadorLinea = 0;
+            contadorLinea = 0;  // 🔥 REINICIAR
             if (ganadorLinea) {
                 trazarLineaGanadora(ganadorLinea.idx, ganadorLinea.r);
                 agregarBadgePremio(ganadorLinea.idCarton, 'linea');
@@ -909,8 +936,7 @@
 
         if (hayBingo && !bingoCantadoGlobal) {
             bingoCantadoGlobal = true;
-            // 🔥 REINICIAR CONTADOR DE BINGO
-            contadorBingo = 0;
+            contadorBingo = 0;  // 🔥 REINICIAR
             if (ganadorBingo) {
                 agregarBadgePremio(ganadorBingo.idCarton, 'bingo');
                 mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganadorBingo.idCarton} !! 🎉🏆`, true);
@@ -923,13 +949,23 @@
     // ==========================================================
     // 🎰 FUNCIÓN SACAR BOLA CON ANIMACIÓN COMPLETA
     // ==========================================================
-    function sacarBolaConAnimacion() {
-        if (isAnimating) return;
+    function sacarBolaConAnimacion(event) {
+        if (event && event.type === 'touchstart') {
+            event.preventDefault();
+        }
+        
+        if (bloquearBoton) {
+            return;
+        }
+        
+        if (isAnimating) {
+            return;
+        }
+        
         if (bolasDisponibles.length === 0) {
             alert('¡Ya se han extraído todas las bolas!');
             return;
         }
-        if (bloquearBoton) return;
 
         const btn = document.getElementById('btnSacarBola');
         btn.classList.remove('presionado');
@@ -1029,7 +1065,7 @@
             
             if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
                 lineaCantadaGlobal = true;
-                contadorLinea = 0; // 🔥 REINICIAR CONTADOR DE LÍNEA
+                contadorLinea = 0;  // 🔥 REINICIAR
                 const ganador = candidatosLinea[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
@@ -1050,7 +1086,7 @@
                 
             } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
                 bingoCantadoGlobal = true;
-                contadorBingo = 0; // 🔥 REINICIAR CONTADOR DE BINGO
+                contadorBingo = 0;  // 🔥 REINICIAR
                 const ganador = candidatosBingo[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
@@ -1098,6 +1134,7 @@
         cartonesFaltaUnoAnunciados.clear();
         anuncioEnProgreso = false;
         bloquearBoton = false;
+        setBotonBloqueado(false);
         contadorLinea = 0;
         contadorBingo = 0;
         inicializarBolillero();
@@ -1117,8 +1154,12 @@
         currentCartones = generar10CartonesGlobales();
         reiniciarJuego();
 
-        document.getElementById('btnSacarBola').addEventListener('click', sacarBolaConAnimacion);
+        const btn = document.getElementById('btnSacarBola');
+        btn.addEventListener('click', sacarBolaConAnimacion);
+        btn.addEventListener('touchstart', sacarBolaConAnimacion, { passive: false });
+        
         document.getElementById('bolilleroSphere').addEventListener('click', sacarBolaConAnimacion);
+        document.getElementById('bolilleroSphere').addEventListener('touchstart', sacarBolaConAnimacion, { passive: false });
 
         document.getElementById('btnGenerar').addEventListener('click', () => {
             cambiarColorAleatorio();
