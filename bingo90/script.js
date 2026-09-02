@@ -24,6 +24,7 @@
     let anuncioEnProgreso = false;
     let bloquearBoton = false;
 
+    // 🔥 CONTADORES SIMPLES - NO SE REINICIAN AUTOMÁTICAMENTE
     let contadorLinea = 0;
     let contadorBingo = 0;
 
@@ -201,7 +202,7 @@
     }
 
     // ==========================================================
-    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO (CORREGIDO)
+    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO (NUEVA LÓGICA)
     // ==========================================================
 
     function anunciarMultiplesCartones(cartones) {
@@ -210,7 +211,7 @@
         
         const tipo = cartones[0].tipo;
         
-        // 🔥 INCREMENTAR CONTADOR
+        // 🔥 CONTADOR POR TIPO (NUNCA SE REINICIA AUTOMÁTICAMENTE)
         if (tipo === 'linea') {
             contadorLinea++;
             console.log(`📊 Contador LÍNEA: ${contadorLinea}`);
@@ -219,6 +220,7 @@
             console.log(`📊 Contador BINGO: ${contadorBingo}`);
         }
         
+        // Filtrar cartones no anunciados
         let cartonesFiltrados = cartones.filter(c => {
             const clave = `${c.id}-${c.numeroFaltante}`;
             if (cartonesFaltaUnoAnunciados.has(clave)) return false;
@@ -235,35 +237,35 @@
         const base = 'Audios/David/';
         let colaAudios = [];
         
-        // 🔥 DETERMINAR NIVEL
+        // 🔥 DETERMINAR NIVEL DE FRASE (1=completa, 2=media, 3+=corta)
         let nivel;
-        if (tipo === 'linea') {
-            if (contadorLinea === 1) nivel = 'completa';
-            else if (contadorLinea === 2) nivel = 'media';
-            else nivel = 'corta';
+        const contador = tipo === 'linea' ? contadorLinea : contadorBingo;
+        
+        if (contador === 1) {
+            nivel = 'completa';
+        } else if (contador === 2) {
+            nivel = 'media';
         } else {
-            if (contadorBingo === 1) nivel = 'completa';
-            else if (contadorBingo === 2) nivel = 'media';
-            else nivel = 'corta';
+            nivel = 'corta';
         }
         
-        console.log(`📢 Nivel ${nivel} para ${tipo} (contador: ${tipo === 'linea' ? contadorLinea : contadorBingo})`);
+        console.log(`📢 Nivel: ${nivel} para ${tipo} (contador: ${contador})`);
         
         // ================================================================
-        // 🔥 CONSTRUIR LA FRASE SEGÚN EL NIVEL
+        // 🔥 CONSTRUIR LA FRASE
         // ================================================================
         
         // SIEMPRE: "Amarra"
         colaAudios.push(base + '1. Amarrar/Amarra.mp3');
         
-        // SIEMPRE: "el cartón X"
+        // SIEMPRE: "el cartón X" (para cada cartón)
         cartonesFiltrados.forEach((carton) => {
             colaAudios.push(base + `2. Cartones/Carton ${carton.id}.mp3`);
         });
         
-        // Si hay MÁS DE 1 cartón, TERMINA AQUÍ
+        // Si hay MÁS DE 1 cartón → TERMINA AQUÍ
         if (cartonesFiltrados.length > 1) {
-            console.log(`📢 Múltiples cartones (${cartonesFiltrados.length}): solo "Amarra + cartones"`);
+            console.log(`📢 Múltiples cartones (${cartonesFiltrados.length}) → solo "Amarra + cartones"`);
             reproducirColaAudios(colaAudios, function() {
                 anuncioEnProgreso = false;
                 bloquearBoton = false;
@@ -272,10 +274,9 @@
             return;
         }
         
-        // 🔥 PARA 1 CARTÓN:
-        // Nivel COMPLETA: "Amarra, cartón X le falta el número Y para completar línea/bingo"
-        // Nivel MEDIA: "Amarra, cartón X le falta el número Y"
-        // Nivel CORTA: "Amarra, cartón X"
+        // ================================================================
+        // 🔥 PARA 1 CARTÓN: SEGÚN EL NIVEL
+        // ================================================================
         
         if (nivel === 'completa' || nivel === 'media') {
             // "le falta el número"
@@ -294,7 +295,8 @@
             colaAudios.push(base + '4. Para ganar/' + tipoArchivo);
         }
         
-        console.log(`📢 Anuncio nivel ${nivel}: ${colaAudios.length} audios`);
+        console.log(`📢 Anuncio FINAL: ${colaAudios.length} audios (${nivel})`);
+        console.log('📢 Archivos:', colaAudios.map(a => a.split('/').pop()));
         
         reproducirColaAudios(colaAudios, function() {
             anuncioEnProgreso = false;
@@ -302,6 +304,20 @@
             setBotonBloqueado(false);
             console.log('📢 Anuncio completado');
         });
+    }
+
+    // ==========================================================
+    // 🔄 FUNCIÓN PARA REINICIAR CONTADORES (CUANDO SE CANTA LÍNEA O BINGO)
+    // ==========================================================
+
+    function reiniciarContadores(tipo) {
+        if (tipo === 'linea') {
+            contadorLinea = 0;
+            console.log('🔄 Contador LÍNEA reiniciado a 0');
+        } else if (tipo === 'bingo') {
+            contadorBingo = 0;
+            console.log('🔄 Contador BINGO reiniciado a 0');
+        }
     }
 
     // ==========================================================
@@ -926,7 +942,7 @@
 
         if (hayLinea && !lineaCantadaGlobal) {
             lineaCantadaGlobal = true;
-            contadorLinea = 0;  // 🔥 REINICIAR
+            reiniciarContadores('linea');  // 🔥 REINICIAR
             if (ganadorLinea) {
                 trazarLineaGanadora(ganadorLinea.idx, ganadorLinea.r);
                 agregarBadgePremio(ganadorLinea.idCarton, 'linea');
@@ -936,7 +952,7 @@
 
         if (hayBingo && !bingoCantadoGlobal) {
             bingoCantadoGlobal = true;
-            contadorBingo = 0;  // 🔥 REINICIAR
+            reiniciarContadores('bingo');  // 🔥 REINICIAR
             if (ganadorBingo) {
                 agregarBadgePremio(ganadorBingo.idCarton, 'bingo');
                 mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganadorBingo.idCarton} !! 🎉🏆`, true);
@@ -1065,7 +1081,7 @@
             
             if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
                 lineaCantadaGlobal = true;
-                contadorLinea = 0;  // 🔥 REINICIAR
+                reiniciarContadores('linea');  // 🔥 REINICIAR
                 const ganador = candidatosLinea[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
@@ -1086,7 +1102,7 @@
                 
             } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
                 bingoCantadoGlobal = true;
-                contadorBingo = 0;  // 🔥 REINICIAR
+                reiniciarContadores('bingo');  // 🔥 REINICIAR
                 const ganador = candidatosBingo[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
