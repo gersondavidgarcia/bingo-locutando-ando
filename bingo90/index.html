@@ -183,45 +183,288 @@
         @keyframes wave { 0%, 100% { transform: scaleY(0.5); opacity: 0.5; } 50% { transform: scaleY(1); opacity: 1; background-color: #10b981; } }
         .status-dot { width: 7px; height: 7px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: parpadeoPunto 2s infinite; }
         @keyframes parpadeoPunto { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        
+        /* ========================================================= */
+        /* MODALES PRINCIPALES */
+        /* ========================================================= */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 9999;
         }
+        .modal-overlay.activo {
+            display: flex;
+        }
         .modal-box {
             background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
             border: 1px solid rgba(245,200,66,0.35);
-            border-radius: 24px; padding: 24px; max-width: 340px; width: 90%;
+            border-radius: 24px; padding: 24px; max-width: 380px; width: 92%;
             text-align: left; color: #e2e8f0; box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
         }
+        .modal-box::-webkit-scrollbar { width: 4px; }
+        .modal-box::-webkit-scrollbar-track { background: transparent; }
+        .modal-box::-webkit-scrollbar-thumb { background: rgba(245,200,66,0.3); border-radius: 2px; }
         .modal-box h2 { color: #f5c842; text-align: center; font-size: 1.35rem; margin-bottom: 16px; text-shadow: 0 0 12px rgba(245,200,66,0.3); }
-        .opcion-ajuste { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        
+        /* ========================================================= */
+        /* POP-UP DE VOZ (ventana emergente) */
+        /* ========================================================= */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none; justify-content: center; align-items: center; z-index: 10000;
+            animation: fadeInPopup 0.3s ease;
+        }
+        .popup-overlay.activo {
+            display: flex;
+        }
+        @keyframes fadeInPopup {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .popup-box {
+            background: linear-gradient(145deg, rgba(20, 22, 38, 0.99), rgba(10, 12, 20, 0.99));
+            border: 1px solid rgba(245,200,66,0.3);
+            border-radius: 24px; padding: 28px 24px; max-width: 380px; width: 92%;
+            text-align: left; color: #e2e8f0; box-shadow: 0 40px 100px rgba(0,0,0,0.95), 0 0 40px rgba(245,200,66,0.08);
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .popup-box::-webkit-scrollbar { width: 4px; }
+        .popup-box::-webkit-scrollbar-track { background: transparent; }
+        .popup-box::-webkit-scrollbar-thumb { background: rgba(245,200,66,0.3); border-radius: 2px; }
+        .popup-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .popup-header h3 {
+            color: #f5c842; font-size: 1.15rem; font-weight: 700;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .popup-header h3 span {
+            font-size: 1.3rem;
+        }
+        .btn-cerrar-popup {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-cerrar-popup:hover {
+            background: rgba(239,68,68,0.2);
+            border-color: rgba(239,68,68,0.3);
+            color: #f87171;
+        }
+
+        /* ========================================================= */
+        /* CONTROLES DE AUDIO DENTRO DEL POP-UP */
+        /* ========================================================= */
+        .control-audio {
+            width: 100%;
+            padding: 6px 0;
+        }
+        .control-audio .fila-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .control-audio .fila-control span.icon {
+            font-size: 0.85rem;
+            min-width: 28px;
+            color: #94a3b8;
+        }
+        .control-audio .fila-control input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            border-radius: 2px;
+            background: #334155;
+            outline: none;
+            transition: background 0.2s;
+        }
+        .control-audio .fila-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5c842;
+            cursor: pointer;
+            box-shadow: 0 0 12px rgba(245,200,66,0.3);
+        }
+        .control-audio .fila-control input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #f5c842;
+            cursor: pointer;
+            border: none;
+        }
+        .control-audio .fila-control .valor {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #f5c842;
+            min-width: 36px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+        .control-audio .fila-control .valor.velocidad-valor {
+            min-width: 42px;
+        }
+        .control-audio .label-control {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 500;
+            padding-left: 38px;
+            margin-top: -2px;
+        }
+        .separador-popup {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin: 8px 0 12px 0;
+        }
+        .label-grupo {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 600;
+            margin: 4px 0 2px 0;
+        }
+        .btn-restaurar-popup {
+            width: 100%;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-restaurar-popup:hover {
+            background: rgba(245,200,66,0.1);
+            border-color: rgba(245,200,66,0.2);
+            color: #f5c842;
+        }
+        .locutor-fijo-popup {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.04);
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 12px;
+        }
+        .locutor-fijo-popup .avatar { font-size: 1.2rem; }
+        .locutor-fijo-popup .nombre {
+            font-weight: 700;
+            color: #f5c842;
+            font-size: 0.9rem;
+        }
+        .locutor-fijo-popup .badge {
+            font-size: 0.55rem;
+            background: rgba(16,185,129,0.2);
+            color: #10b981;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* ========================================================= */
+        /* OPCIONES DE AJUSTES */
+        /* ========================================================= */
+        .opcion-ajuste {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
         .opcion-ajuste:last-child { border-bottom: none; }
-        .etiqueta { font-size: 0.92rem; font-weight: 500; }
+        .opcion-ajuste.vertical { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .etiqueta { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .etiqueta small { font-size: 0.65rem; color: #94a3b8; font-weight: 400; }
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         input:checked + .slider { background-color: #f5c842; box-shadow: 0 0 10px rgba(245,200,66,0.5); }
         input:checked + .slider:before { transform: translateX(20px); }
-        .btn-cerrar-modal { margin-top: 18px; padding: 12px; background: linear-gradient(135deg, #f5c842, #d4a020); color: #0a0a12; border: none; border-radius: 12px; font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%; box-shadow: 0 6px 20px rgba(245,200,66,0.35); }
+        .btn-cerrar-modal {
+            margin-top: 18px; padding: 12px;
+            background: linear-gradient(135deg, #f5c842, #d4a020);
+            color: #0a0a12; border: none; border-radius: 12px;
+            font-weight: 900; font-size: 1rem; cursor: pointer; width: 100%;
+            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+        }
         .btn-cerrar-modal:active { transform: scale(0.96); }
         .btn-musica-activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; }
+        .btn-abrir-popup {
+            width: 100%;
+            padding: 10px;
+            background: rgba(245,200,66,0.08);
+            border: 1px solid rgba(245,200,66,0.15);
+            border-radius: 12px;
+            color: #f5c842;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-abrir-popup:hover {
+            background: rgba(245,200,66,0.15);
+        }
+        .btn-abrir-popup:active { transform: scale(0.97); }
+
+        /* ========================================================= */
+        /* SELECTOR CARTONES */
+        /* ========================================================= */
         .selector-cartones-container { width: 100%; margin-top: 6px; }
         .selector-botones { display: flex; gap: 8px; width: 100%; }
-        .btn-carton-modo { flex: 1; background: rgba(255,255,255,0.04); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 8px 0; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.2s; }
-        .btn-carton-modo.activo { background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; font-weight: bold; box-shadow: 0 0 10px rgba(245,200,66,0.15); }
-        .slider-container { display: none; margin-top: 12px; background: rgba(255,255,255,0.04); border-radius: 24px; padding: 10px 15px; border: 1px solid rgba(255,255,255,0.06); align-items: center; gap: 12px; }
+        .btn-carton-modo {
+            flex: 1; background: rgba(255,255,255,0.04); color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
+            padding: 8px 0; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .btn-carton-modo.activo {
+            background: rgba(245,200,66,0.2); color: #f5c842; border-color: #f5c842; font-weight: bold;
+            box-shadow: 0 0 10px rgba(245,200,66,0.15);
+        }
+        .slider-container {
+            display: none; margin-top: 12px; background: rgba(255,255,255,0.04);
+            border-radius: 24px; padding: 10px 15px; border: 1px solid rgba(255,255,255,0.06);
+            align-items: center; gap: 12px;
+        }
         .slider-container.mostrar { display: flex; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 5px; cursor: pointer; background: #1e293b; border-radius: 3px; }
-        input[type=range]::-webkit-slider-thumb { height: 18px; width: 18px; border-radius: 50%; background: #f5c842; cursor: pointer; -webkit-appearance: none; margin-top: -6.5px; box-shadow: 0 0 10px rgba(245,200,66,0.7); }
-        .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.1rem; min-width: 28px; text-align: center; }
-        select#selectorVozAjustes { width: 100%; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); color: white; border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; cursor: pointer; }
-        select#selectorVozAjustes option { background: #1a1a2e; color: white; }
-        select#selectorVozAjustes:disabled { opacity: 0.5; cursor: not-allowed; }
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px; width: 18px; border-radius: 50%; background: #f5c842; cursor: pointer;
+            -webkit-appearance: none; margin-top: -6.5px; box-shadow: 0 0 10px rgba(245,200,66,0.7);
+        }
+        .slider-valor { color: #f5c842; font-weight: 900; font-size: 1.1rem; min-width: 32px; text-align: center; }
     </style>
 </head>
 <body>
@@ -271,7 +514,9 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
     <!-- MODAL REGLAS -->
+    <!-- ========================================================= -->
     <div class="modal-overlay" id="modalReglas">
         <div class="modal-box">
             <h2>📖 Reglas</h2>
@@ -285,11 +530,24 @@
         </div>
     </div>
 
-    <!-- MODAL AJUSTES -->
+    <!-- ========================================================= -->
+    <!-- MODAL AJUSTES PRINCIPAL -->
+    <!-- ========================================================= -->
     <div class="modal-overlay" id="modalAjustes">
         <div class="modal-box">
             <h2>⚙️ Ajustes</h2>
             
+            <!-- Locutor -->
+            <div class="opcion-ajuste">
+                <span class="etiqueta">🎙️ Locutor</span>
+                <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.04); padding:4px 12px 4px 8px; border-radius:20px; border:1px solid rgba(255,255,255,0.06);">
+                    <span style="font-size:1.1rem;">🎤</span>
+                    <span style="font-weight:700; color:#f5c842; font-size:0.9rem;">GER</span>
+                    <span style="font-size:0.55rem; background:rgba(16,185,129,0.2); color:#10b981; padding:1px 8px; border-radius:10px; font-weight:600;">Activo</span>
+                </div>
+            </div>
+
+            <!-- Voz ON/OFF -->
             <div class="opcion-ajuste">
                 <span class="etiqueta">🔊 Voz (Números)</span>
                 <label class="switch">
@@ -298,18 +556,24 @@
                 </label>
             </div>
 
-            <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-                <span class="etiqueta">🗣️ Seleccionar Voz</span>
-                <select id="selectorVozAjustes">
-                    <option value="">⏳ Cargando voces...</option>
-                </select>
+            <!-- Botón para abrir POP-UP de voz -->
+            <div class="opcion-ajuste vertical" style="border-bottom: none; padding-bottom: 4px;">
+                <button class="btn-abrir-popup" onclick="abrirPopupVoz()">
+                    🎛️ Ajuste de Voz (Avanzado)
+                    <i class="fa-solid fa-chevron-right" style="font-size:0.7rem;"></i>
+                </button>
+                <span style="font-size:0.55rem; color:#64748b; padding-left:4px; margin-top:2px;">
+                    Volumen · Velocidad · Fade · Ecualizador
+                </span>
             </div>
 
+            <!-- Música -->
             <div class="opcion-ajuste">
                 <span class="etiqueta">🎵 Música Ambiente</span>
                 <button id="btnMusica" class="btn-secundario btn-musica-activo" style="width: auto; padding: 5px 12px; margin: 0; font-size: 0.85rem;" onclick="toggleMusica()">▶ Activar</button>
             </div>
 
+            <!-- Scroll -->
             <div class="opcion-ajuste">
                 <span class="etiqueta">📜 Scroll de página</span>
                 <label class="switch">
@@ -318,6 +582,7 @@
                 </label>
             </div>
 
+            <!-- Cartones -->
             <div class="opcion-ajuste" style="flex-direction: column; align-items: flex-start; gap: 0;">
                 <span class="etiqueta" style="margin-bottom: 4px;">🃏 Selección de Cartones</span>
                 <div class="selector-cartones-container">
@@ -336,145 +601,139 @@
         </div>
     </div>
 
+    <!-- ========================================================= -->
+    <!-- 🎛️ POP-UP DE AJUSTE DE VOZ (VENTANA EMERGENTE) -->
+    <!-- ========================================================= -->
+    <div class="popup-overlay" id="popupVoz">
+        <div class="popup-box">
+            <!-- Header con botón cerrar -->
+            <div class="popup-header">
+                <h3>
+                    <span>🎛️</span> Ajuste de Voz
+                </h3>
+                <button class="btn-cerrar-popup" onclick="cerrarPopupVoz()" title="Cerrar">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Locutor fijo -->
+            <div class="locutor-fijo-popup">
+                <span class="avatar">🎤</span>
+                <span class="nombre">GER</span>
+                <span class="badge">Activo</span>
+            </div>
+
+            <!-- ========================================================= -->
+            <!-- CONTROLES DE AUDIO -->
+            <!-- ========================================================= -->
+
+            <!-- Volumen -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🔊</span>
+                    <input type="range" id="controlVolumen" min="0" max="200" value="100">
+                    <span class="valor" id="valorVolumen">100%</span>
+                </div>
+                <div class="label-control">Volumen</div>
+            </div>
+
+            <!-- Velocidad -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">⏩</span>
+                    <input type="range" id="controlVelocidad" min="50" max="200" value="100" step="5">
+                    <span class="valor velocidad-valor" id="valorVelocidad">1.00x</span>
+                </div>
+                <div class="label-control">Velocidad</div>
+            </div>
+
+            <div class="separador-popup"></div>
+
+            <!-- Fade In -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🌅</span>
+                    <input type="range" id="controlFadeIn" min="0" max="1000" value="200" step="50">
+                    <span class="valor" id="valorFadeIn">0.2s</span>
+                </div>
+                <div class="label-control">Fade In (aparición)</div>
+            </div>
+
+            <!-- Fade Out -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🌇</span>
+                    <input type="range" id="controlFadeOut" min="0" max="1000" value="200" step="50">
+                    <span class="valor" id="valorFadeOut">0.2s</span>
+                </div>
+                <div class="label-control">Fade Out (desaparición)</div>
+            </div>
+
+            <div class="separador-popup"></div>
+
+            <div class="label-grupo">🎛️ Ecualizador</div>
+
+            <!-- Bajas -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🔊</span>
+                    <span style="font-size:0.6rem; color:#94a3b8; min-width:30px;">Bajas</span>
+                    <input type="range" id="controlBajas" min="-20" max="20" value="0" step="1">
+                    <span class="valor" id="valorBajas">0 dB</span>
+                </div>
+                <div class="label-control">Graves (20-200 Hz)</div>
+            </div>
+
+            <!-- Medias -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🔊</span>
+                    <span style="font-size:0.6rem; color:#94a3b8; min-width:30px;">Medias</span>
+                    <input type="range" id="controlMedias" min="-20" max="20" value="0" step="1">
+                    <span class="valor" id="valorMedias">0 dB</span>
+                </div>
+                <div class="label-control">Medios (200-2000 Hz)</div>
+            </div>
+
+            <!-- Agudos -->
+            <div class="control-audio">
+                <div class="fila-control">
+                    <span class="icon">🔊</span>
+                    <span style="font-size:0.6rem; color:#94a3b8; min-width:30px;">Agudos</span>
+                    <input type="range" id="controlAgudos" min="-20" max="20" value="0" step="1">
+                    <span class="valor" id="valorAgudos">0 dB</span>
+                </div>
+                <div class="label-control">Agudos (2000-20000 Hz)</div>
+            </div>
+
+            <!-- Botón restaurar -->
+            <button class="btn-restaurar-popup" onclick="resetEcualizadorPopup()">
+                ↺ Restaurar todos los valores
+            </button>
+        </div>
+    </div>
+
     <script>
         // ============================================================
-        // 🗣️ SISTEMA DE VOCES - MUESTRA TODAS LAS VOCES REALES
+        // 🎛️ POP-UP DE VOZ - ABRIR / CERRAR
         // ============================================================
 
-        let vocesMenu = [];
-        let vozSeleccionadaMenu = null;
-        let vozSeleccionadaNombreMenu = localStorage.getItem('vozSeleccionada') || null;
-
-        function cargarVocesMenu() {
-            if (!window.speechSynthesis) {
-                const selector = document.getElementById('selectorVozAjustes');
-                if (selector) {
-                    selector.innerHTML = '<option value="">❌ Navegador no soporta voz</option>';
-                    selector.disabled = true;
-                }
-                return;
-            }
-            
-            const vocesDisponibles = window.speechSynthesis.getVoices();
-            
-            if (vocesDisponibles.length > 0) {
-                procesarVocesMenu(vocesDisponibles);
-                return;
-            }
-            
-            window.speechSynthesis.onvoiceschanged = function() {
-                const nuevasVoces = window.speechSynthesis.getVoices();
-                if (nuevasVoces.length > 0) {
-                    procesarVocesMenu(nuevasVoces);
-                }
-            };
-            
-            setTimeout(() => {
-                const reintentar = window.speechSynthesis.getVoices();
-                if (reintentar.length > 0 && vocesMenu.length === 0) {
-                    procesarVocesMenu(reintentar);
-                }
-            }, 1000);
-            
-            setTimeout(() => {
-                const reintentar = window.speechSynthesis.getVoices();
-                if (reintentar.length > 0 && vocesMenu.length === 0) {
-                    procesarVocesMenu(reintentar);
-                }
-            }, 2000);
+        function abrirPopupVoz() {
+            document.getElementById('popupVoz').classList.add('activo');
+            document.body.style.overflow = 'hidden';
         }
 
-        function procesarVocesMenu(vocesDisponibles) {
-            // Filtrar SOLO español
-            let vocesEspanol = vocesDisponibles.filter(v => v.lang.startsWith('es'));
-            
-            if (vocesEspanol.length === 0) {
-                const selector = document.getElementById('selectorVozAjustes');
-                if (selector) {
-                    selector.innerHTML = '<option value="">❌ No hay voces en español</option>';
-                    selector.disabled = true;
-                }
-                return;
-            }
-            
-            vocesMenu = vocesEspanol;
-            
-            const selector = document.getElementById('selectorVozAjustes');
-            if (selector) {
-                selector.innerHTML = '';
-                selector.disabled = false;
-                
-                // 🔥 MOSTRAR CADA VOZ CON SU NOMBRE REAL
-                vocesMenu.forEach((v, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    
-                    // Mostrar el nombre REAL de la voz
-                    let nombreMostrado = v.name;
-                    
-                    // Añadir idioma si no está visible
-                    if (!nombreMostrado.includes(v.lang)) {
-                        nombreMostrado = nombreMostrado + ' (' + v.lang + ')';
-                    }
-                    
-                    // Añadir indicador de local
-                    if (v.localService) {
-                        nombreMostrado = nombreMostrado + ' 📱';
-                    } else {
-                        nombreMostrado = nombreMostrado + ' ☁️';
-                    }
-                    
-                    opt.textContent = nombreMostrado;
-                    selector.appendChild(opt);
-                });
-                
-                // Seleccionar la voz guardada o la primera
-                if (vozSeleccionadaNombreMenu) {
-                    const idx = vocesMenu.findIndex(v => v.name === vozSeleccionadaNombreMenu);
-                    if (idx !== -1) {
-                        selector.value = idx;
-                        seleccionarVozMenu(idx);
-                    } else {
-                        selector.value = 0;
-                        seleccionarVozMenu(0);
-                    }
-                } else {
-                    selector.value = 0;
-                    seleccionarVozMenu(0);
-                }
-            }
+        function cerrarPopupVoz() {
+            document.getElementById('popupVoz').classList.remove('activo');
+            document.body.style.overflow = '';
         }
 
-        function seleccionarVozMenu(index) {
-            if (index >= 0 && index < vocesMenu.length) {
-                vozSeleccionadaMenu = vocesMenu[index];
-                vozSeleccionadaNombreMenu = vozSeleccionadaMenu.name;
-                localStorage.setItem('vozSeleccionada', vozSeleccionadaNombreMenu);
-                console.log('✅ Voz seleccionada:', vozSeleccionadaNombreMenu);
+        // Cerrar popup al hacer clic fuera
+        document.getElementById('popupVoz').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarPopupVoz();
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const selector = document.getElementById('selectorVozAjustes');
-            if (selector) {
-                selector.addEventListener('change', function() {
-                    const idx = parseInt(this.value);
-                    if (!isNaN(idx) && idx >= 0 && idx < vocesMenu.length) {
-                        seleccionarVozMenu(idx);
-                    }
-                });
-            }
-            
-            setTimeout(cargarVocesMenu, 300);
-            setTimeout(cargarVocesMenu, 1000);
-            setTimeout(cargarVocesMenu, 2000);
         });
-
-        if (window.speechSynthesis) {
-            window.speechSynthesis.onvoiceschanged = function() {
-                cargarVocesMenu();
-            };
-        }
 
         // ============================================================
         // 🎯 CONFIGURACIÓN DEL MENÚ
@@ -536,14 +795,19 @@
             }
         }
 
-        function abrirReglas() { document.getElementById('modalReglas').style.display = 'flex'; }
-        function abrirAjustes() { 
-            document.getElementById('modalAjustes').style.display = 'flex';
-            setTimeout(cargarVocesMenu, 200);
+        function abrirReglas() { 
+            document.getElementById('modalReglas').classList.add('activo');
         }
-        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+        function abrirAjustes() { 
+            document.getElementById('modalAjustes').classList.add('activo');
+        }
+        function cerrarModal(id) { 
+            document.getElementById(id).classList.remove('activo');
+        }
         document.querySelectorAll('.modal-overlay').forEach(el => {
-            el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
+            el.addEventListener('click', function(e) { 
+                if (e.target === this) this.classList.remove('activo');
+            });
         });
 
         document.getElementById('checkVoz').addEventListener('change', function() { configuracion.vozActiva = this.checked; });
@@ -559,6 +823,123 @@
                 btn.textContent = '▶ Activar';
                 btn.classList.remove('btn-musica-activo');
             }
+        }
+
+        // ============================================================
+        // 🎛️ CONTROLES DE AUDIO - INICIALIZAR
+        // ============================================================
+
+        function inicializarControlesPopup() {
+            // Volumen
+            const vol = localStorage.getItem('audioVolumen');
+            if (vol !== null) {
+                document.getElementById('controlVolumen').value = vol * 100;
+                document.getElementById('valorVolumen').textContent = Math.round(vol * 100) + '%';
+            }
+            document.getElementById('controlVolumen').addEventListener('input', function() {
+                const val = this.value / 100;
+                document.getElementById('valorVolumen').textContent = Math.round(val * 100) + '%';
+                localStorage.setItem('audioVolumen', val);
+            });
+
+            // Velocidad
+            const vel = localStorage.getItem('audioVelocidad');
+            if (vel !== null) {
+                document.getElementById('controlVelocidad').value = vel * 100;
+                document.getElementById('valorVelocidad').textContent = parseFloat(vel).toFixed(2) + 'x';
+            }
+            document.getElementById('controlVelocidad').addEventListener('input', function() {
+                const val = this.value / 100;
+                document.getElementById('valorVelocidad').textContent = val.toFixed(2) + 'x';
+                localStorage.setItem('audioVelocidad', val);
+            });
+
+            // Fade In
+            const fadeIn = localStorage.getItem('audioFadeIn');
+            if (fadeIn !== null) {
+                document.getElementById('controlFadeIn').value = fadeIn;
+                document.getElementById('valorFadeIn').textContent = (fadeIn / 1000).toFixed(1) + 's';
+            }
+            document.getElementById('controlFadeIn').addEventListener('input', function() {
+                const val = parseInt(this.value);
+                document.getElementById('valorFadeIn').textContent = (val / 1000).toFixed(1) + 's';
+                localStorage.setItem('audioFadeIn', val);
+            });
+
+            // Fade Out
+            const fadeOut = localStorage.getItem('audioFadeOut');
+            if (fadeOut !== null) {
+                document.getElementById('controlFadeOut').value = fadeOut;
+                document.getElementById('valorFadeOut').textContent = (fadeOut / 1000).toFixed(1) + 's';
+            }
+            document.getElementById('controlFadeOut').addEventListener('input', function() {
+                const val = parseInt(this.value);
+                document.getElementById('valorFadeOut').textContent = (val / 1000).toFixed(1) + 's';
+                localStorage.setItem('audioFadeOut', val);
+            });
+
+            // Ecualizador - Bajas
+            const bajas = localStorage.getItem('eqBajas');
+            if (bajas !== null) {
+                document.getElementById('controlBajas').value = bajas;
+                document.getElementById('valorBajas').textContent = bajas + ' dB';
+            }
+            document.getElementById('controlBajas').addEventListener('input', function() {
+                const val = this.value;
+                document.getElementById('valorBajas').textContent = val + ' dB';
+                localStorage.setItem('eqBajas', val);
+            });
+
+            // Ecualizador - Medias
+            const medias = localStorage.getItem('eqMedias');
+            if (medias !== null) {
+                document.getElementById('controlMedias').value = medias;
+                document.getElementById('valorMedias').textContent = medias + ' dB';
+            }
+            document.getElementById('controlMedias').addEventListener('input', function() {
+                const val = this.value;
+                document.getElementById('valorMedias').textContent = val + ' dB';
+                localStorage.setItem('eqMedias', val);
+            });
+
+            // Ecualizador - Agudos
+            const agudos = localStorage.getItem('eqAgudos');
+            if (agudos !== null) {
+                document.getElementById('controlAgudos').value = agudos;
+                document.getElementById('valorAgudos').textContent = agudos + ' dB';
+            }
+            document.getElementById('controlAgudos').addEventListener('input', function() {
+                const val = this.value;
+                document.getElementById('valorAgudos').textContent = val + ' dB';
+                localStorage.setItem('eqAgudos', val);
+            });
+        }
+
+        function resetEcualizadorPopup() {
+            // Resetear controles visuales
+            document.getElementById('controlVolumen').value = 100;
+            document.getElementById('valorVolumen').textContent = '100%';
+            document.getElementById('controlVelocidad').value = 100;
+            document.getElementById('valorVelocidad').textContent = '1.00x';
+            document.getElementById('controlFadeIn').value = 200;
+            document.getElementById('valorFadeIn').textContent = '0.2s';
+            document.getElementById('controlFadeOut').value = 200;
+            document.getElementById('valorFadeOut').textContent = '0.2s';
+            document.getElementById('controlBajas').value = 0;
+            document.getElementById('valorBajas').textContent = '0 dB';
+            document.getElementById('controlMedias').value = 0;
+            document.getElementById('valorMedias').textContent = '0 dB';
+            document.getElementById('controlAgudos').value = 0;
+            document.getElementById('valorAgudos').textContent = '0 dB';
+
+            // Resetear localStorage
+            localStorage.setItem('audioVolumen', 1.0);
+            localStorage.setItem('audioVelocidad', 1.0);
+            localStorage.setItem('audioFadeIn', 200);
+            localStorage.setItem('audioFadeOut', 200);
+            localStorage.setItem('eqBajas', 0);
+            localStorage.setItem('eqMedias', 0);
+            localStorage.setItem('eqAgudos', 0);
         }
 
         // ============================================================
@@ -641,6 +1022,13 @@
         }
 
         animar();
+
+        // ============================================================
+        // 🚀 INICIALIZAR TODO AL CARGAR
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarControlesPopup();
+        });
     </script>
 </body>
 </html>
