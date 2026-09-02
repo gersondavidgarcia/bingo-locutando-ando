@@ -24,6 +24,9 @@
     let anuncioEnProgreso = false;
     let bloquearBoton = false;
 
+    let contadorLinea = 0;
+    let contadorBingo = 0;
+
     const paletasColores = [
         { border: '#0d47a1', bg: '#42a5f5' },
         { border: '#01579b', bg: '#29b6f6' },
@@ -67,6 +70,24 @@
     let audioFadeOut = parseInt(localStorage.getItem('audioFadeOut')) || 200;
 
     // ==========================================================
+    // 🛠️ FUNCIÓN PARA BLOQUEAR/DESBLOQUEAR EL BOTÓN FÍSICAMENTE
+    // ==========================================================
+
+    function setBotonBloqueado(estado) {
+        const btn = document.getElementById('btnSacarBola');
+        if (!btn) return;
+        if (estado) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.6';
+            btn.style.transform = 'scale(0.95)';
+        } else {
+            btn.style.pointerEvents = 'auto';
+            btn.style.opacity = '1';
+            btn.style.transform = 'scale(1)';
+        }
+    }
+
+    // ==========================================================
     // 🎙️ FUNCIÓN PRINCIPAL - DECIR NÚMERO CON FADE + CALLBACK
     // ==========================================================
 
@@ -99,7 +120,7 @@
                     },
                     onend: function() {
                         if (callback) {
-                            setTimeout(callback, 5);
+                            setTimeout(callback, 0);
                         }
                     }
                 });
@@ -122,7 +143,7 @@
                 
                 audio.onended = function() {
                     if (callback) {
-                        setTimeout(callback, 10);
+                        setTimeout(callback, 0);
                     }
                 };
             }
@@ -160,7 +181,7 @@
             
             audio.onended = function() {
                 index++;
-                setTimeout(playNext, 10);
+                setTimeout(playNext, 0);
             };
             
             audio.onerror = function() {
@@ -174,12 +195,20 @@
     }
 
     // ==========================================================
-    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO
+    // 🆕 ANUNCIAR MÚLTIPLES CARTONES A 1 NÚMERO (CON PATRÓN POR TIPO)
     // ==========================================================
 
     function anunciarMultiplesCartones(cartones) {
         if (cartones.length === 0) return;
         if (!configuracion.vozActiva) return;
+        
+        const tipo = cartones[0].tipo;
+        
+        if (tipo === 'linea') {
+            contadorLinea++;
+        } else {
+            contadorBingo++;
+        }
         
         let cartonesFiltrados = cartones.filter(c => {
             const clave = `${c.id}-${c.numeroFaltante}`;
@@ -191,10 +220,24 @@
         if (cartonesFiltrados.length === 0) return;
         
         bloquearBoton = true;
+        setBotonBloqueado(true);
         anuncioEnProgreso = true;
         
         const base = 'Audios/David/';
         let colaAudios = [];
+        
+        let nivel;
+        if (tipo === 'linea') {
+            if (contadorLinea === 1) nivel = 'completa';
+            else if (contadorLinea === 2) nivel = 'media';
+            else nivel = 'corta';
+        } else {
+            if (contadorBingo === 1) nivel = 'completa';
+            else if (contadorBingo === 2) nivel = 'media';
+            else nivel = 'corta';
+        }
+        
+        console.log(`📢 Nivel ${nivel} para ${tipo} (contador: ${tipo === 'linea' ? contadorLinea : contadorBingo})`);
         
         colaAudios.push(base + '1. Amarrar/Amarra.mp3');
         
@@ -202,23 +245,37 @@
             colaAudios.push(base + `2. Cartones/Carton ${carton.id}.mp3`);
         });
         
-        colaAudios.push(base + '3. Conector/Le falta el numero.mp3');
+        if (cartonesFiltrados.length > 1) {
+            console.log(`📢 Múltiples cartones (${cartonesFiltrados.length}): solo "Amarra + cartones"`);
+            reproducirColaAudios(colaAudios, function() {
+                anuncioEnProgreso = false;
+                bloquearBoton = false;
+                setBotonBloqueado(false);
+            });
+            return;
+        }
         
-        cartonesFiltrados.forEach((carton, index) => {
-            colaAudios.push(base + `0. Numeros del 1 al 90/${carton.numeroFaltante}.mp3`);
-        });
+        if (nivel === 'completa' || nivel === 'media') {
+            colaAudios.push(base + '3. Conector/Le falta el numero.mp3');
+            cartonesFiltrados.forEach((carton) => {
+                colaAudios.push(base + `0. Numeros del 1 al 90/${carton.numeroFaltante}.mp3`);
+            });
+        }
         
-        const todosBingo = cartonesFiltrados.every(c => c.tipo === 'bingo');
-        const tipoArchivo = todosBingo ? 'Para completar bingo.mp3' : 'Para completar Linea.mp3';
-        colaAudios.push(base + '4. Para ganar/' + tipoArchivo);
+        if (nivel === 'completa') {
+            const todosBingo = cartonesFiltrados.every(c => c.tipo === 'bingo');
+            const tipoArchivo = todosBingo ? 'Para completar bingo.mp3' : 'Para completar Linea.mp3';
+            colaAudios.push(base + '4. Para ganar/' + tipoArchivo);
+        }
+        
+        console.log(`📢 Anuncio nivel ${nivel}: ${colaAudios.length} audios`);
         
         reproducirColaAudios(colaAudios, function() {
             anuncioEnProgreso = false;
             bloquearBoton = false;
+            setBotonBloqueado(false);
             console.log('📢 Anuncio completado');
         });
-        
-        console.log(`📢 Anunciando ${cartonesFiltrados.length} cartón(es) a 1 número`);
     }
 
     // ==========================================================
@@ -843,6 +900,7 @@
 
         if (hayLinea && !lineaCantadaGlobal) {
             lineaCantadaGlobal = true;
+            contadorLinea = 0;
             if (ganadorLinea) {
                 trazarLineaGanadora(ganadorLinea.idx, ganadorLinea.r);
                 agregarBadgePremio(ganadorLinea.idCarton, 'linea');
@@ -852,6 +910,7 @@
 
         if (hayBingo && !bingoCantadoGlobal) {
             bingoCantadoGlobal = true;
+            contadorBingo = 0;
             if (ganadorBingo) {
                 agregarBadgePremio(ganadorBingo.idCarton, 'bingo');
                 mostrarBanner(`¡¡ BINGO EN CARTÓN ${ganadorBingo.idCarton} !! 🎉🏆`, true);
@@ -863,15 +922,32 @@
 
     // ==========================================================
     // 🎰 FUNCIÓN SACAR BOLA CON ANIMACIÓN COMPLETA
+    // 🔥 EL BLOQUEO ESTÁ AL PRINCIPIO - ANTES DE CUALQUIER COSA
+    // 🔥 TAMBIÉN BLOQUEA EVENTOS TÁCTILES PARA MÓVIL
     // ==========================================================
-    function sacarBolaConAnimacion() {
-        if (isAnimating) return;
+    function sacarBolaConAnimacion(event) {
+        // 🔥 Prevenir eventos táctiles en móvil
+        if (event && event.type === 'touchstart') {
+            event.preventDefault();
+        }
+        
+        // 🔥 1️⃣ PRIMERO: BLOQUEAR - NO HACE NADA SI ESTÁ BLOQUEADO
+        if (bloquearBoton) {
+            return;
+        }
+        
+        // 🔥 2️⃣ SEGUNDO: VERIFICAR SI YA ESTÁ ANIMANDO
+        if (isAnimating) {
+            return;
+        }
+        
+        // 🔥 3️⃣ TERCERO: VERIFICAR SI HAY BOLAS
         if (bolasDisponibles.length === 0) {
             alert('¡Ya se han extraído todas las bolas!');
             return;
         }
-        if (bloquearBoton) return;
 
+        // 🔥 4️⃣ CUARTO: ANIMACIÓN DEL BOTÓN (SOLO LLEGA AQUÍ SI NO ESTÁ BLOQUEADO)
         const btn = document.getElementById('btnSacarBola');
         btn.classList.remove('presionado');
         void btn.offsetWidth;
@@ -897,7 +973,7 @@
                 });
             });
 
-            await new Promise(r => setTimeout(r, 10));
+            await new Promise(r => setTimeout(r, 0));
 
             actualizarRecientesUI();
             actualizarEstado(num);
@@ -970,6 +1046,7 @@
             
             if (candidatosLinea.length > 0 && !lineaCantadaGlobal) {
                 lineaCantadaGlobal = true;
+                contadorLinea = 0;
                 const ganador = candidatosLinea[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
@@ -990,6 +1067,7 @@
                 
             } else if (candidatosBingo.length > 0 && !bingoCantadoGlobal) {
                 bingoCantadoGlobal = true;
+                contadorBingo = 0;
                 const ganador = candidatosBingo[0];
                 
                 const celdaGanadora = document.querySelector(`#carton-${ganador.idCarton} .celda[data-num="${numActual}"]`);
@@ -1037,6 +1115,9 @@
         cartonesFaltaUnoAnunciados.clear();
         anuncioEnProgreso = false;
         bloquearBoton = false;
+        setBotonBloqueado(false);
+        contadorLinea = 0;
+        contadorBingo = 0;
         inicializarBolillero();
         document.getElementById('numeroDisplay').textContent = '--';
         const sphere = document.getElementById('bolilleroSphere');
@@ -1054,8 +1135,13 @@
         currentCartones = generar10CartonesGlobales();
         reiniciarJuego();
 
-        document.getElementById('btnSacarBola').addEventListener('click', sacarBolaConAnimacion);
+        // 🔥 Usar ambos eventos para móvil y PC
+        const btn = document.getElementById('btnSacarBola');
+        btn.addEventListener('click', sacarBolaConAnimacion);
+        btn.addEventListener('touchstart', sacarBolaConAnimacion, { passive: false });
+        
         document.getElementById('bolilleroSphere').addEventListener('click', sacarBolaConAnimacion);
+        document.getElementById('bolilleroSphere').addEventListener('touchstart', sacarBolaConAnimacion, { passive: false });
 
         document.getElementById('btnGenerar').addEventListener('click', () => {
             cambiarColorAleatorio();
