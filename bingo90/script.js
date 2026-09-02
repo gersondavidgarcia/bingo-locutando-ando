@@ -54,174 +54,43 @@
     ];
 
     // ==========================================================
-    // 🗣️ SISTEMA DE VOCES - UNIFICADO
-    // ==========================================================
-
-    let vozSeleccionada = null;
-    let vocesCargadas = [];
-
-    // Obtener la voz guardada del localStorage
-    const nombreVozGuardada = localStorage.getItem('vozSeleccionada');
-
-    // 1. CARGAR VOCES
-    function cargarVocesJuego() {
-        if (!window.speechSynthesis) {
-            console.warn('❌ Navegador no soporta voz');
-            return;
-        }
-        
-        const voces = window.speechSynthesis.getVoices();
-        
-        if (voces.length > 0) {
-            procesarVocesJuego(voces);
-            return;
-        }
-        
-        // Esperar el evento (como en vocees.html)
-        window.speechSynthesis.onvoiceschanged = function() {
-            const nuevasVoces = window.speechSynthesis.getVoices();
-            if (nuevasVoces.length > 0) {
-                procesarVocesJuego(nuevasVoces);
-            }
-        };
-        
-        // Reintentar
-        setTimeout(() => {
-            const reintentar = window.speechSynthesis.getVoices();
-            if (reintentar.length > 0) {
-                procesarVocesJuego(reintentar);
-            }
-        }, 500);
-        
-        setTimeout(() => {
-            const reintentar = window.speechSynthesis.getVoices();
-            if (reintentar.length > 0) {
-                procesarVocesJuego(reintentar);
-            }
-        }, 1000);
-    }
-
-    // 2. PROCESAR VOCES
-    function procesarVocesJuego(vocesDisponibles) {
-        let vocesEspanol = vocesDisponibles.filter(v => v.lang.startsWith('es'));
-        if (vocesEspanol.length === 0) vocesEspanol = vocesDisponibles;
-        if (vocesEspanol.length === 0) {
-            console.warn('❌ No hay voces disponibles');
-            return;
-        }
-        
-        vocesCargadas = vocesEspanol;
-        
-        // Buscar la voz guardada
-        if (nombreVozGuardada) {
-            const encontrada = vocesCargadas.find(v => v.name === nombreVozGuardada);
-            if (encontrada) {
-                vozSeleccionada = encontrada;
-                console.log('✅ Voz cargada desde localStorage:', vozSeleccionada.name);
-                return;
-            }
-        }
-        
-        // Si no se encontró, usar la primera (mejor)
-        vozSeleccionada = vocesCargadas[0];
-        console.log('✅ Voz por defecto:', vozSeleccionada.name);
-    }
-
-    // 3. DECIR NÚMERO CON LA VOZ SELECCIONADA
-    function decirNumeroConVoz(numero) {
-        if (!configuracion.vozActiva) {
-            console.log('🔇 Voz desactivada');
-            return;
-        }
-        
-        if (!window.speechSynthesis) {
-            console.warn('❌ No hay SpeechSynthesis');
-            return;
-        }
-        
-        // Si no hay voz seleccionada, intentar cargar
-        if (!vozSeleccionada) {
-            console.log('⏳ Intentando cargar voces...');
-            cargarVocesJuego();
-            // Si después de cargar sigue sin haber, usar la primera disponible
-            if (!vozSeleccionada && vocesCargadas.length > 0) {
-                vozSeleccionada = vocesCargadas[0];
-            }
-            if (!vozSeleccionada) {
-                console.warn('❌ No hay voz disponible');
-                return;
-            }
-        }
-        
-        try {
-            window.speechSynthesis.cancel();
-            
-            const mensaje = new SpeechSynthesisUtterance(numero.toString());
-            mensaje.voice = vozSeleccionada;
-            mensaje.lang = vozSeleccionada.lang || 'es-ES';
-            mensaje.rate = 0.9;
-            mensaje.pitch = 1.0;
-            
-            mensaje.onstart = () => {
-                console.log('🔊 Hablando:', numero);
-            };
-            
-            mensaje.onerror = (e) => {
-                console.warn('❌ Error al hablar:', e.error);
-                // Reintentar con voz por defecto
-                if (e.error === 'not-allowed') {
-                    console.log('🔄 Reintentando con voz por defecto...');
-                    const msgFallback = new SpeechSynthesisUtterance(numero.toString());
-                    msgFallback.lang = 'es-ES';
-                    msgFallback.rate = 0.9;
-                    window.speechSynthesis.speak(msgFallback);
-                }
-            };
-            
-            window.speechSynthesis.speak(mensaje);
-            
-        } catch (error) {
-            console.warn('❌ Error en síntesis de voz:', error);
-            // Fallback: voz sin seleccionar
-            try {
-                const msgFallback = new SpeechSynthesisUtterance(numero.toString());
-                msgFallback.lang = 'es-ES';
-                msgFallback.rate = 0.9;
-                window.speechSynthesis.speak(msgFallback);
-            } catch (e) {
-                console.error('❌ Error fatal:', e);
-            }
-        }
-    }
-
-    // 4. Función para probar la voz (desde consola)
-    window.probarVozJuego = function() {
-        if (vozSeleccionada) {
-            console.log('🔊 Probando voz:', vozSeleccionada.name);
-            decirNumeroConVoz(42);
-        } else {
-            console.log('⏳ Cargando voces...');
-            cargarVocesJuego();
-            setTimeout(() => {
-                if (vozSeleccionada) {
-                    console.log('🔊 Probando voz:', vozSeleccionada.name);
-                    decirNumeroConVoz(42);
-                } else {
-                    console.warn('❌ No hay voz disponible');
-                }
-            }, 500);
-        }
-    };
-
-    // 5. Iniciar carga de voces
-    cargarVocesJuego();
-
-    // ==========================================================
-    // 🎯 FUNCIÓN PRINCIPAL - DECIR NÚMERO
+    // 🎙️ FUNCIÓN PRINCIPAL - DECIR NÚMERO CON AUDIOS PREGRABADOS
     // ==========================================================
 
     function decirNumero(numero) {
-        decirNumeroConVoz(numero);
+        // Verificar si la voz está activada en la configuración
+        if (!configuracion.vozActiva) return;
+        
+        try {
+            // Ruta de tu archivo de audio (carpeta Audios/David/)
+            const ruta = `Audios/David/${numero}.mp3`;
+            
+            // Crear el elemento de audio
+            const audio = new Audio(ruta);
+            
+            // Reproducir
+            audio.play();
+            
+        } catch (error) {
+            console.warn('❌ Error al reproducir audio:', error);
+            // Fallback: usar voz del sistema si falla
+            fallbackVozSistema(numero);
+        }
+    }
+
+    // ==========================================================
+    // 🔄 FALLBACK - VOZ DEL SISTEMA (por si falta algún audio)
+    // ==========================================================
+
+    function fallbackVozSistema(numero) {
+        if (!window.speechSynthesis) return;
+        if (!configuracion.vozActiva) return;
+        
+        window.speechSynthesis.cancel();
+        const mensaje = new SpeechSynthesisUtterance(numero.toString());
+        mensaje.lang = 'es-ES';
+        mensaje.rate = 0.9;
+        window.speechSynthesis.speak(mensaje);
     }
 
     // ==========================================================
