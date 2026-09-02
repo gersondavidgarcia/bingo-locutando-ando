@@ -338,7 +338,7 @@
 
     <script>
         // ============================================================
-        // 🗣️ SISTEMA DE VOCES - COMPATIBLE CON PC Y ANDROID
+        // 🗣️ SISTEMA DE VOCES - MUESTRA TODAS LAS VOCES REALES
         // ============================================================
 
         let vocesMenu = [];
@@ -385,28 +385,17 @@
         }
 
         function procesarVocesMenu(vocesDisponibles) {
+            // Filtrar SOLO español
             let vocesEspanol = vocesDisponibles.filter(v => v.lang.startsWith('es'));
-            if (vocesEspanol.length === 0) vocesEspanol = vocesDisponibles;
+            
             if (vocesEspanol.length === 0) {
                 const selector = document.getElementById('selectorVozAjustes');
                 if (selector) {
-                    selector.innerHTML = '<option value="">❌ No hay voces</option>';
+                    selector.innerHTML = '<option value="">❌ No hay voces en español</option>';
                     selector.disabled = true;
                 }
                 return;
             }
-            
-            vocesEspanol.sort((a, b) => {
-                const orden = { 'Google': 0, 'Microsoft': 1, 'Samantha': 2, 'Jorge': 2 };
-                const aKey = Object.keys(orden).find(k => a.name.includes(k)) || 'zzz';
-                const bKey = Object.keys(orden).find(k => b.name.includes(k)) || 'zzz';
-                if (orden[aKey] !== undefined && orden[bKey] !== undefined) {
-                    return orden[aKey] - orden[bKey];
-                }
-                if (orden[aKey] !== undefined) return -1;
-                if (orden[bKey] !== undefined) return 1;
-                return a.name.localeCompare(b.name);
-            });
             
             vocesMenu = vocesEspanol;
             
@@ -415,90 +404,31 @@
                 selector.innerHTML = '';
                 selector.disabled = false;
                 
-                let contadorMicrosoft = 0;
-                let contadorGoogle = 0;
-                let contadorEspanol = 0;
-                let contadorEspanolUS = 0;
-                
+                // 🔥 MOSTRAR CADA VOZ CON SU NOMBRE REAL
                 vocesMenu.forEach((v, i) => {
                     const opt = document.createElement('option');
                     opt.value = i;
                     
-                    let nombreMostrado = '';
-                    const nombreCompleto = v.name;
+                    // Mostrar el nombre REAL de la voz
+                    let nombreMostrado = v.name;
                     
-                    // ================================================================
-                    // 🔥 DETECCIÓN PARA ANDROID - Español (España) y Español (Estados Unidos)
-                    // ================================================================
+                    // Añadir idioma si no está visible
+                    if (!nombreMostrado.includes(v.lang)) {
+                        nombreMostrado = nombreMostrado + ' (' + v.lang + ')';
+                    }
                     
-                    // ANDROID - Español (España)
-                    if (nombreCompleto.includes('España') || nombreCompleto.includes('es-ES')) {
-                        contadorEspanol++;
-                        let numeroRomano = '';
-                        switch(contadorEspanol) {
-                            case 1: numeroRomano = 'I'; break;
-                            case 2: numeroRomano = 'II'; break;
-                            case 3: numeroRomano = 'III'; break;
-                            case 4: numeroRomano = 'IV'; break;
-                            case 5: numeroRomano = 'V'; break;
-                            default: numeroRomano = contadorEspanol;
-                        }
-                        if (v.lang.includes('es-ES')) {
-                            nombreMostrado = '🇪🇸 España Voz ' + numeroRomano + ' ⭐⭐⭐⭐';
-                        } else {
-                            nombreMostrado = '🇪🇸 ' + nombreCompleto + ' ⭐⭐⭐⭐';
-                        }
-                    }
-                    // ANDROID - Español (Estados Unidos)
-                    else if (nombreCompleto.includes('Estados Unidos') || nombreCompleto.includes('es-US')) {
-                        contadorEspanolUS++;
-                        let numeroRomano = '';
-                        switch(contadorEspanolUS) {
-                            case 1: numeroRomano = 'I'; break;
-                            case 2: numeroRomano = 'II'; break;
-                            case 3: numeroRomano = 'III'; break;
-                            case 4: numeroRomano = 'IV'; break;
-                            default: numeroRomano = contadorEspanolUS;
-                        }
-                        nombreMostrado = '🇺🇸 EE.UU Voz ' + numeroRomano + ' ⭐⭐⭐⭐';
-                    }
-                    // GOOGLE (PC)
-                    else if (nombreCompleto.includes('Google')) {
-                        contadorGoogle++;
-                        if (contadorGoogle === 1) {
-                            nombreMostrado = '👩 Google 1 ⭐⭐⭐⭐⭐';
-                        } else if (contadorGoogle === 2) {
-                            nombreMostrado = '👨 Google 2 ⭐⭐⭐⭐⭐';
-                        } else {
-                            nombreMostrado = '🇬 Google ' + contadorGoogle + ' ⭐⭐⭐⭐⭐';
-                        }
-                    }
-                    // MICROSOFT (PC)
-                    else if (nombreCompleto.includes('Microsoft')) {
-                        contadorMicrosoft++;
-                        if (contadorMicrosoft === 1) {
-                            nombreMostrado = '🪟 Microsoft 1 ⭐⭐⭐⭐';
-                        } else if (contadorMicrosoft === 2) {
-                            nombreMostrado = '🪟 Microsoft 2 ⭐⭐⭐⭐';
-                        } else if (contadorMicrosoft === 3) {
-                            nombreMostrado = '🪟 Microsoft 3 ⭐⭐⭐⭐';
-                        } else {
-                            nombreMostrado = '🪟 Microsoft ' + contadorMicrosoft + ' ⭐⭐⭐⭐';
-                        }
-                    }
-                    // APPLE
-                    else if (nombreCompleto.includes('Samantha') || nombreCompleto.includes('Jorge')) {
-                        nombreMostrado = '🍎 Apple ⭐⭐⭐⭐⭐';
-                    }
-                    // CUALQUIER OTRA
-                    else {
-                        nombreMostrado = '🎤 ' + nombreCompleto;
+                    // Añadir indicador de local
+                    if (v.localService) {
+                        nombreMostrado = nombreMostrado + ' 📱';
+                    } else {
+                        nombreMostrado = nombreMostrado + ' ☁️';
                     }
                     
                     opt.textContent = nombreMostrado;
                     selector.appendChild(opt);
                 });
                 
+                // Seleccionar la voz guardada o la primera
                 if (vozSeleccionadaNombreMenu) {
                     const idx = vocesMenu.findIndex(v => v.name === vozSeleccionadaNombreMenu);
                     if (idx !== -1) {
@@ -520,6 +450,7 @@
                 vozSeleccionadaMenu = vocesMenu[index];
                 vozSeleccionadaNombreMenu = vozSeleccionadaMenu.name;
                 localStorage.setItem('vozSeleccionada', vozSeleccionadaNombreMenu);
+                console.log('✅ Voz seleccionada:', vozSeleccionadaNombreMenu);
             }
         }
 
