@@ -229,19 +229,19 @@
             aplicarModoFiguras();
         }
 
-        function aplicarModoFiguras() {
-            const panelFiguras = document.getElementById('panelFiguras');
-            const panelControl = document.getElementById('panelControl');
-            if (!panelFiguras || !panelControl) return;
+       function aplicarModoFiguras() {
+    const panelFiguras = document.getElementById('panelFiguras');
+    const panelControl = document.getElementById('panelControl');
+    if (!panelFiguras || !panelControl) return;
 
-            if (MOSTRAR_FIGURAS) {
-                panelFiguras.style.display = 'flex';
-                panelControl.style.flex = '0 0 52%';
-            } else {
-                panelFiguras.style.display = 'none';
-                panelControl.style.flex = '0 0 58%';
-            }
-        }
+    if (MOSTRAR_FIGURAS) {
+        panelFiguras.classList.add('visible');
+        panelControl.style.flex = '0 0 58%';
+    } else {
+        panelFiguras.classList.remove('visible');
+        panelControl.style.flex = '0 0 58%';
+    }
+}
 
         /* ============================================
            EXTRAER NOMBRES DE FIREBASE
