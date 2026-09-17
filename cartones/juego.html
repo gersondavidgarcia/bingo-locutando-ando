@@ -207,6 +207,7 @@
 
         /* ============================================
            LECTURA DE CONFIGURACIÓN
+           (solo lee valores, NO aplica nada al DOM todavía)
            ============================================ */
         function cargarConfiguracion() {
             try {
@@ -227,51 +228,54 @@
 
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-
-            aplicarTamanoControl();
-            aplicarConfigFiguras();
         }
 
+        /* ============================================
+           APLICAR TAMAÑO DEL CONTROL Y FIGURAS
+           (con requestAnimationFrame para asegurar que el DOM esté listo)
+           ============================================ */
         function aplicarTamanoControl() {
-            const panelControl = document.getElementById('panelControl');
-            if (!panelControl) return;
-            panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
+            requestAnimationFrame(() => {
+                const panelControl = document.getElementById('panelControl');
+                if (!panelControl) return;
+                panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
+            });
         }
 
         function aplicarConfigFiguras() {
-            const panelFiguras = document.getElementById('panelFiguras');
-            const miniLleno = document.getElementById('miniCartonLleno');
-            const miniFigura = document.getElementById('miniCartonFigura');
-            const miniExtra = document.getElementById('miniCartonExtra');
-            if (!panelFiguras) return;
+            requestAnimationFrame(() => {
+                const panelFiguras = document.getElementById('panelFiguras');
+                const miniLleno = document.getElementById('miniCartonLleno');
+                const miniFigura = document.getElementById('miniCartonFigura');
+                const miniExtra = document.getElementById('miniCartonExtra');
+                if (!panelFiguras) return;
 
-            // Aplicar tamaño a todos los mini-cartones
-            [miniLleno, miniFigura, miniExtra].forEach(m => {
-                if (m) m.style.maxWidth = TAMANO_FIGURAS + 'px';
+                [miniLleno, miniFigura, miniExtra].forEach(m => {
+                    if (m) m.style.maxWidth = TAMANO_FIGURAS + 'px';
+                });
+
+                if (CANTIDAD_FIGURAS === 0) {
+                    panelFiguras.classList.remove('visible');
+                    if (miniLleno) miniLleno.style.display = 'none';
+                    if (miniFigura) miniFigura.style.display = 'none';
+                    if (miniExtra) miniExtra.style.display = 'none';
+                } else if (CANTIDAD_FIGURAS === 1) {
+                    panelFiguras.classList.add('visible');
+                    if (miniLleno) miniLleno.style.display = 'none';
+                    if (miniFigura) miniFigura.style.display = 'grid';
+                    if (miniExtra) miniExtra.style.display = 'none';
+                } else if (CANTIDAD_FIGURAS === 2) {
+                    panelFiguras.classList.add('visible');
+                    if (miniLleno) miniLleno.style.display = 'grid';
+                    if (miniFigura) miniFigura.style.display = 'grid';
+                    if (miniExtra) miniExtra.style.display = 'none';
+                } else if (CANTIDAD_FIGURAS === 3) {
+                    panelFiguras.classList.add('visible');
+                    if (miniLleno) miniLleno.style.display = 'grid';
+                    if (miniFigura) miniFigura.style.display = 'grid';
+                    if (miniExtra) miniExtra.style.display = 'grid';
+                }
             });
-
-            // Mostrar/ocultar según cantidad
-            if (CANTIDAD_FIGURAS === 0) {
-                panelFiguras.classList.remove('visible');
-                if (miniLleno) miniLleno.style.display = 'none';
-                if (miniFigura) miniFigura.style.display = 'none';
-                if (miniExtra) miniExtra.style.display = 'none';
-            } else if (CANTIDAD_FIGURAS === 1) {
-                panelFiguras.classList.add('visible');
-                if (miniLleno) miniLleno.style.display = 'none';
-                if (miniFigura) miniFigura.style.display = 'grid';
-                if (miniExtra) miniExtra.style.display = 'none';
-            } else if (CANTIDAD_FIGURAS === 2) {
-                panelFiguras.classList.add('visible');
-                if (miniLleno) miniLleno.style.display = 'grid';
-                if (miniFigura) miniFigura.style.display = 'grid';
-                if (miniExtra) miniExtra.style.display = 'none';
-            } else if (CANTIDAD_FIGURAS === 3) {
-                panelFiguras.classList.add('visible');
-                if (miniLleno) miniLleno.style.display = 'grid';
-                if (miniFigura) miniFigura.style.display = 'grid';
-                if (miniExtra) miniExtra.style.display = 'grid';
-            }
         }
 
         /* ============================================
@@ -417,8 +421,8 @@
             if (CANTIDAD_FIGURAS === 0) return;
             const paleta = PALETAS[paletaActual];
             const colorTema = paleta.tema;
-            if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
             if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', FIGURAS['lleno'], colorTema);
+            if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
             if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', FIGURAS['lleno'], colorTema);
         }
 
@@ -491,6 +495,10 @@
             aplicarPaleta();
             actualizarMiniCartones();
             renderizarTablaControl();
+
+            // ✅ Aplicar configuración DESPUÉS de que todo esté renderizado
+            aplicarTamanoControl();
+            aplicarConfigFiguras();
         }
 
         function renderizarTablaControl() {
@@ -607,12 +615,18 @@
                 figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
             }
             reiniciarJuego();
+            // ✅ Re-aplicar config después del reinicio (por seguridad)
+            aplicarTamanoControl();
+            aplicarConfigFiguras();
         }
 
         window.sacarBola = sacarBola;
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
 
+        /* ============================================
+           INICIALIZACIÓN
+           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 paletaActual = Math.floor(Math.random() * PALETAS.length);
