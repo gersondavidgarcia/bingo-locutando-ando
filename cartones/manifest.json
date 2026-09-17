@@ -2,10 +2,10 @@
   "name": "Bingo Tradicional",
   "short_name": "Bingo",
   "description": "Juego de Bingo Proyector con cartones en pantalla completa",
-  "start_url": "./index.html",
+  "start_url": "index.html",
   "display_override": ["fullscreen", "standalone"],
-  "display": "fullscreen",
-  "orientation": "landscape",
+  "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#12121c",
   "theme_color": "#0d3c9b",
   "icons": [
