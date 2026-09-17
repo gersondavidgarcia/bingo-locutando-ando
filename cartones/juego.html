@@ -242,7 +242,7 @@
                 // 1) Ajustar el ancho del panel de control (porcentaje)
                 panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
 
-                // 2) Calcular font-size: 50% del promedio entre ancho y alto
+                // 2) Calcular font-size: 45% del promedio entre ancho y alto
                 const bolitas = panelControl.querySelectorAll('.bolita');
                 bolitas.forEach(b => {
                     const rect = b.getBoundingClientRect();
@@ -251,11 +251,11 @@
                     if (ancho <= 0 || alto <= 0) return;
 
                     const promedio = (ancho + alto) / 2;
-                    let font = promedio * 0.5;
+                    let font = promedio * 0.45;
 
-                    // Topes: mínimo 6px, máximo 14px
-                    if (font > 14) font = 14;
-                    if (font < 6) font = 6;
+                    // Topes: mínimo 5px, máximo 16px
+                    if (font > 16) font = 16;
+                    if (font < 5) font = 5;
 
                     b.style.fontSize = font + 'px';
                     b.style.lineHeight = '1';
