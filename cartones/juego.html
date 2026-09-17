@@ -64,6 +64,7 @@
             <div class="panel-figuras" id="panelFiguras">
                 <div class="mini-carton" id="miniCartonLleno" title="Cartón lleno"></div>
                 <div class="mini-carton" id="miniCartonFigura" title="Figura actual"></div>
+                <div class="mini-carton" id="miniCartonExtra" title="Extra"></div>
             </div>
 
             <div class="panel-botones">
@@ -89,9 +90,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        /* ============================================
-           CONFIGURACIÓN FIREBASE
-           ============================================ */
         const firebaseConfig = {
             apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
             authDomain: "bingo-locutando-ando.firebaseapp.com",
@@ -190,7 +188,9 @@
         let MAX_BALOTAS = 75;
         let MODO_JUEGO = 75;
         let USAR_BASE_DATOS = true;
-        let MOSTRAR_FIGURAS = false;
+        let CANTIDAD_FIGURAS = 2;
+        let TAMANO_CONTROL = 58;
+        let TAMANO_FIGURAS = 42;
 
         let nombresDeFirebase = [];
         let bombo = [];
@@ -217,7 +217,9 @@
                     MODO_JUEGO = parseInt(config.modo) || 75;
                     MAX_BALOTAS = MODO_JUEGO;
                     USAR_BASE_DATOS = config.usarDB !== undefined ? config.usarDB : true;
-                    MOSTRAR_FIGURAS = config.mostrarFiguras !== undefined ? config.mostrarFiguras : false;
+                    CANTIDAD_FIGURAS = config.cantidadFiguras !== undefined ? parseInt(config.cantidadFiguras) : 2;
+                    TAMANO_CONTROL = config.tamanoControl !== undefined ? parseInt(config.tamanoControl) : 58;
+                    TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
                 }
             } catch (e) {
                 console.warn('Config no leída, usando default.');
@@ -226,22 +228,51 @@
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
 
-            aplicarModoFiguras();
+            aplicarTamanoControl();
+            aplicarConfigFiguras();
         }
 
-       function aplicarModoFiguras() {
-    const panelFiguras = document.getElementById('panelFiguras');
-    const panelControl = document.getElementById('panelControl');
-    if (!panelFiguras || !panelControl) return;
+        function aplicarTamanoControl() {
+            const panelControl = document.getElementById('panelControl');
+            if (!panelControl) return;
+            panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
+        }
 
-    if (MOSTRAR_FIGURAS) {
-        panelFiguras.classList.add('visible');
-        panelControl.style.flex = '0 0 58%';
-    } else {
-        panelFiguras.classList.remove('visible');
-        panelControl.style.flex = '0 0 58%';
-    }
-}
+        function aplicarConfigFiguras() {
+            const panelFiguras = document.getElementById('panelFiguras');
+            const miniLleno = document.getElementById('miniCartonLleno');
+            const miniFigura = document.getElementById('miniCartonFigura');
+            const miniExtra = document.getElementById('miniCartonExtra');
+            if (!panelFiguras) return;
+
+            // Aplicar tamaño a todos los mini-cartones
+            [miniLleno, miniFigura, miniExtra].forEach(m => {
+                if (m) m.style.maxWidth = TAMANO_FIGURAS + 'px';
+            });
+
+            // Mostrar/ocultar según cantidad
+            if (CANTIDAD_FIGURAS === 0) {
+                panelFiguras.classList.remove('visible');
+                if (miniLleno) miniLleno.style.display = 'none';
+                if (miniFigura) miniFigura.style.display = 'none';
+                if (miniExtra) miniExtra.style.display = 'none';
+            } else if (CANTIDAD_FIGURAS === 1) {
+                panelFiguras.classList.add('visible');
+                if (miniLleno) miniLleno.style.display = 'none';
+                if (miniFigura) miniFigura.style.display = 'grid';
+                if (miniExtra) miniExtra.style.display = 'none';
+            } else if (CANTIDAD_FIGURAS === 2) {
+                panelFiguras.classList.add('visible');
+                if (miniLleno) miniLleno.style.display = 'grid';
+                if (miniFigura) miniFigura.style.display = 'grid';
+                if (miniExtra) miniExtra.style.display = 'none';
+            } else if (CANTIDAD_FIGURAS === 3) {
+                panelFiguras.classList.add('visible');
+                if (miniLleno) miniLleno.style.display = 'grid';
+                if (miniFigura) miniFigura.style.display = 'grid';
+                if (miniExtra) miniExtra.style.display = 'grid';
+            }
+        }
 
         /* ============================================
            EXTRAER NOMBRES DE FIREBASE
@@ -294,9 +325,6 @@
             );
         }
 
-        /* ============================================
-           ACTUALIZAR SOLO LOS TEXTOS DE LAS CABECERAS
-           ============================================ */
         function actualizarTextosDeCartones() {
             const cartones = document.querySelectorAll('.cartones-grid .carton');
             cartones.forEach((carton, i) => {
@@ -386,11 +414,12 @@
         }
 
         function actualizarMiniCartones() {
-            if (!MOSTRAR_FIGURAS) return;
+            if (CANTIDAD_FIGURAS === 0) return;
             const paleta = PALETAS[paletaActual];
             const colorTema = paleta.tema;
-            dibujarMiniCarton('miniCartonLleno', FIGURAS['lleno'], colorTema);
-            dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
+            if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
+            if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', FIGURAS['lleno'], colorTema);
+            if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', FIGURAS['lleno'], colorTema);
         }
 
         /* ============================================
@@ -573,23 +602,17 @@
 
         function cambiarCartonesYPaleta() {
             paletaActual = (paletaActual + 1) % PALETAS.length;
-            if (MOSTRAR_FIGURAS) {
+            if (CANTIDAD_FIGURAS >= 1) {
                 const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
                 figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
             }
             reiniciarJuego();
         }
 
-        /* ============================================
-           EXPONER FUNCIONES AL WINDOW
-           ============================================ */
         window.sacarBola = sacarBola;
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
 
-        /* ============================================
-           INICIALIZACIÓN
-           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 paletaActual = Math.floor(Math.random() * PALETAS.length);
