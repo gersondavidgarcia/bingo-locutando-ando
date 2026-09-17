@@ -82,7 +82,7 @@
            IMPORTACIONES DE FIREBASE
            ============================================ */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         /* ============================================
            CONFIGURACIÓN FIREBASE
@@ -131,6 +131,7 @@
         let nombresDeFirebase = [];
         let bombo = [];
         let historialSacadas = [];
+        let unsubscribeSnapshot = null;
 
         const RANGOS_BINGO = {
             B: [1, 15],
@@ -162,74 +163,64 @@
         }
 
         /* ============================================
-           CARGA DE NOMBRES DESDE FIREBASE (CON CACHÉ)
+           EXTRAER NOMBRES DE UN DOCUMENTO FIREBASE
+           (solo los nombres, no el estado)
            ============================================ */
-        async function cargarNombresDeFirebase() {
-            if (!docRef) return [];
-
-            // 1) Intentar leer desde localStorage (instantáneo)
-            let nombresCache = null;
-            try {
-                const cacheRaw = localStorage.getItem('bingo_nombres_cache');
-                if (cacheRaw) nombresCache = JSON.parse(cacheRaw);
-            } catch (e) {}
-
-            // 2) Si hay caché, devolverlo de inmediato y actualizar en segundo plano
-            if (nombresCache && Array.isArray(nombresCache) && nombresCache.length > 0) {
-                actualizarNombresEnSegundoPlano();
-                return nombresCache;
-            }
-
-            // 3) Primera vez: descargar y guardar caché
-            const nombres = await descargarNombresDeFirebase();
-            if (nombres.length > 0) {
-                try {
-                    localStorage.setItem('bingo_nombres_cache', JSON.stringify(nombres));
-                } catch (e) {}
+        function extraerNombresDeData(data) {
+            const cartones = data.cartones || [];
+            const nombres = [];
+            for (let i = 0; i < cartones.length && i < 15; i++) {
+                const lineas = cartones[i].lineas || [];
+                let nombreEncontrado = "";
+                for (const linea of lineas) {
+                    if (linea.nombre && linea.nombre.trim() !== "" && linea.estado !== "libre") {
+                        nombreEncontrado = linea.nombre.trim();
+                        break;
+                    }
+                }
+                nombres.push(nombreEncontrado);
             }
             return nombres;
         }
 
-        async function descargarNombresDeFirebase() {
-            try {
-                const snap = await getDoc(docRef);
-                if (!snap.exists()) return [];
-                const data = snap.data();
-                const cartones = data.cartones || [];
-                const nombres = [];
-                for (let i = 0; i < cartones.length && i < 15; i++) {
-                    const lineas = cartones[i].lineas || [];
-                    let nombreEncontrado = "";
-                    for (const linea of lineas) {
-                        if (linea.nombre && linea.nombre.trim() !== "" && linea.estado !== "libre") {
-                            nombreEncontrado = linea.nombre.trim();
-                            break;
+        /* ============================================
+           SUSCRIPCIÓN EN VIVO A FIREBASE (onSnapshot)
+           ============================================ */
+        function suscribirNombresFirebase() {
+            if (!docRef || !USAR_BASE_DATOS) return;
+
+            // Cancelar suscripción previa si existe
+            if (unsubscribeSnapshot) {
+                try { unsubscribeSnapshot(); } catch (e) {}
+                unsubscribeSnapshot = null;
+            }
+
+            unsubscribeSnapshot = onSnapshot(docRef,
+                (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data();
+                    const nuevosNombres = extraerNombresDeData(data);
+
+                    // Comparar con los actuales
+                    if (JSON.stringify(nuevosNombres) !== JSON.stringify(nombresDeFirebase)) {
+                        nombresDeFirebase = nuevosNombres;
+                        // Si ya está renderizado el grid, actualizar solo los textos
+                        const grid = document.getElementById('cartonesGrid');
+                        if (grid && grid.children.length > 0) {
+                            actualizarTextosDeCartones();
                         }
                     }
-                    nombres.push(nombreEncontrado);
+                },
+                (error) => {
+                    console.warn("⚠️ Error al escuchar Firebase:", error);
                 }
-                return nombres;
-            } catch (e) {
-                console.warn("⚠️ No se pudieron cargar nombres de Firebase:", e);
-                return [];
-            }
+            );
         }
 
-        async function actualizarNombresEnSegundoPlano() {
-            try {
-                const nuevos = await descargarNombresDeFirebase();
-                if (nuevos.length > 0) {
-                    try {
-                        localStorage.setItem('bingo_nombres_cache', JSON.stringify(nuevos));
-                    } catch (e) {}
-                    if (JSON.stringify(nuevos) !== JSON.stringify(nombresDeFirebase)) {
-                        nombresDeFirebase = nuevos;
-                        actualizarTextosDeCartones();
-                    }
-                }
-            } catch (e) {}
-        }
-
+        /* ============================================
+           ACTUALIZAR SOLO LOS TEXTOS DE LAS CABECERAS
+           (sin regenerar cartones ni perder estado del juego)
+           ============================================ */
         function actualizarTextosDeCartones() {
             const cartones = document.querySelectorAll('.cartones-grid .carton');
             cartones.forEach((carton, i) => {
@@ -325,7 +316,6 @@
                 carton.style.setProperty('--carton-color', colorHex);
                 carton.style.setProperty('--carton-color-dark', colorDark);
 
-                // Texto que se muestra en la cabecera (nombre o "CARTÓN N")
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
                     textoCabecera = nombresDeFirebase[i - 1];
@@ -356,7 +346,6 @@
                         celda.className = 'celda';
 
                         if (fila === 2 && colIdx === 2) {
-                            // FREE central → muestra el NÚMERO del cartón
                             celda.classList.add('vacia');
                             celda.innerHTML = `<span class="num-val">${i}</span>`;
                         } else {
@@ -495,13 +484,14 @@
         /* ============================================
            INICIALIZACIÓN
            ============================================ */
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 paletaActual = Math.floor(Math.random() * PALETAS.length);
                 cargarConfiguracion();
 
+                // Suscribirse a Firebase (recibe cambios en vivo)
                 if (USAR_BASE_DATOS) {
-                    nombresDeFirebase = await cargarNombresDeFirebase();
+                    suscribirNombresFirebase();
                 }
 
                 reiniciarJuego();
