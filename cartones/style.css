@@ -32,7 +32,7 @@ button, button:focus, button:active {
    ESTILOS DEL MENÚ (index.html)
    ============================================ */
 .body-center {
-    background-color: #12121c;
+    background-color: #0f1115;
     color: #fff;
     display: flex;
     justify-content: center;
@@ -61,17 +61,17 @@ button, button:focus, button:active {
 
 .menu-card {
     width: 100%;
-    background: #1e1e2d;
+    background: #1a1d24;
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
 .btn-principal {
-    background: #4caf50;
+    background: #2e7d32;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -80,70 +80,195 @@ button, button:focus, button:active {
     font-size: 1.1rem;
     cursor: pointer;
     width: 100%;
-    transition: background 0.2s ease, transform 0.1s ease;
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .btn-principal:active {
-    background: #3d8b40;
+    background: #256428;
     transform: scale(0.98);
 }
 
 .btn-secundario {
-    background: #2a2a3c;
+    background: #262a33;
     color: #fff;
-    border: 1px solid #444;
+    border: 1px solid #333;
     border-radius: 8px;
     padding: 12px;
     font-weight: bold;
     font-size: 1rem;
     cursor: pointer;
     width: 100%;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
 }
 
 .btn-secundario:active {
-    background: #3a3a4c;
+    background: #333842;
 }
 
-.panel-config {
+/* ============================================
+   MODAL DE CONFIGURACIÓN
+   ============================================ */
+.modal-overlay {
     display: none;
-    margin-top: 15px;
-    border-top: 1px solid #333;
-    padding-top: 15px;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
 }
 
-.panel-config.visible {
-    display: block;
+.modal-overlay.visible {
+    display: flex;
 }
 
-.panel-config h2 {
-    font-size: 1rem;
-    color: #aaa;
-    margin-bottom: 12px;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-box {
+    background: #1a1d24;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #2a2e37;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.3px;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:active {
+    background: #262a33;
+    color: #fff;
+}
+
+.modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .form-group {
-    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .form-group label {
     font-size: 0.85rem;
     color: #ccc;
     font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
 .form-group select {
-    background: #2a2a3c;
+    background: #262a33;
     color: #fff;
-    border: 1px solid #444;
-    border-radius: 6px;
-    padding: 10px;
-    font-size: 0.9rem;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
     outline: none;
+    transition: border-color 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 36px;
+}
+
+.form-group select:focus {
+    border-color: #2e7d32;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid #2a2e37;
+    background: #16181f;
+}
+
+.btn-modal-cancelar,
+.btn-modal-guardar {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    letter-spacing: 0.3px;
+}
+
+.btn-modal-cancelar {
+    background: #262a33;
+    color: #ccc;
+    border: 1px solid #333;
+}
+
+.btn-modal-cancelar:active {
+    background: #333842;
+}
+
+.btn-modal-guardar {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.btn-modal-guardar:active {
+    background: #256428;
+    transform: scale(0.98);
 }
 
 /* ============================================
@@ -167,7 +292,9 @@ body {
     gap: 10px;
 }
 
-/* --- RETÍCULA Y ESTRUCTURA DE CARTONES EN MÓVIL --- */
+/* ============================================
+   RETÍCULA DE CARTONES (TAMAÑOS INTACTOS)
+   ============================================ */
 .cartones-grid.modo-15 {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
@@ -177,11 +304,25 @@ body {
 
 .cartones-grid.modo-15 .carton {
     background: #fff;
-    border-radius: 4px;
+    border-radius: 5px;
     padding: 2px !important;
     gap: 1px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.45),
+        0 1px 2px rgba(0, 0, 0, 0.3);
     border: 1px solid var(--carton-color, #2e7d32);
+    position: relative;
+    overflow: hidden;
+}
+
+.cartones-grid.modo-15 .carton::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 30%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0));
+    pointer-events: none;
+    z-index: 1;
 }
 
 .cartones-grid.modo-15 .carton-header {
@@ -190,13 +331,23 @@ body {
     text-align: center;
     font-size: 0.5rem !important;
     padding: 0px 2px !important;
-    border-radius: 2px 2px 0 0;
+    border-radius: 3px 3px 0 0;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 2;
+}
+
+.carton-title {
+    display: block;
+    line-height: 1.3;
 }
 
 .bingo-header-row {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    background: var(--carton-color, #2e7d32);
+    background: var(--carton-color-dark, var(--carton-color, #2e7d32));
     color: #fff;
     text-align: center;
     font-weight: 900;
@@ -204,6 +355,10 @@ body {
     border-radius: 2px;
     margin-bottom: 1px;
     padding: 0px 0 !important;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 2;
 }
 
 .cartones-grid.modo-15 .carton-grid-inner {
@@ -212,6 +367,8 @@ body {
     gap: 1px !important;
     background: var(--carton-color, #2e7d32);
     border: 0.5px solid var(--carton-color, #2e7d32);
+    position: relative;
+    z-index: 2;
 }
 
 .cartones-grid.modo-15 .celda {
@@ -224,21 +381,89 @@ body {
     overflow: hidden !important;
     background: #fff;
     color: #000;
+    position: relative;
 }
 
 .cartones-grid.modo-15 .celda.marcada {
-    background-color: var(--carton-color, #2e7d32) !important;
-    color: #fff !important;
+    background: var(--carton-color, #2e7d32) !important;
+    color: transparent !important;
     font-weight: 900;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+}
+
+.cartones-grid.modo-15 .celda.marcada::after {
+    content: '';
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+        rgba(255, 255, 255, 0.30),
+        rgba(255, 255, 255, 0.05) 55%,
+        rgba(0, 0, 0, 0.15) 100%);
+    box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+}
+
+.cartones-grid.modo-15 .celda.marcada .num-val {
+    opacity: 0;
+}
+
+/* FREE central llamativo */
+.cartones-grid.modo-15 .celda.vacia {
+    background: linear-gradient(135deg, #fff8e1, #ffe082) !important;
+    color: #b8860b !important;
+    font-weight: 900;
+    box-shadow:
+        inset 0 0 0 1.5px #ffb300,
+        inset 0 0 8px rgba(255, 179, 0, 0.4),
+        0 0 6px rgba(255, 179, 0, 0.35);
+    position: relative;
+}
+
+.cartones-grid.modo-15 .celda.vacia::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.7), transparent 55%);
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.cartones-grid.modo-15 .celda.vacia .num-val {
+    font-size: clamp(0.75rem, 2.8vw, 1rem) !important;
+    font-weight: 900 !important;
+    color: #b8860b !important;
+    text-shadow:
+        0 1px 0 #fffbe6,
+        0 0 4px rgba(255, 179, 0, 0.6);
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
 }
 
 .cartones-grid.modo-15 .num-val {
     font-size: clamp(0.7rem, 2.6vw, 0.95rem) !important;
     font-weight: 900 !important;
     line-height: 1 !important;
+    position: relative;
+    z-index: 1;
 }
 
-/* --- ESTRUCTURA INFERIOR Y CONTROLES --- */
+.animar-marca {
+    animation: marcarCelda 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes marcarCelda {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================
+   ESTRUCTURA INFERIOR Y CONTROLES
+   ============================================ */
 .bolillero-container {
     background: #1e1e2d;
     border-radius: 8px;
@@ -469,18 +694,6 @@ body {
     background: #4a4a5a;
 }
 
-/* Animación de marca */
-.animar-marca {
-    animation: marcarCelda 0.4s ease-out;
-}
-
-@keyframes marcarCelda {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-}
-
-/* Banner de premio (opcional) */
 .banner-premio {
     display: none;
 }
