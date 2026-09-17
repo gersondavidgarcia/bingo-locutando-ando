@@ -24,8 +24,8 @@
         <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
         
         <div class="menu-card">
-            <button class="btn-principal" onclick="iniciarJuegoDirecto()">▶ JUGAR AHORA</button>
-            <button class="btn-secundario" onclick="abrirConfiguracion()">⚙️ CONFIGURACIÓN</button>
+            <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
+            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
         </div>
     </div>
 
@@ -34,7 +34,7 @@
         <div class="modal-box">
             <div class="modal-header">
                 <h2>⚙️ Configuración</h2>
-                <button class="modal-close" onclick="cerrarConfiguracion()">✕</button>
+                <button class="modal-close" onclick="cerrarConfiguracion()" onfocus="this.blur()">✕</button>
             </div>
 
             <div class="modal-body">
@@ -63,6 +63,8 @@
                         <option value="15x5" selected>Horizontal (15 × 5) - Clásico</option>
                         <option value="10x8">Compacto (10 × 8)</option>
                         <option value="8x10">Vertical compacto (8 × 10)</option>
+                        <option value="9x9">Cuadrado (9 × 9)</option>
+                        <option value="7x11">Vertical alto (7 × 11)</option>
                     </select>
                 </div>
 
@@ -94,8 +96,8 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()">Cancelar</button>
-                <button class="btn-modal-guardar" onclick="guardarConfiguracion()">Guardar</button>
+                <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()" onfocus="this.blur()">Cancelar</button>
+                <button class="btn-modal-guardar" onclick="guardarConfiguracion()" onfocus="this.blur()">Guardar</button>
             </div>
         </div>
     </div>
