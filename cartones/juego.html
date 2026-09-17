@@ -185,7 +185,7 @@
            CONFIGURACIÓN GLOBAL
            ============================================ */
         let TOTAL_CARTONES = 15;
-        const MAX_BALOTAS = 75;
+        const MAX_BALOTAS = 75; // FIJO: siempre 75 balotas
         let USAR_BASE_DATOS = true;
         let CANTIDAD_FIGURAS = 2;
         let TAMANO_CONTROL = 58;
@@ -234,31 +234,13 @@
         /* ============================================
            APLICAR TAMAÑO DEL CONTROL Y FIGURAS
            ============================================ */
-       function aplicarTamanoControl() {
-    requestAnimationFrame(() => {
-        const panelControl = document.getElementById('panelControl');
-        if (!panelControl) return;
-
-        // 1) Ajustar el ancho del panel de control (porcentaje)
-        panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
-
-        // 2) Font-size lineal: 20% → 5px, 70% → 20px
-        //    Regla de tres: 50% de recorrido del slider = 15px de rango
-        const tamanoFuente = 5 + ((TAMANO_CONTROL - 20) / 50) * 15;
-
-        // 3) Ajustar cada bolita
-        const bolitas = panelControl.querySelectorAll('.bolita');
-        bolitas.forEach(b => {
-            b.style.fontSize = tamanoFuente + 'px';
-            b.style.aspectRatio = '1 / 1';
-            b.style.padding = (tamanoFuente * 0.15) + 'px 0';
-            b.style.borderRadius = Math.max(2, tamanoFuente * 0.2) + 'px';
-        });
-
-        // 4) Padding del panel proporcional
-        panelControl.style.padding = Math.max(3, tamanoFuente * 0.4) + 'px';
-    });
-}
+        function aplicarTamanoControl() {
+            requestAnimationFrame(() => {
+                const panelControl = document.getElementById('panelControl');
+                if (!panelControl) return;
+                panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
+            });
+        }
 
         function aplicarConfigFiguras() {
             requestAnimationFrame(() => {
@@ -526,6 +508,7 @@
             if (!tabla) return;
             tabla.innerHTML = '';
 
+            // Leer formato del localStorage
             let cols = 15, fils = 5;
             try {
                 const raw = localStorage.getItem('bingo_config');
