@@ -14,7 +14,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 html, body {
@@ -31,74 +31,41 @@ body.body-center {
     background-color: #12121c;
 }
 
-/* --- MENÚ INDEX --- */
-.menu-container {
-    width: 90%;
-    max-width: 400px;
-    text-align: center;
-    padding: 15px;
-}
-.app-title {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-    color: #4caf50;
-}
-.menu-card {
-    background: #1e1e2d;
-    border-radius: 12px;
-    padding: 20px;
-}
-.form-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #fff;
-}
-.btn-principal {
-    background: #4caf50;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: bold;
-    width: 100%;
-    cursor: pointer;
-}
-
 /* --- CONTENEDOR PRINCIPAL --- */
 .layout-proyector {
     display: flex;
     width: 100vw;
     height: 100vh;
     padding: 6px;
-    gap: 8px;
+    gap: 8px; /* Separación clara entre zona de cartones y panel lateral */
     background-color: var(--bg-pantalla);
 }
 
-/* --- ÁREA DE CARTONES (IZQUIERDA) --- */
+/* --- ÁREA DE CARTONES (MÁXIMA ESPACIOSIDAD) --- */
 .seccion-cartones {
     flex: 1;
     height: 100%;
-    overflow-y: auto; /* Permite scroll limpio si la pantalla es muy pequeña */
-    overflow-x: hidden;
-    padding-right: 2px;
+    display: flex;
+    overflow: hidden;
 }
 
 .cartones-grid {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 6px !important;
+    grid-template-rows: repeat(6, 1fr) !important;
+    gap: 6px !important; /* Espaciado definido entre cartones */
     width: 100%;
+    height: 100%;
 }
 
 .carton {
     background: #ffffff;
-    border: 2px solid var(--carton-border);
-    border-radius: 6px;
+    border: 1.5px solid var(--carton-border);
+    border-radius: 4px;
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 2px;
+    padding: 1px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.15);
     overflow: hidden;
 }
@@ -110,12 +77,13 @@ body.body-center {
     background: #ffff00;
     color: #000;
     font-weight: 900;
-    font-size: clamp(0.55rem, 1.2vw, 0.75rem);
-    padding: 1px 4px;
-    border-bottom-right-radius: 4px;
+    font-size: clamp(0.5rem, 1vw, 0.7rem);
+    padding: 0 3px;
+    border-bottom-right-radius: 3px;
     border-right: 1px solid #000;
     border-bottom: 1px solid #000;
     z-index: 2;
+    line-height: 1;
 }
 
 .bingo-header-row {
@@ -125,22 +93,21 @@ body.body-center {
     color: #ffffff;
     text-align: center;
     font-weight: 900;
-    font-size: clamp(0.55rem, 1.2vw, 0.75rem) !important;
-    line-height: 1.2;
-    padding: 2px 0;
+    font-size: clamp(0.5rem, 1.1vw, 0.75rem) !important;
+    line-height: 1;
+    padding: 1px 0;
 }
 
 .carton-grid-inner {
     display: grid !important;
     grid-template-columns: repeat(5, 1fr) !important;
+    grid-template-rows: repeat(5, 1fr) !important;
     gap: 1px !important;
     background: #0d3c9b;
-    border-radius: 0 0 4px 4px;
-    overflow: hidden;
+    flex: 1;
 }
 
 .celda {
-    aspect-ratio: 1 / 0.9;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -149,7 +116,7 @@ body.body-center {
 }
 
 .celda.marcada {
-    background-color: #e53935 !important;
+    background-color: #ff0000 !important;
     color: #ffffff !important;
 }
 
@@ -159,64 +126,63 @@ body.body-center {
 }
 
 .num-val {
-    font-size: clamp(0.55rem, 1.3vw, 0.8rem) !important;
-    font-weight: 800 !important;
+    font-size: clamp(0.55rem, 1.2vw, 0.8rem) !important;
+    font-weight: 900 !important;
     line-height: 1;
 }
 
-/* --- SECCIÓN LATERAL DERECHA --- */
+/* --- BARRA LATERAL MÁS ANGOSTA --- */
 .seccion-lateral {
-    width: clamp(130px, 28vw, 220px);
+    width: 18vw;
+    min-width: 105px;
+    max-width: 140px;
     height: 100%;
     background: var(--panel-bg);
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     flex-direction: column;
-    padding: 6px;
-    gap: 6px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    padding: 4px;
+    gap: 4px;
 }
 
 .panel-box {
-    background: #1e1e1e;
-    border-radius: 6px;
-    padding: 6px;
+    background: #111;
+    border-radius: 4px;
+    padding: 3px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid #333;
+    border: 1px solid #222;
 }
 
 .panel-header-title {
     color: #ffffff;
-    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+    font-size: clamp(0.5rem, 0.9vw, 0.65rem);
     font-weight: 900;
     text-align: center;
-    margin-bottom: 4px;
-    letter-spacing: 0.5px;
+    margin-bottom: 2px;
 }
 
 .bolillero-display-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 3px;
     width: 100%;
 }
 
 .bolillero-sphere {
-    width: clamp(40px, 8vw, 55px);
-    height: clamp(40px, 8vw, 55px);
-    background: radial-gradient(circle at 35% 35%, #ffffff, #999999);
-    border: 2px solid #000;
+    width: clamp(32px, 4.5vw, 40px);
+    height: clamp(32px, 4.5vw, 40px);
+    background: radial-gradient(circle at 35% 35%, #ffffff, #888888);
+    border: 1.5px solid #000;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #000;
     font-weight: 900;
-    font-size: clamp(0.85rem, 1.8vw, 1.1rem);
-    box-shadow: inset -2px -2px 6px rgba(0,0,0,0.4);
+    font-size: clamp(0.75rem, 1.3vw, 0.95rem);
 }
 
 .btn-sacar-bola {
@@ -224,67 +190,65 @@ body.body-center {
     color: #000;
     border: none;
     font-weight: 900;
-    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
-    padding: 6px 10px;
-    border-radius: 12px;
+    font-size: clamp(0.5rem, 0.9vw, 0.65rem);
+    padding: 4px 2px;
+    border-radius: 6px;
     cursor: pointer;
     width: 100%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .stats-counter-bar {
-    color: #4caf50;
-    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    color: #00ff00;
+    font-size: clamp(0.45rem, 0.8vw, 0.55rem);
     font-weight: bold;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .recientes-lista {
     display: flex;
-    gap: 3px;
-    margin-top: 4px;
+    gap: 2px;
+    margin-top: 2px;
 }
 
 .mini-bola {
     background: #fff;
     color: #000;
     border-radius: 50%;
-    width: clamp(16px, 3.2vw, 22px);
-    height: clamp(16px, 3.2vw, 22px);
-    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    width: 14px;
+    height: 14px;
+    font-size: 0.45rem;
     font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #666;
 }
 
 /* TABLA CONTROL GENERAL */
 .tabla-numeros {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     width: 100%;
 }
 
 .fila-numeros {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 2px;
+    gap: 1px;
 }
 
 .bolita {
-    background: #2a2a2a;
+    background: #222;
     color: #ccc;
-    font-size: clamp(0.48rem, 0.9vw, 0.6rem);
+    font-size: clamp(0.42rem, 0.75vw, 0.52rem);
     text-align: center;
-    padding: 2px 0;
+    padding: 1px 0;
     font-weight: bold;
-    border-radius: 2px;
+    border-radius: 1px;
 }
 
 .bolita.marcada {
-    background: #e53935;
+    background: #ff0000;
     color: #fff;
 }
 
@@ -293,16 +257,16 @@ body.body-center {
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .btn-accion {
-    padding: 6px 0;
+    padding: 4px 0;
     border: none;
     font-weight: bold;
-    font-size: clamp(0.6rem, 1.1vw, 0.75rem);
+    font-size: clamp(0.5rem, 0.9vw, 0.65rem);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 .btn-reiniciar { background: #ff9800; color: #000; }
