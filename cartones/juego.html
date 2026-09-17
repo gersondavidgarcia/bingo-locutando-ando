@@ -242,21 +242,19 @@
                 // 1) Ajustar el ancho del panel de control (porcentaje)
                 panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
 
-                // 2) Ajustar el tamaño de fuente de las bolitas en proporción al ancho
-                //    Slider 20-70% → font-size 5px a 14px (proporcional)
-                const tamanoFuente = 5 + ((TAMANO_CONTROL - 20) / 50) * 9; // 5px a 14px
-
-                // 3) Ajustar cada bolita: fuente, forma cuadrada y padding interno
+                // 2) Ajustar font-size de cada bolita al 70% del alto del cuadro
                 const bolitas = panelControl.querySelectorAll('.bolita');
                 bolitas.forEach(b => {
-                    b.style.fontSize = tamanoFuente + 'px';
-                    b.style.aspectRatio = '1 / 1';
-                    b.style.padding = (tamanoFuente * 0.15) + 'px 0';
-                    b.style.borderRadius = Math.max(2, tamanoFuente * 0.2) + 'px';
+                    const alto = b.getBoundingClientRect().height;
+                    if (alto > 0) {
+                        const font = alto * 0.7;
+                        b.style.fontSize = font + 'px';
+                        b.style.lineHeight = '1';
+                    }
                 });
 
-                // 4) Ajustar el padding del panel de control
-                panelControl.style.padding = Math.max(3, tamanoFuente * 0.4) + 'px';
+                // 3) Padding del panel
+                panelControl.style.padding = '5px';
             });
         }
 
