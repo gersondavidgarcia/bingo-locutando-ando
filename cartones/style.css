@@ -15,6 +15,21 @@
     padding: 0;
     font-family: Arial, Helvetica, sans-serif;
     touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overscroll-behavior-y: none;
 }
 
 *:focus, *:active, *:focus-visible {
@@ -22,7 +37,7 @@
     -webkit-tap-highlight-color: transparent !important;
 }
 
-button, button:focus, button:active {
+button, button:focus, button:active, select, select:focus, select:active {
     outline: none !important;
     -webkit-tap-highlight-color: transparent !important;
     -webkit-focus-ring-color: transparent !important;
@@ -38,7 +53,12 @@ button, button:focus, button:active {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;
     padding: 20px;
+    overflow: hidden;
+    position: fixed;
+    inset: 0;
+    width: 100%;
 }
 
 .menu-container {
@@ -48,6 +68,10 @@ button, button:focus, button:active {
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 8px 0;
+    -webkit-overflow-scrolling: touch;
 }
 
 .app-title {
@@ -81,6 +105,9 @@ button, button:focus, button:active {
     cursor: pointer;
     width: 100%;
     transition: background 0.15s ease, transform 0.1s ease;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .btn-principal:active {
@@ -99,6 +126,9 @@ button, button:focus, button:active {
     cursor: pointer;
     width: 100%;
     transition: background 0.15s ease;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .btn-secundario:active {
@@ -120,6 +150,8 @@ button, button:focus, button:active {
     align-items: center;
     padding: 20px;
     animation: fadeIn 0.2s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-overlay.visible {
@@ -136,13 +168,16 @@ button, button:focus, button:active {
     border-radius: 14px;
     width: 100%;
     max-width: 380px;
+    max-height: 90vh;
+    max-height: 90dvh;
+    overflow-y: auto;
     box-shadow:
         0 20px 60px rgba(0, 0, 0, 0.7),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-overflow-scrolling: touch;
 }
 
 @keyframes modalIn {
@@ -156,6 +191,10 @@ button, button:focus, button:active {
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid #2a2e37;
+    position: sticky;
+    top: 0;
+    background: #1a1d24;
+    z-index: 2;
 }
 
 .modal-header h2 {
@@ -179,6 +218,7 @@ button, button:focus, button:active {
     align-items: center;
     justify-content: center;
     transition: background 0.15s ease, color 0.15s ease;
+    touch-action: manipulation;
 }
 
 .modal-close:active {
@@ -212,7 +252,7 @@ button, button:focus, button:active {
     border: 1px solid #333;
     border-radius: 8px;
     padding: 12px;
-    font-size: 0.95rem;
+    font-size: 16px; /* 👈 IMPORTANTE: 16px evita el zoom automático en iOS */
     font-weight: 600;
     cursor: pointer;
     outline: none;
@@ -224,10 +264,50 @@ button, button:focus, button:active {
     background-position: right 12px center;
     background-size: 16px;
     padding-right: 36px;
+    touch-action: manipulation;
 }
 
 .form-group select:focus {
     border-color: #2e7d32;
+}
+
+.form-group input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: #262a33;
+    border-radius: 3px;
+    outline: none;
+    margin-top: 4px;
+    touch-action: manipulation;
+}
+
+.form-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #2e7d32;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.form-group input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #2e7d32;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.form-group label span {
+    color: #4caf50;
+    font-weight: 900;
 }
 
 .modal-footer {
@@ -236,6 +316,9 @@ button, button:focus, button:active {
     padding: 16px 20px;
     border-top: 1px solid #2a2e37;
     background: #16181f;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
 }
 
 .btn-modal-cancelar,
@@ -249,6 +332,9 @@ button, button:focus, button:active {
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
     letter-spacing: 0.3px;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .btn-modal-cancelar {
@@ -506,6 +592,9 @@ body {
     text-align: center;
     position: relative;
     overflow: hidden;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .btn-sacar-bola:active {
@@ -728,6 +817,9 @@ body {
     font-weight: 700;
     cursor: pointer;
     text-align: center;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .btn-cambiar {
@@ -748,45 +840,4 @@ body {
 
 .banner-premio {
     display: none;
-}
-
-/* ============================================
-   SLIDERS DE CONFIGURACIÓN
-   ============================================ */
-.form-group input[type="range"] {
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 6px;
-    background: #262a33;
-    border-radius: 3px;
-    outline: none;
-    margin-top: 4px;
-}
-
-.form-group input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #2e7d32;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.form-group input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: #2e7d32;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-}
-
-.form-group label span {
-    color: #4caf50;
-    font-weight: 900;
 }
