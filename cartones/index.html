@@ -17,122 +17,88 @@
     <link rel="icon" type="image/png" sizes="512x512" href="icono-512.png">
     
     <link rel="stylesheet" href="style.css">
-    
-    <style>
-        /* ============================================
-           LAYOUT FIJO ABSOLUTO (anti-salto PWA fullscreen)
-           ============================================ */
-        html {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            inset: 0;
-            overscroll-behavior: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        /* El scroll vive SOLO dentro de #appRoot */
-        #appRoot {
-            position: absolute;
-            inset: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-    </style>
 </head>
 <body class="body-center" ontouchstart="">
 
-    <div id="appRoot">
-        <div class="menu-container">
-            <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
-            
-            <div class="menu-card">
-                <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
-                <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
-            </div>
+    <div class="menu-container">
+        <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
+        
+        <div class="menu-card">
+            <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
+            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
         </div>
+    </div>
 
-        <!-- MODAL DE CONFIGURACIÓN -->
-        <div class="modal-overlay" id="modalConfig">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <h2>⚙️ Configuración</h2>
-                    <button class="modal-close" onclick="cerrarConfiguracion()" onfocus="this.blur()">✕</button>
+    <!-- MODAL DE CONFIGURACIÓN -->
+    <div class="modal-overlay" id="modalConfig">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>⚙️ Configuración</h2>
+                <button class="modal-close" onclick="cerrarConfiguracion()" onfocus="this.blur()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cantCartones">Cantidad de Cartones:</label>
+                    <select id="cantCartones">
+                        <option value="6">6 Cartones</option>
+                        <option value="9">9 Cartones</option>
+                        <option value="12">12 Cartones</option>
+                        <option value="15" selected>15 Cartones</option>
+                        <option value="18">18 Cartones</option>
+                    </select>
                 </div>
 
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cantCartones">Cantidad de Cartones:</label>
-                        <select id="cantCartones">
-                            <option value="6">6 Cartones</option>
-                            <option value="9">9 Cartones</option>
-                            <option value="12">12 Cartones</option>
-                            <option value="15" selected>15 Cartones</option>
-                            <option value="18">18 Cartones</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="usarBaseDatos">Usar base de datos (nombres reales):</label>
-                        <select id="usarBaseDatos">
-                            <option value="si" selected>SÍ - Cargar nombres de Firebase</option>
-                            <option value="no">NO - Mostrar "CARTÓN N"</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="formatoControl">Formato del control (1-75):</label>
-                        <select id="formatoControl">
-                            <option value="15x5" selected>Horizontal (15 × 5) - Clásico</option>
-                            <option value="10x8">Compacto (10 × 8)</option>
-                            <option value="8x10">Vertical compacto (8 × 10)</option>
-                            <option value="9x9">Cuadrado (9 × 9)</option>
-                            <option value="7x11">Vertical alto (7 × 11)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cantidadFiguras">Mini-cartones de referencia:</label>
-                        <select id="cantidadFiguras">
-                            <option value="0">0 - Ocultar</option>
-                            <option value="1">1 - Solo figura</option>
-                            <option value="2" selected>2 - Lleno + Figura</option>
-                            <option value="3">3 - Lleno + Figura + Extra</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="tamanoControl">
-                            Ancho del panel de control: 
-                            <span id="valTamanoControl">58%</span>
-                        </label>
-                        <input type="range" id="tamanoControl" min="20" max="70" value="58" step="2">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="tamanoFiguras">
-                            Tamaño de mini-cartones: 
-                            <span id="valTamanoFiguras">42px</span>
-                        </label>
-                        <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
-                    </div>
+                <div class="form-group">
+                    <label for="usarBaseDatos">Usar base de datos (nombres reales):</label>
+                    <select id="usarBaseDatos">
+                        <option value="si" selected>SÍ - Cargar nombres de Firebase</option>
+                        <option value="no">NO - Mostrar "CARTÓN N"</option>
+                    </select>
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()" onfocus="this.blur()">Cancelar</button>
-                    <button class="btn-modal-guardar" onclick="guardarConfiguracion()" onfocus="this.blur()">Guardar</button>
+                <div class="form-group">
+                    <label for="formatoControl">Formato del control (1-75):</label>
+                    <select id="formatoControl">
+                        <option value="15x5" selected>Horizontal (15 × 5) - Clásico</option>
+                        <option value="10x8">Compacto (10 × 8)</option>
+                        <option value="8x10">Vertical compacto (8 × 10)</option>
+                        <option value="9x9">Cuadrado (9 × 9)</option>
+                        <option value="7x11">Vertical alto (7 × 11)</option>
+                        <option value="3x25">Columna estrecha (3 × 25)</option>
+                    </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="cantidadFiguras">Mini-cartones de referencia:</label>
+                    <select id="cantidadFiguras">
+                        <option value="0">0 - Ocultar</option>
+                        <option value="1">1 - Solo figura</option>
+                        <option value="2" selected>2 - Lleno + Figura</option>
+                        <option value="3">3 - Lleno + Figura + Extra</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tamanoControl">
+                        Ancho del panel de control: 
+                        <span id="valTamanoControl">58%</span>
+                    </label>
+                    <input type="range" id="tamanoControl" min="20" max="70" value="58" step="2">
+                </div>
+
+                <div class="form-group">
+                    <label for="tamanoFiguras">
+                        Tamaño de mini-cartones: 
+                        <span id="valTamanoFiguras">42px</span>
+                    </label>
+                    <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()" onfocus="this.blur()">Cancelar</button>
+                <button class="btn-modal-guardar" onclick="guardarConfiguracion()" onfocus="this.blur()">Guardar</button>
             </div>
         </div>
     </div>
@@ -146,38 +112,6 @@
                     .catch((err) => console.warn('❌ SW error:', err));
             });
         }
-
-        /* ============================================
-           FIJAR ALTURA DEL #appRoot (anti-salto)
-           Fija la altura UNA VEZ al cargar y al redimensionar.
-           NO recalcula en cada toque.
-           ============================================ */
-        (function fixHeight() {
-            const root = document.getElementById('appRoot');
-            if (!root) return;
-
-            function setHeight() {
-                // Usamos la altura real de la ventana una sola vez
-                const h = window.innerHeight;
-                root.style.height = h + 'px';
-            }
-
-            setHeight();
-
-            // Solo recalcula si cambia el tamaño real (rotación, teclado, etc.)
-            let lastH = window.innerHeight;
-            window.addEventListener('resize', () => {
-                if (Math.abs(window.innerHeight - lastH) > 50) {
-                    lastH = window.innerHeight;
-                    setHeight();
-                }
-            });
-
-            // Bloquea el "toque fantasma" que hace scroll
-            document.addEventListener('touchstart', (e) => {
-                if (e.touches.length > 1) e.preventDefault();
-            }, { passive: false });
-        })();
     </script>
 </body>
 </html>
