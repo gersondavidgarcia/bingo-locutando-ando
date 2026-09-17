@@ -22,19 +22,23 @@ function cargarConfigEnModal() {
             const selCartones = document.getElementById('cantCartones');
             const selModo = document.getElementById('maxBolas');
             const selDB = document.getElementById('usarBaseDatos');
+            const selFig = document.getElementById('mostrarFiguras');
             if (selCartones && config.cartones) selCartones.value = config.cartones;
             if (selModo && config.modo) selModo.value = config.modo;
             if (selDB && config.usarDB !== undefined) selDB.value = config.usarDB ? 'si' : 'no';
+            if (selFig && config.mostrarFiguras !== undefined) selFig.value = config.mostrarFiguras ? 'si' : 'no';
         }
     } catch (e) {}
 }
 
 function guardarConfiguracion() {
     const usarDB = document.getElementById('usarBaseDatos')?.value === 'si';
+    const mostrarFiguras = document.getElementById('mostrarFiguras')?.value === 'si';
     const config = {
         cartones: document.getElementById('cantCartones')?.value || '15',
         modo: document.getElementById('maxBolas')?.value || '75',
-        usarDB: usarDB
+        usarDB: usarDB,
+        mostrarFiguras: mostrarFiguras
     };
     localStorage.setItem('bingo_config', JSON.stringify(config));
     cerrarConfiguracion();
@@ -44,10 +48,12 @@ function iniciarJuegoDirecto() {
     const existente = localStorage.getItem('bingo_config');
     if (!existente) {
         const usarDB = document.getElementById('usarBaseDatos')?.value === 'si';
+        const mostrarFiguras = document.getElementById('mostrarFiguras')?.value === 'si';
         const config = {
             cartones: document.getElementById('cantCartones')?.value || '15',
             modo: document.getElementById('maxBolas')?.value || '75',
-            usarDB: usarDB
+            usarDB: usarDB,
+            mostrarFiguras: mostrarFiguras
         };
         localStorage.setItem('bingo_config', JSON.stringify(config));
     }

@@ -54,11 +54,16 @@
             </div>
         </div>
 
-        <div class="panel-inferior">
+        <div class="panel-inferior" id="panelInferior">
             
-            <div class="panel-numeros-inferior">
+            <div class="panel-numeros-inferior" id="panelControl">
                 <div class="titulo-tabla">CONTROL (1 - 75)</div>
                 <div class="tabla-numeros" id="tablaNumeros"></div>
+            </div>
+
+            <div class="panel-figuras" id="panelFiguras">
+                <div class="mini-carton" id="miniCartonLleno" title="Cartón lleno"></div>
+                <div class="mini-carton" id="miniCartonFigura" title="Figura actual"></div>
             </div>
 
             <div class="panel-botones">
@@ -121,12 +126,71 @@
         let paletaActual = 0;
 
         /* ============================================
+           FIGURAS
+           ============================================ */
+        const FIGURAS = {
+            'lleno': [
+                [1,1,1,1,1],
+                [1,1,1,1,1],
+                [1,1,1,1,1],
+                [1,1,1,1,1],
+                [1,1,1,1,1]
+            ],
+            'diagonal': [
+                [1,0,0,0,0],
+                [0,1,0,0,0],
+                [0,0,1,0,0],
+                [0,0,0,1,0],
+                [0,0,0,0,1]
+            ],
+            'diana': [
+                [0,1,1,1,0],
+                [1,0,0,0,1],
+                [1,0,1,0,1],
+                [1,0,0,0,1],
+                [0,1,1,1,0]
+            ],
+            'cesto': [
+                [0,1,1,1,0],
+                [1,0,0,0,1],
+                [1,0,1,0,1],
+                [1,1,1,1,1],
+                [1,0,0,0,1]
+            ],
+            'matamoscas': [
+                [1,1,1,0,0],
+                [1,1,1,0,0],
+                [0,0,1,0,0],
+                [0,1,0,0,0],
+                [0,1,0,0,1]
+            ],
+            'arana': [
+                [1,0,0,0,1],
+                [0,1,0,1,0],
+                [1,0,1,0,1],
+                [0,1,0,1,0],
+                [1,0,0,0,1]
+            ],
+            'paraguas': [
+                [0,1,1,1,1],
+                [1,1,1,1,0],
+                [0,1,1,0,0],
+                [0,0,1,0,0],
+                [0,0,1,0,0]
+            ]
+        };
+
+        const ORDEN_FIGURAS = ['diagonal', 'diana', 'cesto', 'matamoscas', 'arana', 'paraguas'];
+        let figuraActual = 'diagonal';
+
+        /* ============================================
            CONFIGURACIÓN GLOBAL
            ============================================ */
         let TOTAL_CARTONES = 15;
         let MAX_BALOTAS = 75;
         let MODO_JUEGO = 75;
         let USAR_BASE_DATOS = true;
+        let MOSTRAR_FIGURAS = false;
 
         let nombresDeFirebase = [];
         let bombo = [];
@@ -153,6 +217,7 @@
                     MODO_JUEGO = parseInt(config.modo) || 75;
                     MAX_BALOTAS = MODO_JUEGO;
                     USAR_BASE_DATOS = config.usarDB !== undefined ? config.usarDB : true;
+                    MOSTRAR_FIGURAS = config.mostrarFiguras !== undefined ? config.mostrarFiguras : false;
                 }
             } catch (e) {
                 console.warn('Config no leída, usando default.');
@@ -160,11 +225,26 @@
 
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
+            aplicarModoFiguras();
+        }
+
+        function aplicarModoFiguras() {
+            const panelFiguras = document.getElementById('panelFiguras');
+            const panelControl = document.getElementById('panelControl');
+            if (!panelFiguras || !panelControl) return;
+
+            if (MOSTRAR_FIGURAS) {
+                panelFiguras.style.display = 'flex';
+                panelControl.style.flex = '0 0 52%';
+            } else {
+                panelFiguras.style.display = 'none';
+                panelControl.style.flex = '0 0 58%';
+            }
         }
 
         /* ============================================
-           EXTRAER NOMBRES DE UN DOCUMENTO FIREBASE
-           (solo los nombres, no el estado)
+           EXTRAER NOMBRES DE FIREBASE
            ============================================ */
         function extraerNombresDeData(data) {
             const cartones = data.cartones || [];
@@ -184,12 +264,11 @@
         }
 
         /* ============================================
-           SUSCRIPCIÓN EN VIVO A FIREBASE (onSnapshot)
+           SUSCRIPCIÓN EN VIVO A FIREBASE
            ============================================ */
         function suscribirNombresFirebase() {
             if (!docRef || !USAR_BASE_DATOS) return;
 
-            // Cancelar suscripción previa si existe
             if (unsubscribeSnapshot) {
                 try { unsubscribeSnapshot(); } catch (e) {}
                 unsubscribeSnapshot = null;
@@ -201,10 +280,8 @@
                     const data = snap.data();
                     const nuevosNombres = extraerNombresDeData(data);
 
-                    // Comparar con los actuales
                     if (JSON.stringify(nuevosNombres) !== JSON.stringify(nombresDeFirebase)) {
                         nombresDeFirebase = nuevosNombres;
-                        // Si ya está renderizado el grid, actualizar solo los textos
                         const grid = document.getElementById('cartonesGrid');
                         if (grid && grid.children.length > 0) {
                             actualizarTextosDeCartones();
@@ -219,7 +296,6 @@
 
         /* ============================================
            ACTUALIZAR SOLO LOS TEXTOS DE LAS CABECERAS
-           (sin regenerar cartones ni perder estado del juego)
            ============================================ */
         function actualizarTextosDeCartones() {
             const cartones = document.querySelectorAll('.cartones-grid .carton');
@@ -278,9 +354,6 @@
             }
         }
 
-        /* ============================================
-           AJUSTE AUTOMÁTICO DEL TAMAÑO DE NOMBRE
-           ============================================ */
         function ajustarTamanoNombre(elemento) {
             if (!elemento) return;
             let size = 0.5;
@@ -290,6 +363,34 @@
                 size -= 0.02;
                 elemento.style.fontSize = size + 'rem';
             }
+        }
+
+        /* ============================================
+           MINI-CARTONES DE REFERENCIA
+           ============================================ */
+        function dibujarMiniCarton(containerId, patron, colorTema) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            for (let f = 0; f < 5; f++) {
+                for (let c = 0; c < 5; c++) {
+                    const celda = document.createElement('div');
+                    celda.className = 'mini-celda';
+                    if (patron[f][c] === 1) {
+                        celda.classList.add('marcada');
+                        celda.style.background = colorTema;
+                    }
+                    container.appendChild(celda);
+                }
+            }
+        }
+
+        function actualizarMiniCartones() {
+            if (!MOSTRAR_FIGURAS) return;
+            const paleta = PALETAS[paletaActual];
+            const colorTema = paleta.tema;
+            dibujarMiniCarton('miniCartonLleno', FIGURAS['lleno'], colorTema);
+            dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
         }
 
         /* ============================================
@@ -359,6 +460,7 @@
             }
 
             aplicarPaleta();
+            actualizarMiniCartones();
             renderizarTablaControl();
         }
 
@@ -471,6 +573,10 @@
 
         function cambiarCartonesYPaleta() {
             paletaActual = (paletaActual + 1) % PALETAS.length;
+            if (MOSTRAR_FIGURAS) {
+                const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
+                figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
+            }
             reiniciarJuego();
         }
 
@@ -489,7 +595,6 @@
                 paletaActual = Math.floor(Math.random() * PALETAS.length);
                 cargarConfiguracion();
 
-                // Suscribirse a Firebase (recibe cambios en vivo)
                 if (USAR_BASE_DATOS) {
                     suscribirNombresFirebase();
                 }
