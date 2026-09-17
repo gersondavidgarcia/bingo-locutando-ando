@@ -304,6 +304,58 @@ button, button:focus, button:active, select, select:focus, select:active {
     font-weight: 900;
 }
 
+/* ============================================
+   SELECTOR DE TEMAS (checkboxes)
+   ============================================ */
+.temas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.tema-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #ccc;
+    font-weight: 600;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: border-color 0.15s ease;
+}
+
+.tema-item:active {
+    border-color: #2e7d32;
+}
+
+.tema-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2e7d32;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.tema-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tema-nombre {
+    flex: 1;
+}
+
 .modal-footer {
     display: flex;
     gap: 10px;
@@ -750,6 +802,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: nowrap;
 }
 
 .bolita.marcada {
@@ -848,9 +903,929 @@ body {
     display: none;
 }
 
-/* Las bolitas no deben desbordar su contenido */
-.bolita {
-    overflow: hidden;
-    text-overflow: clip;
-    white-space: nowrap;
+/* ============================================
+   TEMAS ESPECIALES
+   ============================================ */
+
+/* ============================================
+   TEMA CLÁSICO (dorado/beige vintage)
+   ============================================ */
+body.tema-clasico {
+    background: radial-gradient(ellipse at top, #2a2418 0%, #0a0805 70%), #0a0805;
+}
+body.tema-clasico .cartones-grid.modo-15 .carton {
+    background: #f5ecd4;
+    border: 2px solid #1a1a1a;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.7), inset 0 0 0 2px #b8860b;
+}
+body.tema-clasico .cartones-grid.modo-15 .carton-header {
+    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 50%, #b8a468 100%);
+    color: #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+body.tema-clasico .bingo-header-row {
+    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%);
+    color: #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+body.tema-clasico .cartones-grid.modo-15 .carton-grid-inner {
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+}
+body.tema-clasico .cartones-grid.modo-15 .celda {
+    background: #fdf9ec;
+    color: #1a1a1a;
+    border: 1px solid #1a1a1a !important;
+}
+body.tema-clasico .cartones-grid.modo-15 .celda.marcada {
+    background: #d4af37 !important;
+    color: #1a1a1a !important;
+    box-shadow: inset 0 0 0 1.5px #8b6914;
+}
+body.tema-clasico .cartones-grid.modo-15 .celda.vacia {
+    background: linear-gradient(135deg, #f5e6b8, #d4af37) !important;
+    color: #3a2a08 !important;
+    box-shadow: inset 0 0 0 1.5px #8b6914, inset 0 0 8px rgba(139, 105, 20, 0.6);
+}
+body.tema-clasico .cartones-grid.modo-15 .celda.vacia .num-val {
+    color: #3a2a08 !important;
+    text-shadow: 0 1px 0 rgba(255, 240, 200, 0.9);
+}
+body.tema-clasico .bolillero-container {
+    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
+    border: 2px solid #8b6914;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.6);
+}
+body.tema-clasico .bolillero-sphere {
+    background: radial-gradient(circle at 35% 30%, #6b1414, #2b0808);
+    border: 2px solid #8b6914;
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.8), inset 3px 3px 8px rgba(255, 200, 200, 0.15), 0 0 15px rgba(139, 105, 20, 0.4);
+}
+body.tema-clasico .btn-sacar-bola {
+    background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%) !important;
+    border: 2px solid #5c4508;
+    color: #1a1a1a;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 240, 200, 0.5);
+}
+body.tema-clasico .stats-box {
+    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
+    border: 2px solid #8b6914;
+    color: #d4af37;
+}
+body.tema-clasico .stats-box span {
+    color: #d4af37;
+}
+body.tema-clasico .panel-numeros-inferior {
+    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
+    border: 2px solid #8b6914;
+}
+body.tema-clasico .titulo-tabla {
+    color: #d4af37;
+}
+body.tema-clasico .bolita {
+    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%);
+    color: #1a1a1a;
+    border: 1px solid #8b6914;
+    font-weight: 900;
+}
+body.tema-clasico .bolita.marcada {
+    background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%);
+    color: #fff;
+    border: 1px solid #5c4508;
+    box-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+}
+body.tema-clasico .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #4a3a08;
+}
+body.tema-clasico .btn-cambiar,
+body.tema-clasico .btn-atras {
+    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
+    color: #d4af37;
+    border: 2px solid #8b6914;
+    font-weight: 900;
+}
+body.tema-clasico .mini-carton {
+    background: #1a1508;
+    border: 2px solid #8b6914;
+}
+
+/* ============================================
+   TEMA CYBERPUNK (neón azul/rosa)
+   ============================================ */
+body.tema-cyberpunk {
+    background: #0d0f18;
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .carton {
+    background: #0d0f18;
+    border: 3px solid #00f0ff;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 15px rgba(0, 240, 255, 0.2);
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .carton-header {
+    background: linear-gradient(90deg, #ff0055, #ff00a0);
+    color: #fff;
+    text-shadow: 0 0 8px #ff0055;
+}
+body.tema-cyberpunk .bingo-header-row {
+    background: #0d0f18;
+    color: #00f0ff;
+    text-shadow: 0 0 10px #00f0ff;
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .carton-grid-inner {
+    background: #0d0f18;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .celda {
+    background: #141829;
+    color: #fff;
+    border: 1px solid rgba(0, 240, 255, 0.3) !important;
+    box-shadow: inset 0 -3px 0 rgba(0, 240, 255, 0.4);
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .celda.marcada {
+    background: #00f0ff !important;
+    color: #0d0f18 !important;
+    box-shadow: 0 0 12px #00f0ff, inset 0 0 4px #fff;
+}
+body.tema-cyberpunk .cartones-grid.modo-15 .celda.vacia {
+    background: #ff0055 !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px #ff0055;
+}
+body.tema-cyberpunk .bolillero-container {
+    background: #0d0f18;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+}
+body.tema-cyberpunk .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #ff0055, #0d0f18);
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 15px #00f0ff;
+}
+body.tema-cyberpunk .btn-sacar-bola {
+    background: linear-gradient(90deg, #ff0055, #ff00a0) !important;
+    color: #fff;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 12px rgba(255, 0, 85, 0.5);
+}
+body.tema-cyberpunk .stats-box {
+    background: #141829;
+    border: 2px solid #00f0ff;
+    color: #00f0ff;
+}
+body.tema-cyberpunk .stats-box span {
+    color: #00f0ff;
+}
+body.tema-cyberpunk .panel-numeros-inferior {
+    background: #0d0f18;
+    border: 2px solid #00f0ff;
+}
+body.tema-cyberpunk .titulo-tabla {
+    color: #00f0ff;
+}
+body.tema-cyberpunk .bolita {
+    background: #141829;
+    color: #00f0ff;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+body.tema-cyberpunk .bolita.marcada {
+    background: #00f0ff;
+    color: #0d0f18;
+    box-shadow: 0 0 8px #00f0ff;
+}
+body.tema-cyberpunk .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #00f0ff;
+}
+body.tema-cyberpunk .btn-cambiar,
+body.tema-cyberpunk .btn-atras {
+    background: #141829;
+    color: #00f0ff;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+body.tema-cyberpunk .mini-carton {
+    background: #0d0f18;
+    border: 2px solid #00f0ff;
+}
+
+/* ============================================
+   TEMA DORADO (casino gold biselado)
+   ============================================ */
+body.tema-dorado {
+    background: linear-gradient(145deg, #1f1a0e, #080705);
+}
+body.tema-dorado .cartones-grid.modo-15 .carton {
+    background: linear-gradient(145deg, #1f1a0e, #080705);
+    border: 3px solid #d4af37;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8), 0 0 15px rgba(212, 175, 55, 0.3);
+}
+body.tema-dorado .cartones-grid.modo-15 .carton-header {
+    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%);
+    color: #1a1100;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+}
+body.tema-dorado .bingo-header-row {
+    background: linear-gradient(145deg, #1f1a0e, #080705);
+    color: #f3e5ab;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+body.tema-dorado .cartones-grid.modo-15 .carton-grid-inner {
+    background: #080705;
+    border: 1px solid #d4af37;
+}
+body.tema-dorado .cartones-grid.modo-15 .celda {
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+    color: #1a1a1a;
+    box-shadow: 0 4px 0 #94a3b8, inset 0 2px 0 #fff;
+}
+body.tema-dorado .cartones-grid.modo-15 .celda.marcada {
+    background: radial-gradient(circle, #e63946, #9b2226) !important;
+    color: #fff !important;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+}
+body.tema-dorado .cartones-grid.modo-15 .celda.vacia {
+    background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%) !important;
+    color: #1a1100 !important;
+    box-shadow: 0 4px 0 #785a00;
+}
+body.tema-dorado .bolillero-container {
+    background: linear-gradient(145deg, #1f1a0e, #080705);
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+body.tema-dorado .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #ffe58f, #8b6914);
+    border: 2px solid #b8860b;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+body.tema-dorado .btn-sacar-bola {
+    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%) !important;
+    color: #1a1100;
+    border: 2px solid #785a00;
+    box-shadow: 0 4px 0 #785a00;
+}
+body.tema-dorado .stats-box {
+    background: #080705;
+    border: 2px solid #d4af37;
+    color: #f3e5ab;
+}
+body.tema-dorado .stats-box span {
+    color: #d4af37;
+}
+body.tema-dorado .panel-numeros-inferior {
+    background: linear-gradient(145deg, #1f1a0e, #080705);
+    border: 2px solid #d4af37;
+}
+body.tema-dorado .titulo-tabla {
+    color: #d4af37;
+}
+body.tema-dorado .bolita {
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+    color: #1a1a1a;
+    border: 1px solid #b8860b;
+    box-shadow: 0 2px 0 #94a3b8;
+}
+body.tema-dorado .bolita.marcada {
+    background: linear-gradient(180deg, #ffd700, #b8860b);
+    color: #1a1100;
+    box-shadow: 0 2px 0 #785a00;
+}
+body.tema-dorado .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #8b6914;
+}
+body.tema-dorado .btn-cambiar,
+body.tema-dorado .btn-atras {
+    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%);
+    color: #1a1100;
+    border: 2px solid #785a00;
+    box-shadow: 0 3px 0 #785a00;
+}
+body.tema-dorado .mini-carton {
+    background: #080705;
+    border: 2px solid #d4af37;
+}
+
+/* ============================================
+   TEMA ARCADE (retro 8-bit)
+   ============================================ */
+body.tema-arcade {
+    background: #181425;
+}
+body.tema-arcade .cartones-grid.modo-15 .carton {
+    background: #181425;
+    border: 4px solid #fff;
+    box-shadow: 6px 6px 0px #ff0055, -6px -6px 0px #00f0ff;
+    border-radius: 4px;
+}
+body.tema-arcade .cartones-grid.modo-15 .carton-header {
+    background: #ff0055;
+    color: #fff;
+    border-radius: 0;
+}
+body.tema-arcade .bingo-header-row {
+    background: #181425;
+    color: #ffcc00;
+}
+body.tema-arcade .cartones-grid.modo-15 .carton-grid-inner {
+    background: #181425;
+    border: 1px solid #3b3355;
+    border-radius: 0;
+}
+body.tema-arcade .cartones-grid.modo-15 .celda {
+    background: #262135;
+    color: #00ffcc;
+    border: 2px solid #3b3355 !important;
+    border-radius: 0;
+}
+body.tema-arcade .cartones-grid.modo-15 .celda.marcada {
+    background: #ff0055 !important;
+    color: #fff !important;
+    box-shadow: 2px 2px 0 #fff;
+    border-radius: 0;
+}
+body.tema-arcade .cartones-grid.modo-15 .celda.vacia {
+    background: #ffcc00 !important;
+    color: #181425 !important;
+    border: 2px solid #fff !important;
+    border-radius: 0;
+}
+body.tema-arcade .bolillero-container {
+    background: #181425;
+    border: 4px solid #fff;
+    box-shadow: 6px 6px 0 #ff0055, -6px -6px 0 #00f0ff;
+    border-radius: 4px;
+}
+body.tema-arcade .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #ff0055, #181425);
+    border: 3px solid #fff;
+    border-radius: 4px;
+    box-shadow: 3px 3px 0 #00f0ff;
+}
+body.tema-arcade .btn-sacar-bola {
+    background: #ff0055 !important;
+    color: #fff;
+    border: 3px solid #fff;
+    border-radius: 0;
+    box-shadow: 3px 3px 0 #00f0ff;
+}
+body.tema-arcade .stats-box {
+    background: #262135;
+    border: 3px solid #ffcc00;
+    border-radius: 0;
+    color: #ffcc00;
+}
+body.tema-arcade .stats-box span {
+    color: #ffcc00;
+}
+body.tema-arcade .panel-numeros-inferior {
+    background: #181425;
+    border: 3px solid #fff;
+    border-radius: 0;
+    box-shadow: 3px 3px 0 #ff0055;
+}
+body.tema-arcade .titulo-tabla {
+    color: #ffcc00;
+}
+body.tema-arcade .bolita {
+    background: #262135;
+    color: #00ffcc;
+    border: 2px solid #3b3355;
+    border-radius: 0;
+}
+body.tema-arcade .bolita.marcada {
+    background: #ff0055;
+    color: #fff;
+    border-color: #fff;
+    border-radius: 0;
+}
+body.tema-arcade .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #3b3355;
+    border-radius: 0;
+}
+body.tema-arcade .btn-cambiar,
+body.tema-arcade .btn-atras {
+    background: #262135;
+    color: #ffcc00;
+    border: 3px solid #ffcc00;
+    border-radius: 0;
+    box-shadow: 3px 3px 0 #ff0055;
+}
+body.tema-arcade .mini-carton {
+    background: #181425;
+    border: 3px solid #fff;
+    border-radius: 0;
+}
+
+/* ============================================
+   TEMA CRISTAL (glassmorphism)
+   ============================================ */
+body.tema-cristal {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+body.tema-cristal .cartones-grid.modo-15 .carton {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+body.tema-cristal .cartones-grid.modo-15 .carton-header {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+body.tema-cristal .bingo-header-row {
+    background: rgba(255, 255, 255, 0.1);
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+body.tema-cristal .cartones-grid.modo-15 .carton-grid-inner {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+body.tema-cristal .cartones-grid.modo-15 .celda {
+    background: rgba(255, 255, 255, 0.9);
+    color: #0f172a;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+body.tema-cristal .cartones-grid.modo-15 .celda.marcada {
+    background: rgba(236, 72, 153, 0.9) !important;
+    color: #fff !important;
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.8);
+}
+body.tema-cristal .cartones-grid.modo-15 .celda.vacia {
+    background: #38bdf8 !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.8);
+}
+body.tema-cristal .bolillero-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+body.tema-cristal .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #38bdf8, #0f172a);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+}
+body.tema-cristal .btn-sacar-bola {
+    background: rgba(56, 189, 248, 0.9) !important;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 20px rgba(56, 189, 248, 0.4);
+}
+body.tema-cristal .stats-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+body.tema-cristal .stats-box span {
+    color: #38bdf8;
+}
+body.tema-cristal .panel-numeros-inferior {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+body.tema-cristal .titulo-tabla {
+    color: #38bdf8;
+}
+body.tema-cristal .bolita {
+    background: rgba(255, 255, 255, 0.9);
+    color: #0f172a;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+}
+body.tema-cristal .bolita.marcada {
+    background: rgba(236, 72, 153, 0.9);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.8);
+}
+body.tema-cristal .bolita.vacia {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+}
+body.tema-cristal .btn-cambiar,
+body.tema-cristal .btn-atras {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+body.tema-cristal .mini-carton {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   TEMA MADERA (vintage rústico)
+   ============================================ */
+body.tema-madera {
+    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
+}
+body.tema-madera .cartones-grid.modo-15 .carton {
+    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
+    border: 4px solid #8d5b41;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 0 10px #000;
+}
+body.tema-madera .cartones-grid.modo-15 .carton-header {
+    background: #8d5b41;
+    color: #fef3c7;
+    text-shadow: 1px 1px 2px #000;
+}
+body.tema-madera .bingo-header-row {
+    background: #23130a;
+    color: #f59e0b;
+}
+body.tema-madera .cartones-grid.modo-15 .carton-grid-inner {
+    background: #23130a;
+    border: 1px solid #8d5b41;
+}
+body.tema-madera .cartones-grid.modo-15 .celda {
+    background: #fef3c7;
+    color: #451a03;
+    box-shadow: inset 0 -3px 0 #d97706, 0 3px 5px rgba(0,0,0,0.4);
+}
+body.tema-madera .cartones-grid.modo-15 .celda.marcada {
+    background: #dc2626 !important;
+    color: #fff !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+}
+body.tema-madera .cartones-grid.modo-15 .celda.vacia {
+    background: #d97706 !important;
+    color: #fff !important;
+    box-shadow: inset 0 -3px 0 #78350f;
+}
+body.tema-madera .bolillero-container {
+    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
+    border: 3px solid #8d5b41;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+}
+body.tema-madera .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #d97706, #78350f);
+    border: 3px solid #8d5b41;
+    box-shadow: inset -3px -3px 8px rgba(0,0,0,0.8);
+}
+body.tema-madera .btn-sacar-bola {
+    background: #8d5b41 !important;
+    color: #fef3c7;
+    border: 2px solid #3d2314;
+    box-shadow: inset 0 -3px 0 #3d2314;
+}
+body.tema-madera .stats-box {
+    background: #23130a;
+    border: 2px solid #8d5b41;
+    color: #fef3c7;
+}
+body.tema-madera .stats-box span {
+    color: #f59e0b;
+}
+body.tema-madera .panel-numeros-inferior {
+    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
+    border: 3px solid #8d5b41;
+}
+body.tema-madera .titulo-tabla {
+    color: #f59e0b;
+}
+body.tema-madera .bolita {
+    background: #fef3c7;
+    color: #451a03;
+    box-shadow: inset 0 -2px 0 #d97706;
+}
+body.tema-madera .bolita.marcada {
+    background: #d97706;
+    color: #fff;
+    box-shadow: inset 0 -2px 0 #78350f;
+}
+body.tema-madera .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #8d5b41;
+}
+body.tema-madera .btn-cambiar,
+body.tema-madera .btn-atras {
+    background: #8d5b41;
+    color: #fef3c7;
+    border: 2px solid #3d2314;
+    box-shadow: inset 0 -3px 0 #3d2314;
+}
+body.tema-madera .mini-carton {
+    background: #23130a;
+    border: 3px solid #8d5b41;
+}
+
+/* ============================================
+   TEMA FUEGO (lava/tóxico)
+   ============================================ */
+body.tema-fuego {
+    background: #1c0a0a;
+}
+body.tema-fuego .cartones-grid.modo-15 .carton {
+    background: #1c0a0a;
+    border: 3px solid #ff4500;
+    box-shadow: 0 0 25px rgba(255, 69, 0, 0.35);
+}
+body.tema-fuego .cartones-grid.modo-15 .carton-header {
+    background: linear-gradient(90deg, #ff4500, #ff8c00);
+    color: #fff;
+    text-shadow: 0 2px 4px #000;
+}
+body.tema-fuego .bingo-header-row {
+    background: #1c0a0a;
+    color: #ffaa00;
+    text-shadow: 0 0 8px #ff4500;
+}
+body.tema-fuego .cartones-grid.modo-15 .carton-grid-inner {
+    background: #1c0a0a;
+    border: 1px solid #ff4500;
+}
+body.tema-fuego .cartones-grid.modo-15 .celda {
+    background: #2b1111;
+    color: #ffedd5;
+    border: 1px solid #ff450055 !important;
+    box-shadow: inset 0 -3px 0 #ff4500;
+}
+body.tema-fuego .cartones-grid.modo-15 .celda.marcada {
+    background: #facc15 !important;
+    color: #1c0a0a !important;
+    box-shadow: 0 0 12px #facc15;
+}
+body.tema-fuego .cartones-grid.modo-15 .celda.vacia {
+    background: #ff4500 !important;
+    color: #fff !important;
+    box-shadow: 0 0 15px #ff4500;
+}
+body.tema-fuego .bolillero-container {
+    background: #1c0a0a;
+    border: 2px solid #ff4500;
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
+}
+body.tema-fuego .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #ff8c00, #ff4500);
+    border: 2px solid #facc15;
+    box-shadow: 0 0 20px #ff4500;
+}
+body.tema-fuego .btn-sacar-bola {
+    background: linear-gradient(90deg, #ff4500, #ff8c00) !important;
+    color: #fff;
+    border: 2px solid #facc15;
+    box-shadow: 0 0 12px rgba(255, 69, 0, 0.6);
+}
+body.tema-fuego .stats-box {
+    background: #2b1111;
+    border: 2px solid #ff4500;
+    color: #ffaa00;
+}
+body.tema-fuego .stats-box span {
+    color: #facc15;
+}
+body.tema-fuego .panel-numeros-inferior {
+    background: #1c0a0a;
+    border: 2px solid #ff4500;
+}
+body.tema-fuego .titulo-tabla {
+    color: #ffaa00;
+}
+body.tema-fuego .bolita {
+    background: #2b1111;
+    color: #ffedd5;
+    border: 1px solid #ff450055;
+}
+body.tema-fuego .bolita.marcada {
+    background: #facc15;
+    color: #1c0a0a;
+    box-shadow: 0 0 8px #facc15;
+}
+body.tema-fuego .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #ff4500;
+}
+body.tema-fuego .btn-cambiar,
+body.tema-fuego .btn-atras {
+    background: #2b1111;
+    color: #ffaa00;
+    border: 2px solid #ff4500;
+    box-shadow: 0 0 8px rgba(255, 69, 0, 0.4);
+}
+body.tema-fuego .mini-carton {
+    background: #1c0a0a;
+    border: 2px solid #ff4500;
+}
+
+/* ============================================
+   TEMA ESMERALDA (royal verde)
+   ============================================ */
+body.tema-esmeralda {
+    background: #022c22;
+}
+body.tema-esmeralda .cartones-grid.modo-15 .carton {
+    background: #022c22;
+    border: 3px solid #10b981;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6), 0 0 15px rgba(16, 185, 129, 0.2);
+}
+body.tema-esmeralda .cartones-grid.modo-15 .carton-header {
+    background: linear-gradient(180deg, #10b981, #047857);
+    color: #ecfdf5;
+}
+body.tema-esmeralda .bingo-header-row {
+    background: #022c22;
+    color: #6ee7b7;
+}
+body.tema-esmeralda .cartones-grid.modo-15 .carton-grid-inner {
+    background: #022c22;
+    border: 1px solid #10b981;
+}
+body.tema-esmeralda .cartones-grid.modo-15 .celda {
+    background: #064e3b;
+    color: #a7f3d0;
+    border: 1px solid #059669 !important;
+    box-shadow: 0 4px 0 #022c22;
+}
+body.tema-esmeralda .cartones-grid.modo-15 .celda.marcada {
+    background: #f43f5e !important;
+    color: #fff !important;
+    box-shadow: 0 0 8px #f43f5e;
+}
+body.tema-esmeralda .cartones-grid.modo-15 .celda.vacia {
+    background: #10b981 !important;
+    color: #022c22 !important;
+    box-shadow: 0 4px 0 #047857;
+}
+body.tema-esmeralda .bolillero-container {
+    background: #022c22;
+    border: 2px solid #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+body.tema-esmeralda .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #6ee7b7, #047857);
+    border: 2px solid #10b981;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+}
+body.tema-esmeralda .btn-sacar-bola {
+    background: linear-gradient(180deg, #10b981, #047857) !important;
+    color: #ecfdf5;
+    border: 2px solid #022c22;
+    box-shadow: 0 4px 0 #022c22;
+}
+body.tema-esmeralda .stats-box {
+    background: #064e3b;
+    border: 2px solid #10b981;
+    color: #a7f3d0;
+}
+body.tema-esmeralda .stats-box span {
+    color: #6ee7b7;
+}
+body.tema-esmeralda .panel-numeros-inferior {
+    background: #022c22;
+    border: 2px solid #10b981;
+}
+body.tema-esmeralda .titulo-tabla {
+    color: #6ee7b7;
+}
+body.tema-esmeralda .bolita {
+    background: #064e3b;
+    color: #a7f3d0;
+    border: 1px solid #059669;
+}
+body.tema-esmeralda .bolita.marcada {
+    background: #10b981;
+    color: #022c22;
+    box-shadow: 0 0 8px #10b981;
+}
+body.tema-esmeralda .bolita.vacia {
+    background: transparent;
+    border: 1px dashed #059669;
+}
+body.tema-esmeralda .btn-cambiar,
+body.tema-esmeralda .btn-atras {
+    background: #064e3b;
+    color: #6ee7b7;
+    border: 2px solid #10b981;
+    box-shadow: 0 3px 0 #022c22;
+}
+body.tema-esmeralda .mini-carton {
+    background: #022c22;
+    border: 2px solid #10b981;
+}
+
+/* ============================================
+   TEMA NEUMÓRFICO (relieve moderno)
+   ============================================ */
+body.tema-neumorfico {
+    background: #181b22;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .carton {
+    background: #181b22;
+    box-shadow: 10px 10px 20px #0f1116, -10px -10px 20px #21252e;
+    border: 1px solid #232833;
+    border-radius: 16px;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .carton-header {
+    background: #181b22;
+    color: #a855f7;
+    box-shadow: inset 3px 3px 6px #0f1116, inset -3px -3px 6px #21252e;
+    border-radius: 8px;
+}
+body.tema-neumorfico .bingo-header-row {
+    background: #181b22;
+    color: #c084fc;
+    border-radius: 8px;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .carton-grid-inner {
+    background: #181b22;
+    border: none;
+    border-radius: 8px;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .celda {
+    background: #181b22;
+    color: #e2e8f0;
+    box-shadow: 4px 4px 8px #0f1116, -4px -4px 8px #21252e;
+    border: none !important;
+    border-radius: 6px;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .celda.marcada {
+    background: #181b22 !important;
+    color: #a855f7 !important;
+    box-shadow: inset 3px 3px 6px #0f1116, inset -3px -3px 6px #21252e;
+}
+body.tema-neumorfico .cartones-grid.modo-15 .celda.vacia {
+    background: #181b22 !important;
+    color: #a855f7 !important;
+    box-shadow: inset 3px 3px 6px #0f1116, inset -3px -3px 6px #21252e;
+}
+body.tema-neumorfico .bolillero-container {
+    background: #181b22;
+    box-shadow: 10px 10px 20px #0f1116, -10px -10px 20px #21252e;
+    border: 1px solid #232833;
+    border-radius: 16px;
+}
+body.tema-neumorfico .bolillero-sphere {
+    background: radial-gradient(circle at 30% 30%, #c084fc, #181b22);
+    border: 2px solid #a855f7;
+    box-shadow: inset 3px 3px 6px #0f1116, 0 0 15px rgba(168, 85, 247, 0.5);
+}
+body.tema-neumorfico .btn-sacar-bola {
+    background: #181b22 !important;
+    color: #a855f7;
+    border: 1px solid #232833;
+    box-shadow: 4px 4px 8px #0f1116, -4px -4px 8px #21252e;
+    border-radius: 12px;
+}
+body.tema-neumorfico .stats-box {
+    background: #181b22;
+    border: 1px solid #232833;
+    color: #a855f7;
+    box-shadow: inset 3px 3px 6px #0f1116, inset -3px -3px 6px #21252e;
+    border-radius: 12px;
+}
+body.tema-neumorfico .stats-box span {
+    color: #c084fc;
+}
+body.tema-neumorfico .panel-numeros-inferior {
+    background: #181b22;
+    box-shadow: 10px 10px 20px #0f1116, -10px -10px 20px #21252e;
+    border: 1px solid #232833;
+    border-radius: 12px;
+}
+body.tema-neumorfico .titulo-tabla {
+    color: #c084fc;
+}
+body.tema-neumorfico .bolita {
+    background: #181b22;
+    color: #e2e8f0;
+    box-shadow: 3px 3px 6px #0f1116, -3px -3px 6px #21252e;
+    border-radius: 4px;
+}
+body.tema-neumorfico .bolita.marcada {
+    background: #181b22;
+    color: #a855f7;
+    box-shadow: inset 3px 3px 6px #0f1116, inset -3px -3px 6px #21252e;
+}
+body.tema-neumorfico .bolita.vacia {
+    background: transparent;
+    box-shadow: none;
+    border: 1px dashed #232833;
+    border-radius: 4px;
+}
+body.tema-neumorfico .btn-cambiar,
+body.tema-neumorfico .btn-atras {
+    background: #181b22;
+    color: #a855f7;
+    border: 1px solid #232833;
+    box-shadow: 4px 4px 8px #0f1116, -4px -4px 8px #21252e;
+    border-radius: 25px;
+}
+body.tema-neumorfico .mini-carton {
+    background: #181b22;
+    border: 1px solid #232833;
+    box-shadow: 3px 3px 6px #0f1116, -3px -3px 6px #21252e;
+    border-radius: 6px;
 }
