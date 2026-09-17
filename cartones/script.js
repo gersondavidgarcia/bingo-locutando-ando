@@ -1,18 +1,47 @@
 /* ============================================
+   PALETAS DE COLOR (5 tonos por paleta)
+   ============================================ */
+const PALETAS = [
+    {
+        nombre: 'Esmeralda',
+        colores: ['#1b5e20', '#2e7d32', '#388e3c', '#43a047', '#4caf50'],
+        tema: '#2e7d32'
+    },
+    {
+        nombre: 'Zafiro',
+        colores: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3'],
+        tema: '#1565c0'
+    },
+    {
+        nombre: 'Rubí',
+        colores: ['#7f0000', '#b71c1c', '#c62828', '#d32f2f', '#e53935'],
+        tema: '#c62828'
+    },
+    {
+        nombre: 'Onyx',
+        colores: ['#1c1c1c', '#2c2c2c', '#3d3d3d', '#4d4d4d', '#5e5e5e'],
+        tema: '#3d3d3d'
+    },
+    {
+        nombre: 'Ámbar',
+        colores: ['#b45309', '#d97706', '#ea8c1c', '#f59e0b', '#fbbf24'],
+        tema: '#d97706'
+    },
+    {
+        nombre: 'Amatista',
+        colores: ['#4a148c', '#6a1b9a', '#7b1fa2', '#8e24aa', '#9c27b0'],
+        tema: '#7b1fa2'
+    }
+];
+
+let paletaActual = 0;
+
+/* ============================================
    CONFIGURACIÓN GLOBAL
    ============================================ */
 let TOTAL_CARTONES = 15;
 let MAX_BALOTAS = 75;
 let MODO_JUEGO = 75;
-
-// Paleta de colores (se repetirá si hay más cartones que colores)
-const COLORES_CARTONES = [
-    '#e53935', '#d81b60', '#8e24aa', '#5e35b1', 
-    '#3949ab', '#1e88e5', '#039be5', '#00acc1', 
-    '#00897b', '#43a047', '#7cb342', '#fb8c00', 
-    '#f4511e', '#6d4c41', '#546e7a',
-    '#ad1457', '#6a1b9a', '#283593'
-];
 
 let bombo = [];
 let historialSacadas = [];
@@ -28,24 +57,67 @@ const RANGOS_BINGO = {
 /* ============================================
    FUNCIONES DEL MENÚ (index.html)
    ============================================ */
-function toggleConfiguracion() {
-    const panel = document.getElementById('panelConfiguracion');
-    if (panel) {
-        panel.classList.toggle('visible');
+function abrirConfiguracion() {
+    const modal = document.getElementById('modalConfig');
+    if (modal) {
+        modal.classList.add('visible');
+        cargarConfigEnModal();
     }
 }
 
-function iniciarJuegoDirecto() {
+function cerrarConfiguracion() {
+    const modal = document.getElementById('modalConfig');
+    if (modal) modal.classList.remove('visible');
+}
+
+function cargarConfigEnModal() {
+    try {
+        const raw = localStorage.getItem('bingo_config');
+        if (raw) {
+            const config = JSON.parse(raw);
+            const selCartones = document.getElementById('cantCartones');
+            const selModo = document.getElementById('maxBolas');
+            if (selCartones && config.cartones) selCartones.value = config.cartones;
+            if (selModo && config.modo) selModo.value = config.modo;
+        }
+    } catch (e) {
+        // sin config previa, se queda con los valores por defecto
+    }
+}
+
+function guardarConfiguracion() {
     const config = {
-        cartones: document.getElementById('cantCartones')?.value || '18',
+        cartones: document.getElementById('cantCartones')?.value || '15',
         modo: document.getElementById('maxBolas')?.value || '75'
     };
     localStorage.setItem('bingo_config', JSON.stringify(config));
+    cerrarConfiguracion();
+}
+
+function iniciarJuegoDirecto() {
+    // Si el usuario ya abrió config antes, la respetamos.
+    // Si no hay nada guardado, usamos los defaults del modal.
+    const existente = localStorage.getItem('bingo_config');
+    if (!existente) {
+        const config = {
+            cartones: document.getElementById('cantCartones')?.value || '15',
+            modo: document.getElementById('maxBolas')?.value || '75'
+        };
+        localStorage.setItem('bingo_config', JSON.stringify(config));
+    }
     window.location.href = 'juego.html';
 }
 
+/* Cerrar modal al tocar el fondo oscuro */
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('modalConfig');
+    if (modal && e.target === modal) {
+        cerrarConfiguracion();
+    }
+});
+
 /* ============================================
-   LECTURA DE CONFIGURACIÓN
+   LECTURA DE CONFIGURACIÓN (para juego.html)
    ============================================ */
 function cargarConfiguracion() {
     try {
@@ -57,18 +129,11 @@ function cargarConfiguracion() {
             MAX_BALOTAS = MODO_JUEGO;
         }
     } catch (e) {
-        console.warn('No se pudo leer la configuración, usando valores por defecto.');
+        console.warn('Config no leída, usando default.');
     }
 
-    ajustarGrid(TOTAL_CARTONES);
-}
-
-function ajustarGrid(cantidad) {
     const grid = document.getElementById('cartonesGrid');
-    if (!grid) return;
-
-    // Mantener 3 columnas para móvil (6, 9, 12, 15, 18 se ven bien)
-    grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
 }
 
 /* ============================================
@@ -99,6 +164,31 @@ function obtenerLetra(num) {
 }
 
 /* ============================================
+   SELECCIÓN DE COLOR POR CARTÓN (patrón A,A,A,B,B,B...)
+   ============================================ */
+function obtenerIndiceTonoPorCarton(idx) {
+    const bloque = Math.floor(idx / 3); // 0, 1, 2, 3, 4...
+    const par = bloque % 2;            // 0 → tono A, 1 → tono B
+    return par === 0 ? 0 : 2;
+}
+
+/* ============================================
+   APLICAR PALETA AL DOM
+   ============================================ */
+function aplicarPaleta() {
+    const paleta = PALETAS[paletaActual];
+    document.documentElement.style.setProperty('--tema-color', paleta.tema);
+    
+    const btnSacar = document.querySelector('.btn-sacar-bola');
+    if (btnSacar) btnSacar.style.background = paleta.tema;
+    
+    const sphere = document.querySelector('.bolillero-sphere');
+    if (sphere) {
+        sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
+    }
+}
+
+/* ============================================
    RENDERIZADO
    ============================================ */
 function renderizarEstructura() {
@@ -107,13 +197,20 @@ function renderizarEstructura() {
     
     grid.innerHTML = '';
 
+    const paleta = PALETAS[paletaActual];
+    const colores = paleta.colores;
+
     for (let i = 1; i <= TOTAL_CARTONES; i++) {
         const datos = generarCarton75();
         const carton = document.createElement('div');
         carton.className = 'carton';
         
-        const colorHex = COLORES_CARTONES[(i - 1) % COLORES_CARTONES.length];
+        const idxTono = obtenerIndiceTonoPorCarton(i - 1);
+        const colorHex = colores[idxTono];
+        const colorDark = paleta.colores[0];
+
         carton.style.setProperty('--carton-color', colorHex);
+        carton.style.setProperty('--carton-color-dark', colorDark);
 
         carton.innerHTML = `
             <div class="carton-header">
@@ -135,7 +232,7 @@ function renderizarEstructura() {
 
                 if (fila === 2 && colIdx === 2) {
                     celda.classList.add('vacia');
-                    celda.innerHTML = `<span class="num-val" style="font-size: 0.45rem !important;">FREE</span>`;
+                    celda.innerHTML = `<span class="num-val">${i}</span>`;
                 } else {
                     const val = datos[letra][fila];
                     celda.dataset.valor = val;
@@ -146,6 +243,7 @@ function renderizarEstructura() {
         }
     }
 
+    aplicarPaleta();
     renderizarTablaControl();
 }
 
@@ -155,7 +253,6 @@ function renderizarTablaControl() {
     tabla.innerHTML = '';
 
     if (MODO_JUEGO === 75) {
-        // 5 filas x 15 columnas = 75
         for (let f = 0; f < 5; f++) {
             const fila = document.createElement('div');
             fila.className = 'fila-numeros';
@@ -170,7 +267,6 @@ function renderizarTablaControl() {
             tabla.appendChild(fila);
         }
     } else if (MODO_JUEGO === 90) {
-        // 6 filas x 15 columnas = 90
         for (let f = 0; f < 6; f++) {
             const fila = document.createElement('div');
             fila.className = 'fila-numeros';
@@ -185,7 +281,6 @@ function renderizarTablaControl() {
             tabla.appendChild(fila);
         }
     } else if (MODO_JUEGO === 100) {
-        // 5 filas x 20 columnas = 100
         for (let f = 0; f < 5; f++) {
             const fila = document.createElement('div');
             fila.className = 'fila-numeros';
@@ -225,9 +320,7 @@ function sacarBola(e) {
     }
 
     const stats = document.getElementById('statsDisplay');
-    if (stats) {
-        stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
-    }
+    if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
     document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
         el.classList.add('marcada');
@@ -265,13 +358,23 @@ function reiniciarJuego() {
     renderizarEstructura();
 }
 
+function cambiarCartonesYPaleta() {
+    paletaActual = (paletaActual + 1) % PALETAS.length;
+    reiniciarJuego();
+}
+
 /* ============================================
    INICIALIZACIÓN
    ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Si estamos en la página del juego, inicializar
     if (document.getElementById('cartonesGrid')) {
-        cargarConfiguracion();  // Lee localStorage y ajusta TOTAL_CARTONES, MODO_JUEGO, MAX_BALOTAS
-        reiniciarJuego();       // Inicia el juego con esos valores
+        paletaActual = Math.floor(Math.random() * PALETAS.length);
+        cargarConfiguracion();
+        reiniciarJuego();
+
+        const btnCambiar = document.querySelector('.btn-cambiar');
+        if (btnCambiar) {
+            btnCambiar.onclick = cambiarCartonesYPaleta;
+        }
     }
 });
