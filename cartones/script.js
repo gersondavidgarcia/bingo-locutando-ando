@@ -9,6 +9,23 @@ const MAX_BALOTAS = parseInt(configGuardada.modo);
 let bombo = [];
 let historialSacadas = [];
 
+function toggleFullScreen() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) {
+            docEl.requestFullscreen();
+        } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+}
+
 function obtenerLetra(num) {
     if (MAX_BALOTAS === 75) {
         if (num <= 15) return 'B';
@@ -46,7 +63,7 @@ function renderizarEstructura() {
         carton.className = 'carton';
 
         carton.innerHTML = `
-            <div class="star-badge">★ ${i}</div>
+            <div class="star-badge">★${i}</div>
             <div class="bingo-header-row">
                 <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
             </div>
@@ -108,7 +125,7 @@ function sacarBola(e) {
     historialSacadas.unshift({ numero, letra });
 
     const display = document.getElementById('numeroDisplay');
-    display.innerHTML = `${letra} ${numero}`;
+    display.innerHTML = `${letra}${numero}`;
 
     document.getElementById('statsDisplay').textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
@@ -121,7 +138,7 @@ function sacarBola(e) {
 
     const recientesLista = document.getElementById('recientesLista');
     recientesLista.innerHTML = '';
-    historialSacadas.slice(0, 5).forEach(item => {
+    historialSacadas.slice(0, 4).forEach(item => {
         const bola = document.createElement('div');
         bola.className = 'mini-bola';
         bola.textContent = item.numero;
