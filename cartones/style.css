@@ -293,7 +293,7 @@ body {
 }
 
 /* ============================================
-   RETÍCULA DE CARTONES (TAMAÑOS INTACTOS)
+   RETÍCULA DE CARTONES
    ============================================ */
 .cartones-grid.modo-15 {
     display: grid !important;
@@ -325,6 +325,7 @@ body {
     z-index: 1;
 }
 
+/* Cabecera del cartón (fondo color tema, letra blanca) */
 .cartones-grid.modo-15 .carton-header {
     background: var(--carton-color, #2e7d32);
     color: #fff;
@@ -344,6 +345,7 @@ body {
     line-height: 1.3;
 }
 
+/* Fila B I N G O */
 .bingo-header-row {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -410,7 +412,9 @@ body {
     opacity: 0;
 }
 
-/* FREE central llamativo */
+/* ============================================
+   FREE CENTRAL LLAMATIVO (muestra el número del cartón)
+   ============================================ */
 .cartones-grid.modo-15 .celda.vacia {
     background: linear-gradient(135deg, #fff8e1, #ffe082) !important;
     color: #b8860b !important;
