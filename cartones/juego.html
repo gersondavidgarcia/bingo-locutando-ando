@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bingo Tradicional 75 - Cartones</title>
     
     <link rel="manifest" href="manifest.json">
@@ -13,7 +13,7 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body ontouchstart="">
 
     <div class="bingo-app">
         
@@ -185,11 +185,11 @@
            CONFIGURACIÓN GLOBAL
            ============================================ */
         let TOTAL_CARTONES = 15;
-        let MAX_BALOTAS = 75;
-        let MODO_JUEGO = 75;
+        const MAX_BALOTAS = 75; // FIJO: siempre 75 balotas
         let USAR_BASE_DATOS = true;
         let CANTIDAD_FIGURAS = 2;
         let TAMANO_CONTROL = 58;
+        let FORMATO_CONTROL = '15x5';
         let TAMANO_FIGURAS = 42;
 
         let nombresDeFirebase = [];
@@ -207,7 +207,6 @@
 
         /* ============================================
            LECTURA DE CONFIGURACIÓN
-           (solo lee valores, NO aplica nada al DOM todavía)
            ============================================ */
         function cargarConfiguracion() {
             try {
@@ -215,11 +214,10 @@
                 if (raw) {
                     const config = JSON.parse(raw);
                     TOTAL_CARTONES = parseInt(config.cartones) || 15;
-                    MODO_JUEGO = parseInt(config.modo) || 75;
-                    MAX_BALOTAS = MODO_JUEGO;
                     USAR_BASE_DATOS = config.usarDB !== undefined ? config.usarDB : true;
                     CANTIDAD_FIGURAS = config.cantidadFiguras !== undefined ? parseInt(config.cantidadFiguras) : 2;
                     TAMANO_CONTROL = config.tamanoControl !== undefined ? parseInt(config.tamanoControl) : 58;
+                    FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
                 }
             } catch (e) {
@@ -228,11 +226,13 @@
 
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
+            const titulo = document.querySelector('.titulo-tabla');
+            if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
         }
 
         /* ============================================
            APLICAR TAMAÑO DEL CONTROL Y FIGURAS
-           (con requestAnimationFrame para asegurar que el DOM esté listo)
            ============================================ */
         function aplicarTamanoControl() {
             requestAnimationFrame(() => {
@@ -496,60 +496,53 @@
             actualizarMiniCartones();
             renderizarTablaControl();
 
-            // ✅ Aplicar configuración DESPUÉS de que todo esté renderizado
             aplicarTamanoControl();
             aplicarConfigFiguras();
         }
 
+        /* ============================================
+           TABLA DE CONTROL (con formato configurable)
+           ============================================ */
         function renderizarTablaControl() {
             const tabla = document.getElementById('tablaNumeros');
             if (!tabla) return;
             tabla.innerHTML = '';
 
-            if (MODO_JUEGO === 75) {
-                for (let f = 0; f < 5; f++) {
-                    const fila = document.createElement('div');
-                    fila.className = 'fila-numeros';
-                    for (let c = 1; c <= 15; c++) {
-                        const num = f * 15 + c;
-                        const bolita = document.createElement('div');
-                        bolita.className = 'bolita';
-                        bolita.id = `ctrl-${num}`;
-                        bolita.textContent = num;
-                        fila.appendChild(bolita);
+            // Leer formato del localStorage
+            let cols = 15, fils = 5;
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                if (raw) {
+                    const config = JSON.parse(raw);
+                    if (config.formatoControl) {
+                        const partes = config.formatoControl.split('x');
+                        cols = parseInt(partes[0]) || 15;
+                        fils = parseInt(partes[1]) || 5;
                     }
-                    tabla.appendChild(fila);
                 }
-            } else if (MODO_JUEGO === 90) {
-                for (let f = 0; f < 6; f++) {
-                    const fila = document.createElement('div');
-                    fila.className = 'fila-numeros';
-                    for (let c = 1; c <= 15; c++) {
-                        const num = f * 15 + c;
-                        const bolita = document.createElement('div');
-                        bolita.className = 'bolita';
-                        bolita.id = `ctrl-${num}`;
-                        bolita.textContent = num;
-                        fila.appendChild(bolita);
-                    }
-                    tabla.appendChild(fila);
+            } catch (e) {}
+
+            const grid = document.createElement('div');
+            grid.className = 'control-grid';
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+            const totalCeldas = cols * fils;
+            const totalNumeros = MAX_BALOTAS;
+
+            for (let i = 0; i < totalCeldas; i++) {
+                const bolita = document.createElement('div');
+                bolita.className = 'bolita';
+                if (i < totalNumeros) {
+                    const num = i + 1;
+                    bolita.id = `ctrl-${num}`;
+                    bolita.textContent = num;
+                } else {
+                    bolita.classList.add('vacia');
                 }
-            } else if (MODO_JUEGO === 100) {
-                for (let f = 0; f < 5; f++) {
-                    const fila = document.createElement('div');
-                    fila.className = 'fila-numeros';
-                    fila.style.gridTemplateColumns = 'repeat(20, 1fr)';
-                    for (let c = 1; c <= 20; c++) {
-                        const num = f * 20 + c;
-                        const bolita = document.createElement('div');
-                        bolita.className = 'bolita';
-                        bolita.id = `ctrl-${num}`;
-                        bolita.textContent = num;
-                        fila.appendChild(bolita);
-                    }
-                    tabla.appendChild(fila);
-                }
+                grid.appendChild(bolita);
             }
+
+            tabla.appendChild(grid);
         }
 
         /* ============================================
@@ -615,7 +608,6 @@
                 figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
             }
             reiniciarJuego();
-            // ✅ Re-aplicar config después del reinicio (por seguridad)
             aplicarTamanoControl();
             aplicarConfigFiguras();
         }
@@ -624,9 +616,6 @@
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
 
-        /* ============================================
-           INICIALIZACIÓN
-           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 paletaActual = Math.floor(Math.random() * PALETAS.length);

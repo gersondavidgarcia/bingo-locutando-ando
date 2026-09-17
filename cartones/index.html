@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Bingo Tradicional - Menú</title>
     
     <link rel="manifest" href="manifest.json">
@@ -18,7 +18,7 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="body-center">
+<body class="body-center" ontouchstart="">
 
     <div class="menu-container">
         <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
@@ -50,19 +50,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="maxBolas">Modo de Juego:</label>
-                    <select id="maxBolas">
-                        <option value="75" selected>Bingo 75 Balotas (5x5)</option>
-                        <option value="90">Bingo 90 Balotas (3x9)</option>
-                        <option value="100">Bingo 100 Balotas (3x5)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label for="usarBaseDatos">Usar base de datos (nombres reales):</label>
                     <select id="usarBaseDatos">
                         <option value="si" selected>SÍ - Cargar nombres de Firebase</option>
                         <option value="no">NO - Mostrar "CARTÓN N"</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="formatoControl">Formato del control (1-75):</label>
+                    <select id="formatoControl">
+                        <option value="15x5" selected>Horizontal (15 × 5) - Clásico</option>
+                        <option value="10x8">Compacto (10 × 8)</option>
+                        <option value="8x10">Vertical compacto (8 × 10)</option>
                     </select>
                 </div>
 
@@ -78,10 +78,10 @@
 
                 <div class="form-group">
                     <label for="tamanoControl">
-                        Tamaño del control (1-75): 
+                        Ancho del panel de control: 
                         <span id="valTamanoControl">58%</span>
                     </label>
-                    <input type="range" id="tamanoControl" min="30" max="80" value="58" step="2">
+                    <input type="range" id="tamanoControl" min="20" max="70" value="58" step="2">
                 </div>
 
                 <div class="form-group">
@@ -102,7 +102,6 @@
 
     <script src="script.js"></script>
     <script>
-        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
