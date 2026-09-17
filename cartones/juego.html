@@ -234,39 +234,37 @@
         /* ============================================
            APLICAR TAMAÑO DEL CONTROL Y FIGURAS
            ============================================ */
-   function aplicarTamanoControl() {
-    requestAnimationFrame(() => {
-        const panelControl = document.getElementById('panelControl');
-        if (!panelControl) return;
+        function aplicarTamanoControl() {
+            requestAnimationFrame(() => {
+                const panelControl = document.getElementById('panelControl');
+                if (!panelControl) return;
 
-        // 1) Ajustar el ancho del panel de control (porcentaje)
-        panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
+                // 1) Ajustar el ancho del panel de control (porcentaje)
+                panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
 
-        // 2) Calcular font-size: 50% del promedio entre ancho y alto,
-        //    con un tope máximo de 14px para que no se desborde.
-        const bolitas = panelControl.querySelectorAll('.bolita');
-        bolitas.forEach(b => {
-            const rect = b.getBoundingClientRect();
-            const ancho = rect.width;
-            const alto = rect.height;
-            if (ancho <= 0 || alto <= 0) return;
+                // 2) Calcular font-size: 50% del promedio entre ancho y alto
+                const bolitas = panelControl.querySelectorAll('.bolita');
+                bolitas.forEach(b => {
+                    const rect = b.getBoundingClientRect();
+                    const ancho = rect.width;
+                    const alto = rect.height;
+                    if (ancho <= 0 || alto <= 0) return;
 
-            const promedio = (ancho + alto) / 2;
-            let font = promedio * 0.5;
+                    const promedio = (ancho + alto) / 2;
+                    let font = promedio * 0.5;
 
-            // Topes: mínimo 6px, máximo 14px
-            if (font > 14) font = 14;
-            if (font < 6) font = 6;
+                    // Topes: mínimo 6px, máximo 14px
+                    if (font > 14) font = 14;
+                    if (font < 6) font = 6;
 
-            b.style.fontSize = font + 'px';
-            b.style.lineHeight = '1';
-        });
+                    b.style.fontSize = font + 'px';
+                    b.style.lineHeight = '1';
+                });
 
-        // 3) Padding del panel
-        panelControl.style.padding = '5px';
-    });
-}
-    }
+                // 3) Padding del panel
+                panelControl.style.padding = '5px';
+            });
+        }
 
         function aplicarConfigFiguras() {
             requestAnimationFrame(() => {
