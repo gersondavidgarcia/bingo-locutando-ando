@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bingo Tradicional - Menú</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .btn-secundario {
+            background: #2a2a3c;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+        .btn-secundario:active {
+            background: #3a3a4c;
+        }
+    </style>
+</head>
+<body class="body-center">
+
+    <div class="menu-container">
+        <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
+        
+        <div class="menu-card">
+            <button class="btn-principal" onclick="iniciarJuegoDirecto()">▶ JUGAR AHORA</button>
+            <button class="btn-secundario" onclick="toggleConfiguracion()">⚙️ CONFIGURACIÓN</button>
+
+            <div id="panelConfiguracion" style="display: none; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px;">
+                <h2>Configuración de la Partida</h2>
+                
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="cantCartones">Cantidad de Cartones:</label>
+                    <select id="cantCartones">
+                        <option value="6">6 Cartones</option>
+                        <option value="9">9 Cartones</option>
+                        <option value="12">12 Cartones</option>
+                        <option value="18" selected>18 Cartones</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 12px;">
+                    <label for="maxBolas">Modo de Juego:</label>
+                    <select id="maxBolas">
+                        <option value="75" selected>Bingo 75 Balotas (5x5)</option>
+                        <option value="90">Bingo 90 Balotas (3x9)</option>
+                        <option value="100">Bingo 100 Balotas (3x5)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleConfiguracion() {
+            const panel = document.getElementById('panelConfiguracion');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function iniciarJuegoDirecto() {
+            const config = {
+                cartones: document.getElementById('cantCartones').value,
+                modo: document.getElementById('maxBolas').value
+            };
+            localStorage.setItem('bingo_config', JSON.stringify(config));
+            window.location.href = 'juego.html';
+        }
+    </script>
+</body>
+</html>
