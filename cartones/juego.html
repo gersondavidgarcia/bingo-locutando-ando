@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0d3c9b">
+    <link rel="manifest" href="manifest.json">
     <title>Bingo Proyector</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,12 +14,12 @@
 
     <div class="layout-proyector">
         
-        <!-- SECCIÓN IZQUIERDA: TODOS LOS CARTONES -->
+        <!-- SECCIÓN IZQUIERDA: CARTONES -->
         <div class="seccion-cartones">
             <div class="cartones-grid" id="cartonesGrid"></div>
         </div>
 
-        <!-- SECCIÓN DERECHA: PANELES Y CONTROL -->
+        <!-- SECCIÓN DERECHA: CONTROL LATERAL -->
         <div class="seccion-lateral">
             
             <div class="panel-box">
@@ -29,7 +33,7 @@
                     </button>
                 </div>
                 <div class="stats-counter-bar">
-                    BOLAS EXTRAÍDAS: <span id="statsDisplay">0/75</span>
+                    BOLAS: <span id="statsDisplay">0/75</span>
                 </div>
                 <div class="recientes-lista" id="recientesLista"></div>
             </div>
@@ -40,6 +44,9 @@
             </div>
 
             <div class="panel-acciones">
+                <button class="btn-accion btn-fullscreen" onclick="toggleFullScreen()" onfocus="this.blur()">
+                    ⛶ PANTALLA COMPLETA
+                </button>
                 <button class="btn-accion btn-reiniciar" onclick="reiniciarJuego()" onfocus="this.blur()">
                     🔄 REINICIAR
                 </button>
