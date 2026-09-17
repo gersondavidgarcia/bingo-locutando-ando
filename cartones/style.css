@@ -1,0 +1,309 @@
+:root {
+    --bg-pantalla: #b2d0f0;
+    --carton-border: #1a3e7a;
+    --carton-header-bg: #0d3c9b;
+    --celda-bg: #ffffff;
+    --celda-texto: #000000;
+    --celda-free: #ff9800;
+    --panel-bg: #121212;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--bg-pantalla);
+}
+
+body.body-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #12121c;
+}
+
+/* --- MENÚ INDEX --- */
+.menu-container {
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    padding: 15px;
+}
+.app-title {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #4caf50;
+}
+.menu-card {
+    background: #1e1e2d;
+    border-radius: 12px;
+    padding: 20px;
+}
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+}
+.btn-principal {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: bold;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* --- CONTENEDOR PRINCIPAL --- */
+.layout-proyector {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    padding: 6px;
+    gap: 8px;
+    background-color: var(--bg-pantalla);
+}
+
+/* --- ÁREA DE CARTONES (IZQUIERDA) --- */
+.seccion-cartones {
+    flex: 1;
+    height: 100%;
+    overflow-y: auto; /* Permite scroll limpio si la pantalla es muy pequeña */
+    overflow-x: hidden;
+    padding-right: 2px;
+}
+
+.cartones-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    width: 100%;
+}
+
+.carton {
+    background: #ffffff;
+    border: 2px solid var(--carton-border);
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.star-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #ffff00;
+    color: #000;
+    font-weight: 900;
+    font-size: clamp(0.55rem, 1.2vw, 0.75rem);
+    padding: 1px 4px;
+    border-bottom-right-radius: 4px;
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+    z-index: 2;
+}
+
+.bingo-header-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    background: var(--carton-header-bg);
+    color: #ffffff;
+    text-align: center;
+    font-weight: 900;
+    font-size: clamp(0.55rem, 1.2vw, 0.75rem) !important;
+    line-height: 1.2;
+    padding: 2px 0;
+}
+
+.carton-grid-inner {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 1px !important;
+    background: #0d3c9b;
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.celda {
+    aspect-ratio: 1 / 0.9;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--celda-bg);
+    color: var(--celda-texto);
+}
+
+.celda.marcada {
+    background-color: #e53935 !important;
+    color: #ffffff !important;
+}
+
+.celda.vacia {
+    background-color: var(--celda-free) !important;
+    color: #ffffff;
+}
+
+.num-val {
+    font-size: clamp(0.55rem, 1.3vw, 0.8rem) !important;
+    font-weight: 800 !important;
+    line-height: 1;
+}
+
+/* --- SECCIÓN LATERAL DERECHA --- */
+.seccion-lateral {
+    width: clamp(130px, 28vw, 220px);
+    height: 100%;
+    background: var(--panel-bg);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+    gap: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.panel-box {
+    background: #1e1e1e;
+    border-radius: 6px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #333;
+}
+
+.panel-header-title {
+    color: #ffffff;
+    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.bolillero-display-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.bolillero-sphere {
+    width: clamp(40px, 8vw, 55px);
+    height: clamp(40px, 8vw, 55px);
+    background: radial-gradient(circle at 35% 35%, #ffffff, #999999);
+    border: 2px solid #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 900;
+    font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+    box-shadow: inset -2px -2px 6px rgba(0,0,0,0.4);
+}
+
+.btn-sacar-bola {
+    background: #ffeb3b;
+    color: #000;
+    border: none;
+    font-weight: 900;
+    font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+    padding: 6px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.stats-counter-bar {
+    color: #4caf50;
+    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.recientes-lista {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+}
+
+.mini-bola {
+    background: #fff;
+    color: #000;
+    border-radius: 50%;
+    width: clamp(16px, 3.2vw, 22px);
+    height: clamp(16px, 3.2vw, 22px);
+    font-size: clamp(0.5rem, 1vw, 0.65rem);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #666;
+}
+
+/* TABLA CONTROL GENERAL */
+.tabla-numeros {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+}
+
+.fila-numeros {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+}
+
+.bolita {
+    background: #2a2a2a;
+    color: #ccc;
+    font-size: clamp(0.48rem, 0.9vw, 0.6rem);
+    text-align: center;
+    padding: 2px 0;
+    font-weight: bold;
+    border-radius: 2px;
+}
+
+.bolita.marcada {
+    background: #e53935;
+    color: #fff;
+}
+
+/* ACCIONES INFERIORES */
+.panel-acciones {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.btn-accion {
+    padding: 6px 0;
+    border: none;
+    font-weight: bold;
+    font-size: clamp(0.6rem, 1.1vw, 0.75rem);
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn-reiniciar { background: #ff9800; color: #000; }
+.btn-atras { background: #333333; color: #fff; }

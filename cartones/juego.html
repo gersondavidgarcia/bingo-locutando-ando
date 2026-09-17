@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bingo Proyector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="juego-body">
+
+    <div class="layout-proyector">
+        
+        <!-- SECCIÓN IZQUIERDA: TODOS LOS CARTONES -->
+        <div class="seccion-cartones">
+            <div class="cartones-grid" id="cartonesGrid"></div>
+        </div>
+
+        <!-- SECCIÓN DERECHA: PANELES Y CONTROL -->
+        <div class="seccion-lateral">
+            
+            <div class="panel-box">
+                <div class="panel-header-title">BOLILLERO</div>
+                <div class="bolillero-display-area">
+                    <div class="bolillero-sphere" id="bolilleroSphere">
+                        <span class="bolillero-numero" id="numeroDisplay">--</span>
+                    </div>
+                    <button class="btn-sacar-bola" id="btnSacarBola" onclick="sacarBola(event)" onfocus="this.blur()">
+                        SACAR BOLA
+                    </button>
+                </div>
+                <div class="stats-counter-bar">
+                    BOLAS EXTRAÍDAS: <span id="statsDisplay">0/75</span>
+                </div>
+                <div class="recientes-lista" id="recientesLista"></div>
+            </div>
+
+            <div class="panel-box">
+                <div class="panel-header-title">CONTROL GENERAL</div>
+                <div class="tabla-numeros" id="tablaNumeros"></div>
+            </div>
+
+            <div class="panel-acciones">
+                <button class="btn-accion btn-reiniciar" onclick="reiniciarJuego()" onfocus="this.blur()">
+                    🔄 REINICIAR
+                </button>
+                <button class="btn-accion btn-atras" onclick="window.location.href='index.html'" onfocus="this.blur()">
+                    ⬅ MENÚ
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
