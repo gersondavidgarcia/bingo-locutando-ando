@@ -77,6 +77,441 @@
 
     </div>
 
-    <script src="script.js"></script>
+    <script type="module">
+        /* ============================================
+           IMPORTACIONES DE FIREBASE
+           ============================================ */
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        /* ============================================
+           CONFIGURACIÓN FIREBASE
+           ============================================ */
+        const firebaseConfig = {
+            apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
+            authDomain: "bingo-locutando-ando.firebaseapp.com",
+            projectId: "bingo-locutando-ando",
+            storageBucket: "bingo-locutando-ando.firebasestorage.app",
+            messagingSenderId: "547896039173",
+            appId: "1:547896039173:web:e7f5389dde11af9078096c"
+        };
+
+        let db = null;
+        let docRef = null;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            docRef = doc(db, "bingo", "tablero");
+        } catch (e) {
+            console.warn("⚠️ Firebase no inicializado:", e);
+        }
+
+        /* ============================================
+           PALETAS DE COLOR
+           ============================================ */
+        const PALETAS = [
+            { nombre: 'Esmeralda', colores: ['#1b5e20', '#2e7d32', '#388e3c', '#43a047', '#4caf50'], tema: '#2e7d32' },
+            { nombre: 'Zafiro',    colores: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3'], tema: '#1565c0' },
+            { nombre: 'Rubí',      colores: ['#7f0000', '#b71c1c', '#c62828', '#d32f2f', '#e53935'], tema: '#c62828' },
+            { nombre: 'Onyx',      colores: ['#1c1c1c', '#2c2c2c', '#3d3d3d', '#4d4d4d', '#5e5e5e'], tema: '#3d3d3d' },
+            { nombre: 'Ámbar',     colores: ['#b45309', '#d97706', '#ea8c1c', '#f59e0b', '#fbbf24'], tema: '#d97706' },
+            { nombre: 'Amatista',  colores: ['#4a148c', '#6a1b9a', '#7b1fa2', '#8e24aa', '#9c27b0'], tema: '#7b1fa2' }
+        ];
+
+        let paletaActual = 0;
+
+        /* ============================================
+           CONFIGURACIÓN GLOBAL
+           ============================================ */
+        let TOTAL_CARTONES = 15;
+        let MAX_BALOTAS = 75;
+        let MODO_JUEGO = 75;
+        let USAR_BASE_DATOS = true;
+
+        let nombresDeFirebase = [];
+        let bombo = [];
+        let historialSacadas = [];
+
+        const RANGOS_BINGO = {
+            B: [1, 15],
+            I: [16, 30],
+            N: [31, 45],
+            G: [46, 60],
+            O: [61, 75]
+        };
+
+        /* ============================================
+           LECTURA DE CONFIGURACIÓN
+           ============================================ */
+        function cargarConfiguracion() {
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                if (raw) {
+                    const config = JSON.parse(raw);
+                    TOTAL_CARTONES = parseInt(config.cartones) || 15;
+                    MODO_JUEGO = parseInt(config.modo) || 75;
+                    MAX_BALOTAS = MODO_JUEGO;
+                    USAR_BASE_DATOS = config.usarDB !== undefined ? config.usarDB : true;
+                }
+            } catch (e) {
+                console.warn('Config no leída, usando default.');
+            }
+
+            const grid = document.getElementById('cartonesGrid');
+            if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        }
+
+        /* ============================================
+           CARGA DE NOMBRES DESDE FIREBASE (CON CACHÉ)
+           ============================================ */
+        async function cargarNombresDeFirebase() {
+            if (!docRef) return [];
+
+            // 1) Intentar leer desde localStorage (instantáneo)
+            let nombresCache = null;
+            try {
+                const cacheRaw = localStorage.getItem('bingo_nombres_cache');
+                if (cacheRaw) nombresCache = JSON.parse(cacheRaw);
+            } catch (e) {}
+
+            // 2) Si hay caché, devolverlo de inmediato y actualizar en segundo plano
+            if (nombresCache && Array.isArray(nombresCache) && nombresCache.length > 0) {
+                actualizarNombresEnSegundoPlano();
+                return nombresCache;
+            }
+
+            // 3) Primera vez: descargar y guardar caché
+            const nombres = await descargarNombresDeFirebase();
+            if (nombres.length > 0) {
+                try {
+                    localStorage.setItem('bingo_nombres_cache', JSON.stringify(nombres));
+                } catch (e) {}
+            }
+            return nombres;
+        }
+
+        async function descargarNombresDeFirebase() {
+            try {
+                const snap = await getDoc(docRef);
+                if (!snap.exists()) return [];
+                const data = snap.data();
+                const cartones = data.cartones || [];
+                const nombres = [];
+                for (let i = 0; i < cartones.length && i < 15; i++) {
+                    const lineas = cartones[i].lineas || [];
+                    let nombreEncontrado = "";
+                    for (const linea of lineas) {
+                        if (linea.nombre && linea.nombre.trim() !== "" && linea.estado !== "libre") {
+                            nombreEncontrado = linea.nombre.trim();
+                            break;
+                        }
+                    }
+                    nombres.push(nombreEncontrado);
+                }
+                return nombres;
+            } catch (e) {
+                console.warn("⚠️ No se pudieron cargar nombres de Firebase:", e);
+                return [];
+            }
+        }
+
+        async function actualizarNombresEnSegundoPlano() {
+            try {
+                const nuevos = await descargarNombresDeFirebase();
+                if (nuevos.length > 0) {
+                    try {
+                        localStorage.setItem('bingo_nombres_cache', JSON.stringify(nuevos));
+                    } catch (e) {}
+                    if (JSON.stringify(nuevos) !== JSON.stringify(nombresDeFirebase)) {
+                        nombresDeFirebase = nuevos;
+                        actualizarTextosDeCartones();
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function actualizarTextosDeCartones() {
+            const cartones = document.querySelectorAll('.cartones-grid .carton');
+            cartones.forEach((carton, i) => {
+                let textoCabecera = `CARTÓN ${i + 1}`;
+                if (USAR_BASE_DATOS && nombresDeFirebase[i] && nombresDeFirebase[i].trim() !== "") {
+                    textoCabecera = nombresDeFirebase[i];
+                }
+                const headerSpan = carton.querySelector('.carton-title');
+                if (headerSpan) {
+                    headerSpan.textContent = textoCabecera;
+                    if (USAR_BASE_DATOS && nombresDeFirebase[i]) {
+                        setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
+                    }
+                }
+            });
+        }
+
+        /* ============================================
+           GENERACIÓN DE CARTONES
+           ============================================ */
+        function generarCarton75() {
+            const columnas = { B: [], I: [], N: [], G: [], O: [] };
+            Object.keys(RANGOS_BINGO).forEach(letra => {
+                const [min, max] = RANGOS_BINGO[letra];
+                while (columnas[letra].length < 5) {
+                    let num = Math.floor(Math.random() * (max - min + 1)) + min;
+                    if (!columnas[letra].includes(num)) columnas[letra].push(num);
+                }
+            });
+            return columnas;
+        }
+
+        function obtenerLetra(num) {
+            if (num <= 15) return 'B';
+            if (num <= 30) return 'I';
+            if (num <= 45) return 'N';
+            if (num <= 60) return 'G';
+            return 'O';
+        }
+
+        function obtenerIndiceTonoPorCarton(idx) {
+            const bloque = Math.floor(idx / 3);
+            const par = bloque % 2;
+            return par === 0 ? 0 : 2;
+        }
+
+        function aplicarPaleta() {
+            const paleta = PALETAS[paletaActual];
+            document.documentElement.style.setProperty('--tema-color', paleta.tema);
+            const btnSacar = document.querySelector('.btn-sacar-bola');
+            if (btnSacar) btnSacar.style.background = paleta.tema;
+            const sphere = document.querySelector('.bolillero-sphere');
+            if (sphere) {
+                sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
+            }
+        }
+
+        /* ============================================
+           AJUSTE AUTOMÁTICO DEL TAMAÑO DE NOMBRE
+           ============================================ */
+        function ajustarTamanoNombre(elemento) {
+            if (!elemento) return;
+            let size = 0.5;
+            elemento.style.fontSize = size + 'rem';
+            const minSize = 0.3;
+            while (elemento.scrollWidth > elemento.clientWidth && size > minSize) {
+                size -= 0.02;
+                elemento.style.fontSize = size + 'rem';
+            }
+        }
+
+        /* ============================================
+           RENDERIZADO
+           ============================================ */
+        function renderizarEstructura() {
+            const grid = document.getElementById('cartonesGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+
+            const paleta = PALETAS[paletaActual];
+            const colores = paleta.colores;
+
+            for (let i = 1; i <= TOTAL_CARTONES; i++) {
+                const datos = generarCarton75();
+                const carton = document.createElement('div');
+                carton.className = 'carton';
+                
+                const idxTono = obtenerIndiceTonoPorCarton(i - 1);
+                const colorHex = colores[idxTono];
+                const colorDark = paleta.colores[0];
+
+                carton.style.setProperty('--carton-color', colorHex);
+                carton.style.setProperty('--carton-color-dark', colorDark);
+
+                // Texto que se muestra en la cabecera (nombre o "CARTÓN N")
+                let textoCabecera = `CARTÓN ${i}`;
+                if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
+                    textoCabecera = nombresDeFirebase[i - 1];
+                }
+
+                carton.innerHTML = `
+                    <div class="carton-header">
+                        <span class="carton-title">${textoCabecera}</span>
+                    </div>
+                    <div class="bingo-header-row">
+                        <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
+                    </div>
+                    <div class="carton-grid-inner" style="grid-template-columns: repeat(5, 1fr);"></div>
+                `;
+
+                grid.appendChild(carton);
+
+                const headerSpan = carton.querySelector('.carton-title');
+                if (headerSpan && USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
+                    setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
+                }
+
+                const innerGrid = carton.querySelector('.carton-grid-inner');
+
+                for (let fila = 0; fila < 5; fila++) {
+                    ['B', 'I', 'N', 'G', 'O'].forEach((letra, colIdx) => {
+                        const celda = document.createElement('div');
+                        celda.className = 'celda';
+
+                        if (fila === 2 && colIdx === 2) {
+                            // FREE central → muestra el NÚMERO del cartón
+                            celda.classList.add('vacia');
+                            celda.innerHTML = `<span class="num-val">${i}</span>`;
+                        } else {
+                            const val = datos[letra][fila];
+                            celda.dataset.valor = val;
+                            celda.innerHTML = `<span class="num-val">${val}</span>`;
+                        }
+                        innerGrid.appendChild(celda);
+                    });
+                }
+            }
+
+            aplicarPaleta();
+            renderizarTablaControl();
+        }
+
+        function renderizarTablaControl() {
+            const tabla = document.getElementById('tablaNumeros');
+            if (!tabla) return;
+            tabla.innerHTML = '';
+
+            if (MODO_JUEGO === 75) {
+                for (let f = 0; f < 5; f++) {
+                    const fila = document.createElement('div');
+                    fila.className = 'fila-numeros';
+                    for (let c = 1; c <= 15; c++) {
+                        const num = f * 15 + c;
+                        const bolita = document.createElement('div');
+                        bolita.className = 'bolita';
+                        bolita.id = `ctrl-${num}`;
+                        bolita.textContent = num;
+                        fila.appendChild(bolita);
+                    }
+                    tabla.appendChild(fila);
+                }
+            } else if (MODO_JUEGO === 90) {
+                for (let f = 0; f < 6; f++) {
+                    const fila = document.createElement('div');
+                    fila.className = 'fila-numeros';
+                    for (let c = 1; c <= 15; c++) {
+                        const num = f * 15 + c;
+                        const bolita = document.createElement('div');
+                        bolita.className = 'bolita';
+                        bolita.id = `ctrl-${num}`;
+                        bolita.textContent = num;
+                        fila.appendChild(bolita);
+                    }
+                    tabla.appendChild(fila);
+                }
+            } else if (MODO_JUEGO === 100) {
+                for (let f = 0; f < 5; f++) {
+                    const fila = document.createElement('div');
+                    fila.className = 'fila-numeros';
+                    fila.style.gridTemplateColumns = 'repeat(20, 1fr)';
+                    for (let c = 1; c <= 20; c++) {
+                        const num = f * 20 + c;
+                        const bolita = document.createElement('div');
+                        bolita.className = 'bolita';
+                        bolita.id = `ctrl-${num}`;
+                        bolita.textContent = num;
+                        fila.appendChild(bolita);
+                    }
+                    tabla.appendChild(fila);
+                }
+            }
+        }
+
+        /* ============================================
+           LÓGICA DEL JUEGO
+           ============================================ */
+        function sacarBola(e) {
+            if (bombo.length === 0) return;
+
+            const idx = Math.floor(Math.random() * bombo.length);
+            const numero = bombo.splice(idx, 1)[0];
+            const letra = obtenerLetra(numero);
+
+            historialSacadas.unshift({ numero, letra });
+
+            const display = document.getElementById('numeroDisplay');
+            if (display) {
+                display.innerHTML = `<span style="font-size: 0.75rem; display: block; line-height: 1;">${letra}</span>${numero}`;
+            }
+
+            const stats = document.getElementById('statsDisplay');
+            if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
+
+            document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
+                el.classList.add('marcada');
+                el.classList.add('animar-marca');
+            });
+
+            const ctrlEl = document.getElementById(`ctrl-${numero}`);
+            if (ctrlEl) ctrlEl.classList.add('marcada');
+
+            const recientesLista = document.getElementById('recientesLista');
+            if (recientesLista) {
+                recientesLista.innerHTML = '';
+                historialSacadas.slice(0, 6).forEach(item => {
+                    const bola = document.createElement('div');
+                    bola.className = 'mini-bola entrando';
+                    bola.innerHTML = `<span>${item.numero}</span>`;
+                    recientesLista.appendChild(bola);
+                });
+            }
+        }
+
+        function reiniciarJuego() {
+            bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
+            historialSacadas = [];
+            
+            const display = document.getElementById('numeroDisplay');
+            if (display) display.textContent = '--';
+            
+            const stats = document.getElementById('statsDisplay');
+            if (stats) stats.textContent = `0/${MAX_BALOTAS}`;
+            
+            const recientes = document.getElementById('recientesLista');
+            if (recientes) recientes.innerHTML = '';
+            
+            renderizarEstructura();
+        }
+
+        function cambiarCartonesYPaleta() {
+            paletaActual = (paletaActual + 1) % PALETAS.length;
+            reiniciarJuego();
+        }
+
+        /* ============================================
+           EXPONER FUNCIONES AL WINDOW
+           ============================================ */
+        window.sacarBola = sacarBola;
+        window.reiniciarJuego = reiniciarJuego;
+        window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
+
+        /* ============================================
+           INICIALIZACIÓN
+           ============================================ */
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (document.getElementById('cartonesGrid')) {
+                paletaActual = Math.floor(Math.random() * PALETAS.length);
+                cargarConfiguracion();
+
+                if (USAR_BASE_DATOS) {
+                    nombresDeFirebase = await cargarNombresDeFirebase();
+                }
+
+                reiniciarJuego();
+
+                const btnCambiar = document.querySelector('.btn-cambiar');
+                if (btnCambiar) {
+                    btnCambiar.onclick = cambiarCartonesYPaleta;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
