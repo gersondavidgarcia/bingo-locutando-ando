@@ -234,16 +234,15 @@
         /* ============================================
            APLICAR TAMAÑO DEL CONTROL Y FIGURAS
            ============================================ */
-        function aplicarTamanoControl() {
-    requestAnimationFrame(() => {
+    function aplicarTamanoControl() {
+        requestAnimationFrame(() => {
         const panelControl = document.getElementById('panelControl');
         if (!panelControl) return;
 
         // 1) Ajustar el ancho del panel de control (porcentaje)
         panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
 
-        // 2) Ajustar font-size según el MENOR entre ancho y alto de cada celda
-        //    así funciona bien sin importar el formato.
+        // 2) Font-size = 60% del promedio entre ancho y alto de la celda
         const bolitas = panelControl.querySelectorAll('.bolita');
         bolitas.forEach(b => {
             const rect = b.getBoundingClientRect();
@@ -251,8 +250,8 @@
             const alto = rect.height;
             if (ancho <= 0 || alto <= 0) return;
 
-            const ladoMenor = Math.min(ancho, alto);
-            const font = ladoMenor * 0.6; // 60% del lado más chico
+            const promedio = (ancho + alto) / 2;
+            const font = promedio * 0.6;
 
             b.style.fontSize = font + 'px';
             b.style.lineHeight = '1';
@@ -260,8 +259,8 @@
 
         // 3) Padding del panel
         panelControl.style.padding = '5px';
-    });
-}
+        });
+    }
 
         function aplicarConfigFiguras() {
             requestAnimationFrame(() => {
