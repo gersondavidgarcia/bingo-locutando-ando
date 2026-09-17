@@ -3,58 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0d3c9b">
+    <title>Bingo Tradicional 75 - 15 Cartones</title>
+    
     <link rel="manifest" href="manifest.json">
-    <title>Bingo Proyector</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="x5-full-screen" content="true">
+    <meta name="full-screen" content="yes">
+    
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="juego-body">
+<body>
 
-    <div class="layout-proyector">
+    <div class="bingo-app">
         
-        <!-- SECCIÓN IZQUIERDA: CARTONES -->
-        <div class="seccion-cartones">
-            <div class="cartones-grid" id="cartonesGrid"></div>
-        </div>
+        <div class="banner-premio" id="bannerPremio"></div>
 
-        <!-- SECCIÓN DERECHA: CONTROL LATERAL -->
-        <div class="seccion-lateral">
+        <!-- Modo 15 para la retícula de 3 columnas -->
+        <div class="cartones-grid modo-15" id="cartonesGrid"></div>
+
+        <div class="bolillero-container">
             
-            <div class="panel-box">
-                <div class="panel-header-title">BOLILLERO</div>
-                <div class="bolillero-display-area">
+            <div class="bolillero-top-row">
+                
+                <div class="bolillero-stage">
                     <div class="bolillero-sphere" id="bolilleroSphere">
                         <span class="bolillero-numero" id="numeroDisplay">--</span>
                     </div>
-                    <button class="btn-sacar-bola" id="btnSacarBola" onclick="sacarBola(event)" onfocus="this.blur()">
-                        SACAR BOLA
-                    </button>
                 </div>
-                <div class="stats-counter-bar">
-                    BOLAS: <span id="statsDisplay">0/75</span>
+                
+                <button class="btn-sacar-bola" id="btnSacarBola" onclick="sacarBola(event)" onfocus="this.blur()">
+                    <span class="onda"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="particula"></span><span class="particula"></span>
+                    <span class="text-glow">SACAR<br>BOLAS</span>
+                </button>
+
+                <div class="stats-box">
+                    BOLAS
+                    <span id="statsDisplay">0/75</span>
                 </div>
-                <div class="recientes-lista" id="recientesLista"></div>
+
             </div>
 
-            <div class="panel-box">
-                <div class="panel-header-title">CONTROL GENERAL</div>
+            <div class="recientes-container">
+                <div class="recientes-lista" id="recientesLista"></div>
+            </div>
+        </div>
+
+        <div class="panel-inferior">
+            
+            <div class="panel-numeros-inferior">
+                <div class="titulo-tabla">CONTROL (1 - 75)</div>
                 <div class="tabla-numeros" id="tablaNumeros"></div>
             </div>
 
-            <div class="panel-acciones">
-                <button class="btn-accion btn-fullscreen" onclick="toggleFullScreen()" onfocus="this.blur()">
-                    ⛶ PANTALLA COMPLETA
+            <div class="panel-botones">
+                
+                <button onclick="reiniciarJuego()" class="btn-cambiar" onfocus="this.blur()">
+                🔄 CAMBIAR
                 </button>
-                <button class="btn-accion btn-reiniciar" onclick="reiniciarJuego()" onfocus="this.blur()">
-                    🔄 REINICIAR
-                </button>
-                <button class="btn-accion btn-atras" onclick="window.location.href='index.html'" onfocus="this.blur()">
-                    ⬅ MENÚ
-                </button>
-            </div>
 
+                <button onclick="window.location.href='index.html'" class="btn-atras" onfocus="this.blur()">
+                ⬅ ATRÁS
+                </button>
+                
+            </div>
+            
         </div>
 
     </div>
