@@ -11,6 +11,10 @@
     <meta name="x5-full-screen" content="true">
     <meta name="full-screen" content="yes">
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Orbitron:wght@900&family=Press+Start+2P&family=Outfit:wght@900&family=Bebas+Neue&family=Creepster&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body ontouchstart="">
@@ -110,7 +114,7 @@
         }
 
         /* ============================================
-           PALETAS DE COLOR (15 temas)
+           PALETAS DE COLOR (21 temas)
            ============================================ */
         const PALETAS = [
             { nombre: 'Verde',       colores: ['#1b5e20', '#2e7d32', '#388e3c', '#43a047', '#4caf50'], tema: '#2e7d32' },
@@ -120,71 +124,36 @@
             { nombre: 'Naranja',     colores: ['#b45309', '#d97706', '#ea8c1c', '#f59e0b', '#fbbf24'], tema: '#d97706' },
             { nombre: 'Morado',      colores: ['#4a148c', '#6a1b9a', '#7b1fa2', '#8e24aa', '#9c27b0'], tema: '#7b1fa2' },
             { nombre: 'Clásico',     colores: ['#8b6914', '#a67c00', '#b8860b', '#d4af37', '#ffd700'], tema: '#b8860b' },
-            { nombre: 'Cyberpunk',   colores: ['#0d0f18', '#00f0ff', '#ff0055', '#ff00a0', '#141829'], tema: '#00f0ff' },
             { nombre: 'Dorado',      colores: ['#1f1a0e', '#d4af37', '#ffe58f', '#b8860b', '#f3e5ab'], tema: '#d4af37' },
-            { nombre: 'Arcade',      colores: ['#181425', '#ff0055', '#00f0ff', '#ffcc00', '#262135'], tema: '#ff0055' },
-            { nombre: 'Cristal',     colores: ['#38bdf8', '#ec4899', '#0f172a', '#ffffff', '#1e293b'], tema: '#38bdf8' },
             { nombre: 'Madera',      colores: ['#3d2314', '#8d5b41', '#d97706', '#fef3c7', '#f59e0b'], tema: '#8d5b41' },
-            { nombre: 'Fuego',       colores: ['#1c0a0a', '#ff4500', '#ff8c00', '#ffaa00', '#facc15'], tema: '#ff4500' },
-            { nombre: 'Esmeralda',   colores: ['#022c22', '#10b981', '#047857', '#6ee7b7', '#a7f3d0'], tema: '#10b981' },
-            { nombre: 'Neumórfico',  colores: ['#181b22', '#a855f7', '#c084fc', '#e2e8f0', '#21252e'], tema: '#a855f7' }
+            { nombre: 'Kate',        colores: ['#e2b97c', '#d4a359', '#a66042', '#8a5a22', '#261106'], tema: '#d4a359' },
+            { nombre: 'Cyberpunk',   colores: ['#06b6d4', '#22d3ee', '#f43f5e', '#083344', '#facc15'], tema: '#22d3ee' },
+            { nombre: 'Volcano',     colores: ['#ef4444', '#f97316', '#fde047', '#7f1d1d', '#38bdf8'], tema: '#f97316' },
+            { nombre: 'Pixel',       colores: ['#b91c1c', '#f97316', '#fde047', '#22c55e', '#fff'], tema: '#b91c1c' },
+            { nombre: 'Esmeralda',   colores: ['#10b981', '#34d399', '#a7f3d0', '#ec4899', '#fbbf24'], tema: '#10b981' },
+            { nombre: 'Candy',       colores: ['#f43f5e', '#be123c', '#fecdd3', '#34d399', '#f97316'], tema: '#be123c' },
+            { nombre: 'Oro',         colores: ['#facc15', '#fde047', '#ca8a04', '#ef4444', '#2563eb'], tema: '#facc15' },
+            { nombre: 'Pacifico',    colores: ['#14b8a6', '#0f766e', '#99f6e4', '#f97316', '#eab308'], tema: '#14b8a6' },
+            { nombre: 'Halloween',   colores: ['#a855f7', '#c084fc', '#3b0764', '#22c55e', '#f97316'], tema: '#a855f7' },
+            { nombre: 'Sport',       colores: ['#2563eb', '#1d4ed8', '#facc15', '#dc2626', '#fff'], tema: '#2563eb' },
+            { nombre: 'Titan',       colores: ['#64748b', '#334155', '#38bdf8', '#ec4899', '#84cc16'], tema: '#64748b' },
+            { nombre: 'Bronce',      colores: ['#b45309', '#92400e', '#d97706', '#fef3c7', '#10b981'], tema: '#b45309' }
         ];
 
         let paletaActual = 0;
+        let indiceRotacionActual = 0;
 
         /* ============================================
            FIGURAS
            ============================================ */
         const FIGURAS = {
-            'lleno': [
-                [1,1,1,1,1],
-                [1,1,1,1,1],
-                [1,1,1,1,1],
-                [1,1,1,1,1],
-                [1,1,1,1,1]
-            ],
-            'diagonal': [
-                [1,0,0,0,0],
-                [0,1,0,0,0],
-                [0,0,1,0,0],
-                [0,0,0,1,0],
-                [0,0,0,0,1]
-            ],
-            'diana': [
-                [0,1,1,1,0],
-                [1,0,0,0,1],
-                [1,0,1,0,1],
-                [1,0,0,0,1],
-                [0,1,1,1,0]
-            ],
-            'cesto': [
-                [0,1,1,1,0],
-                [1,0,0,0,1],
-                [1,0,1,0,1],
-                [1,1,1,1,1],
-                [1,0,0,0,1]
-            ],
-            'matamoscas': [
-                [1,1,1,0,0],
-                [1,1,1,0,0],
-                [0,0,1,0,0],
-                [0,1,0,0,0],
-                [0,1,0,0,1]
-            ],
-            'arana': [
-                [1,0,0,0,1],
-                [0,1,0,1,0],
-                [1,0,1,0,1],
-                [0,1,0,1,0],
-                [1,0,0,0,1]
-            ],
-            'paraguas': [
-                [0,1,1,1,1],
-                [1,1,1,1,0],
-                [0,1,1,0,0],
-                [0,0,1,0,0],
-                [0,0,1,0,0]
-            ]
+            'lleno': [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
+            'diagonal': [[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1]],
+            'diana': [[0,1,1,1,0],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,0,1],[0,1,1,1,0]],
+            'cesto': [[0,1,1,1,0],[1,0,0,0,1],[1,0,1,0,1],[1,1,1,1,1],[1,0,0,0,1]],
+            'matamoscas': [[1,1,1,0,0],[1,1,1,0,0],[0,0,1,0,0],[0,1,0,0,0],[0,1,0,0,1]],
+            'arana': [[1,0,0,0,1],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0],[1,0,0,0,1]],
+            'paraguas': [[0,1,1,1,1],[1,1,1,1,0],[0,1,1,0,0],[0,0,1,0,0],[0,0,1,0,0]]
         };
 
         const ORDEN_FIGURAS = ['diagonal', 'diana', 'cesto', 'matamoscas', 'arana', 'paraguas'];
@@ -230,16 +199,11 @@
                     FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
-                        ? config.temasActivos
-                        : ['Verde'];
+                        ? config.temasActivos : ['Verde'];
                 }
-            } catch (e) {
-                console.warn('Config no leída, usando default.');
-            }
-
+            } catch (e) {}
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
         }
@@ -251,26 +215,20 @@
             requestAnimationFrame(() => {
                 const panelControl = document.getElementById('panelControl');
                 if (!panelControl) return;
-
                 panelControl.style.flex = `0 0 ${TAMANO_CONTROL}%`;
-
                 const bolitas = panelControl.querySelectorAll('.bolita');
                 bolitas.forEach(b => {
                     const rect = b.getBoundingClientRect();
                     const ancho = rect.width;
                     const alto = rect.height;
                     if (ancho <= 0 || alto <= 0) return;
-
                     const promedio = (ancho + alto) / 2;
                     let font = promedio * 0.45;
-
                     if (font > 16) font = 16;
                     if (font < 5) font = 5;
-
                     b.style.fontSize = font + 'px';
                     b.style.lineHeight = '1';
                 });
-
                 panelControl.style.padding = '5px';
             });
         }
@@ -282,11 +240,9 @@
                 const miniFigura = document.getElementById('miniCartonFigura');
                 const miniExtra = document.getElementById('miniCartonExtra');
                 if (!panelFiguras) return;
-
                 [miniLleno, miniFigura, miniExtra].forEach(m => {
                     if (m) m.style.maxWidth = TAMANO_FIGURAS + 'px';
                 });
-
                 if (CANTIDAD_FIGURAS === 0) {
                     panelFiguras.classList.remove('visible');
                     if (miniLleno) miniLleno.style.display = 'none';
@@ -336,29 +292,22 @@
            ============================================ */
         function suscribirNombresFirebase() {
             if (!docRef || !USAR_BASE_DATOS) return;
-
             if (unsubscribeSnapshot) {
                 try { unsubscribeSnapshot(); } catch (e) {}
                 unsubscribeSnapshot = null;
             }
-
             unsubscribeSnapshot = onSnapshot(docRef,
                 (snap) => {
                     if (!snap.exists()) return;
                     const data = snap.data();
                     const nuevosNombres = extraerNombresDeData(data);
-
                     if (JSON.stringify(nuevosNombres) !== JSON.stringify(nombresDeFirebase)) {
                         nombresDeFirebase = nuevosNombres;
                         const grid = document.getElementById('cartonesGrid');
-                        if (grid && grid.children.length > 0) {
-                            actualizarTextosDeCartones();
-                        }
+                        if (grid && grid.children.length > 0) actualizarTextosDeCartones();
                     }
                 },
-                (error) => {
-                    console.warn("⚠️ Error al escuchar Firebase:", error);
-                }
+                (error) => { console.warn("⚠️ Error Firebase:", error); }
             );
         }
 
@@ -372,9 +321,7 @@
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan) {
                     headerSpan.textContent = textoCabecera;
-                    if (USAR_BASE_DATOS && nombresDeFirebase[i]) {
-                        setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
-                    }
+                    if (USAR_BASE_DATOS && nombresDeFirebase[i]) setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
                 }
             });
         }
@@ -412,8 +359,10 @@
             document.body.classList.remove(
                 'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
                 'tema-naranja', 'tema-morado', 'tema-clasico',
-                'tema-cyberpunk', 'tema-dorado', 'tema-arcade', 'tema-cristal',
-                'tema-madera', 'tema-fuego', 'tema-esmeralda', 'tema-neumorfico'
+                'tema-dorado', 'tema-madera',
+                'tema-kate', 'tema-cyberpunk', 'tema-volcano', 'tema-pixel',
+                'tema-esmeralda', 'tema-candy', 'tema-oro', 'tema-pacifico',
+                'tema-halloween', 'tema-sport', 'tema-titan', 'tema-bronce'
             );
             const paleta = PALETAS[paletaActual];
             const nombre = paleta.nombre.toLowerCase()
@@ -427,9 +376,7 @@
             const btnSacar = document.querySelector('.btn-sacar-bola');
             if (btnSacar) btnSacar.style.background = paleta.tema;
             const sphere = document.querySelector('.bolillero-sphere');
-            if (sphere) {
-                sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
-            }
+            if (sphere) sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
             aplicarTemaEnBody();
         }
 
@@ -479,29 +426,22 @@
         function renderizarEstructura() {
             const grid = document.getElementById('cartonesGrid');
             if (!grid) return;
-            
             grid.innerHTML = '';
-
             const paleta = PALETAS[paletaActual];
             const colores = paleta.colores;
-
             for (let i = 1; i <= TOTAL_CARTONES; i++) {
                 const datos = generarCarton75();
                 const carton = document.createElement('div');
                 carton.className = 'carton';
-                
                 const idxTono = obtenerIndiceTonoPorCarton(i - 1);
                 const colorHex = colores[idxTono];
                 const colorDark = paleta.colores[0];
-
                 carton.style.setProperty('--carton-color', colorHex);
                 carton.style.setProperty('--carton-color-dark', colorDark);
-
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
                     textoCabecera = nombresDeFirebase[i - 1];
                 }
-
                 carton.innerHTML = `
                     <div class="carton-header">
                         <span class="carton-title">${textoCabecera}</span>
@@ -511,21 +451,16 @@
                     </div>
                     <div class="carton-grid-inner" style="grid-template-columns: repeat(5, 1fr);"></div>
                 `;
-
                 grid.appendChild(carton);
-
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan && USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
                     setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
                 }
-
                 const innerGrid = carton.querySelector('.carton-grid-inner');
-
                 for (let fila = 0; fila < 5; fila++) {
                     ['B', 'I', 'N', 'G', 'O'].forEach((letra, colIdx) => {
                         const celda = document.createElement('div');
                         celda.className = 'celda';
-
                         if (fila === 2 && colIdx === 2) {
                             celda.classList.add('vacia');
                             celda.innerHTML = `<span class="num-val">${i}</span>`;
@@ -538,11 +473,9 @@
                     });
                 }
             }
-
             aplicarPaleta();
             actualizarMiniCartones();
             renderizarTablaControl();
-
             aplicarTamanoControl();
             aplicarConfigFiguras();
         }
@@ -554,7 +487,6 @@
             const tabla = document.getElementById('tablaNumeros');
             if (!tabla) return;
             tabla.innerHTML = '';
-
             let cols = 15, fils = 5;
             try {
                 const raw = localStorage.getItem('bingo_config');
@@ -567,14 +499,11 @@
                     }
                 }
             } catch (e) {}
-
             const grid = document.createElement('div');
             grid.className = 'control-grid';
             grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
             const totalCeldas = cols * fils;
             const totalNumeros = MAX_BALOTAS;
-
             for (let i = 0; i < totalCeldas; i++) {
                 const bolita = document.createElement('div');
                 bolita.className = 'bolita';
@@ -587,7 +516,6 @@
                 }
                 grid.appendChild(bolita);
             }
-
             tabla.appendChild(grid);
         }
 
@@ -596,29 +524,20 @@
            ============================================ */
         function sacarBola(e) {
             if (bombo.length === 0) return;
-
             const idx = Math.floor(Math.random() * bombo.length);
             const numero = bombo.splice(idx, 1)[0];
             const letra = obtenerLetra(numero);
-
             historialSacadas.unshift({ numero, letra });
-
             const display = document.getElementById('numeroDisplay');
-            if (display) {
-                display.innerHTML = `<span style="font-size: 0.75rem; display: block; line-height: 1;">${letra}</span>${numero}`;
-            }
-
+            if (display) display.innerHTML = `<span style="font-size: 0.75rem; display: block; line-height: 1;">${letra}</span>${numero}`;
             const stats = document.getElementById('statsDisplay');
             if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
-
             document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
                 el.classList.add('marcada');
                 el.classList.add('animar-marca');
             });
-
             const ctrlEl = document.getElementById(`ctrl-${numero}`);
             if (ctrlEl) ctrlEl.classList.add('marcada');
-
             const recientesLista = document.getElementById('recientesLista');
             if (recientesLista) {
                 recientesLista.innerHTML = '';
@@ -634,37 +553,48 @@
         function reiniciarJuego() {
             bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
             historialSacadas = [];
-            
             const display = document.getElementById('numeroDisplay');
             if (display) display.textContent = '--';
-            
             const stats = document.getElementById('statsDisplay');
             if (stats) stats.textContent = `0/${MAX_BALOTAS}`;
-            
             const recientes = document.getElementById('recientesLista');
             if (recientes) recientes.innerHTML = '';
-            
             renderizarEstructura();
         }
 
         function cambiarCartonesYPaleta() {
+            // 1) Volver a leer la config de localStorage
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                if (raw) {
+                    const config = JSON.parse(raw);
+                    if (Array.isArray(config.temasActivos) && config.temasActivos.length > 0) {
+                        TEMAS_ACTIVOS = config.temasActivos;
+                    }
+                }
+            } catch (e) {}
+
+            // 2) Obtener índices activos en orden
             const indicesActivos = PALETAS
                 .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
                 .filter(i => i !== -1);
 
             if (indicesActivos.length > 0) {
-                let posActual = indicesActivos.indexOf(paletaActual);
-                if (posActual === -1) posActual = -1;
-                const siguientePos = (posActual + 1) % indicesActivos.length;
-                paletaActual = indicesActivos[siguientePos];
+                // Avanzar índice de rotación con módulo → siempre vuelve al primero
+                indiceRotacionActual = (indiceRotacionActual + 1) % indicesActivos.length;
+                paletaActual = indicesActivos[indiceRotacionActual];
             } else {
-                paletaActual = (paletaActual + 1) % PALETAS.length;
+                indiceRotacionActual = (indiceRotacionActual + 1) % PALETAS.length;
+                paletaActual = indiceRotacionActual;
             }
 
+            // 3) Rotar figura
             if (CANTIDAD_FIGURAS >= 1) {
                 const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
                 figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
             }
+
+            // 4) Regenerar cartones
             reiniciarJuego();
             aplicarTamanoControl();
             aplicarConfigFiguras();
@@ -674,16 +604,20 @@
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
 
+        /* ============================================
+           INICIALIZACIÓN
+           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 cargarConfiguracion();
 
+                // El primer tema activo se muestra al abrir
                 const indicesActivos = PALETAS
                     .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
                     .filter(i => i !== -1);
-                paletaActual = indicesActivos.length > 0 
-                    ? indicesActivos[Math.floor(Math.random() * indicesActivos.length)]
-                    : 0;
+
+                indiceRotacionActual = 0;
+                paletaActual = indicesActivos.length > 0 ? indicesActivos[0] : 0;
 
                 if (USAR_BASE_DATOS) {
                     suscribirNombresFirebase();

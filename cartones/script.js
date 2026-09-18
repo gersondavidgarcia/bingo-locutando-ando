@@ -2,8 +2,10 @@
    TEMAS DISPONIBLES
    ============================================ */
 const TEMAS_DISPONIBLES = [
-    'Verde', 'Azul', 'Rojo', 'Negro', 'Naranja', 'Morado', 'Clásico',
-    'Cyberpunk', 'Dorado', 'Arcade', 'Cristal', 'Madera', 'Fuego', 'Esmeralda', 'Neumórfico'
+    'Verde', 'Azul', 'Rojo', 'Negro', 'Naranja', 'Morado',
+    'Clásico', 'Dorado', 'Madera',
+    'Kate', 'Cyberpunk', 'Volcano', 'Pixel', 'Esmeralda',
+    'Candy', 'Oro', 'Pacifico', 'Halloween', 'Sport', 'Titan', 'Bronce'
 ];
 
 /* ============================================
