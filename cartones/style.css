@@ -184,7 +184,7 @@ button, button:focus, button:active, select, select:focus, select:active {
 }
 
 .modal-header h2 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 900;
     color: #fff;
     letter-spacing: 0.3px;
@@ -216,6 +216,116 @@ button, button:focus, button:active, select, select:focus, select:active {
     gap: 16px;
 }
 
+/* ============================================
+   PANTALLAS INTERNAS DEL MODAL
+   ============================================ */
+.config-pantalla {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    animation: pantallaIn 0.2s ease;
+}
+
+.config-pantalla.visible { display: flex; }
+
+@keyframes pantallaIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.config-hint {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.btn-config-seccion {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: left;
+    color: #fff;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    width: 100%;
+    font-family: inherit;
+}
+
+.btn-config-seccion:active {
+    background: #2e313b;
+    border-color: #2e7d32;
+    transform: scale(0.98);
+}
+
+.seccion-icono {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+}
+
+.seccion-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.seccion-texto strong {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.2px;
+}
+
+.seccion-texto small {
+    font-size: 0.72rem;
+    color: #999;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.seccion-flecha {
+    font-size: 1.4rem;
+    color: #666;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.btn-volver {
+    background: transparent;
+    border: 1px solid #333;
+    color: #ccc;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: inherit;
+}
+
+.btn-volver:active {
+    background: #262a33;
+    border-color: #2e7d32;
+    color: #fff;
+}
+
+/* ============================================
+   FORMULARIOS
+   ============================================ */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -288,6 +398,9 @@ button, button:focus, button:active, select, select:focus, select:active {
 
 .form-group label span { color: #4caf50; font-weight: 900; }
 
+/* ============================================
+   TEMAS
+   ============================================ */
 .temas-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -333,6 +446,9 @@ button, button:focus, button:active, select, select:focus, select:active {
 
 .tema-nombre { flex: 1; }
 
+/* ============================================
+   FOOTER DEL MODAL
+   ============================================ */
 .modal-footer {
     display: flex;
     gap: 10px;
@@ -517,7 +633,7 @@ body {
 }
 
 /* ============================================
-   CELDA MARCADA (número tapado)
+   CELDA MARCADA
    ============================================ */
 .cartones-grid.modo-15 .celda.marcada {
     background: var(--carton-color, #2e7d32) !important;
@@ -526,7 +642,6 @@ body {
     box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
 }
 
-/* Bolita gris que se dibuja encima de la celda marcada */
 .cartones-grid.modo-15 .celda.marcada::after {
     content: '';
     position: absolute;
@@ -881,7 +996,7 @@ body {
 .banner-premio { display: none; }
 
 /* ============================================
-   🏆 EN LA ESQUINA DEL CARTÓN GANADOR (permanente)
+   🏆 EN LA ESQUINA DEL CARTÓN GANADOR
    ============================================ */
 .cartones-grid.modo-15 .carton.ganador::after {
     content: '🏆';
@@ -901,7 +1016,6 @@ body {
     100% { transform: scale(1.18) rotate(-8deg); }
 }
 
-/* Borde del cartón ganador (permanente) */
 .cartones-grid.modo-15 .carton.ganador {
     outline: 2px solid var(--color-figura);
     outline-offset: -2px;
@@ -912,7 +1026,7 @@ body {
 }
 
 /* ============================================
-   FASE 1: ENCENDIDO CELDA POR CELDA (durante .animando)
+   FASE 1: ENCENDIDO CELDA POR CELDA
    ============================================ */
 .cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura {
     background: var(--color-figura) !important;
@@ -930,7 +1044,7 @@ body {
 }
 
 /* ============================================
-   FASE 2: RESALTADO FINAL (cuando termina la fase 1)
+   FASE 2: RESALTADO FINAL
    ============================================ */
 .cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura {
     background: var(--color-figura) !important;
@@ -992,8 +1106,6 @@ body .cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda
 
 /* ============================================
    COLOR DE RESALTE DE FIGURA POR TEMA
-   (sirven como valor por defecto; el usuario
-    puede ajustar la intensidad desde Configuración)
    ============================================ */
 body.tema-verde      { --color-figura: #ffd700; --color-figura-glow: rgba(255, 215, 0, 0.95);  --color-figura-suave: rgba(255, 215, 0, 0.55); }
 body.tema-azul       { --color-figura: #ffb300; --color-figura-glow: rgba(255, 179, 0, 0.95);  --color-figura-suave: rgba(255, 179, 0, 0.55); }
@@ -1315,3 +1427,70 @@ body.tema-bronce .bolita { background: #fef3c7; color: #451a03; border: 1px soli
 body.tema-bronce .bolita.marcada { background: #10b981; color: #fff; }
 body.tema-bronce .btn-cambiar, body.tema-bronce .btn-atras { background: #451a03; color: #fef3c7; border: 2px solid #d97706; }
 body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; }
+
+/* ============================================
+   ZOOM DE ENTRADA DEL CENTRO (FREE)
+   Empieza pequeño, pausa breve, y luego hace el zoom grande
+   para después encogerse hasta encajar en su celda.
+   ============================================ */
+
+/* Permitir que el cartón deje ver la celda central desbordada
+   durante la animación (sin afectar el resto del tiempo). */
+.cartones-grid.modo-15 .carton.animando-centro-carton {
+    overflow: visible !important;
+    z-index: 5;
+}
+
+.cartones-grid.modo-15 .celda.vacia.animando-centro {
+    overflow: visible !important;
+    z-index: 20;
+    animation: zoomEntradaCentro 8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center center;
+    will-change: transform, opacity;
+    position: relative;
+}
+
+/* El número del centro no se anima por separado,
+   hereda el zoom de la celda. */
+.cartones-grid.modo-15 .celda.vacia.animando-centro .num-val {
+    transform: none !important;
+    animation: none !important;
+}
+
+@keyframes zoomEntradaCentro {
+    0% {
+        /* Empieza pequeño y visible */
+        transform: scale(0.6);
+        opacity: 1;
+    }
+    12% {
+        /* Se queda quieto un momento (pausa) */
+        transform: scale(0.6);
+        opacity: 1;
+    }
+    22% {
+        /* Arranca el zoom hacia grande */
+        transform: scale(1.6);
+        opacity: 1;
+    }
+    45% {
+        /* Momento más grande: casi del tamaño de un cartón */
+        transform: scale(4.2);
+        opacity: 1;
+    }
+    75% {
+        /* Empieza a encogerse */
+        transform: scale(1.35);
+        opacity: 1;
+    }
+    90% {
+        /* Pequeño rebote */
+        transform: scale(0.94);
+        opacity: 1;
+    }
+    100% {
+        /* Encaja exacto en su celda */
+        transform: scale(1);
+        opacity: 1;
+    }
+}

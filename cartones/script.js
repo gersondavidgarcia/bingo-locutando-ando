@@ -8,9 +8,16 @@ const TEMAS_DISPONIBLES = [
     'Candy', 'Oro', 'Pacifico', 'Halloween', 'Sport', 'Titan', 'Bronce'
 ];
 
+/* ============================================
+   ABRIR / CERRAR MODAL
+   ============================================ */
 function abrirConfiguracion() {
     const modal = document.getElementById('modalConfig');
-    if (modal) { modal.classList.add('visible'); cargarConfigEnModal(); }
+    if (modal) {
+        modal.classList.add('visible');
+        cargarConfigEnModal();
+        volverAlMenuConfig(); // siempre empezamos en el menú
+    }
 }
 
 function cerrarConfiguracion() {
@@ -18,6 +25,47 @@ function cerrarConfiguracion() {
     if (modal) modal.classList.remove('visible');
 }
 
+/* ============================================
+   NAVEGACIÓN ENTRE PANTALLAS DEL MODAL
+   ============================================ */
+function mostrarPantallaConfig(idPantalla) {
+    document.querySelectorAll('.config-pantalla').forEach(p => p.classList.remove('visible'));
+    const pantalla = document.getElementById(idPantalla);
+    if (pantalla) pantalla.classList.add('visible');
+
+    // Actualizamos el título del modal según la pantalla
+    const titulo = document.getElementById('modalTitulo');
+    if (!titulo) return;
+    switch (idPantalla) {
+        case 'pantallaGeneral':   titulo.textContent = '⚙️ General'; break;
+        case 'pantallaTemas':     titulo.textContent = '🎨 Temas'; break;
+        case 'pantallaResaltado': titulo.textContent = '✨ Resaltado de figura'; break;
+        case 'pantallaApariencia':titulo.textContent = '📐 Apariencia'; break;
+        default:                  titulo.textContent = '⚙️ Configuración';
+    }
+
+    // Scroll al inicio del modal
+    const box = document.querySelector('.modal-box');
+    if (box) box.scrollTop = 0;
+}
+
+function abrirSeccionConfig(nombre) {
+    switch (nombre) {
+        case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
+        case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
+        case 'resaltado':  mostrarPantallaConfig('pantallaResaltado'); break;
+        case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
+        default:           volverAlMenuConfig();
+    }
+}
+
+function volverAlMenuConfig() {
+    mostrarPantallaConfig('pantallaMenu');
+}
+
+/* ============================================
+   CARGAR CONFIGURACIÓN EN EL MODAL
+   ============================================ */
 function cargarConfigEnModal() {
     try {
         const raw = localStorage.getItem('bingo_config');
@@ -53,6 +101,9 @@ function cargarConfigEnModal() {
     actualizarLabelsSliders();
 }
 
+/* ============================================
+   LABELS DINÁMICOS DE LOS SLIDERS
+   ============================================ */
 function actualizarLabelsSliders() {
     const rangoTamano = document.getElementById('tamanoControl');
     const rangoFiguras = document.getElementById('tamanoFiguras');
@@ -90,12 +141,16 @@ function actualizarLabelsSliders() {
     }
 }
 
+/* ============================================
+   GUARDAR CONFIGURACIÓN
+   ============================================ */
 function guardarConfiguracion() {
     const temasActivos = [];
     document.querySelectorAll('.tema-check').forEach(chk => {
         if (chk.checked) temasActivos.push(chk.value);
     });
     if (temasActivos.length === 0) temasActivos.push('Verde');
+
     const config = {
         cartones: document.getElementById('cantCartones')?.value || '15',
         modo: '75',
@@ -114,6 +169,9 @@ function guardarConfiguracion() {
     cerrarConfiguracion();
 }
 
+/* ============================================
+   INICIAR JUEGO DIRECTO
+   ============================================ */
 function iniciarJuegoDirecto() {
     const existente = localStorage.getItem('bingo_config');
     if (!existente) {
@@ -140,6 +198,9 @@ function iniciarJuegoDirecto() {
     window.location.href = 'juego.html';
 }
 
+/* ============================================
+   CLICK FUERA DEL MODAL → CERRAR
+   ============================================ */
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('modalConfig');
     if (modal && e.target === modal) cerrarConfiguracion();

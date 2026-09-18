@@ -171,8 +171,6 @@
         let TAMANO_FIGURAS = 42;
         let TEMAS_ACTIVOS = ['Verde'];
 
-        // Parámetros del resaltado de figura (configurables)
-        // El COLOR lo sigue definiendo el tema, aquí solo van las intensidades y la velocidad.
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
@@ -182,14 +180,14 @@
         let historialSacadas = [];
         let unsubscribeSnapshot = null;
 
-        // Bloqueo durante animación
         let bloqueadoPorAnimacion = false;
         let timeoutAnimacion = null;
-        let timeoutsFase1 = [];  // Guarda los setTimeout de la fase 1
+        let timeoutsFase1 = [];
 
-        // Estado del ganador
         let figuraYaGanada = false;
-        let cartonGanadorActual = null;
+
+        // Control del zoom inicial del centro (bloquea hasta que terminen TODOS)
+        let celdasCentroPendientes = 0;
 
         const RANGOS_BINGO = {
             B: [1, 15],
@@ -216,7 +214,6 @@
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                         ? config.temasActivos : ['Verde'];
 
-                    // Parámetros del resaltado de figura
                     INTENSIDAD_GLOW = config.intensidadGlow !== undefined ? parseInt(config.intensidadGlow) : 95;
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
@@ -407,15 +404,11 @@
 
         /* ============================================
            APLICAR PARÁMETROS DEL RESALTADO DE FIGURA
-           - Toma el color base del tema (--color-figura que ya definió el CSS)
-           - Solo sobreescribe las opacidades (glow y suave)
            ============================================ */
         function aplicarParametrosResaltado() {
-            // Leemos el color de figura que el tema actual ya puso en el body
             const estiloComputado = getComputedStyle(document.body);
             const colorTema = estiloComputado.getPropertyValue('--color-figura').trim() || '#ffd700';
 
-            // Convertimos a RGB (soporta hex #rrggbb)
             let r = 255, g = 215, b = 0;
             if (colorTema.startsWith('#')) {
                 const hex = colorTema.replace('#', '');
@@ -448,7 +441,6 @@
             const sphere = document.querySelector('.bolillero-sphere');
             if (sphere) sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
             aplicarTemaEnBody();
-            // Reaplicamos las intensidades del resaltado tras el cambio de tema
             aplicarParametrosResaltado();
         }
 
@@ -565,6 +557,50 @@
                             celda.style.removeProperty('--delay-figura');
                         });
                 });
+
+            // ============================================
+            // ZOOM DE ENTRADA DEL CENTRO
+            // Bloquea el botón de sacar bolas hasta que TODAS
+            // las celdas del centro terminen su animación.
+            // ============================================
+            requestAnimationFrame(() => {
+                const celdasCentro = document.querySelectorAll(
+                    '.cartones-grid.modo-15 .celda.vacia'
+                );
+
+                if (celdasCentro.length === 0) {
+                    celdasCentroPendientes = 0;
+                    return;
+                }
+
+                const btn = document.getElementById('btnSacarBola');
+
+                if (btn) btn.classList.add('bloqueado');
+                bloqueadoPorAnimacion = true;
+                celdasCentroPendientes = celdasCentro.length;
+
+                celdasCentro.forEach(celda => {
+                    const carton = celda.closest('.carton');
+                    celda.classList.remove('animando-centro');
+                    if (carton) carton.classList.remove('animando-centro-carton');
+                    void celda.offsetWidth;
+                    celda.classList.add('animando-centro');
+                    if (carton) carton.classList.add('animando-centro-carton');
+
+                    celda.addEventListener('animationend', function handler() {
+                        celda.classList.remove('animando-centro');
+                        if (carton) carton.classList.remove('animando-centro-carton');
+                        celda.removeEventListener('animationend', handler);
+
+                        celdasCentroPendientes--;
+                        if (celdasCentroPendientes <= 0) {
+                            celdasCentroPendientes = 0;
+                            bloqueadoPorAnimacion = false;
+                            if (btn) btn.classList.remove('bloqueado');
+                        }
+                    });
+                });
+            });
         }
 
         /* ============================================
@@ -607,21 +643,9 @@
         }
 
         /* ============================================
-           COMPROBAR SI UN CARTÓN COMPLETA LA FIGURA
+           COMPROBAR SI UNO O VARIOS CARTONES COMPLETAN LA FIGURA
            ============================================ */
         function comprobarFiguraEnCartones() {
-            document.querySelectorAll('.cartones-grid.modo-15 .carton')
-                .forEach(c => {
-                    if (c !== cartonGanadorActual) {
-                        c.classList.remove('ganador', 'resaltando', 'animando', 'secuencia-completa');
-                        c.querySelectorAll('.celda.en-figura')
-                            .forEach(celda => {
-                                celda.classList.remove('en-figura');
-                                celda.style.removeProperty('--delay-figura');
-                            });
-                    }
-                });
-
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
             if (figuraYaGanada) return { hayGanador: false, infoGanadores: [] };
 
@@ -663,16 +687,12 @@
 
             return {
                 hayGanador: infoGanadores.length > 0,
-                infoGanadores: infoGanadores.length > 0 ? [infoGanadores[0]] : []
+                infoGanadores: infoGanadores
             };
         }
 
         /* ============================================
-           ANIMACIÓN DE FIGURA COMPLETADA
-           - FASE 1: el JS va añadiendo .en-figura a cada casilla
-             de la figura UNA POR UNA con setTimeout.
-           - FASE 2: cuando termina la fase 1, se añade el resaltado/pulso.
-           - Bloquea el botón durante toda la animación.
+           ANIMACIÓN DE FIGURA COMPLETADA (uno o varios cartones)
            ============================================ */
         function ejecutarAnimacionFigura(infoGanadores) {
             if (!infoGanadores || infoGanadores.length === 0) return Promise.resolve();
@@ -681,53 +701,46 @@
             if (btn) btn.classList.add('bloqueado');
             bloqueadoPorAnimacion = true;
 
-            const PAUSA_FINAL = 600;           // ms extra antes del resaltado final
-
+            const PAUSA_FINAL = 600;
             const patron = FIGURAS[figuraActual] || [];
 
-            // PASO 1: marcar el cartón ganador con .ganador (🏆) y .animando,
-            // pero SIN .en-figura en las celdas (eso lo haremos una por una).
             infoGanadores.forEach(({ carton }) => {
                 carton.classList.add('ganador', 'animando');
                 carton.classList.remove('resaltando', 'secuencia-completa');
             });
 
-            cartonGanadorActual = infoGanadores[0].carton;
-            figuraYaGanada = true;
-
-            // PASO 2: construir la lista de celdas a encender, en orden
-            // (fila por fila, de arriba a abajo, de izquierda a derecha).
-            const listaCeldas = [];
-            infoGanadores.forEach(({ carton }) => {
+            const celdasPorCarton = infoGanadores.map(({ carton }) => {
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                const lista = [];
                 for (let f = 0; f < 5; f++) {
                     for (let c = 0; c < 5; c++) {
                         if (patron[f]?.[c] === 1) {
                             const idx = f * 5 + c;
                             const celda = celdas[idx];
-                            if (celda) listaCeldas.push(celda);
+                            if (celda) lista.push(celda);
                         }
                     }
                 }
+                return lista;
             });
 
-            // PASO 3: encender cada celda con un setTimeout propio.
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
 
-            const totalCeldas = listaCeldas.length;
-            listaCeldas.forEach((celda, i) => {
-                const t = setTimeout(() => {
-                    celda.classList.add('en-figura');
-                }, i * DURACION_POR_CASILLA);
-                timeoutsFase1.push(t);
+            let maxCeldas = 0;
+            celdasPorCarton.forEach(lista => {
+                if (lista.length > maxCeldas) maxCeldas = lista.length;
+                lista.forEach((celda, i) => {
+                    const t = setTimeout(() => {
+                        celda.classList.add('en-figura');
+                    }, i * DURACION_POR_CASILLA);
+                    timeoutsFase1.push(t);
+                });
             });
 
-            // Duración total de la fase 1
-            const duracionFase1 = totalCeldas * DURACION_POR_CASILLA;
+            const duracionFase1 = maxCeldas * DURACION_POR_CASILLA;
             const duracionTotal = duracionFase1 + PAUSA_FINAL;
 
-            // PASO 4: al terminar la fase 1, activar la fase 2 (pulso/halo)
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
                 timeoutAnimacion = setTimeout(() => {
@@ -750,21 +763,6 @@
         function sacarBola(e) {
             if (bloqueadoPorAnimacion) return;
             if (bombo.length === 0) return;
-
-            // Al sacar nueva bola, quitar SOLO el resaltado (.resaltando / .secuencia-completa)
-            // al ganador anterior. El .ganador (🏆) se queda.
-            if (cartonGanadorActual) {
-                cartonGanadorActual.classList.remove('resaltando', 'secuencia-completa', 'animando');
-                cartonGanadorActual.querySelectorAll('.celda.en-figura').forEach(celda => {
-                    celda.classList.remove('en-figura');
-                    celda.style.removeProperty('--delay-figura');
-                });
-                cartonGanadorActual = null;
-            }
-
-            // Limpiar cualquier timeout de fase 1 pendiente
-            timeoutsFase1.forEach(t => clearTimeout(t));
-            timeoutsFase1 = [];
 
             const idx = Math.floor(Math.random() * bombo.length);
             const numero = bombo.splice(idx, 1)[0];
@@ -798,6 +796,7 @@
 
             const resultado = comprobarFiguraEnCartones();
             if (resultado.hayGanador && resultado.infoGanadores.length > 0) {
+                figuraYaGanada = true;
                 ejecutarAnimacionFigura(resultado.infoGanadores);
             }
         }
@@ -819,7 +818,7 @@
             timeoutsFase1 = [];
             bloqueadoPorAnimacion = false;
             figuraYaGanada = false;
-            cartonGanadorActual = null;
+            celdasCentroPendientes = 0;
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.remove('bloqueado');
             renderizarEstructura();
@@ -829,7 +828,6 @@
            CAMBIAR CARTONES Y PALETA
            ============================================ */
         function cambiarCartonesYPaleta() {
-            if (bloqueadoPorAnimacion) return;
 
             try {
                 const raw = localStorage.getItem('bingo_config');
@@ -881,7 +879,6 @@
                 indiceRotacionActual = 0;
                 paletaActual = indicesActivos.length > 0 ? indicesActivos[0] : 0;
 
-                // Aplicar tema y luego las intensidades del resaltado
                 aplicarTemaEnBody();
                 aplicarParametrosResaltado();
 
