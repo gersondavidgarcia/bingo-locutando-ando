@@ -185,9 +185,12 @@
         let timeoutsFase1 = [];
 
         let figuraYaGanada = false;
+        let llenoYaGanado = false;
 
-        // Control del zoom inicial del centro (bloquea hasta que terminen TODOS)
         let celdasCentroPendientes = 0;
+
+        let primeraBolaNumero = null;
+        let primeraBolaYaSalio = false;
 
         const RANGOS_BINGO = {
             B: [1, 15],
@@ -513,6 +516,9 @@
                     textoCabecera = nombresDeFirebase[i - 1];
                 }
                 carton.innerHTML = `
+                    <span class="emoji-primera-bola">🎱</span>
+                    <span class="emoji-figura">🎯</span>
+                    <span class="emoji-carton-lleno">👑</span>
                     <div class="carton-header">
                         <span class="carton-title">${textoCabecera}</span>
                     </div>
@@ -550,7 +556,15 @@
             aplicarConfigFiguras();
             document.querySelectorAll('.cartones-grid.modo-15 .carton')
                 .forEach(c => {
-                    c.classList.remove('ganador', 'resaltando', 'animando', 'secuencia-completa');
+                    c.classList.remove(
+                        'ganador-figura-1',
+                        'ganador-bingo',
+                        'resaltando',
+                        'animando',
+                        'secuencia-completa',
+                        'tiene-primera-bola',
+                        'tiene-lleno'
+                    );
                     c.querySelectorAll('.celda.en-figura')
                         .forEach(celda => {
                             celda.classList.remove('en-figura');
@@ -560,8 +574,6 @@
 
             // ============================================
             // ZOOM DE ENTRADA DEL CENTRO
-            // Bloquea el botón de sacar bolas hasta que TODAS
-            // las celdas del centro terminen su animación.
             // ============================================
             requestAnimationFrame(() => {
                 const celdasCentro = document.querySelectorAll(
@@ -643,7 +655,7 @@
         }
 
         /* ============================================
-           COMPROBAR SI UNO O VARIOS CARTONES COMPLETAN LA FIGURA
+           COMPROBAR FIGURA
            ============================================ */
         function comprobarFiguraEnCartones() {
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
@@ -656,6 +668,9 @@
             const infoGanadores = [];
 
             cartones.forEach((carton) => {
+                // Si ya ganó figura, lo saltamos
+                if (carton.classList.contains('ganador-figura-1')) return;
+
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
                 let completa = true;
                 const celdasDeLaFigura = [];
@@ -692,43 +707,105 @@
         }
 
         /* ============================================
-           ANIMACIÓN DE FIGURA COMPLETADA (uno o varios cartones)
+           COMPROBAR CARTÓN LLENO
            ============================================ */
-        function ejecutarAnimacionFigura(infoGanadores) {
-            if (!infoGanadores || infoGanadores.length === 0) return Promise.resolve();
+        function comprobarLlenoEnCartones() {
+            if (llenoYaGanado) return { hayGanador: false, infoGanadores: [] };
+
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            const infoGanadores = [];
+
+            cartones.forEach((carton) => {
+                // Si ya ganó bingo (llenó), lo saltamos
+                if (carton.classList.contains('ganador-bingo')) return;
+
+                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                let todasMarcadas = true;
+                const celdasLleno = [];
+
+                celdas.forEach(celda => {
+                    celdasLleno.push(celda);
+                    const estaMarcada = celda.classList.contains('marcada') ||
+                                        celda.classList.contains('vacia');
+                    if (!estaMarcada) todasMarcadas = false;
+                });
+
+                if (todasMarcadas) {
+                    infoGanadores.push({ carton, celdasDeLaFigura: celdasLleno });
+                }
+            });
+
+            return {
+                hayGanador: infoGanadores.length > 0,
+                infoGanadores: infoGanadores
+            };
+        }
+
+        /* ============================================
+           MARCAR CARTONES QUE CONTIENEN LA PRIMERA BOLA
+           ============================================ */
+        function marcarCartonesConPrimeraBola(numero) {
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            cartones.forEach(carton => {
+                const celdaCoincide = carton.querySelector(`.carton-grid-inner .celda[data-valor="${numero}"]`);
+                if (celdaCoincide) {
+                    carton.classList.add('tiene-primera-bola');
+                }
+            });
+        }
+
+        /* ============================================
+           APAGAR RESALTADO DE TODOS LOS CARTONES
+           - Quita .resaltando, .secuencia-completa y .animando
+           - Quita .en-figura de las celdas
+           - NO toca .ganador-figura-1, .ganador-bingo,
+             .tiene-primera-bola ni .tiene-lleno
+           ============================================ */
+        function apagarResaltadoDeTodos() {
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
+                carton.classList.remove('resaltando', 'secuencia-completa', 'animando');
+                carton.querySelectorAll('.celda.en-figura').forEach(celda => {
+                    celda.classList.remove('en-figura');
+                    celda.style.removeProperty('--delay-figura');
+                });
+            });
+        }
+
+        /* ============================================
+           EJECUTAR ANIMACIÓN DE RESALTADO
+           Recibe una lista de cartones con:
+             - carton
+             - celdasDeLaFigura
+             - ganoFigura
+             - ganoBingo
+           Aplica a cada cartón:
+             - .ganador-figura-1 si ganoFigura
+             - .ganador-bingo si ganoBingo
+             - .animando durante la fase 1
+             - .resaltando + .secuencia-completa en la fase 2
+           ============================================ */
+        function ejecutarAnimacionResaltado(cartonesInfo) {
+            if (!cartonesInfo || cartonesInfo.length === 0) return Promise.resolve();
 
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.add('bloqueado');
             bloqueadoPorAnimacion = true;
 
             const PAUSA_FINAL = 600;
-            const patron = FIGURAS[figuraActual] || [];
 
-            infoGanadores.forEach(({ carton }) => {
-                carton.classList.add('ganador', 'animando');
+            cartonesInfo.forEach(({ carton, ganoFigura, ganoBingo }) => {
+                if (ganoFigura) carton.classList.add('ganador-figura-1');
+                if (ganoBingo) carton.classList.add('ganador-bingo');
+                carton.classList.add('animando');
                 carton.classList.remove('resaltando', 'secuencia-completa');
-            });
-
-            const celdasPorCarton = infoGanadores.map(({ carton }) => {
-                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
-                const lista = [];
-                for (let f = 0; f < 5; f++) {
-                    for (let c = 0; c < 5; c++) {
-                        if (patron[f]?.[c] === 1) {
-                            const idx = f * 5 + c;
-                            const celda = celdas[idx];
-                            if (celda) lista.push(celda);
-                        }
-                    }
-                }
-                return lista;
             });
 
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
 
             let maxCeldas = 0;
-            celdasPorCarton.forEach(lista => {
+            cartonesInfo.forEach(({ carton, celdasDeLaFigura }) => {
+                const lista = celdasDeLaFigura || [];
                 if (lista.length > maxCeldas) maxCeldas = lista.length;
                 lista.forEach((celda, i) => {
                     const t = setTimeout(() => {
@@ -744,7 +821,7 @@
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
                 timeoutAnimacion = setTimeout(() => {
-                    infoGanadores.forEach(({ carton }) => {
+                    cartonesInfo.forEach(({ carton }) => {
                         carton.classList.remove('animando');
                         carton.classList.add('resaltando', 'secuencia-completa');
                     });
@@ -764,10 +841,19 @@
             if (bloqueadoPorAnimacion) return;
             if (bombo.length === 0) return;
 
+            // Apagamos el resaltado de la jugada anterior
+            apagarResaltadoDeTodos();
+
             const idx = Math.floor(Math.random() * bombo.length);
             const numero = bombo.splice(idx, 1)[0];
             const letra = obtenerLetra(numero);
             historialSacadas.unshift({ numero, letra });
+
+            if (!primeraBolaYaSalio) {
+                primeraBolaYaSalio = true;
+                primeraBolaNumero = numero;
+                marcarCartonesConPrimeraBola(numero);
+            }
 
             const display = document.getElementById('numeroDisplay');
             if (display) display.innerHTML = `<span style="font-size: 0.75rem; display: block; line-height: 1;">${letra}</span>${numero}`;
@@ -794,10 +880,44 @@
                 });
             }
 
-            const resultado = comprobarFiguraEnCartones();
-            if (resultado.hayGanador && resultado.infoGanadores.length > 0) {
+            // ============================================
+            // COMPROBAR FIGURA Y BINGO EN PARALELO
+            // ============================================
+            const resultadoFigura = comprobarFiguraEnCartones();
+            const resultadoLleno = comprobarLlenoEnCartones();
+
+            const cartonesGanadores = new Map();
+
+            if (resultadoFigura.hayGanador) {
                 figuraYaGanada = true;
-                ejecutarAnimacionFigura(resultado.infoGanadores);
+                resultadoFigura.infoGanadores.forEach(info => {
+                    cartonesGanadores.set(info.carton, {
+                        carton: info.carton,
+                        celdasDeLaFigura: info.celdasDeLaFigura || [],
+                        ganoFigura: true,
+                        ganoBingo: false
+                    });
+                });
+            }
+
+            if (resultadoLleno.hayGanador) {
+                llenoYaGanado = true;
+                resultadoLleno.infoGanadores.forEach(info => {
+                    if (cartonesGanadores.has(info.carton)) {
+                        cartonesGanadores.get(info.carton).ganoBingo = true;
+                    } else {
+                        cartonesGanadores.set(info.carton, {
+                            carton: info.carton,
+                            celdasDeLaFigura: info.celdasDeLaFigura || [],
+                            ganoFigura: false,
+                            ganoBingo: true
+                        });
+                    }
+                });
+            }
+
+            if (cartonesGanadores.size > 0) {
+                ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values()));
             }
         }
 
@@ -818,7 +938,10 @@
             timeoutsFase1 = [];
             bloqueadoPorAnimacion = false;
             figuraYaGanada = false;
+            llenoYaGanado = false;
             celdasCentroPendientes = 0;
+            primeraBolaNumero = null;
+            primeraBolaYaSalio = false;
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.remove('bloqueado');
             renderizarEstructura();
@@ -828,7 +951,6 @@
            CAMBIAR CARTONES Y PALETA
            ============================================ */
         function cambiarCartonesYPaleta() {
-
             try {
                 const raw = localStorage.getItem('bingo_config');
                 if (raw) {
