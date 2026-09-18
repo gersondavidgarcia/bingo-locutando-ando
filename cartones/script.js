@@ -8,15 +8,9 @@ const TEMAS_DISPONIBLES = [
     'Candy', 'Oro', 'Pacifico', 'Halloween', 'Sport', 'Titan', 'Bronce'
 ];
 
-/* ============================================
-   FUNCIONES DEL MENÚ (index.html)
-   ============================================ */
 function abrirConfiguracion() {
     const modal = document.getElementById('modalConfig');
-    if (modal) {
-        modal.classList.add('visible');
-        cargarConfigEnModal();
-    }
+    if (modal) { modal.classList.add('visible'); cargarConfigEnModal(); }
 }
 
 function cerrarConfiguracion() {
@@ -40,9 +34,13 @@ function cargarConfigEnModal() {
             setVal('tamanoControl', config.tamanoControl);
             setVal('tamanoFiguras', config.tamanoFiguras);
 
+            // Parámetros del resaltado de figura
+            setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
+            setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
+            setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+
             const temasGuardados = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
-                ? config.temasActivos
-                : ['Verde'];
+                ? config.temasActivos : ['Verde'];
             document.querySelectorAll('.tema-check').forEach(chk => {
                 chk.checked = temasGuardados.includes(chk.value);
             });
@@ -60,7 +58,6 @@ function actualizarLabelsSliders() {
     const rangoFiguras = document.getElementById('tamanoFiguras');
     const valTamano = document.getElementById('valTamanoControl');
     const valFiguras = document.getElementById('valTamanoFiguras');
-
     if (rangoTamano && valTamano) {
         valTamano.textContent = rangoTamano.value + '%';
         rangoTamano.oninput = () => { valTamano.textContent = rangoTamano.value + '%'; };
@@ -68,6 +65,28 @@ function actualizarLabelsSliders() {
     if (rangoFiguras && valFiguras) {
         valFiguras.textContent = rangoFiguras.value + 'px';
         rangoFiguras.oninput = () => { valFiguras.textContent = rangoFiguras.value + 'px'; };
+    }
+
+    // Sliders del resaltado de figura
+    const rangoGlow = document.getElementById('intensidadGlow');
+    const valGlow = document.getElementById('valIntensidadGlow');
+    if (rangoGlow && valGlow) {
+        valGlow.textContent = rangoGlow.value + '%';
+        rangoGlow.oninput = () => { valGlow.textContent = rangoGlow.value + '%'; };
+    }
+
+    const rangoSuave = document.getElementById('intensidadSuave');
+    const valSuave = document.getElementById('valIntensidadSuave');
+    if (rangoSuave && valSuave) {
+        valSuave.textContent = rangoSuave.value + '%';
+        rangoSuave.oninput = () => { valSuave.textContent = rangoSuave.value + '%'; };
+    }
+
+    const rangoDur = document.getElementById('duracionPorCasilla');
+    const valDur = document.getElementById('valDuracionPorCasilla');
+    if (rangoDur && valDur) {
+        valDur.textContent = rangoDur.value + ' ms';
+        rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
     }
 }
 
@@ -77,7 +96,6 @@ function guardarConfiguracion() {
         if (chk.checked) temasActivos.push(chk.value);
     });
     if (temasActivos.length === 0) temasActivos.push('Verde');
-
     const config = {
         cartones: document.getElementById('cantCartones')?.value || '15',
         modo: '75',
@@ -86,6 +104,10 @@ function guardarConfiguracion() {
         cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
         tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
         tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+        // Parámetros del resaltado de figura (el color lo define el tema)
+        intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
+        intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
+        duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
         temasActivos: temasActivos
     };
     localStorage.setItem('bingo_config', JSON.stringify(config));
@@ -100,7 +122,6 @@ function iniciarJuegoDirecto() {
             if (chk.checked) temasActivos.push(chk.value);
         });
         if (temasActivos.length === 0) temasActivos.push('Verde');
-
         const config = {
             cartones: document.getElementById('cantCartones')?.value || '15',
             modo: '75',
@@ -109,6 +130,9 @@ function iniciarJuegoDirecto() {
             cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
             tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
             tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+            intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
+            intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
+            duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
             temasActivos: temasActivos
         };
         localStorage.setItem('bingo_config', JSON.stringify(config));

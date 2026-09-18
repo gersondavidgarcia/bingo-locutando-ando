@@ -3,6 +3,9 @@
    ============================================ */
 :root {
     --tema-color: #2e7d32;
+    --color-figura: #ffd700;
+    --color-figura-glow: rgba(255, 215, 0, 0.9);
+    --color-figura-suave: rgba(255, 215, 0, 0.55);
 }
 
 * {
@@ -44,7 +47,7 @@ button, button:focus, button:active, select, select:focus, select:active {
 }
 
 /* ============================================
-   ESTILOS DEL MENÚ (index.html)
+   ESTILOS DEL MENÚ
    ============================================ */
 .body-center {
     background-color: #0f1115;
@@ -105,9 +108,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     -webkit-user-select: none;
 }
 
-.btn-principal:active {
-    filter: brightness(0.85);
-}
+.btn-principal:active { filter: brightness(0.85); }
 
 .btn-secundario {
     background: #262a33;
@@ -125,9 +126,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     -webkit-user-select: none;
 }
 
-.btn-secundario:active {
-    filter: brightness(0.85);
-}
+.btn-secundario:active { filter: brightness(0.85); }
 
 /* ============================================
    MODAL DE CONFIGURACIÓN
@@ -148,14 +147,9 @@ button, button:focus, button:active, select, select:focus, select:active {
     -webkit-overflow-scrolling: touch;
 }
 
-.modal-overlay.visible {
-    display: flex;
-}
+.modal-overlay.visible { display: flex; }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .modal-box {
     background: #1a1d24;
@@ -165,9 +159,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     max-height: 90vh;
     max-height: 90dvh;
     overflow-y: auto;
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.7),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
     display: flex;
     flex-direction: column;
     animation: modalIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -215,10 +207,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     touch-action: manipulation;
 }
 
-.modal-close:active {
-    background: #262a33;
-    color: #fff;
-}
+.modal-close:active { background: #262a33; color: #fff; }
 
 .modal-body {
     padding: 20px;
@@ -261,9 +250,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     touch-action: manipulation;
 }
 
-.form-group select:focus {
-    border-color: #2e7d32;
-}
+.form-group select:focus { border-color: #2e7d32; }
 
 .form-group input[type="range"] {
     width: 100%;
@@ -299,14 +286,8 @@ button, button:focus, button:active, select, select:focus, select:active {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
-.form-group label span {
-    color: #4caf50;
-    font-weight: 900;
-}
+.form-group label span { color: #4caf50; font-weight: 900; }
 
-/* ============================================
-   SELECTOR DE TEMAS
-   ============================================ */
 .temas-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -331,9 +312,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     transition: border-color 0.15s ease;
 }
 
-.tema-item:active {
-    border-color: #2e7d32;
-}
+.tema-item:active { border-color: #2e7d32; }
 
 .tema-item input[type="checkbox"] {
     width: 18px;
@@ -352,9 +331,7 @@ button, button:focus, button:active, select, select:focus, select:active {
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.tema-nombre {
-    flex: 1;
-}
+.tema-nombre { flex: 1; }
 
 .modal-footer {
     display: flex;
@@ -389,21 +366,17 @@ button, button:focus, button:active, select, select:focus, select:active {
     border: 1px solid #333;
 }
 
-.btn-modal-cancelar:active {
-    filter: brightness(0.85);
-}
+.btn-modal-cancelar:active { filter: brightness(0.85); }
 
 .btn-modal-guardar {
     background: #2e7d32;
     color: #fff;
 }
 
-.btn-modal-guardar:active {
-    filter: brightness(0.85);
-}
+.btn-modal-guardar:active { filter: brightness(0.85); }
 
 /* ============================================
-   ESTILOS DEL JUEGO (juego.html)
+   ESTILOS DEL JUEGO
    ============================================ */
 body {
     background-color: #12121c;
@@ -441,9 +414,7 @@ body {
     border-radius: 5px;
     padding: 2px !important;
     gap: 1px !important;
-    box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.45),
-        0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
     border: 1px solid var(--carton-color, #2e7d32);
     position: relative;
     overflow: hidden;
@@ -459,9 +430,12 @@ body {
     z-index: 1;
 }
 
+/* ============================================
+   CABECERA DEL CARTÓN
+   ============================================ */
 .cartones-grid.modo-15 .carton-header {
-    background: var(--carton-color, #2e7d32);
-    color: #fff;
+    background: var(--header-bg, var(--carton-color, #2e7d32));
+    color: var(--header-color, #fff);
     text-align: center;
     font-size: 0.5rem !important;
     padding: 0px 2px !important;
@@ -473,11 +447,11 @@ body {
     z-index: 2;
 }
 
-.carton-title {
-    display: block;
-    line-height: 1.3;
-}
+.carton-title { display: block; line-height: 1.3; }
 
+/* ============================================
+   FILA "B I N G O"
+   ============================================ */
 .bingo-header-row {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -488,20 +462,34 @@ body {
     font-size: 0.5rem !important;
     border-radius: 2px;
     margin-bottom: 1px;
-    padding: 0px 0 !important;
+    padding: 0 !important;
     letter-spacing: 0.5px;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 2;
+    overflow: hidden;
+    height: 12px;
+    min-height: 12px;
+    max-height: 12px;
+    box-sizing: border-box;
+    align-items: center;
 }
 
 .bingo-header-row span {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1px 0;
+    min-width: 0;
+    overflow: hidden;
+    line-height: 1;
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
 }
 
+/* ============================================
+   REJILLA 5x5 INTERNA
+   ============================================ */
 .cartones-grid.modo-15 .carton-grid-inner {
     display: grid !important;
     grid-template-columns: repeat(5, 1fr) !important;
@@ -512,6 +500,9 @@ body {
     z-index: 2;
 }
 
+/* ============================================
+   CELDA NORMAL
+   ============================================ */
 .cartones-grid.modo-15 .celda {
     aspect-ratio: 1 / 0.65 !important;
     padding: 0px !important;
@@ -525,6 +516,9 @@ body {
     position: relative;
 }
 
+/* ============================================
+   CELDA MARCADA (número tapado)
+   ============================================ */
 .cartones-grid.modo-15 .celda.marcada {
     background: var(--carton-color, #2e7d32) !important;
     color: transparent !important;
@@ -532,6 +526,7 @@ body {
     box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
 }
 
+/* Bolita gris que se dibuja encima de la celda marcada */
 .cartones-grid.modo-15 .celda.marcada::after {
     content: '';
     position: absolute;
@@ -541,44 +536,29 @@ body {
         rgba(255, 255, 255, 0.30),
         rgba(255, 255, 255, 0.05) 55%,
         rgba(0, 0, 0, 0.15) 100%);
-    box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.25),
-        0 1px 2px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
     pointer-events: none;
 }
 
-.cartones-grid.modo-15 .celda.marcada .num-val {
-    opacity: 0;
-}
+.cartones-grid.modo-15 .celda.marcada .num-val { opacity: 0; }
 
-/* FREE CENTRAL */
+/* ============================================
+   FREE CENTRAL
+   ============================================ */
 .cartones-grid.modo-15 .celda.vacia {
-    background: linear-gradient(135deg, #fff8e1, #ffe082) !important;
-    color: #b8860b !important;
-    font-weight: 900;
-    box-shadow:
-        inset 0 0 0 1.5px #ffb300,
-        inset 0 0 8px rgba(255, 179, 0, 0.4),
-        0 0 6px rgba(255, 179, 0, 0.35);
+    background: var(--header-bg, var(--carton-color, #2e7d32)) !important;
+    color: var(--header-color, #fff) !important;
+    font-weight: 800;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.5);
     position: relative;
-}
-
-.cartones-grid.modo-15 .celda.vacia::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.7), transparent 55%);
-    pointer-events: none;
-    border-radius: inherit;
 }
 
 .cartones-grid.modo-15 .celda.vacia .num-val {
     font-size: clamp(0.75rem, 2.8vw, 1rem) !important;
-    font-weight: 900 !important;
-    color: #b8860b !important;
-    text-shadow:
-        0 1px 0 #fffbe6,
-        0 0 4px rgba(255, 179, 0, 0.6);
+    font-weight: 800 !important;
+    color: var(--header-color, #fff) !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35) !important;
     letter-spacing: -0.3px;
     position: relative;
     z-index: 1;
@@ -592,9 +572,7 @@ body {
     z-index: 1;
 }
 
-.animar-marca {
-    animation: marcarCelda 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
+.animar-marca { animation: marcarCelda 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 @keyframes marcarCelda {
     0%   { transform: scale(1); }
@@ -603,7 +581,7 @@ body {
 }
 
 /* ============================================
-   ESTRUCTURA INFERIOR Y CONTROLES
+   BOLILLERO
    ============================================ */
 .bolillero-container {
     background: #1e1e2d;
@@ -648,10 +626,15 @@ body {
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
+    transition: filter 0.15s ease, opacity 0.15s ease;
 }
 
-.btn-sacar-bola:active {
-    background: #3d8b40;
+.btn-sacar-bola:active { background: #3d8b40; }
+
+.btn-sacar-bola.bloqueado {
+    opacity: 0.45;
+    pointer-events: none;
+    filter: grayscale(0.4);
 }
 
 .btn-sacar-bola .text-glow {
@@ -721,6 +704,9 @@ body {
     color: var(--tema-color, #2e7d32);
 }
 
+/* ============================================
+   BOLAS RECIENTES
+   ============================================ */
 .recientes-container {
     display: flex;
     gap: 5px;
@@ -728,10 +714,7 @@ body {
     min-height: 28px;
 }
 
-.recientes-lista {
-    display: flex;
-    gap: 4px;
-}
+.recientes-lista { display: flex; gap: 4px; }
 
 .mini-bola {
     background: #fff;
@@ -747,9 +730,7 @@ body {
     flex-shrink: 0;
 }
 
-.mini-bola.entrando {
-    animation: entrarBola 0.3s ease-out;
-}
+.mini-bola.entrando { animation: entrarBola 0.3s ease-out; }
 
 @keyframes entrarBola {
     from { transform: scale(0); opacity: 0; }
@@ -814,10 +795,7 @@ body {
     white-space: nowrap;
 }
 
-.bolita.marcada {
-    background: #4caf50;
-    color: #fff;
-}
+.bolita.marcada { background: #4caf50; color: #fff; }
 
 .bolita.vacia {
     background: transparent;
@@ -827,7 +805,7 @@ body {
 }
 
 /* ============================================
-   PANEL FIGURAS (mini-cartones)
+   MINI-CARTONES DE FIGURAS
    ============================================ */
 .panel-figuras {
     flex: 0 0 18%;
@@ -838,9 +816,7 @@ body {
     justify-content: flex-start;
 }
 
-.panel-figuras.visible {
-    display: flex;
-}
+.panel-figuras.visible { display: flex; }
 
 .mini-carton {
     display: grid;
@@ -862,12 +838,10 @@ body {
     aspect-ratio: 1 / 1;
 }
 
-.mini-celda.marcada {
-    box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.4);
-}
+.mini-celda.marcada { box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.4); }
 
 /* ============================================
-   BOTONES DEL PANEL INFERIOR
+   BOTONES INFERIORES
    ============================================ */
 .panel-botones {
     flex: 1;
@@ -902,1302 +876,442 @@ body {
     font-size: 0.9rem;
 }
 
-.btn-cambiar:active, .btn-atras:active {
-    background: #4a4a5a;
+.btn-cambiar:active, .btn-atras:active { background: #4a4a5a; }
+
+.banner-premio { display: none; }
+
+/* ============================================
+   🏆 EN LA ESQUINA DEL CARTÓN GANADOR (permanente)
+   ============================================ */
+.cartones-grid.modo-15 .carton.ganador::after {
+    content: '🏆';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: clamp(0.9rem, 3.2vw, 1.4rem);
+    z-index: 30;
+    pointer-events: none;
+    filter: drop-shadow(0 0 4px var(--color-figura-glow))
+            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+    animation: trofeoLatido 1s ease-in-out infinite alternate;
 }
 
-.banner-premio {
-    display: none;
+@keyframes trofeoLatido {
+    0%   { transform: scale(1) rotate(-8deg); }
+    100% { transform: scale(1.18) rotate(-8deg); }
+}
+
+/* Borde del cartón ganador (permanente) */
+.cartones-grid.modo-15 .carton.ganador {
+    outline: 2px solid var(--color-figura);
+    outline-offset: -2px;
+    box-shadow:
+        0 3px 8px rgba(0, 0, 0, 0.45),
+        0 0 12px 2px var(--color-figura-suave);
+    transition: box-shadow 0.3s ease;
 }
 
 /* ============================================
-   TEMA CLÁSICO
+   FASE 1: ENCENDIDO CELDA POR CELDA (durante .animando)
    ============================================ */
-body.tema-clasico {
-    background: radial-gradient(ellipse at top, #2a2418 0%, #0a0805 70%), #0a0805;
+.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura {
+    background: var(--color-figura) !important;
+    animation: rellenarCelda 0.35s ease-out both;
+    animation-delay: var(--delay-figura, 0s);
 }
-body.tema-clasico .cartones-grid.modo-15 .carton {
-    background: #f5ecd4;
-    border: 2px solid #1a1a1a;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.7), inset 0 0 0 2px #b8860b;
+
+.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura::after {
+    display: none !important;
 }
-body.tema-clasico .cartones-grid.modo-15 .carton-header {
-    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 50%, #b8a468 100%);
-    color: #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura .num-val {
+    opacity: 0 !important;
+    color: transparent !important;
+    text-shadow: none !important;
 }
-body.tema-clasico .bingo-header-row {
-    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%);
-    color: #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+
+/* ============================================
+   FASE 2: RESALTADO FINAL (cuando termina la fase 1)
+   ============================================ */
+.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura {
+    background: var(--color-figura) !important;
+    border-radius: 4px;
+    box-shadow:
+        0 0 12px 3px var(--color-figura-glow),
+        0 0 20px 8px var(--color-figura-suave);
+    animation: pulsoFigura 1s ease-in-out infinite alternate;
 }
-body.tema-clasico .bingo-header-row span {
-    background: transparent;
+
+.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura::after {
+    display: none !important;
 }
-body.tema-clasico .cartones-grid.modo-15 .carton-grid-inner {
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
+.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura .num-val {
+    opacity: 0 !important;
+    color: transparent !important;
+    text-shadow: none !important;
+    mix-blend-mode: normal !important;
 }
-body.tema-clasico .cartones-grid.modo-15 .celda {
-    background: #fdf9ec;
-    color: #1a1a1a;
-    border: 1px solid #1a1a1a !important;
+
+@keyframes rellenarCelda {
+    0% {
+        transform: scale(1);
+        background: var(--carton-color, #2e7d32);
+        opacity: 0.3;
+    }
+    60% {
+        transform: scale(1.15);
+        background: #ffffff;
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        background: var(--color-figura);
+        opacity: 1;
+    }
 }
-body.tema-clasico .cartones-grid.modo-15 .celda.marcada {
-    background: #d4af37 !important;
-    color: #1a1a1a !important;
-    box-shadow: inset 0 0 0 1.5px #8b6914;
+
+@keyframes pulsoFigura {
+    0% {
+        box-shadow:
+            0 0 10px 2px var(--color-figura-suave),
+            0 0 16px 6px var(--color-figura-suave);
+    }
+    100% {
+        box-shadow:
+            0 0 16px 5px var(--color-figura-glow),
+            0 0 24px 10px var(--color-figura-glow);
+    }
 }
-body.tema-clasico .cartones-grid.modo-15 .celda.vacia {
-    background: linear-gradient(135deg, #f5e6b8, #d4af37) !important;
-    color: #3a2a08 !important;
-    box-shadow: inset 0 0 0 1.5px #8b6914, inset 0 0 8px rgba(139, 105, 20, 0.6);
+
+/* ============================================
+   FORZAR FONDO DE FIGURA EN TODOS LOS TEMAS
+   ============================================ */
+body .cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura,
+body .cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura {
+    background: var(--color-figura) !important;
 }
-body.tema-clasico .bolillero-container {
-    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
-    border: 2px solid #8b6914;
-}
-body.tema-clasico .bolillero-sphere {
-    background: radial-gradient(circle at 35% 30%, #6b1414, #2b0808);
-    border: 2px solid #8b6914;
-}
-body.tema-clasico .btn-sacar-bola {
-    background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%) !important;
-    color: #1a1a1a;
-    border: 2px solid #5c4508;
-}
-body.tema-clasico .stats-box {
-    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
-    border: 2px solid #8b6914;
-    color: #d4af37;
-}
+
+/* ============================================
+   COLOR DE RESALTE DE FIGURA POR TEMA
+   (sirven como valor por defecto; el usuario
+    puede ajustar la intensidad desde Configuración)
+   ============================================ */
+body.tema-verde      { --color-figura: #ffd700; --color-figura-glow: rgba(255, 215, 0, 0.95);  --color-figura-suave: rgba(255, 215, 0, 0.55); }
+body.tema-azul       { --color-figura: #ffb300; --color-figura-glow: rgba(255, 179, 0, 0.95);  --color-figura-suave: rgba(255, 179, 0, 0.55); }
+body.tema-rojo       { --color-figura: #00e5ff; --color-figura-glow: rgba(0, 229, 255, 0.95);  --color-figura-suave: rgba(0, 229, 255, 0.55); }
+body.tema-negro      { --color-figura: #ffea00; --color-figura-glow: rgba(255, 234, 0, 0.95);  --color-figura-suave: rgba(255, 234, 0, 0.55); }
+body.tema-naranja    { --color-figura: #00b0ff; --color-figura-glow: rgba(0, 176, 255, 0.95);  --color-figura-suave: rgba(0, 176, 255, 0.55); }
+body.tema-morado     { --color-figura: #b2ff59; --color-figura-glow: rgba(178, 255, 89, 0.95); --color-figura-suave: rgba(178, 255, 89, 0.55); }
+body.tema-clasico    { --color-figura: #ffffff; --color-figura-glow: rgba(255, 255, 255, 0.95);--color-figura-suave: rgba(255, 255, 255, 0.6); }
+body.tema-dorado     { --color-figura: #00e5ff; --color-figura-glow: rgba(0, 229, 255, 0.95);  --color-figura-suave: rgba(0, 229, 255, 0.55); }
+body.tema-madera     { --color-figura: #69f0ae; --color-figura-glow: rgba(105, 240, 174, 0.95);--color-figura-suave: rgba(105, 240, 174, 0.55); }
+body.tema-kate       { --color-figura: #ff4081; --color-figura-glow: rgba(255, 64, 129, 0.95); --color-figura-suave: rgba(255, 64, 129, 0.55); }
+body.tema-cyberpunk  { --color-figura: #ff00ff; --color-figura-glow: rgba(255, 0, 255, 0.95);  --color-figura-suave: rgba(255, 0, 255, 0.55); }
+body.tema-volcano    { --color-figura: #ff9100; --color-figura-glow: rgba(255, 145, 0, 0.95);  --color-figura-suave: rgba(255, 145, 0, 0.55); }
+body.tema-pixel      { --color-figura: #ffee00; --color-figura-glow: rgba(255, 238, 0, 0.95);  --color-figura-suave: rgba(255, 238, 0, 0.55); }
+body.tema-esmeralda  { --color-figura: #ffea00; --color-figura-glow: rgba(255, 234, 0, 0.95);  --color-figura-suave: rgba(255, 234, 0, 0.55); }
+body.tema-candy      { --color-figura: #00e676; --color-figura-glow: rgba(0, 230, 118, 0.95);  --color-figura-suave: rgba(0, 230, 118, 0.55); }
+body.tema-oro        { --color-figura: #ff1744; --color-figura-glow: rgba(255, 23, 68, 0.95);   --color-figura-suave: rgba(255, 23, 68, 0.55); }
+body.tema-pacifico   { --color-figura: #ff00ff; --color-figura-glow: rgba(255, 0, 255, 0.95);  --color-figura-suave: rgba(255, 0, 255, 0.55); }
+body.tema-halloween  { --color-figura: #ff9100; --color-figura-glow: rgba(255, 145, 0, 0.95);  --color-figura-suave: rgba(255, 145, 0, 0.55); }
+body.tema-sport      { --color-figura: #ffea00; --color-figura-glow: rgba(255, 234, 0, 0.95);  --color-figura-suave: rgba(255, 234, 0, 0.55); }
+body.tema-titan      { --color-figura: #ff00ff; --color-figura-glow: rgba(255, 0, 255, 0.95);  --color-figura-suave: rgba(255, 0, 255, 0.55); }
+body.tema-bronce     { --color-figura: #ffee00; --color-figura-glow: rgba(255, 238, 0, 0.95);  --color-figura-suave: rgba(255, 238, 0, 0.55); }
+
+/* ============================================
+   TEMAS
+   ============================================ */
+
+/* TEMA CLÁSICO */
+body.tema-clasico { background: radial-gradient(ellipse at top, #2a2418 0%, #0a0805 70%), #0a0805; }
+body.tema-clasico .cartones-grid.modo-15 .carton { background: #f5ecd4; border: 2px solid #1a1a1a; box-shadow: 0 3px 8px rgba(0,0,0,0.7), inset 0 0 0 2px #b8860b; --header-bg: linear-gradient(180deg, #e8d9a8 0%, #d4c389 50%, #b8a468 100%); --header-color: #1a1a1a; }
+body.tema-clasico .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border-bottom: 1px solid #1a1a1a; }
+body.tema-clasico .bingo-header-row { background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%); color: #1a1a1a; border-bottom: 1px solid #1a1a1a; }
+body.tema-clasico .cartones-grid.modo-15 .carton-grid-inner { background: #1a1a1a; border: 1px solid #1a1a1a; }
+body.tema-clasico .cartones-grid.modo-15 .celda { background: #fdf9ec; color: #1a1a1a; border: 1px solid #1a1a1a !important; }
+body.tema-clasico .cartones-grid.modo-15 .celda.marcada { background: #d4af37 !important; color: #1a1a1a !important; }
+body.tema-clasico .bolillero-container, body.tema-clasico .panel-numeros-inferior { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); border: 2px solid #8b6914; }
+body.tema-clasico .bolillero-sphere { background: radial-gradient(circle at 35% 30%, #6b1414, #2b0808); border: 2px solid #8b6914; }
+body.tema-clasico .btn-sacar-bola { background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%) !important; color: #1a1a1a; border: 2px solid #5c4508; }
+body.tema-clasico .stats-box { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); border: 2px solid #8b6914; color: #d4af37; }
 body.tema-clasico .stats-box span { color: #d4af37; }
-body.tema-clasico .panel-numeros-inferior {
-    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
-    border: 2px solid #8b6914;
-}
 body.tema-clasico .titulo-tabla { color: #d4af37; }
-body.tema-clasico .bolita {
-    background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%);
-    color: #1a1a1a;
-    border: 1px solid #8b6914;
-}
-body.tema-clasico .bolita.marcada {
-    background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%);
-    color: #fff;
-}
-body.tema-clasico .btn-cambiar, body.tema-clasico .btn-atras {
-    background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%);
-    color: #d4af37;
-    border: 2px solid #8b6914;
-}
+body.tema-clasico .bolita { background: linear-gradient(180deg, #e8d9a8 0%, #d4c389 100%); color: #1a1a1a; border: 1px solid #8b6914; }
+body.tema-clasico .bolita.marcada { background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%); color: #fff; }
+body.tema-clasico .btn-cambiar, body.tema-clasico .btn-atras { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); color: #d4af37; border: 2px solid #8b6914; }
 body.tema-clasico .mini-carton { background: #1a1508; border: 2px solid #8b6914; }
 
-/* ============================================
-   TEMA DORADO
-   ============================================ */
-body.tema-dorado {
-    background: linear-gradient(145deg, #1f1a0e, #080705);
-}
-body.tema-dorado .cartones-grid.modo-15 .carton {
-    background: linear-gradient(145deg, #1f1a0e, #080705);
-    border: 3px solid #d4af37;
-}
-body.tema-dorado .cartones-grid.modo-15 .carton-header {
-    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%);
-    color: #1a1100;
-}
-body.tema-dorado .bingo-header-row {
-    background: linear-gradient(145deg, #1f1a0e, #080705);
-    color: #f3e5ab;
-}
-body.tema-dorado .cartones-grid.modo-15 .celda {
-    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-    color: #1a1a1a;
-}
-body.tema-dorado .cartones-grid.modo-15 .celda.marcada {
-    background: radial-gradient(circle, #e63946, #9b2226) !important;
-    color: #fff !important;
-}
-body.tema-dorado .cartones-grid.modo-15 .celda.vacia {
-    background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%) !important;
-    color: #1a1100 !important;
-}
-body.tema-dorado .bolillero-container {
-    background: linear-gradient(145deg, #1f1a0e, #080705);
-    border: 2px solid #d4af37;
-}
-body.tema-dorado .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #ffe58f, #8b6914);
-}
-body.tema-dorado .btn-sacar-bola {
-    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%) !important;
-    color: #1a1100;
-}
-body.tema-dorado .stats-box {
-    background: #080705;
-    border: 2px solid #d4af37;
-    color: #f3e5ab;
-}
+/* TEMA DORADO */
+body.tema-dorado { background: linear-gradient(145deg, #1f1a0e, #080705); }
+body.tema-dorado .cartones-grid.modo-15 .carton { background: linear-gradient(145deg, #1f1a0e, #080705); border: 3px solid #d4af37; --header-bg: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%); --header-color: #1a1100; }
+body.tema-dorado .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); }
+body.tema-dorado .bingo-header-row { background: linear-gradient(145deg, #1f1a0e, #080705); color: #f3e5ab; }
+body.tema-dorado .cartones-grid.modo-15 .celda { background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%); color: #1a1a1a; }
+body.tema-dorado .cartones-grid.modo-15 .celda.marcada { background: radial-gradient(circle, #e63946, #9b2226) !important; color: #fff !important; }
+body.tema-dorado .bolillero-container, body.tema-dorado .panel-numeros-inferior { background: linear-gradient(145deg, #1f1a0e, #080705); border: 2px solid #d4af37; }
+body.tema-dorado .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #ffe58f, #8b6914); }
+body.tema-dorado .btn-sacar-bola { background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%) !important; color: #1a1100; }
+body.tema-dorado .stats-box { background: #080705; border: 2px solid #d4af37; color: #f3e5ab; }
 body.tema-dorado .stats-box span { color: #d4af37; }
-body.tema-dorado .panel-numeros-inferior {
-    background: linear-gradient(145deg, #1f1a0e, #080705);
-    border: 2px solid #d4af37;
-}
 body.tema-dorado .titulo-tabla { color: #d4af37; }
-body.tema-dorado .bolita {
-    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
-    color: #1a1a1a;
-    border: 1px solid #b8860b;
-}
-body.tema-dorado .bolita.marcada {
-    background: linear-gradient(180deg, #ffd700, #b8860b);
-    color: #1a1100;
-}
-body.tema-dorado .btn-cambiar, body.tema-dorado .btn-atras {
-    background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%);
-    color: #1a1100;
-    border: 2px solid #785a00;
-}
+body.tema-dorado .bolita { background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%); color: #1a1a1a; border: 1px solid #b8860b; }
+body.tema-dorado .bolita.marcada { background: linear-gradient(180deg, #ffd700, #b8860b); color: #1a1100; }
+body.tema-dorado .btn-cambiar, body.tema-dorado .btn-atras { background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%); color: #1a1100; border: 2px solid #785a00; }
 body.tema-dorado .mini-carton { background: #080705; border: 2px solid #d4af37; }
 
-/* ============================================
-   TEMA MADERA
-   ============================================ */
-body.tema-madera {
-    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
-}
-body.tema-madera .cartones-grid.modo-15 .carton {
-    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
-    border: 4px solid #8d5b41;
-}
-body.tema-madera .cartones-grid.modo-15 .carton-header {
-    background: #8d5b41;
-    color: #fef3c7;
-}
-body.tema-madera .bingo-header-row {
-    background: #23130a;
-    color: #f59e0b;
-}
-body.tema-madera .cartones-grid.modo-15 .celda {
-    background: #fef3c7;
-    color: #451a03;
-}
-body.tema-madera .cartones-grid.modo-15 .celda.marcada {
-    background: #dc2626 !important;
-    color: #fff !important;
-}
-body.tema-madera .cartones-grid.modo-15 .celda.vacia {
-    background: #d97706 !important;
-    color: #fff !important;
-}
-body.tema-madera .bolillero-container {
-    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
-    border: 3px solid #8d5b41;
-}
-body.tema-madera .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #d97706, #78350f);
-}
-body.tema-madera .btn-sacar-bola {
-    background: #8d5b41 !important;
-    color: #fef3c7;
-}
-body.tema-madera .stats-box {
-    background: #23130a;
-    border: 2px solid #8d5b41;
-    color: #fef3c7;
-}
+/* TEMA MADERA */
+body.tema-madera { background: linear-gradient(180deg, #3d2314 0%, #23130a 100%); }
+body.tema-madera .cartones-grid.modo-15 .carton { background: linear-gradient(180deg, #3d2314 0%, #23130a 100%); border: 4px solid #8d5b41; --header-bg: #8d5b41; --header-color: #fef3c7; }
+body.tema-madera .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); }
+body.tema-madera .bingo-header-row { background: #23130a; color: #f59e0b; }
+body.tema-madera .cartones-grid.modo-15 .celda { background: #fef3c7; color: #451a03; }
+body.tema-madera .cartones-grid.modo-15 .celda.marcada { background: #dc2626 !important; color: #fff !important; }
+body.tema-madera .bolillero-container, body.tema-madera .panel-numeros-inferior { background: linear-gradient(180deg, #3d2314 0%, #23130a 100%); border: 3px solid #8d5b41; }
+body.tema-madera .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #d97706, #78350f); }
+body.tema-madera .btn-sacar-bola { background: #8d5b41 !important; color: #fef3c7; }
+body.tema-madera .stats-box { background: #23130a; border: 2px solid #8d5b41; color: #fef3c7; }
 body.tema-madera .stats-box span { color: #f59e0b; }
-body.tema-madera .panel-numeros-inferior {
-    background: linear-gradient(180deg, #3d2314 0%, #23130a 100%);
-    border: 3px solid #8d5b41;
-}
 body.tema-madera .titulo-tabla { color: #f59e0b; }
-body.tema-madera .bolita {
-    background: #fef3c7;
-    color: #451a03;
-    border: 1px solid #8d5b41;
-}
-body.tema-madera .bolita.marcada {
-    background: #d97706;
-    color: #fff;
-}
-body.tema-madera .btn-cambiar, body.tema-madera .btn-atras {
-    background: #8d5b41;
-    color: #fef3c7;
-    border: 2px solid #3d2314;
-}
+body.tema-madera .bolita { background: #fef3c7; color: #451a03; border: 1px solid #8d5b41; }
+body.tema-madera .bolita.marcada { background: #d97706; color: #fff; }
+body.tema-madera .btn-cambiar, body.tema-madera .btn-atras { background: #8d5b41; color: #fef3c7; border: 2px solid #3d2314; }
 body.tema-madera .mini-carton { background: #23130a; border: 3px solid #8d5b41; }
 
-/* ============================================
-   TEMA KATE DÉCO
-   ============================================ */
-body.tema-kate {
-    background: linear-gradient(135deg, #e2b97c, #8a5a22);
-}
-body.tema-kate .cartones-grid.modo-15 .carton {
-    background: #5c3b1e;
-    border: 2px solid #fce3b8;
-    border-radius: 8px;
-    padding: 4px !important;
-}
-body.tema-kate .cartones-grid.modo-15 .carton-header {
-    background: #261106;
-    color: #fce3b8;
-    border: 1px solid #d4a359;
-    border-radius: 6px 6px 0 0;
-    font-family: 'Cinzel', serif;
-    font-weight: 900;
-    letter-spacing: 1.2px;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-kate .bingo-header-row {
-    background: #261106;
-    padding: 3px 4px !important;
-    gap: 2px;
-}
-body.tema-kate .bingo-header-row span {
-    background: linear-gradient(180deg, #e2a07d, #a66042);
-    color: #1a0a03;
-    border-radius: 10px 10px 0 0;
-    padding: 3px 0;
-    font-family: 'Cinzel', serif;
-    font-weight: 900;
-}
-body.tema-kate .cartones-grid.modo-15 .carton-grid-inner {
-    background: #5c3b1e;
-    border: 1px solid #5c3b1e;
-}
-body.tema-kate .cartones-grid.modo-15 .celda {
-    background: #fff9ee;
-    color: #111;
-    border: 1px solid #e2b97c !important;
-}
-body.tema-kate .cartones-grid.modo-15 .celda.marcada {
-    background: #d4a359 !important;
-    color: #1a0a03 !important;
-}
-body.tema-kate .cartones-grid.modo-15 .celda.vacia {
-    background: #d4a359 !important;
-    color: #fff !important;
-}
-body.tema-kate .bolillero-container,
-body.tema-kate .panel-numeros-inferior {
-    background: #261106;
-    border: 2px solid #d4a359;
-}
-body.tema-kate .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #e2a07d, #8a5a22);
-}
-body.tema-kate .btn-sacar-bola {
-    background: linear-gradient(180deg, #e2a07d, #a66042) !important;
-    color: #1a0a03;
-}
-body.tema-kate .stats-box {
-    background: #fff9ee;
-    border: 2px solid #d4a359;
-    color: #261106;
-}
+/* TEMA KATE */
+body.tema-kate { background: linear-gradient(135deg, #e2b97c, #8a5a22); }
+body.tema-kate .cartones-grid.modo-15 .carton { background: #5c3b1e; border: 2px solid #fce3b8; border-radius: 8px; --header-bg: #261106; --header-color: #fce3b8; }
+body.tema-kate .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border: 1px solid #d4a359; border-radius: 6px 6px 0 0; font-family: 'Cinzel', serif; font-weight: 900; letter-spacing: 1px; }
+body.tema-kate .bingo-header-row { background: #261106; }
+body.tema-kate .bingo-header-row span { background: linear-gradient(180deg, #e2a07d, #a66042); color: #1a0a03; border-radius: 8px 8px 0 0; font-family: 'Cinzel', serif; font-weight: 900; }
+body.tema-kate .cartones-grid.modo-15 .carton-grid-inner { background: #5c3b1e; }
+body.tema-kate .cartones-grid.modo-15 .celda { background: #fff9ee; color: #111; }
+body.tema-kate .cartones-grid.modo-15 .celda.marcada { background: #d4a359 !important; color: #1a0a03 !important; }
+body.tema-kate .bolillero-container, body.tema-kate .panel-numeros-inferior { background: #261106; border: 2px solid #d4a359; }
+body.tema-kate .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #e2a07d, #8a5a22); }
+body.tema-kate .btn-sacar-bola { background: linear-gradient(180deg, #e2a07d, #a66042) !important; color: #1a0a03; }
+body.tema-kate .stats-box { background: #fff9ee; border: 2px solid #d4a359; color: #261106; }
 body.tema-kate .stats-box span { color: #a66042; }
-body.tema-kate .bolita {
-    background: #fff9ee;
-    color: #261106;
-    border: 1px solid #d4a359;
-}
-body.tema-kate .bolita.marcada {
-    background: #d4a359;
-    color: #fff;
-}
-body.tema-kate .btn-cambiar, body.tema-kate .btn-atras {
-    background: #261106;
-    color: #fce3b8;
-    border: 2px solid #d4a359;
-}
 body.tema-kate .titulo-tabla { color: #fce3b8; }
+body.tema-kate .bolita { background: #fff9ee; color: #261106; border: 1px solid #d4a359; }
+body.tema-kate .bolita.marcada { background: #d4a359; color: #fff; }
+body.tema-kate .btn-cambiar, body.tema-kate .btn-atras { background: #261106; color: #fce3b8; border: 2px solid #d4a359; }
 body.tema-kate .mini-carton { background: #261106; border: 2px solid #d4a359; }
 
-/* ============================================
-   TEMA CYBERPUNK
-   ============================================ */
-body.tema-cyberpunk {
-    background: linear-gradient(135deg, #06b6d4, #083344);
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .carton {
-    background: #0c4a6e;
-    border: 2px solid #22d3ee;
-    border-radius: 4px;
-    padding: 4px !important;
-    box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .carton-header {
-    background: #02131e;
-    color: #22d3ee;
-    border: 1px solid #06b6d4;
-    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    padding: 3px 8px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-cyberpunk .bingo-header-row {
-    background: #02131e;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-cyberpunk .bingo-header-row span {
-    background: #f43f5e;
-    color: #fff;
-    clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-    padding: 3px 0;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .carton-grid-inner {
-    background: #0c4a6e;
-    border: 1px solid #0c4a6e;
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .celda {
-    background: #cff4fc;
-    color: #032b36;
-    border: none !important;
-    clip-path: polygon(0 0, 85% 0, 100% 15%, 100% 100%, 15% 100%, 0 85%);
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .celda.marcada {
-    background: #facc15 !important;
-    color: #000 !important;
-    clip-path: none;
-}
-body.tema-cyberpunk .cartones-grid.modo-15 .celda.vacia {
-    background: #facc15 !important;
-    color: #000 !important;
-    clip-path: none;
-}
-body.tema-cyberpunk .bolillero-container,
-body.tema-cyberpunk .panel-numeros-inferior {
-    background: #02131e;
-    border: 2px solid #22d3ee;
-}
-body.tema-cyberpunk .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #22d3ee, #083344);
-}
-body.tema-cyberpunk .btn-sacar-bola {
-    background: #f43f5e !important;
-    color: #fff;
-    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
-}
-body.tema-cyberpunk .stats-box {
-    background: #cff4fc;
-    border: 2px solid #22d3ee;
-    color: #02131e;
-}
+/* TEMA CYBERPUNK */
+body.tema-cyberpunk { background: linear-gradient(135deg, #06b6d4, #083344); }
+body.tema-cyberpunk .cartones-grid.modo-15 .carton { background: #0c4a6e; border: 2px solid #22d3ee; border-radius: 4px; --header-bg: #02131e; --header-color: #22d3ee; }
+body.tema-cyberpunk .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border: 1px solid #06b6d4; font-family: 'Orbitron', sans-serif; font-weight: 900; }
+body.tema-cyberpunk .bingo-header-row { background: #02131e; }
+body.tema-cyberpunk .bingo-header-row span { background: #f43f5e; color: #fff; clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%); font-family: 'Orbitron', sans-serif; font-weight: 900; }
+body.tema-cyberpunk .cartones-grid.modo-15 .carton-grid-inner { background: #0c4a6e; }
+body.tema-cyberpunk .cartones-grid.modo-15 .celda { background: #cff4fc; color: #032b36; }
+body.tema-cyberpunk .cartones-grid.modo-15 .celda.marcada { background: #facc15 !important; color: #000 !important; }
+body.tema-cyberpunk .bolillero-container, body.tema-cyberpunk .panel-numeros-inferior { background: #02131e; border: 2px solid #22d3ee; }
+body.tema-cyberpunk .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #22d3ee, #083344); }
+body.tema-cyberpunk .btn-sacar-bola { background: #f43f5e !important; color: #fff; }
+body.tema-cyberpunk .stats-box { background: #cff4fc; border: 2px solid #22d3ee; color: #02131e; }
 body.tema-cyberpunk .stats-box span { color: #f43f5e; }
-body.tema-cyberpunk .bolita {
-    background: #cff4fc;
-    color: #032b36;
-    border: 1px solid #06b6d4;
-}
-body.tema-cyberpunk .bolita.marcada {
-    background: #facc15;
-    color: #000;
-}
-body.tema-cyberpunk .btn-cambiar, body.tema-cyberpunk .btn-atras {
-    background: #02131e;
-    color: #22d3ee;
-    border: 2px solid #22d3ee;
-}
 body.tema-cyberpunk .titulo-tabla { color: #22d3ee; }
+body.tema-cyberpunk .bolita { background: #cff4fc; color: #032b36; border: 1px solid #06b6d4; }
+body.tema-cyberpunk .bolita.marcada { background: #facc15; color: #000; }
+body.tema-cyberpunk .btn-cambiar, body.tema-cyberpunk .btn-atras { background: #02131e; color: #22d3ee; border: 2px solid #22d3ee; }
 body.tema-cyberpunk .mini-carton { background: #02131e; border: 2px solid #22d3ee; }
 
-/* ============================================
-   TEMA VOLCANO
-   ============================================ */
-body.tema-volcano {
-    background: linear-gradient(135deg, #ef4444, #7f1d1d);
-}
-body.tema-volcano .cartones-grid.modo-15 .carton {
-    background: #450a0a;
-    border: 2px solid #fca5a5;
-    padding: 4px !important;
-}
-body.tema-volcano .cartones-grid.modo-15 .carton-header {
-    background: #2a0404;
-    color: #fde047;
-    border-radius: 3px;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-volcano .bingo-header-row {
-    background: #2a0404;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-volcano .bingo-header-row span {
-    background: #f97316;
-    color: #fff;
-    clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0 100%, 0 30%);
-    padding: 4px 0;
-    font-weight: 900;
-}
-body.tema-volcano .cartones-grid.modo-15 .carton-grid-inner {
-    background: #450a0a;
-    border: 1px solid #450a0a;
-}
-body.tema-volcano .cartones-grid.modo-15 .celda {
-    background: #ffe4e6;
-    color: #450a0a;
-    border: none !important;
-}
-body.tema-volcano .cartones-grid.modo-15 .celda.marcada {
-    background: #38bdf8 !important;
-    color: #fff !important;
-}
-body.tema-volcano .cartones-grid.modo-15 .celda.vacia {
-    background: #38bdf8 !important;
-    color: #fff !important;
-}
-body.tema-volcano .bolillero-container,
-body.tema-volcano .panel-numeros-inferior {
-    background: #2a0404;
-    border: 2px solid #f97316;
-}
-body.tema-volcano .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #f97316, #7f1d1d);
-}
-body.tema-volcano .btn-sacar-bola {
-    background: #f97316 !important;
-    color: #fff;
-}
-body.tema-volcano .stats-box {
-    background: #ffe4e6;
-    border: 2px solid #f97316;
-    color: #2a0404;
-}
+/* TEMA VOLCANO */
+body.tema-volcano { background: linear-gradient(135deg, #ef4444, #7f1d1d); }
+body.tema-volcano .cartones-grid.modo-15 .carton { background: #450a0a; border: 2px solid #fca5a5; --header-bg: #2a0404; --header-color: #fde047; }
+body.tema-volcano .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border-radius: 3px; font-weight: 900; }
+body.tema-volcano .bingo-header-row { background: #2a0404; }
+body.tema-volcano .bingo-header-row span { background: #f97316; color: #fff; clip-path: polygon(50% 0, 100% 25%, 100% 100%, 0 100%, 0 25%); font-weight: 900; }
+body.tema-volcano .cartones-grid.modo-15 .carton-grid-inner { background: #450a0a; }
+body.tema-volcano .cartones-grid.modo-15 .celda { background: #ffe4e6; color: #450a0a; }
+body.tema-volcano .cartones-grid.modo-15 .celda.marcada { background: #38bdf8 !important; color: #fff !important; }
+body.tema-volcano .bolillero-container, body.tema-volcano .panel-numeros-inferior { background: #2a0404; border: 2px solid #f97316; }
+body.tema-volcano .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #f97316, #7f1d1d); }
+body.tema-volcano .btn-sacar-bola { background: #f97316 !important; color: #fff; }
+body.tema-volcano .stats-box { background: #ffe4e6; border: 2px solid #f97316; color: #2a0404; }
 body.tema-volcano .stats-box span { color: #7f1d1d; }
-body.tema-volcano .bolita {
-    background: #ffe4e6;
-    color: #450a0a;
-    border: 1px solid #f97316;
-}
-body.tema-volcano .bolita.marcada {
-    background: #f97316;
-    color: #fff;
-}
-body.tema-volcano .btn-cambiar, body.tema-volcano .btn-atras {
-    background: #2a0404;
-    color: #fde047;
-    border: 2px solid #f97316;
-}
 body.tema-volcano .titulo-tabla { color: #fde047; }
+body.tema-volcano .bolita { background: #ffe4e6; color: #450a0a; border: 1px solid #f97316; }
+body.tema-volcano .bolita.marcada { background: #f97316; color: #fff; }
+body.tema-volcano .btn-cambiar, body.tema-volcano .btn-atras { background: #2a0404; color: #fde047; border: 2px solid #f97316; }
 body.tema-volcano .mini-carton { background: #2a0404; border: 2px solid #f97316; }
 
-/* ============================================
-   TEMA 8-BIT PIXEL
-   ============================================ */
-body.tema-pixel {
-    background: #b91c1c;
-}
-body.tema-pixel .cartones-grid.modo-15 .carton {
-    background: #000;
-    border: 2px solid #fff;
-    border-radius: 0;
-    padding: 4px !important;
-}
-body.tema-pixel .cartones-grid.modo-15 .carton-header {
-    background: #450a0a;
-    color: #fde047;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.4rem !important;
-    padding: 3px 4px !important;
-    border-radius: 0;
-    letter-spacing: 0;
-}
-body.tema-pixel .bingo-header-row {
-    background: #450a0a;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-pixel .bingo-header-row span {
-    background: #f97316;
-    color: #fff;
-    border: 2px solid #000;
-    padding: 3px 0;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.5rem !important;
-}
-body.tema-pixel .cartones-grid.modo-15 .carton-grid-inner {
-    background: #000;
-    border: 1px solid #000;
-    border-radius: 0;
-}
-body.tema-pixel .cartones-grid.modo-15 .celda {
-    background: #fff;
-    color: #000;
-    border: 1px solid #000 !important;
-    border-radius: 0;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.45rem !important;
-}
-body.tema-pixel .cartones-grid.modo-15 .celda.marcada {
-    background: #22c55e !important;
-    color: #fff !important;
-    border-radius: 0;
-}
-body.tema-pixel .cartones-grid.modo-15 .celda.vacia {
-    background: #22c55e !important;
-    color: #fff !important;
-    border-radius: 0;
-}
-body.tema-pixel .bolillero-container,
-body.tema-pixel .panel-numeros-inferior {
-    background: #450a0a;
-    border: 2px solid #fff;
-    border-radius: 0;
-}
-body.tema-pixel .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #f97316, #b91c1c);
-    border-radius: 0;
-}
-body.tema-pixel .btn-sacar-bola {
-    background: #f97316 !important;
-    color: #fff;
-    border: 2px solid #000;
-    border-radius: 0;
-}
-body.tema-pixel .stats-box {
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 0;
-    color: #000;
-}
+/* TEMA PIXEL */
+body.tema-pixel { background: #b91c1c; }
+body.tema-pixel .cartones-grid.modo-15 .carton { background: #000; border: 2px solid #fff; border-radius: 0; --header-bg: #450a0a; --header-color: #fde047; }
+body.tema-pixel .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); font-family: 'Press Start 2P', cursive; border-radius: 0; letter-spacing: 0; }
+body.tema-pixel .bingo-header-row { background: #450a0a; }
+body.tema-pixel .bingo-header-row span { background: #f97316; color: #fff; border: 1px solid #000; font-family: 'Press Start 2P', cursive; }
+body.tema-pixel .cartones-grid.modo-15 .carton-grid-inner { background: #000; border-radius: 0; }
+body.tema-pixel .cartones-grid.modo-15 .celda { background: #fff; color: #000; border-radius: 0; font-family: 'Press Start 2P', cursive; }
+body.tema-pixel .cartones-grid.modo-15 .celda.marcada { background: #22c55e !important; color: #fff !important; border-radius: 0; }
+body.tema-pixel .bolillero-container, body.tema-pixel .panel-numeros-inferior { background: #450a0a; border: 2px solid #fff; border-radius: 0; }
+body.tema-pixel .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #f97316, #b91c1c); border-radius: 0; }
+body.tema-pixel .btn-sacar-bola { background: #f97316 !important; color: #fff; border-radius: 0; }
+body.tema-pixel .stats-box { background: #fff; border: 2px solid #000; border-radius: 0; color: #000; }
 body.tema-pixel .stats-box span { color: #b91c1c; }
-body.tema-pixel .bolita {
-    background: #fff;
-    color: #000;
-    border: 1px solid #000;
-    border-radius: 0;
-}
-body.tema-pixel .bolita.marcada {
-    background: #22c55e;
-    color: #fff;
-}
-body.tema-pixel .btn-cambiar, body.tema-pixel .btn-atras {
-    background: #450a0a;
-    color: #fde047;
-    border: 2px solid #fff;
-    border-radius: 0;
-}
 body.tema-pixel .titulo-tabla { color: #fde047; }
+body.tema-pixel .bolita { background: #fff; color: #000; border: 1px solid #000; border-radius: 0; }
+body.tema-pixel .bolita.marcada { background: #22c55e; color: #fff; }
+body.tema-pixel .btn-cambiar, body.tema-pixel .btn-atras { background: #450a0a; color: #fde047; border: 2px solid #fff; border-radius: 0; }
 body.tema-pixel .mini-carton { background: #000; border: 2px solid #fff; border-radius: 0; }
 
-/* ============================================
-   TEMA ESMERALDA
-   ============================================ */
-body.tema-esmeralda {
-    background: linear-gradient(135deg, #10b981, #064e3b);
-}
-body.tema-esmeralda .cartones-grid.modo-15 .carton {
-    background: #065f46;
-    border: 2px solid #a7f3d0;
-    padding: 4px !important;
-}
-body.tema-esmeralda .cartones-grid.modo-15 .carton-header {
-    background: #022c22;
-    color: #a7f3d0;
-    border-radius: 4px;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-esmeralda .bingo-header-row {
-    background: #022c22;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-esmeralda .bingo-header-row span {
-    background: #fbbf24;
-    color: #000;
-    clip-path: polygon(0 25%, 50% 0, 100% 25%, 100% 100%, 0 100%);
-    padding: 4px 0;
-    font-weight: 900;
-}
-body.tema-esmeralda .cartones-grid.modo-15 .carton-grid-inner {
-    background: #065f46;
-    border: 1px solid #065f46;
-}
-body.tema-esmeralda .cartones-grid.modo-15 .celda {
-    background: #d1fae5;
-    color: #064e3b;
-    border: none !important;
-}
-body.tema-esmeralda .cartones-grid.modo-15 .celda.marcada {
-    background: #ec4899 !important;
-    color: #fff !important;
-}
-body.tema-esmeralda .cartones-grid.modo-15 .celda.vacia {
-    background: #ec4899 !important;
-    color: #fff !important;
-}
-body.tema-esmeralda .bolillero-container,
-body.tema-esmeralda .panel-numeros-inferior {
-    background: #022c22;
-    border: 2px solid #10b981;
-}
-body.tema-esmeralda .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #34d399, #064e3b);
-}
-body.tema-esmeralda .btn-sacar-bola {
-    background: #10b981 !important;
-    color: #022c22;
-}
-body.tema-esmeralda .stats-box {
-    background: #d1fae5;
-    border: 2px solid #10b981;
-    color: #022c22;
-}
+/* TEMA ESMERALDA */
+body.tema-esmeralda { background: linear-gradient(135deg, #10b981, #064e3b); }
+body.tema-esmeralda .cartones-grid.modo-15 .carton { background: #065f46; border: 2px solid #a7f3d0; --header-bg: #022c22; --header-color: #a7f3d0; }
+body.tema-esmeralda .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border-radius: 4px; font-weight: 900; }
+body.tema-esmeralda .bingo-header-row { background: #022c22; }
+body.tema-esmeralda .bingo-header-row span { background: #fbbf24; color: #000; clip-path: polygon(0 20%, 50% 0, 100% 20%, 100% 100%, 0 100%); font-weight: 900; }
+body.tema-esmeralda .cartones-grid.modo-15 .carton-grid-inner { background: #065f46; }
+body.tema-esmeralda .cartones-grid.modo-15 .celda { background: #d1fae5; color: #064e3b; }
+body.tema-esmeralda .cartones-grid.modo-15 .celda.marcada { background: #ec4899 !important; color: #fff !important; }
+body.tema-esmeralda .bolillero-container, body.tema-esmeralda .panel-numeros-inferior { background: #022c22; border: 2px solid #10b981; }
+body.tema-esmeralda .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #34d399, #064e3b); }
+body.tema-esmeralda .btn-sacar-bola { background: #10b981 !important; color: #022c22; }
+body.tema-esmeralda .stats-box { background: #d1fae5; border: 2px solid #10b981; color: #022c22; }
 body.tema-esmeralda .stats-box span { color: #064e3b; }
-body.tema-esmeralda .bolita {
-    background: #d1fae5;
-    color: #064e3b;
-    border: 1px solid #10b981;
-}
-body.tema-esmeralda .bolita.marcada {
-    background: #ec4899;
-    color: #fff;
-}
-body.tema-esmeralda .btn-cambiar, body.tema-esmeralda .btn-atras {
-    background: #022c22;
-    color: #a7f3d0;
-    border: 2px solid #10b981;
-}
 body.tema-esmeralda .titulo-tabla { color: #a7f3d0; }
+body.tema-esmeralda .bolita { background: #d1fae5; color: #064e3b; border: 1px solid #10b981; }
+body.tema-esmeralda .bolita.marcada { background: #ec4899; color: #fff; }
+body.tema-esmeralda .btn-cambiar, body.tema-esmeralda .btn-atras { background: #022c22; color: #a7f3d0; border: 2px solid #10b981; }
 body.tema-esmeralda .mini-carton { background: #022c22; border: 2px solid #10b981; }
 
-/* ============================================
-   TEMA CANDY
-   ============================================ */
-body.tema-candy {
-    background: linear-gradient(135deg, #f43f5e, #be123c);
-}
-body.tema-candy .cartones-grid.modo-15 .carton {
-    background: #881337;
-    border: 2px solid #fecdd3;
-    border-radius: 12px;
-    padding: 4px !important;
-}
-body.tema-candy .cartones-grid.modo-15 .carton-header {
-    background: #4c0519;
-    color: #fff;
-    border-radius: 12px 12px 4px 4px;
-    font-weight: 900;
-    padding: 3px 8px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-candy .bingo-header-row {
-    background: #4c0519;
-    padding: 3px 4px !important;
-    gap: 3px;
-}
-body.tema-candy .bingo-header-row span {
-    background: #34d399;
-    color: #064e3b;
-    border-radius: 20px 20px 5px 5px;
-    padding: 3px 0;
-    font-weight: 900;
-}
-body.tema-candy .cartones-grid.modo-15 .carton-grid-inner {
-    background: #881337;
-    border: 1px solid #881337;
-    border-radius: 8px;
-}
-body.tema-candy .cartones-grid.modo-15 .celda {
-    background: #ffe4e6;
-    color: #881337;
-    border: none !important;
-    border-radius: 6px;
-}
-body.tema-candy .cartones-grid.modo-15 .celda.marcada {
-    background: #f97316 !important;
-    color: #fff !important;
-}
-body.tema-candy .cartones-grid.modo-15 .celda.vacia {
-    background: #f97316 !important;
-    color: #fff !important;
-}
-body.tema-candy .bolillero-container,
-body.tema-candy .panel-numeros-inferior {
-    background: #4c0519;
-    border: 2px solid #fecdd3;
-    border-radius: 12px;
-}
-body.tema-candy .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #fda4af, #be123c);
-}
-body.tema-candy .btn-sacar-bola {
-    background: #be123c !important;
-    color: #fff;
-    border-radius: 20px;
-}
-body.tema-candy .stats-box {
-    background: #ffe4e6;
-    border: 2px solid #be123c;
-    border-radius: 20px;
-    color: #4c0519;
-}
+/* TEMA CANDY */
+body.tema-candy { background: linear-gradient(135deg, #f43f5e, #be123c); }
+body.tema-candy .cartones-grid.modo-15 .carton { background: #881337; border: 2px solid #fecdd3; border-radius: 8px; --header-bg: #4c0519; --header-color: #fff; }
+body.tema-candy .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border-radius: 8px 8px 2px 2px; font-weight: 900; }
+body.tema-candy .bingo-header-row { background: #4c0519; }
+body.tema-candy .bingo-header-row span { background: #34d399; color: #064e3b; border-radius: 8px 8px 2px 2px; font-weight: 900; }
+body.tema-candy .cartones-grid.modo-15 .carton-grid-inner { background: #881337; border-radius: 4px; }
+body.tema-candy .cartones-grid.modo-15 .celda { background: #ffe4e6; color: #881337; border-radius: 3px; }
+body.tema-candy .cartones-grid.modo-15 .celda.marcada { background: #f97316 !important; color: #fff !important; }
+body.tema-candy .bolillero-container, body.tema-candy .panel-numeros-inferior { background: #4c0519; border: 2px solid #fecdd3; border-radius: 8px; }
+body.tema-candy .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #fda4af, #be123c); }
+body.tema-candy .btn-sacar-bola { background: #be123c !important; color: #fff; }
+body.tema-candy .stats-box { background: #ffe4e6; border: 2px solid #be123c; color: #4c0519; }
 body.tema-candy .stats-box span { color: #be123c; }
-body.tema-candy .bolita {
-    background: #ffe4e6;
-    color: #881337;
-    border: 1px solid #be123c;
-    border-radius: 4px;
-}
-body.tema-candy .bolita.marcada {
-    background: #f97316;
-    color: #fff;
-}
-body.tema-candy .btn-cambiar, body.tema-candy .btn-atras {
-    background: #4c0519;
-    color: #fff;
-    border: 2px solid #be123c;
-}
 body.tema-candy .titulo-tabla { color: #fecdd3; }
+body.tema-candy .bolita { background: #ffe4e6; color: #881337; border: 1px solid #be123c; border-radius: 3px; }
+body.tema-candy .bolita.marcada { background: #f97316; color: #fff; }
+body.tema-candy .btn-cambiar, body.tema-candy .btn-atras { background: #4c0519; color: #fff; border: 2px solid #be123c; }
 body.tema-candy .mini-carton { background: #4c0519; border: 2px solid #fecdd3; border-radius: 8px; }
 
-/* ============================================
-   TEMA ORO
-   ============================================ */
-body.tema-oro {
-    background: linear-gradient(135deg, #facc15, #ca8a04);
-}
-body.tema-oro .cartones-grid.modo-15 .carton {
-    background: #854d0e;
-    border: 2px solid #fef08a;
-    padding: 4px !important;
-}
-body.tema-oro .cartones-grid.modo-15 .carton-header {
-    background: #1c1917;
-    color: #fde047;
-    border: 1px solid #ca8a04;
-    border-radius: 4px;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-oro .bingo-header-row {
-    background: #1c1917;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-oro .bingo-header-row span {
-    background: #ef4444;
-    color: #fff;
-    border-radius: 4px 4px 0 0;
-    box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
-    padding: 3px 0;
-    font-weight: 900;
-}
-body.tema-oro .cartones-grid.modo-15 .carton-grid-inner {
-    background: #854d0e;
-    border: 1px solid #854d0e;
-}
-body.tema-oro .cartones-grid.modo-15 .celda {
-    background: #fef9c3;
-    color: #713f12;
-    border: none !important;
-}
-body.tema-oro .cartones-grid.modo-15 .celda.marcada {
-    background: #2563eb !important;
-    color: #fff !important;
-}
-body.tema-oro .cartones-grid.modo-15 .celda.vacia {
-    background: #2563eb !important;
-    color: #fff !important;
-}
-body.tema-oro .bolillero-container,
-body.tema-oro .panel-numeros-inferior {
-    background: #1c1917;
-    border: 2px solid #facc15;
-}
-body.tema-oro .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #fde047, #ca8a04);
-}
-body.tema-oro .btn-sacar-bola {
-    background: #ef4444 !important;
-    color: #fff;
-}
-body.tema-oro .stats-box {
-    background: #fef9c3;
-    border: 2px solid #ca8a04;
-    color: #1c1917;
-}
+/* TEMA ORO */
+body.tema-oro { background: linear-gradient(135deg, #facc15, #ca8a04); }
+body.tema-oro .cartones-grid.modo-15 .carton { background: #854d0e; border: 2px solid #fef08a; --header-bg: #1c1917; --header-color: #fde047; }
+body.tema-oro .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border: 1px solid #ca8a04; border-radius: 4px; font-weight: 900; }
+body.tema-oro .bingo-header-row { background: #1c1917; }
+body.tema-oro .bingo-header-row span { background: #ef4444; color: #fff; border-radius: 3px 3px 0 0; font-weight: 900; }
+body.tema-oro .cartones-grid.modo-15 .carton-grid-inner { background: #854d0e; }
+body.tema-oro .cartones-grid.modo-15 .celda { background: #fef9c3; color: #713f12; }
+body.tema-oro .cartones-grid.modo-15 .celda.marcada { background: #2563eb !important; color: #fff !important; }
+body.tema-oro .bolillero-container, body.tema-oro .panel-numeros-inferior { background: #1c1917; border: 2px solid #facc15; }
+body.tema-oro .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #fde047, #ca8a04); }
+body.tema-oro .btn-sacar-bola { background: #ef4444 !important; color: #fff; }
+body.tema-oro .stats-box { background: #fef9c3; border: 2px solid #ca8a04; color: #1c1917; }
 body.tema-oro .stats-box span { color: #854d0e; }
-body.tema-oro .bolita {
-    background: #fef9c3;
-    color: #713f12;
-    border: 1px solid #ca8a04;
-}
-body.tema-oro .bolita.marcada {
-    background: #ef4444;
-    color: #fff;
-}
-body.tema-oro .btn-cambiar, body.tema-oro .btn-atras {
-    background: #1c1917;
-    color: #fde047;
-    border: 2px solid #facc15;
-}
 body.tema-oro .titulo-tabla { color: #fde047; }
+body.tema-oro .bolita { background: #fef9c3; color: #713f12; border: 1px solid #ca8a04; }
+body.tema-oro .bolita.marcada { background: #ef4444; color: #fff; }
+body.tema-oro .btn-cambiar, body.tema-oro .btn-atras { background: #1c1917; color: #fde047; border: 2px solid #facc15; }
 body.tema-oro .mini-carton { background: #1c1917; border: 2px solid #facc15; }
 
-/* ============================================
-   TEMA PACÍFICO
-   ============================================ */
-body.tema-pacifico {
-    background: linear-gradient(135deg, #14b8a6, #0f766e);
-}
-body.tema-pacifico .cartones-grid.modo-15 .carton {
-    background: #115e59;
-    border: 2px solid #99f6e4;
-    padding: 4px !important;
-}
-body.tema-pacifico .cartones-grid.modo-15 .carton-header {
-    background: #042f2e;
-    color: #99f6e4;
-    border-radius: 4px;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-pacifico .bingo-header-row {
-    background: #042f2e;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-pacifico .bingo-header-row span {
-    background: #f97316;
-    color: #fff;
-    border-radius: 15px 0 8px 0;
-    padding: 4px 0;
-    font-weight: 900;
-}
-body.tema-pacifico .cartones-grid.modo-15 .carton-grid-inner {
-    background: #115e59;
-    border: 1px solid #115e59;
-}
-body.tema-pacifico .cartones-grid.modo-15 .celda {
-    background: #ccfbf1;
-    color: #115e59;
-    border: none !important;
-}
-body.tema-pacifico .cartones-grid.modo-15 .celda.marcada {
-    background: #eab308 !important;
-    color: #000 !important;
-}
-body.tema-pacifico .cartones-grid.modo-15 .celda.vacia {
-    background: #eab308 !important;
-    color: #000 !important;
-}
-body.tema-pacifico .bolillero-container,
-body.tema-pacifico .panel-numeros-inferior {
-    background: #042f2e;
-    border: 2px solid #14b8a6;
-}
-body.tema-pacifico .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #5eead4, #0f766e);
-}
-body.tema-pacifico .btn-sacar-bola {
-    background: #f97316 !important;
-    color: #fff;
-}
-body.tema-pacifico .stats-box {
-    background: #ccfbf1;
-    border: 2px solid #0f766e;
-    color: #042f2e;
-}
+/* TEMA PACÍFICO */
+body.tema-pacifico { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+body.tema-pacifico .cartones-grid.modo-15 .carton { background: #115e59; border: 2px solid #99f6e4; --header-bg: #042f2e; --header-color: #99f6e4; }
+body.tema-pacifico .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border-radius: 4px; font-weight: 900; }
+body.tema-pacifico .bingo-header-row { background: #042f2e; }
+body.tema-pacifico .bingo-header-row span { background: #f97316; color: #fff; border-radius: 8px 0 4px 0; font-weight: 900; }
+body.tema-pacifico .cartones-grid.modo-15 .carton-grid-inner { background: #115e59; }
+body.tema-pacifico .cartones-grid.modo-15 .celda { background: #ccfbf1; color: #115e59; }
+body.tema-pacifico .cartones-grid.modo-15 .celda.marcada { background: #eab308 !important; color: #000 !important; }
+body.tema-pacifico .bolillero-container, body.tema-pacifico .panel-numeros-inferior { background: #042f2e; border: 2px solid #14b8a6; }
+body.tema-pacifico .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #5eead4, #0f766e); }
+body.tema-pacifico .btn-sacar-bola { background: #f97316 !important; color: #fff; }
+body.tema-pacifico .stats-box { background: #ccfbf1; border: 2px solid #0f766e; color: #042f2e; }
 body.tema-pacifico .stats-box span { color: #0f766e; }
-body.tema-pacifico .bolita {
-    background: #ccfbf1;
-    color: #115e59;
-    border: 1px solid #0f766e;
-}
-body.tema-pacifico .bolita.marcada {
-    background: #f97316;
-    color: #fff;
-}
-body.tema-pacifico .btn-cambiar, body.tema-pacifico .btn-atras {
-    background: #042f2e;
-    color: #99f6e4;
-    border: 2px solid #14b8a6;
-}
 body.tema-pacifico .titulo-tabla { color: #99f6e4; }
+body.tema-pacifico .bolita { background: #ccfbf1; color: #115e59; border: 1px solid #0f766e; }
+body.tema-pacifico .bolita.marcada { background: #f97316; color: #fff; }
+body.tema-pacifico .btn-cambiar, body.tema-pacifico .btn-atras { background: #042f2e; color: #99f6e4; border: 2px solid #14b8a6; }
 body.tema-pacifico .mini-carton { background: #042f2e; border: 2px solid #14b8a6; }
 
-/* ============================================
-   TEMA HALLOWEEN
-   ============================================ */
-body.tema-halloween {
-    background: linear-gradient(135deg, #a855f7, #3b0764);
-}
-body.tema-halloween .cartones-grid.modo-15 .carton {
-    background: #2e1065;
-    border: 2px solid #c084fc;
-    padding: 4px !important;
-}
-body.tema-halloween .cartones-grid.modo-15 .carton-header {
-    background: #1e1b4b;
-    color: #22c55e;
-    font-family: 'Creepster', cursive;
-    font-size: 0.6rem !important;
-    letter-spacing: 1px;
-    padding: 3px 6px !important;
-    border-radius: 4px;
-}
-body.tema-halloween .bingo-header-row {
-    background: #1e1b4b;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-halloween .bingo-header-row span {
-    background: #f97316;
-    color: #000;
-    clip-path: polygon(0 0, 100% 10%, 85% 100%, 15% 90%);
-    padding: 4px 0;
-    font-family: 'Creepster', cursive;
-    font-size: 0.7rem !important;
-    font-weight: 900;
-}
-body.tema-halloween .cartones-grid.modo-15 .carton-grid-inner {
-    background: #2e1065;
-    border: 1px solid #2e1065;
-}
-body.tema-halloween .cartones-grid.modo-15 .celda {
-    background: #f3e8ff;
-    color: #3b0764;
-    border: none !important;
-    font-weight: 700;
-}
-body.tema-halloween .cartones-grid.modo-15 .celda.marcada {
-    background: #22c55e !important;
-    color: #000 !important;
-}
-body.tema-halloween .cartones-grid.modo-15 .celda.vacia {
-    background: #22c55e !important;
-    color: #000 !important;
-}
-body.tema-halloween .bolillero-container,
-body.tema-halloween .panel-numeros-inferior {
-    background: #1e1b4b;
-    border: 2px solid #a855f7;
-}
-body.tema-halloween .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #c084fc, #3b0764);
-}
-body.tema-halloween .btn-sacar-bola {
-    background: #f97316 !important;
-    color: #000;
-}
-body.tema-halloween .stats-box {
-    background: #f3e8ff;
-    border: 2px solid #a855f7;
-    color: #3b0764;
-}
+/* TEMA HALLOWEEN */
+body.tema-halloween { background: linear-gradient(135deg, #a855f7, #3b0764); }
+body.tema-halloween .cartones-grid.modo-15 .carton { background: #2e1065; border: 2px solid #c084fc; --header-bg: #1e1b4b; --header-color: #22c55e; }
+body.tema-halloween .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); font-family: 'Creepster', cursive; letter-spacing: 1px; border-radius: 4px; }
+body.tema-halloween .bingo-header-row { background: #1e1b4b; }
+body.tema-halloween .bingo-header-row span { background: #f97316; color: #000; clip-path: polygon(0 0, 100% 10%, 85% 100%, 15% 90%); font-family: 'Creepster', cursive; font-weight: 900; }
+body.tema-halloween .cartones-grid.modo-15 .carton-grid-inner { background: #2e1065; }
+body.tema-halloween .cartones-grid.modo-15 .celda { background: #f3e8ff; color: #3b0764; font-weight: 700; }
+body.tema-halloween .cartones-grid.modo-15 .celda.marcada { background: #22c55e !important; color: #000 !important; }
+body.tema-halloween .bolillero-container, body.tema-halloween .panel-numeros-inferior { background: #1e1b4b; border: 2px solid #a855f7; }
+body.tema-halloween .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #c084fc, #3b0764); }
+body.tema-halloween .btn-sacar-bola { background: #f97316 !important; color: #000; }
+body.tema-halloween .stats-box { background: #f3e8ff; border: 2px solid #a855f7; color: #3b0764; }
 body.tema-halloween .stats-box span { color: #a855f7; }
-body.tema-halloween .bolita {
-    background: #f3e8ff;
-    color: #3b0764;
-    border: 1px solid #a855f7;
-}
-body.tema-halloween .bolita.marcada {
-    background: #f97316;
-    color: #000;
-}
-body.tema-halloween .btn-cambiar, body.tema-halloween .btn-atras {
-    background: #1e1b4b;
-    color: #22c55e;
-    border: 2px solid #a855f7;
-}
 body.tema-halloween .titulo-tabla { color: #22c55e; }
+body.tema-halloween .bolita { background: #f3e8ff; color: #3b0764; border: 1px solid #a855f7; }
+body.tema-halloween .bolita.marcada { background: #f97316; color: #000; }
+body.tema-halloween .btn-cambiar, body.tema-halloween .btn-atras { background: #1e1b4b; color: #22c55e; border: 2px solid #a855f7; }
 body.tema-halloween .mini-carton { background: #1e1b4b; border: 2px solid #a855f7; }
 
-/* ============================================
-   TEMA SPORT
-   ============================================ */
-body.tema-sport {
-    background: linear-gradient(135deg, #2563eb, #1e3a8a);
-}
-body.tema-sport .cartones-grid.modo-15 .carton {
-    background: #1d4ed8;
-    border: 2px solid #93c5fd;
-    padding: 4px !important;
-}
-body.tema-sport .cartones-grid.modo-15 .carton-header {
-    background: #0f172a;
-    color: #fff;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.7rem !important;
-    letter-spacing: 2px;
-    padding: 3px 6px !important;
-    border-radius: 3px;
-}
-body.tema-sport .bingo-header-row {
-    background: #0f172a;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-sport .bingo-header-row span {
-    background: #facc15;
-    color: #000;
-    border-radius: 2px;
-    padding: 2px 0;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.75rem !important;
-    font-weight: 900;
-}
-body.tema-sport .cartones-grid.modo-15 .carton-grid-inner {
-    background: #1d4ed8;
-    border: 1px solid #1d4ed8;
-}
-body.tema-sport .cartones-grid.modo-15 .celda {
-    background: #ffffff;
-    color: #1e3a8a;
-    border: none !important;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.75rem !important;
-    font-weight: 900;
-}
-body.tema-sport .cartones-grid.modo-15 .celda.marcada {
-    background: #dc2626 !important;
-    color: #fff !important;
-}
-body.tema-sport .cartones-grid.modo-15 .celda.vacia {
-    background: #dc2626 !important;
-    color: #fff !important;
-}
-body.tema-sport .bolillero-container,
-body.tema-sport .panel-numeros-inferior {
-    background: #0f172a;
-    border: 2px solid #2563eb;
-}
-body.tema-sport .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a);
-}
-body.tema-sport .btn-sacar-bola {
-    background: #dc2626 !important;
-    color: #fff;
-}
-body.tema-sport .stats-box {
-    background: #fff;
-    border: 2px solid #2563eb;
-    color: #0f172a;
-}
+/* TEMA SPORT */
+body.tema-sport { background: linear-gradient(135deg, #2563eb, #1e3a8a); }
+body.tema-sport .cartones-grid.modo-15 .carton { background: #1d4ed8; border: 2px solid #93c5fd; --header-bg: #0f172a; --header-color: #fff; }
+body.tema-sport .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; border-radius: 3px; }
+body.tema-sport .bingo-header-row { background: #0f172a; }
+body.tema-sport .bingo-header-row span { background: #facc15; color: #000; border-radius: 2px; font-family: 'Bebas Neue', sans-serif; font-weight: 900; }
+body.tema-sport .cartones-grid.modo-15 .carton-grid-inner { background: #1d4ed8; }
+body.tema-sport .cartones-grid.modo-15 .celda { background: #ffffff; color: #1e3a8a; font-family: 'Bebas Neue', sans-serif; font-weight: 900; }
+body.tema-sport .cartones-grid.modo-15 .celda.marcada { background: #dc2626 !important; color: #fff !important; }
+body.tema-sport .bolillero-container, body.tema-sport .panel-numeros-inferior { background: #0f172a; border: 2px solid #2563eb; }
+body.tema-sport .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a); }
+body.tema-sport .btn-sacar-bola { background: #dc2626 !important; color: #fff; }
+body.tema-sport .stats-box { background: #fff; border: 2px solid #2563eb; color: #0f172a; }
 body.tema-sport .stats-box span { color: #dc2626; }
-body.tema-sport .bolita {
-    background: #fff;
-    color: #1e3a8a;
-    border: 1px solid #2563eb;
-}
-body.tema-sport .bolita.marcada {
-    background: #dc2626;
-    color: #fff;
-}
-body.tema-sport .btn-cambiar, body.tema-sport .btn-atras {
-    background: #0f172a;
-    color: #facc15;
-    border: 2px solid #2563eb;
-}
 body.tema-sport .titulo-tabla { color: #facc15; }
+body.tema-sport .bolita { background: #fff; color: #1e3a8a; border: 1px solid #2563eb; }
+body.tema-sport .bolita.marcada { background: #dc2626; color: #fff; }
+body.tema-sport .btn-cambiar, body.tema-sport .btn-atras { background: #0f172a; color: #facc15; border: 2px solid #2563eb; }
 body.tema-sport .mini-carton { background: #0f172a; border: 2px solid #2563eb; }
 
-/* ============================================
-   TEMA TITAN
-   ============================================ */
-body.tema-titan {
-    background: linear-gradient(135deg, #64748b, #334155);
-}
-body.tema-titan .cartones-grid.modo-15 .carton {
-    background: #1e293b;
-    border: 2px solid #e2e8f0;
-    padding: 4px !important;
-}
-body.tema-titan .cartones-grid.modo-15 .carton-header {
-    background: #0f172a;
-    color: #38bdf8;
-    border: 1px solid #38bdf8;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.45rem !important;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    border-radius: 3px;
-}
-body.tema-titan .bingo-header-row {
-    background: #0f172a;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-titan .bingo-header-row span {
-    background: #ec4899;
-    color: #fff;
-    clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
-    padding: 4px 0 6px 0;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.5rem !important;
-    font-weight: 900;
-}
-body.tema-titan .cartones-grid.modo-15 .carton-grid-inner {
-    background: #1e293b;
-    border: 1px solid #1e293b;
-}
-body.tema-titan .cartones-grid.modo-15 .celda {
-    background: #f1f5f9;
-    color: #0f172a;
-    border: none !important;
-}
-body.tema-titan .cartones-grid.modo-15 .celda.marcada {
-    background: #84cc16 !important;
-    color: #000 !important;
-}
-body.tema-titan .cartones-grid.modo-15 .celda.vacia {
-    background: #84cc16 !important;
-    color: #000 !important;
-}
-body.tema-titan .bolillero-container,
-body.tema-titan .panel-numeros-inferior {
-    background: #0f172a;
-    border: 2px solid #38bdf8;
-}
-body.tema-titan .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #94a3b8, #334155);
-}
-body.tema-titan .btn-sacar-bola {
-    background: #ec4899 !important;
-    color: #fff;
-}
-body.tema-titan .stats-box {
-    background: #f1f5f9;
-    border: 2px solid #38bdf8;
-    color: #0f172a;
-}
+/* TEMA TITAN */
+body.tema-titan { background: linear-gradient(135deg, #64748b, #334155); }
+body.tema-titan .cartones-grid.modo-15 .carton { background: #1e293b; border: 2px solid #e2e8f0; --header-bg: #0f172a; --header-color: #38bdf8; }
+body.tema-titan .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border: 1px solid #38bdf8; font-family: 'Orbitron', sans-serif; font-weight: 900; border-radius: 3px; }
+body.tema-titan .bingo-header-row { background: #0f172a; }
+body.tema-titan .bingo-header-row span { background: #ec4899; color: #fff; clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%); font-family: 'Orbitron', sans-serif; font-weight: 900; }
+body.tema-titan .cartones-grid.modo-15 .carton-grid-inner { background: #1e293b; }
+body.tema-titan .cartones-grid.modo-15 .celda { background: #f1f5f9; color: #0f172a; }
+body.tema-titan .cartones-grid.modo-15 .celda.marcada { background: #84cc16 !important; color: #000 !important; }
+body.tema-titan .bolillero-container, body.tema-titan .panel-numeros-inferior { background: #0f172a; border: 2px solid #38bdf8; }
+body.tema-titan .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #94a3b8, #334155); }
+body.tema-titan .btn-sacar-bola { background: #ec4899 !important; color: #fff; }
+body.tema-titan .stats-box { background: #f1f5f9; border: 2px solid #38bdf8; color: #0f172a; }
 body.tema-titan .stats-box span { color: #ec4899; }
-body.tema-titan .bolita {
-    background: #f1f5f9;
-    color: #0f172a;
-    border: 1px solid #64748b;
-}
-body.tema-titan .bolita.marcada {
-    background: #84cc16;
-    color: #000;
-}
-body.tema-titan .btn-cambiar, body.tema-titan .btn-atras {
-    background: #0f172a;
-    color: #38bdf8;
-    border: 2px solid #38bdf8;
-}
 body.tema-titan .titulo-tabla { color: #38bdf8; }
+body.tema-titan .bolita { background: #f1f5f9; color: #0f172a; border: 1px solid #64748b; }
+body.tema-titan .bolita.marcada { background: #84cc16; color: #000; }
+body.tema-titan .btn-cambiar, body.tema-titan .btn-atras { background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; }
 body.tema-titan .mini-carton { background: #0f172a; border: 2px solid #38bdf8; }
 
-/* ============================================
-   TEMA BRONCE
-   ============================================ */
-body.tema-bronce {
-    background: linear-gradient(135deg, #b45309, #78350f);
-}
-body.tema-bronce .cartones-grid.modo-15 .carton {
-    background: #92400e;
-    border: 2px solid #fef3c7;
-    padding: 4px !important;
-}
-body.tema-bronce .cartones-grid.modo-15 .carton-header {
-    background: #451a03;
-    color: #fef3c7;
-    border: 1px solid #d97706;
-    border-radius: 4px;
-    font-weight: 900;
-    padding: 3px 6px !important;
-    font-size: 0.5rem !important;
-}
-body.tema-bronce .bingo-header-row {
-    background: #451a03;
-    padding: 3px 0 !important;
-    gap: 2px;
-}
-body.tema-bronce .bingo-header-row span {
-    background: #10b981;
-    color: #fff;
-    border-radius: 50% 50% 0 0 / 20% 20% 0 0;
-    padding: 3px 0;
-    font-weight: 900;
-}
-body.tema-bronce .cartones-grid.modo-15 .carton-grid-inner {
-    background: #92400e;
-    border: 1px solid #92400e;
-}
-body.tema-bronce .cartones-grid.modo-15 .celda {
-    background: #fef3c7;
-    color: #451a03;
-    border: none !important;
-}
-body.tema-bronce .cartones-grid.modo-15 .celda.marcada {
-    background: #3b82f6 !important;
-    color: #fff !important;
-}
-body.tema-bronce .cartones-grid.modo-15 .celda.vacia {
-    background: #3b82f6 !important;
-    color: #fff !important;
-}
-body.tema-bronce .bolillero-container,
-body.tema-bronce .panel-numeros-inferior {
-    background: #451a03;
-    border: 2px solid #d97706;
-}
-body.tema-bronce .bolillero-sphere {
-    background: radial-gradient(circle at 30% 30%, #d97706, #78350f);
-}
-body.tema-bronce .btn-sacar-bola {
-    background: #10b981 !important;
-    color: #fff;
-}
-body.tema-bronce .stats-box {
-    background: #fef3c7;
-    border: 2px solid #d97706;
-    color: #451a03;
-}
+/* TEMA BRONCE */
+body.tema-bronce { background: linear-gradient(135deg, #b45309, #78350f); }
+body.tema-bronce .cartones-grid.modo-15 .carton { background: #92400e; border: 2px solid #fef3c7; --header-bg: #451a03; --header-color: #fef3c7; }
+body.tema-bronce .cartones-grid.modo-15 .carton-header { background: var(--header-bg); color: var(--header-color); border: 1px solid #d97706; border-radius: 4px; font-weight: 900; }
+body.tema-bronce .bingo-header-row { background: #451a03; }
+body.tema-bronce .bingo-header-row span { background: #10b981; color: #fff; border-radius: 6px 6px 0 0; font-weight: 900; }
+body.tema-bronce .cartones-grid.modo-15 .carton-grid-inner { background: #92400e; }
+body.tema-bronce .cartones-grid.modo-15 .celda { background: #fef3c7; color: #451a03; }
+body.tema-bronce .cartones-grid.modo-15 .celda.marcada { background: #3b82f6 !important; color: #fff !important; }
+body.tema-bronce .bolillero-container, body.tema-bronce .panel-numeros-inferior { background: #451a03; border: 2px solid #d97706; }
+body.tema-bronce .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #d97706, #78350f); }
+body.tema-bronce .btn-sacar-bola { background: #10b981 !important; color: #fff; }
+body.tema-bronce .stats-box { background: #fef3c7; border: 2px solid #d97706; color: #451a03; }
 body.tema-bronce .stats-box span { color: #92400e; }
-body.tema-bronce .bolita {
-    background: #fef3c7;
-    color: #451a03;
-    border: 1px solid #d97706;
-}
-body.tema-bronce .bolita.marcada {
-    background: #10b981;
-    color: #fff;
-}
-body.tema-bronce .btn-cambiar, body.tema-bronce .btn-atras {
-    background: #451a03;
-    color: #fef3c7;
-    border: 2px solid #d97706;
-}
 body.tema-bronce .titulo-tabla { color: #fef3c7; }
+body.tema-bronce .bolita { background: #fef3c7; color: #451a03; border: 1px solid #d97706; }
+body.tema-bronce .bolita.marcada { background: #10b981; color: #fff; }
+body.tema-bronce .btn-cambiar, body.tema-bronce .btn-atras { background: #451a03; color: #fef3c7; border: 2px solid #d97706; }
 body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; }
-
-/* ============================================
-   CONTENEDOR DE LAS LETRAS BINGO (evita desbordes)
-   ============================================ */
-.bingo-header-row {
-    overflow: hidden;
-    border-radius: 3px;
-    min-height: 0;
-    box-sizing: border-box;
-    padding: 2px 4px !important;
-}
-
-.bingo-header-row span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    overflow: hidden;
-    line-height: 1;
-    height: 100%;
-}
