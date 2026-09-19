@@ -996,19 +996,142 @@ body {
 .banner-premio { display: none; }
 
 /* ============================================
-   🏆 EN LA ESQUINA DEL CARTÓN GANADOR
+   ZOOM DE ENTRADA DEL CENTRO (FREE)
    ============================================ */
-.cartones-grid.modo-15 .carton.ganador::after {
-    content: '🏆';
+.cartones-grid.modo-15 .carton.animando-centro-carton {
+    overflow: visible !important;
+    z-index: 5;
+}
+
+.cartones-grid.modo-15 .celda.vacia.animando-centro {
+    overflow: visible !important;
+    z-index: 20;
+    animation: zoomEntradaCentro 8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center center;
+    will-change: transform, opacity;
+    position: relative;
+}
+
+.cartones-grid.modo-15 .celda.vacia.animando-centro .num-val {
+    transform: none !important;
+    animation: none !important;
+}
+
+@keyframes zoomEntradaCentro {
+    0%   { transform: scale(0.6); opacity: 1; }
+    12%  { transform: scale(0.6); opacity: 1; }
+    22%  { transform: scale(1.6); opacity: 1; }
+    45%  { transform: scale(4.2); opacity: 1; }
+    75%  { transform: scale(1.35); opacity: 1; }
+    90%  { transform: scale(0.94); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   EMOJIS CON CÍRCULO BLANCO
+   🎱 Primera bola       → esquina superior derecha
+   🎯 Figura             → esquina superior derecha (se corre si hay 🎱)
+   👑 Cartón lleno       → esquina superior izquierda
+   ============================================ */
+
+/* ---------- 🎱 Primera bola ---------- */
+.cartones-grid.modo-15 .carton .emoji-primera-bola {
+    display: none;
     position: absolute;
     top: 2px;
     right: 2px;
-    font-size: clamp(0.9rem, 3.2vw, 1.4rem);
+    z-index: 31;
+    pointer-events: none;
+    line-height: 1;
+
+    width: clamp(1.1rem, 3.8vw, 1.6rem);
+    height: clamp(1.1rem, 3.8vw, 1.6rem);
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid #000000;
+    box-sizing: border-box;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: clamp(0.6rem, 2.2vw, 0.9rem);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    transition: right 0.25s ease;
+}
+
+.cartones-grid.modo-15 .carton.tiene-primera-bola .emoji-primera-bola {
+    display: flex;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cartones-grid.modo-15 .carton.tiene-primera-bola.ganador-figura-1 .emoji-primera-bola {
+    right: calc(clamp(1.2rem, 4.2vw, 1.8rem) + 6px);
+}
+
+/* ---------- 🎯 Figura ---------- */
+.cartones-grid.modo-15 .carton .emoji-figura {
+    display: none;
+    position: absolute;
+    top: 2px;
+    right: 2px;
     z-index: 30;
     pointer-events: none;
-    filter: drop-shadow(0 0 4px var(--color-figura-glow))
-            drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
-    animation: trofeoLatido 1s ease-in-out infinite alternate;
+    line-height: 1;
+
+    width: clamp(1.2rem, 4.2vw, 1.8rem);
+    height: clamp(1.2rem, 4.2vw, 1.8rem);
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid #000000;
+    box-sizing: border-box;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: clamp(0.65rem, 2.4vw, 1rem);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.cartones-grid.modo-15 .carton.ganador-figura-1 .emoji-figura {
+    display: flex;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+               trofeoLatido 1s ease-in-out infinite alternate 0.4s;
+}
+
+/* ---------- 👑 Cartón lleno ---------- */
+.cartones-grid.modo-15 .carton .emoji-carton-lleno {
+    display: none;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    z-index: 31;
+    pointer-events: none;
+    line-height: 1;
+
+    width: clamp(1.2rem, 4.2vw, 1.8rem);
+    height: clamp(1.2rem, 4.2vw, 1.8rem);
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1.5px solid #000000;
+    box-sizing: border-box;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: clamp(0.65rem, 2.4vw, 1rem);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.cartones-grid.modo-15 .carton.ganador-bingo .emoji-carton-lleno {
+    display: flex;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes emojiEntrada {
+    0%   { transform: scale(0) rotate(-25deg); opacity: 0; }
+    60%  { transform: scale(1.25) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 @keyframes trofeoLatido {
@@ -1016,7 +1139,11 @@ body {
     100% { transform: scale(1.18) rotate(-8deg); }
 }
 
-.cartones-grid.modo-15 .carton.ganador {
+/* ============================================
+   BORDE DORADO PERMANENTE
+   Solo para el ganador de figura 1
+   ============================================ */
+.cartones-grid.modo-15 .carton.ganador-figura-1 {
     outline: 2px solid var(--color-figura);
     outline-offset: -2px;
     box-shadow:
@@ -1026,27 +1153,31 @@ body {
 }
 
 /* ============================================
-   FASE 1: ENCENDIDO CELDA POR CELDA
+   ANIMACIÓN DE RESALTADO (figura o bingo)
    ============================================ */
-.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura {
+
+/* FASE 1: encendido celda por celda */
+.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
+.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura {
     background: var(--color-figura) !important;
     animation: rellenarCelda 0.35s ease-out both;
     animation-delay: var(--delay-figura, 0s);
 }
 
-.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura::after {
+.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura::after,
+.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura::after {
     display: none !important;
 }
-.cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura .num-val {
+.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura .num-val,
+.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura .num-val {
     opacity: 0 !important;
     color: transparent !important;
     text-shadow: none !important;
 }
 
-/* ============================================
-   FASE 2: RESALTADO FINAL
-   ============================================ */
-.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura {
+/* FASE 2: pulso final */
+.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura,
+.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura {
     background: var(--color-figura) !important;
     border-radius: 4px;
     box-shadow:
@@ -1055,14 +1186,23 @@ body {
     animation: pulsoFigura 1s ease-in-out infinite alternate;
 }
 
-.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura::after {
+.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura::after,
+.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura::after {
     display: none !important;
 }
-.cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura .num-val {
+.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura .num-val,
+.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura .num-val {
     opacity: 0 !important;
     color: transparent !important;
     text-shadow: none !important;
     mix-blend-mode: normal !important;
+}
+
+body .cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
+body .cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura,
+body .cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura,
+body .cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura {
+    background: var(--color-figura) !important;
 }
 
 @keyframes rellenarCelda {
@@ -1094,14 +1234,6 @@ body {
             0 0 16px 5px var(--color-figura-glow),
             0 0 24px 10px var(--color-figura-glow);
     }
-}
-
-/* ============================================
-   FORZAR FONDO DE FIGURA EN TODOS LOS TEMAS
-   ============================================ */
-body .cartones-grid.modo-15 .carton.ganador.animando .celda.en-figura,
-body .cartones-grid.modo-15 .carton.ganador.resaltando.secuencia-completa .celda.en-figura {
-    background: var(--color-figura) !important;
 }
 
 /* ============================================
@@ -1429,284 +1561,162 @@ body.tema-bronce .btn-cambiar, body.tema-bronce .btn-atras { background: #451a03
 body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; }
 
 /* ============================================
-   ZOOM DE ENTRADA DEL CENTRO (FREE)
-   Empieza pequeño, pausa breve, y luego hace el zoom grande
-   para después encogerse hasta encajar en su celda.
+   RÓTULOS DE GANADOR FLOTANTES
+   BINGO  → entre fila 1 y 2 de la cuadrícula (arriba del FREE)
+   FIGURA → entre fila 4 y 5 de la cuadrícula (abajo del FREE)
+   GANA   → misma posición que BINGO, pero solo cuando gana los 3 premios
+   TODO   → misma posición que FIGURA, pero solo cuando gana los 3 premios
+   Aparecen 1.5s después de la animación de resaltado.
    ============================================ */
 
-/* Permitir que el cartón deje ver la celda central desbordada
-   durante la animación (sin afectar el resto del tiempo). */
-.cartones-grid.modo-15 .carton.animando-centro-carton {
+/* El cartón deja salir el rótulo sin recortarlo */
+.cartones-grid.modo-15 .carton.mostrar-rotulo-bingo,
+.cartones-grid.modo-15 .carton.mostrar-rotulo-figura,
+.cartones-grid.modo-15 .carton.mostrar-rotulo-gana,
+.cartones-grid.modo-15 .carton.mostrar-rotulo-todo {
     overflow: visible !important;
-    z-index: 5;
+    z-index: 6;
 }
 
-.cartones-grid.modo-15 .celda.vacia.animando-centro {
-    overflow: visible !important;
-    z-index: 20;
-    animation: zoomEntradaCentro 8s cubic-bezier(0.16, 1, 0.3, 1) both;
-    transform-origin: center center;
-    will-change: transform, opacity;
-    position: relative;
-}
-
-/* El número del centro no se anima por separado,
-   hereda el zoom de la celda. */
-.cartones-grid.modo-15 .celda.vacia.animando-centro .num-val {
-    transform: none !important;
-    animation: none !important;
-}
-
-@keyframes zoomEntradaCentro {
-    0% {
-        /* Empieza pequeño y visible */
-        transform: scale(0.6);
-        opacity: 1;
-    }
-    12% {
-        /* Se queda quieto un momento (pausa) */
-        transform: scale(0.6);
-        opacity: 1;
-    }
-    22% {
-        /* Arranca el zoom hacia grande */
-        transform: scale(1.6);
-        opacity: 1;
-    }
-    45% {
-        /* Momento más grande: casi del tamaño de un cartón */
-        transform: scale(4.2);
-        opacity: 1;
-    }
-    75% {
-        /* Empieza a encogerse */
-        transform: scale(1.35);
-        opacity: 1;
-    }
-    90% {
-        /* Pequeño rebote */
-        transform: scale(0.94);
-        opacity: 1;
-    }
-    100% {
-        /* Encaja exacto en su celda */
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* ============================================
-   EMOJIS CON CÍRCULO BLANCO
-   🎱 Primera bola       → esquina superior derecha
-   🎯 Figura             → esquina superior derecha (se corre si hay 🎱)
-   👑 Cartón lleno       → esquina superior izquierda
-   ============================================ */
-
-/* ---------- 🎱 Primera bola ---------- */
-.cartones-grid.modo-15 .carton .emoji-primera-bola {
-    display: none;
+/* Base común a los 4 rótulos */
+.cartones-grid.modo-15 .carton .rotulo-bingo,
+.cartones-grid.modo-15 .carton .rotulo-figura,
+.cartones-grid.modo-15 .carton .rotulo-gana,
+.cartones-grid.modo-15 .carton .rotulo-todo {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 31;
-    pointer-events: none;
-    line-height: 1;
-
-    width: clamp(1.1rem, 3.8vw, 1.6rem);
-    height: clamp(1.1rem, 3.8vw, 1.6rem);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #000000;
-    box-sizing: border-box;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: clamp(0.6rem, 2.2vw, 0.9rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    transition: right 0.25s ease;
-}
-
-.cartones-grid.modo-15 .carton.tiene-primera-bola .emoji-primera-bola {
-    display: flex;
-    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Si el cartón también es ganador de figura, el 🎱 se mueve a la izquierda
-   para dejar sitio al 🎯 */
-.cartones-grid.modo-15 .carton.tiene-primera-bola.ganador-figura-1 .emoji-primera-bola {
-    right: calc(clamp(1.2rem, 4.2vw, 1.8rem) + 6px);
-}
-
-/* ---------- 🎯 Figura ---------- */
-.cartones-grid.modo-15 .carton .emoji-figura {
-    display: none;
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 30;
-    pointer-events: none;
-    line-height: 1;
-
-    width: clamp(1.2rem, 4.2vw, 1.8rem);
-    height: clamp(1.2rem, 4.2vw, 1.8rem);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #000000;
-    box-sizing: border-box;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: clamp(0.65rem, 2.4vw, 1rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-.cartones-grid.modo-15 .carton.ganador-figura-1 .emoji-figura {
-    display: flex;
-    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-               trofeoLatido 1s ease-in-out infinite alternate 0.4s;
-}
-
-/* ---------- 👑 Cartón lleno ---------- */
-.cartones-grid.modo-15 .carton .emoji-carton-lleno {
-    display: none;
-    position: absolute;
-    top: 2px;
     left: 2px;
-    z-index: 31;
-    pointer-events: none;
-    line-height: 1;
-
-    width: clamp(1.2rem, 4.2vw, 1.8rem);
-    height: clamp(1.2rem, 4.2vw, 1.8rem);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #000000;
+    right: 2px;
+    width: auto;
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: 2px;
+    padding: 5px 6px;
     box-sizing: border-box;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: clamp(0.65rem, 2.4vw, 1rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    display: none;
+    /* Letra un 20% más grande */
+    font-size: clamp(0.85rem, 3.6vw, 1.2rem);
+    line-height: 1.1;
+    border-radius: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    transform: translateY(-50%);
 }
 
-.cartones-grid.modo-15 .carton.ganador-bingo .emoji-carton-lleno {
-    display: flex;
-    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* ---------- BINGO ---------- */
+/* Fondo amarillo, letra blanca, contorno negro fuerte */
+.cartones-grid.modo-15 .carton .rotulo-bingo {
+    background: #ffcc00;
+    color: #ffffff;
+    border: 1.5px solid #000;
+    top: 37%;
+    text-shadow:
+        -1.5px -1.5px 0 #000,
+         1.5px -1.5px 0 #000,
+        -1.5px  1.5px 0 #000,
+         1.5px  1.5px 0 #000,
+        -1.5px  0     0 #000,
+         1.5px  0     0 #000,
+         0    -1.5px 0 #000,
+         0     1.5px 0 #000;
 }
 
-/* ---------- Keyframes ---------- */
-@keyframes emojiEntrada {
-    0%   { transform: scale(0) rotate(-25deg); opacity: 0; }
-    60%  { transform: scale(1.25) rotate(5deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+/* ---------- FIGURA ---------- */
+/* Fondo blanco, letra negra */
+.cartones-grid.modo-15 .carton .rotulo-figura {
+    background: #ffffff;
+    color: #000000;
+    border: 1.5px solid #000;
+    top: 82%;
 }
 
-@keyframes trofeoLatido {
-    0%   { transform: scale(1) rotate(-8deg); }
-    100% { transform: scale(1.18) rotate(-8deg); }
+/* ---------- GANA ---------- */
+/* Fondo rojo, letra blanca, contorno negro suave, misma posición que BINGO */
+.cartones-grid.modo-15 .carton .rotulo-gana {
+    background: #d32f2f;
+    color: #ffffff;
+    border: 1.5px solid #000;
+    top: 32%;
+    text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
+/* ---------- TODO ---------- */
+/* Fondo rojo, letra blanca, contorno negro suave, misma posición que FIGURA */
+.cartones-grid.modo-15 .carton .rotulo-todo {
+    background: #d32f2f;
+    color: #ffffff;
+    border: 1.5px solid #000;
+    top: 82%;
+    text-shadow:
+        -1px -1px 0 #000,
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
+/* ---------- Mostrar según las clases del cartón ---------- */
+.cartones-grid.modo-15 .carton.mostrar-rotulo-bingo .rotulo-bingo {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.cartones-grid.modo-15 .carton.mostrar-rotulo-figura .rotulo-figura {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.cartones-grid.modo-15 .carton.mostrar-rotulo-gana .rotulo-gana {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.cartones-grid.modo-15 .carton.mostrar-rotulo-todo .rotulo-todo {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+@keyframes rotuloEntrada {
+    0%   { opacity: 0; transform: translateY(-50%) scale(0.85); }
+    60%  { opacity: 1; transform: translateY(-50%) scale(1.05); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1); }
 }
 
 /* ============================================
-   BORDE DORADO PERMANENTE
-   Solo para el ganador de figura 1
+   APAGADO SUAVE DEL RESALTADO AL TERMINAR LA PARTIDA
+   Se aplica a los cartones que tenían .resaltando cuando
+   aparecen los rótulos de ganador. Dura 0.5s y luego se
+   quitan las clases de resaltado por completo.
    ============================================ */
-.cartones-grid.modo-15 .carton.ganador-figura-1 {
-    outline: 2px solid var(--color-figura);
-    outline-offset: -2px;
-    box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.45),
-        0 0 12px 2px var(--color-figura-suave);
-    transition: box-shadow 0.3s ease;
+.cartones-grid.modo-15 .carton.apagando-resaltado .celda.en-figura {
+    background: var(--carton-color, #2e7d32) !important;
+    box-shadow: none !important;
+    animation: none !important;
+    transition: background 0.5s ease, box-shadow 0.5s ease;
 }
 
-/* ============================================
-   ANIMACIÓN DE RESALTADO (figura o bingo)
-   Se activa cuando el cartón tiene la clase .animando
-   junto con .ganador-figura-1 o .ganador-bingo.
-   ============================================ */
-
-/* FASE 1: encendido celda por celda */
-.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
-.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura {
-    background: var(--color-figura) !important;
-    animation: rellenarCelda 0.35s ease-out both;
-    animation-delay: var(--delay-figura, 0s);
+.cartones-grid.modo-15 .carton.apagando-resaltado {
+    transition: box-shadow 0.5s ease, outline-color 0.5s ease;
 }
 
-.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura::after,
-.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura::after {
-    display: none !important;
-}
-.cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura .num-val,
-.cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura .num-val {
-    opacity: 0 !important;
-    color: transparent !important;
-    text-shadow: none !important;
+.cartones-grid.modo-15 .carton.apagando-resaltado.ganador-bingo,
+.cartones-grid.modo-15 .carton.apagando-resaltado.ganador-figura-1 {
+    /* Mantener el borde dorado del ganador de figura, si lo tiene */
+    outline-color: var(--color-figura);
 }
 
-/* FASE 2: pulso final */
-.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura,
-.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura {
-    background: var(--color-figura) !important;
-    border-radius: 4px;
-    box-shadow:
-        0 0 12px 3px var(--color-figura-glow),
-        0 0 20px 8px var(--color-figura-suave);
-    animation: pulsoFigura 1s ease-in-out infinite alternate;
+
+/* Mostrar según las clases del cartón */
+.cartones-grid.modo-15 .carton.mostrar-rotulo-gana .rotulo-gana {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
 
-.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura::after,
-.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura::after {
-    display: none !important;
-}
-.cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura .num-val,
-.cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura .num-val {
-    opacity: 0 !important;
-    color: transparent !important;
-    text-shadow: none !important;
-    mix-blend-mode: normal !important;
-}
-
-/* ============================================
-   FORZAR FONDO DE FIGURA EN TODOS LOS TEMAS
-   ============================================ */
-body .cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
-body .cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura,
-body .cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura,
-body .cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura {
-    background: var(--color-figura) !important;
-}
-
-@keyframes rellenarCelda {
-    0% {
-        transform: scale(1);
-        background: var(--carton-color, #2e7d32);
-        opacity: 0.3;
-    }
-    60% {
-        transform: scale(1.15);
-        background: #ffffff;
-        opacity: 1;
-    }
-    100% {
-        transform: scale(1);
-        background: var(--color-figura);
-        opacity: 1;
-    }
-}
-
-@keyframes pulsoFigura {
-    0% {
-        box-shadow:
-            0 0 10px 2px var(--color-figura-suave),
-            0 0 16px 6px var(--color-figura-suave);
-    }
-    100% {
-        box-shadow:
-            0 0 16px 5px var(--color-figura-glow),
-            0 0 24px 10px var(--color-figura-glow);
-    }
+.cartones-grid.modo-15 .carton.mostrar-rotulo-todo .rotulo-todo {
+    display: block;
+    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }

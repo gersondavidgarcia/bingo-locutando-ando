@@ -182,10 +182,13 @@
 
         let bloqueadoPorAnimacion = false;
         let timeoutAnimacion = null;
+        let timeoutRotulos = null;
+        let timeoutApagado = null;
         let timeoutsFase1 = [];
 
         let figuraYaGanada = false;
         let llenoYaGanado = false;
+        let partidaTerminada = false;
 
         let celdasCentroPendientes = 0;
 
@@ -519,6 +522,10 @@
                     <span class="emoji-primera-bola">🎱</span>
                     <span class="emoji-figura">🎯</span>
                     <span class="emoji-carton-lleno">👑</span>
+                    <span class="rotulo-bingo">BINGO</span>
+                    <span class="rotulo-figura">FIGURA</span>
+                    <span class="rotulo-gana">GANA</span>
+                    <span class="rotulo-todo">TODO</span>
                     <div class="carton-header">
                         <span class="carton-title">${textoCabecera}</span>
                     </div>
@@ -563,7 +570,12 @@
                         'animando',
                         'secuencia-completa',
                         'tiene-primera-bola',
-                        'tiene-lleno'
+                        'tiene-lleno',
+                        'mostrar-rotulo-bingo',
+                        'mostrar-rotulo-figura',
+                        'mostrar-rotulo-gana',
+                        'mostrar-rotulo-todo',
+                        'apagando-resaltado'
                     );
                     c.querySelectorAll('.celda.en-figura')
                         .forEach(celda => {
@@ -668,7 +680,6 @@
             const infoGanadores = [];
 
             cartones.forEach((carton) => {
-                // Si ya ganó figura, lo saltamos
                 if (carton.classList.contains('ganador-figura-1')) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
@@ -716,7 +727,6 @@
             const infoGanadores = [];
 
             cartones.forEach((carton) => {
-                // Si ya ganó bingo (llenó), lo saltamos
                 if (carton.classList.contains('ganador-bingo')) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
@@ -756,14 +766,11 @@
 
         /* ============================================
            APAGAR RESALTADO DE TODOS LOS CARTONES
-           - Quita .resaltando, .secuencia-completa y .animando
-           - Quita .en-figura de las celdas
-           - NO toca .ganador-figura-1, .ganador-bingo,
-             .tiene-primera-bola ni .tiene-lleno
+           (instantáneo, se usa al pulsar SACAR BOLAS)
            ============================================ */
         function apagarResaltadoDeTodos() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
-                carton.classList.remove('resaltando', 'secuencia-completa', 'animando');
+                carton.classList.remove('resaltando', 'secuencia-completa', 'animando', 'apagando-resaltado');
                 carton.querySelectorAll('.celda.en-figura').forEach(celda => {
                     celda.classList.remove('en-figura');
                     celda.style.removeProperty('--delay-figura');
@@ -772,17 +779,60 @@
         }
 
         /* ============================================
+           APAGADO SUAVE DEL RESALTADO (0.5s)
+           ============================================ */
+        function apagarResaltadoSuave() {
+            const cartonesConResaltado = document.querySelectorAll(
+                '.cartones-grid.modo-15 .carton.resaltando'
+            );
+            if (cartonesConResaltado.length === 0) return;
+
+            cartonesConResaltado.forEach(carton => {
+                carton.classList.add('apagando-resaltado');
+            });
+
+            if (timeoutApagado) clearTimeout(timeoutApagado);
+            timeoutApagado = setTimeout(() => {
+                cartonesConResaltado.forEach(carton => {
+                    carton.classList.remove('resaltando', 'secuencia-completa', 'animando', 'apagando-resaltado');
+                    carton.querySelectorAll('.celda.en-figura').forEach(celda => {
+                        celda.classList.remove('en-figura');
+                        celda.style.removeProperty('--delay-figura');
+                    });
+                });
+                timeoutApagado = null;
+            }, 500);
+        }
+
+        /* ============================================
+           MOSTRAR RÓTULOS EN CARTONES GANADORES
+           - Si el cartón tiene los 3 premios (primera bola + figura + bingo)
+             → muestra "GANA" arriba y "TODO" abajo.
+           - Si no, aplica la lógica normal:
+             - ganador-bingo    → mostrar-rotulo-bingo (BINGO arriba)
+             - ganador-figura-1 → mostrar-rotulo-figura (FIGURA abajo)
+           Al mostrarlos, también se dispara el apagado suave del resaltado.
+           ============================================ */
+        function mostrarRotulosDeGanadores() {
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
+                const tienePrimera  = carton.classList.contains('tiene-primera-bola');
+                const ganoFigura    = carton.classList.contains('ganador-figura-1');
+                const ganoBingo     = carton.classList.contains('ganador-bingo');
+                const ganoTodo      = tienePrimera && ganoFigura && ganoBingo;
+
+                if (ganoTodo) {
+                    carton.classList.add('mostrar-rotulo-gana', 'mostrar-rotulo-todo');
+                } else {
+                    if (ganoBingo)  carton.classList.add('mostrar-rotulo-bingo');
+                    if (ganoFigura) carton.classList.add('mostrar-rotulo-figura');
+                }
+            });
+
+            apagarResaltadoSuave();
+        }
+
+        /* ============================================
            EJECUTAR ANIMACIÓN DE RESALTADO
-           Recibe una lista de cartones con:
-             - carton
-             - celdasDeLaFigura
-             - ganoFigura
-             - ganoBingo
-           Aplica a cada cartón:
-             - .ganador-figura-1 si ganoFigura
-             - .ganador-bingo si ganoBingo
-             - .animando durante la fase 1
-             - .resaltando + .secuencia-completa en la fase 2
            ============================================ */
         function ejecutarAnimacionResaltado(cartonesInfo) {
             if (!cartonesInfo || cartonesInfo.length === 0) return Promise.resolve();
@@ -797,7 +847,7 @@
                 if (ganoFigura) carton.classList.add('ganador-figura-1');
                 if (ganoBingo) carton.classList.add('ganador-bingo');
                 carton.classList.add('animando');
-                carton.classList.remove('resaltando', 'secuencia-completa');
+                carton.classList.remove('resaltando', 'secuencia-completa', 'apagando-resaltado');
             });
 
             timeoutsFase1.forEach(t => clearTimeout(t));
@@ -825,6 +875,17 @@
                         carton.classList.remove('animando');
                         carton.classList.add('resaltando', 'secuencia-completa');
                     });
+
+                    // Si la partida terminó (alguien ganó bingo),
+                    // programamos la aparición de los rótulos 1.5s después.
+                    if (partidaTerminada) {
+                        if (timeoutRotulos) clearTimeout(timeoutRotulos);
+                        timeoutRotulos = setTimeout(() => {
+                            mostrarRotulosDeGanadores();
+                            timeoutRotulos = null;
+                        }, 1500);
+                    }
+
                     if (btn) btn.classList.remove('bloqueado');
                     bloqueadoPorAnimacion = false;
                     timeoutAnimacion = null;
@@ -841,8 +902,19 @@
             if (bloqueadoPorAnimacion) return;
             if (bombo.length === 0) return;
 
-            // Apagamos el resaltado de la jugada anterior
             apagarResaltadoDeTodos();
+            if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
+            if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
+
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
+                c.classList.remove(
+                    'mostrar-rotulo-bingo',
+                    'mostrar-rotulo-figura',
+                    'mostrar-rotulo-gana',
+                    'mostrar-rotulo-todo',
+                    'apagando-resaltado'
+                );
+            });
 
             const idx = Math.floor(Math.random() * bombo.length);
             const numero = bombo.splice(idx, 1)[0];
@@ -902,6 +974,7 @@
 
             if (resultadoLleno.hayGanador) {
                 llenoYaGanado = true;
+                partidaTerminada = true;
                 resultadoLleno.infoGanadores.forEach(info => {
                     if (cartonesGanadores.has(info.carton)) {
                         cartonesGanadores.get(info.carton).ganoBingo = true;
@@ -934,11 +1007,14 @@
             const recientes = document.getElementById('recientesLista');
             if (recientes) recientes.innerHTML = '';
             if (timeoutAnimacion) { clearTimeout(timeoutAnimacion); timeoutAnimacion = null; }
+            if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
+            if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
             bloqueadoPorAnimacion = false;
             figuraYaGanada = false;
             llenoYaGanado = false;
+            partidaTerminada = false;
             celdasCentroPendientes = 0;
             primeraBolaNumero = null;
             primeraBolaYaSalio = false;
