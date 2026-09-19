@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Bingo Tradicional - Menú</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d3c9b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Bingo">
+
+    <link rel="apple-touch-icon" href="icono-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icono-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icono-512.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Orbitron:wght@900&family=Press+Start+2P&family=Outfit:wght@900&family=Bebas+Neue&family=Creepster&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="body-center" ontouchstart="">
+
+    <div class="menu-container">
+        <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
+
+        <div class="menu-card">
+            <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
+            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURACIÓN -->
+    <div class="modal-overlay" id="modalConfig">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modalTitulo">⚙️ Configuración</h2>
+                <button class="modal-close" onclick="cerrarConfiguracion()" onfocus="this.blur()">✕</button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- ============================================
+                     PANTALLA: MENÚ PRINCIPAL DE CONFIGURACIÓN
+                     ============================================ -->
+                <div class="config-pantalla visible" id="pantallaMenu">
+                    <p class="config-hint">Elige qué quieres configurar:</p>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('general')" onfocus="this.blur()">
+                        <span class="seccion-icono">⚙️</span>
+                        <span class="seccion-texto">
+                            <strong>General</strong>
+                            <small>Cartones · Firebase · Formato control</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('temas')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎨</span>
+                        <span class="seccion-texto">
+                            <strong>Temas</strong>
+                            <small>Activa o desactiva los 21 temas</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎯</span>
+                        <span class="seccion-texto">
+                            <strong>Figuras</strong>
+                            <small>Crea, borra y ordena tus figuras</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltado')" onfocus="this.blur()">
+                        <span class="seccion-icono">✨</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de figura</strong>
+                            <small>Brillo · Halo suave · Velocidad</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('apariencia')" onfocus="this.blur()">
+                        <span class="seccion-icono">📐</span>
+                        <span class="seccion-texto">
+                            <strong>Apariencia</strong>
+                            <small>Ancho del control · Tamaño mini-cartones</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: GENERAL
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaGeneral">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="cantCartones">Cantidad de Cartones:</label>
+                        <select id="cantCartones">
+                            <option value="6">6 Cartones</option>
+                            <option value="9">9 Cartones</option>
+                            <option value="12">12 Cartones</option>
+                            <option value="15" selected>15 Cartones</option>
+                            <option value="18">18 Cartones</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usarBaseDatos">Usar base de datos (nombres reales):</label>
+                        <select id="usarBaseDatos">
+                            <option value="si" selected>SÍ - Cargar nombres de Firebase</option>
+                            <option value="no">NO - Mostrar "CARTÓN N"</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="formatoControl">Formato del control (1-75):</label>
+                        <select id="formatoControl">
+                            <option value="15x5" selected>Horizontal (15 × 5) - Clásico</option>
+                            <option value="10x8">Compacto (10 × 8)</option>
+                            <option value="8x10">Vertical compacto (8 × 10)</option>
+                            <option value="9x9">Cuadrado (9 × 9)</option>
+                            <option value="7x11">Vertical alto (7 × 11)</option>
+                            <option value="25x3">Horizontal ancho (25 × 3)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cantidadFiguras">Mini-cartones de referencia:</label>
+                        <select id="cantidadFiguras">
+                            <option value="0">0 - Ocultar</option>
+                            <option value="1">1 - Solo figura</option>
+                            <option value="2" selected>2 - Lleno + Figura</option>
+                            <option value="3">3 - Lleno + Figura + Extra</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: TEMAS
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaTemas">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label>Temas activos:</label>
+                        <div class="temas-grid" id="temasGrid">
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Verde" checked>
+                                <span class="tema-color" style="background:#2e7d32"></span>
+                                <span class="tema-nombre">Verde</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Azul">
+                                <span class="tema-color" style="background:#1565c0"></span>
+                                <span class="tema-nombre">Azul</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Rojo">
+                                <span class="tema-color" style="background:#c62828"></span>
+                                <span class="tema-nombre">Rojo</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Negro">
+                                <span class="tema-color" style="background:#3d3d3d"></span>
+                                <span class="tema-nombre">Negro</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Naranja">
+                                <span class="tema-color" style="background:#d97706"></span>
+                                <span class="tema-nombre">Naranja</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Morado">
+                                <span class="tema-color" style="background:#7b1fa2"></span>
+                                <span class="tema-nombre">Morado</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Clásico">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#d4af37,#8b6914)"></span>
+                                <span class="tema-nombre">Clásico</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Dorado">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#ffe58f,#b8860b)"></span>
+                                <span class="tema-nombre">Dorado</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Madera">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#8d5b41,#3d2314)"></span>
+                                <span class="tema-nombre">Madera</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Kate">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#e2b97c,#8a5a22)"></span>
+                                <span class="tema-nombre">Kate Déco</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Cyberpunk">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#06b6d4,#083344)"></span>
+                                <span class="tema-nombre">Cyberpunk</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Volcano">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#ef4444,#7f1d1d)"></span>
+                                <span class="tema-nombre">Volcano</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Pixel">
+                                <span class="tema-color" style="background:#b91c1c"></span>
+                                <span class="tema-nombre">8-Bit</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Esmeralda">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#10b981,#064e3b)"></span>
+                                <span class="tema-nombre">Esmeralda</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Candy">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#f43f5e,#be123c)"></span>
+                                <span class="tema-nombre">Candy</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Oro">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#facc15,#ca8a04)"></span>
+                                <span class="tema-nombre">Oro</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Pacifico">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#14b8a6,#0f766e)"></span>
+                                <span class="tema-nombre">Pacífico</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Halloween">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#a855f7,#3b0764)"></span>
+                                <span class="tema-nombre">Halloween</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Sport">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#2563eb,#1e3a8a)"></span>
+                                <span class="tema-nombre">Sport</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Titan">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#64748b,#334155)"></span>
+                                <span class="tema-nombre">Titan</span>
+                            </label>
+                            <label class="tema-item">
+                                <input type="checkbox" class="tema-check" value="Bronce">
+                                <span class="tema-color" style="background:linear-gradient(135deg,#b45309,#78350f)"></span>
+                                <span class="tema-nombre">Bronce</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: FIGURAS
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaFiguras">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Marca las figuras que quieres jugar y ordénalas como prefieras. La diagonal siempre está disponible.</p>
+
+                    <div class="figuras-lista" id="figurasLista"></div>
+
+                    <button class="btn-figura-nueva" onclick="abrirEditorFiguraNueva()" onfocus="this.blur()">
+                        ➕ Crear figura nueva
+                    </button>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: EDITOR DE FIGURA
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaEditorFigura">
+                    <button class="btn-volver" onclick="cerrarEditorFigura()" onfocus="this.blur()">‹ Volver</button>
+
+                    <h3 class="editor-titulo">✏️ Nueva figura</h3>
+
+                    <div class="form-group">
+                        <label for="nombreFigura">Nombre de la figura:</label>
+                        <input type="text" id="nombreFigura" class="input-texto" placeholder="Ej: Cruz, X, Marco..." maxlength="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Toca las celdas para dibujar la figura:</label>
+                        <div class="editor-grid" id="editorGrid"></div>
+                    </div>
+
+                    <button class="btn-figura-guardar" onclick="guardarFiguraNueva()" onfocus="this.blur()">
+                        💾 Guardar figura
+                    </button>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: RESALTADO DE FIGURA
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaResaltado">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="intensidadGlow">
+                            ✨ Intensidad del brillo: 
+                            <span id="valIntensidadGlow">95%</span>
+                        </label>
+                        <input type="range" id="intensidadGlow" min="0" max="100" value="95" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intensidadSuave">
+                            🌫️ Expansión del halo suave: 
+                            <span id="valIntensidadSuave">55%</span>
+                        </label>
+                        <input type="range" id="intensidadSuave" min="0" max="100" value="55" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracionPorCasilla">
+                            ⏱️ Velocidad de encendido por casilla: 
+                            <span id="valDuracionPorCasilla">260 ms</span>
+                        </label>
+                        <input type="range" id="duracionPorCasilla" min="60" max="600" value="260" step="20">
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: APARIENCIA
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaApariencia">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="tamanoControl">
+                            Ancho del panel de control: 
+                            <span id="valTamanoControl">58%</span>
+                        </label>
+                        <input type="range" id="tamanoControl" min="20" max="70" value="58" step="2">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tamanoFiguras">
+                            Tamaño de mini-cartones: 
+                            <span id="valTamanoFiguras">42px</span>
+                        </label>
+                        <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()" onfocus="this.blur()">Cancelar</button>
+                <button class="btn-modal-guardar" onclick="guardarConfiguracion()" onfocus="this.blur()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((reg) => console.log('✅ SW registrado:', reg.scope))
+                    .catch((err) => console.warn('❌ SW error:', err));
+            });
+        }
+    </script>
+</body>
+</html>
