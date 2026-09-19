@@ -67,6 +67,15 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎯</span>
+                        <span class="seccion-texto">
+                            <strong>Figuras</strong>
+                            <small>Crea, borra y ordena tus figuras</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltado')" onfocus="this.blur()">
                         <span class="seccion-icono">✨</span>
                         <span class="seccion-texto">
@@ -250,6 +259,44 @@
                             </label>
                         </div>
                     </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: FIGURAS
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaFiguras">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Marca las figuras que quieres jugar y ordénalas como prefieras. La diagonal siempre está disponible.</p>
+
+                    <div class="figuras-lista" id="figurasLista"></div>
+
+                    <button class="btn-figura-nueva" onclick="abrirEditorFiguraNueva()" onfocus="this.blur()">
+                        ➕ Crear figura nueva
+                    </button>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: EDITOR DE FIGURA
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaEditorFigura">
+                    <button class="btn-volver" onclick="cerrarEditorFigura()" onfocus="this.blur()">‹ Volver</button>
+
+                    <h3 class="editor-titulo">✏️ Nueva figura</h3>
+
+                    <div class="form-group">
+                        <label for="nombreFigura">Nombre de la figura:</label>
+                        <input type="text" id="nombreFigura" class="input-texto" placeholder="Ej: Cruz, X, Marco..." maxlength="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Toca las celdas para dibujar la figura:</label>
+                        <div class="editor-grid" id="editorGrid"></div>
+                    </div>
+
+                    <button class="btn-figura-guardar" onclick="guardarFiguraNueva()" onfocus="this.blur()">
+                        💾 Guardar figura
+                    </button>
                 </div>
 
                 <!-- ============================================

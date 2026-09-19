@@ -114,6 +114,34 @@
         }
 
         /* ============================================
+           FIGURA DIAGONAL BASE
+           ============================================ */
+        const FIGURA_DIAGONAL = {
+            id: 'diagonal',
+            nombre: 'Diagonal',
+            patron: [
+                [1,0,0,0,0],
+                [0,1,0,0,0],
+                [0,0,1,0,0],
+                [0,0,0,1,0],
+                [0,0,0,0,1]
+            ],
+            activa: true,
+            fija: true
+        };
+
+        /* ============================================
+           FIGURAS (se reconstruye al arrancar)
+           ============================================ */
+        let FIGURAS = {
+            'diagonal': FIGURA_DIAGONAL.patron
+        };
+
+        // Orden de figuras por id (activas)
+        let ORDEN_FIGURAS = ['diagonal'];
+        let figuraActual = 'diagonal';
+
+        /* ============================================
            PALETAS DE COLOR (21 temas)
            ============================================ */
         const PALETAS = [
@@ -142,22 +170,6 @@
 
         let paletaActual = 0;
         let indiceRotacionActual = 0;
-
-        /* ============================================
-           FIGURAS
-           ============================================ */
-        const FIGURAS = {
-            'lleno':      [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]],
-            'diagonal':   [[1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,1,0],[0,0,0,0,1]],
-            'diana':      [[0,1,1,1,0],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-            'cesto':      [[0,1,1,1,0],[1,0,0,0,1],[1,0,1,0,1],[1,1,1,1,1],[1,0,0,0,1]],
-            'matamoscas': [[1,1,1,0,0],[1,1,1,0,0],[0,0,1,0,0],[0,1,0,0,0],[0,1,0,0,1]],
-            'arana':      [[1,0,0,0,1],[0,1,0,1,0],[1,0,1,0,1],[0,1,0,1,0],[1,0,0,0,1]],
-            'paraguas':   [[0,1,1,1,1],[1,1,1,1,0],[0,1,1,0,0],[0,0,1,0,0],[0,0,1,0,0]]
-        };
-
-        const ORDEN_FIGURAS = ['diagonal', 'diana', 'cesto', 'matamoscas', 'arana', 'paraguas'];
-        let figuraActual = 'diagonal';
 
         /* ============================================
            CONFIGURACIÓN GLOBAL
@@ -204,9 +216,10 @@
         };
 
         /* ============================================
-           CARGAR CONFIGURACIÓN
+           CARGAR CONFIGURACIÓN Y FIGURAS
            ============================================ */
         function cargarConfiguracion() {
+            let figurasPersonalizadas = [];
             try {
                 const raw = localStorage.getItem('bingo_config');
                 if (raw) {
@@ -223,8 +236,33 @@
                     INTENSIDAD_GLOW = config.intensidadGlow !== undefined ? parseInt(config.intensidadGlow) : 95;
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
+
+                    if (Array.isArray(config.figurasPersonalizadas)) {
+                        figurasPersonalizadas = config.figurasPersonalizadas;
+                    }
                 }
             } catch (e) {}
+
+            // Reconstruir FIGURAS y ORDEN_FIGURAS
+            FIGURAS = {};
+            FIGURAS['diagonal'] = FIGURA_DIAGONAL.patron;
+            ORDEN_FIGURAS = ['diagonal'];
+
+            figurasPersonalizadas.forEach(fig => {
+                if (!fig || !fig.id || !Array.isArray(fig.patron)) return;
+                FIGURAS[fig.id] = fig.patron;
+                if (fig.activa !== false) {
+                    ORDEN_FIGURAS.push(fig.id);
+                }
+            });
+
+            // Si no hay ninguna activa además de la diagonal, la diagonal se queda sola
+            if (ORDEN_FIGURAS.length === 0) {
+                ORDEN_FIGURAS = ['diagonal'];
+            }
+
+            figuraActual = ORDEN_FIGURAS[0];
+
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
             const titulo = document.querySelector('.titulo-tabla');
@@ -475,7 +513,7 @@
                 for (let c = 0; c < 5; c++) {
                     const celda = document.createElement('div');
                     celda.className = 'mini-celda';
-                    if (patron[f][c] === 1) {
+                    if (patron[f] && patron[f][c] === 1) {
                         celda.classList.add('marcada');
                         celda.style.background = colorTema;
                     }
@@ -491,9 +529,9 @@
             if (CANTIDAD_FIGURAS === 0) return;
             const paleta = PALETAS[paletaActual];
             const colorTema = paleta.tema;
-            if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', FIGURAS['lleno'], colorTema);
-            if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual], colorTema);
-            if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', FIGURAS['lleno'], colorTema);
+            if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', FIGURAS['diagonal'] ? Array.from({length:5},()=>Array(5).fill(1)) : [], colorTema);
+            if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron, colorTema);
+            if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
         }
 
         /* ============================================
@@ -584,9 +622,6 @@
                         });
                 });
 
-            // ============================================
-            // ZOOM DE ENTRADA DEL CENTRO
-            // ============================================
             requestAnimationFrame(() => {
                 const celdasCentro = document.querySelectorAll(
                     '.cartones-grid.modo-15 .celda.vacia'
@@ -673,7 +708,7 @@
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
             if (figuraYaGanada) return { hayGanador: false, infoGanadores: [] };
 
-            const patronFigura = FIGURAS[figuraActual];
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
             if (!patronFigura) return { hayGanador: false, infoGanadores: [] };
 
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
@@ -766,7 +801,6 @@
 
         /* ============================================
            APAGAR RESALTADO DE TODOS LOS CARTONES
-           (instantáneo, se usa al pulsar SACAR BOLAS)
            ============================================ */
         function apagarResaltadoDeTodos() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
@@ -806,12 +840,6 @@
 
         /* ============================================
            MOSTRAR RÓTULOS EN CARTONES GANADORES
-           - Si el cartón tiene los 3 premios (primera bola + figura + bingo)
-             → muestra "GANA" arriba y "TODO" abajo.
-           - Si no, aplica la lógica normal:
-             - ganador-bingo    → mostrar-rotulo-bingo (BINGO arriba)
-             - ganador-figura-1 → mostrar-rotulo-figura (FIGURA abajo)
-           Al mostrarlos, también se dispara el apagado suave del resaltado.
            ============================================ */
         function mostrarRotulosDeGanadores() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
@@ -876,8 +904,6 @@
                         carton.classList.add('resaltando', 'secuencia-completa');
                     });
 
-                    // Si la partida terminó (alguien ganó bingo),
-                    // programamos la aparición de los rótulos 1.5s después.
                     if (partidaTerminada) {
                         if (timeoutRotulos) clearTimeout(timeoutRotulos);
                         timeoutRotulos = setTimeout(() => {
@@ -952,9 +978,6 @@
                 });
             }
 
-            // ============================================
-            // COMPROBAR FIGURA Y BINGO EN PARALELO
-            // ============================================
             const resultadoFigura = comprobarFiguraEnCartones();
             const resultadoLleno = comprobarLlenoEnCartones();
 
@@ -1027,6 +1050,7 @@
            CAMBIAR CARTONES Y PALETA
            ============================================ */
         function cambiarCartonesYPaleta() {
+            // Rota paleta
             try {
                 const raw = localStorage.getItem('bingo_config');
                 if (raw) {
@@ -1049,9 +1073,11 @@
                 paletaActual = indiceRotacionActual;
             }
 
-            if (CANTIDAD_FIGURAS >= 1) {
+            // Rota figura
+            if (CANTIDAD_FIGURAS >= 1 && ORDEN_FIGURAS.length > 0) {
                 const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
-                figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
+                const nuevoIdx = (idxFigura + 1) % ORDEN_FIGURAS.length;
+                figuraActual = ORDEN_FIGURAS[nuevoIdx];
             }
 
             reiniciarJuego();

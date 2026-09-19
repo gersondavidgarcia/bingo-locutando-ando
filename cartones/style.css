@@ -1720,3 +1720,210 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     display: block;
     animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
+
+/* ============================================
+   LISTA DE FIGURAS EN EL MODAL
+   ============================================ */
+.figuras-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.figura-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px 10px;
+    color: #ccc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+.figura-item.arrastrando {
+    cursor: grabbing;
+    background: #2e313b;
+    border-color: #2196f3;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(33, 150, 243, 0.35);
+    transform: scale(1.02);
+    opacity: 0.98;
+    touch-action: none;
+}
+
+.figura-item .figura-check {
+    width: 18px;
+    height: 18px;
+    accent-color: #2e7d32;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.figura-mini {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1px;
+    width: 42px;
+    height: 42px;
+    background: #111;
+    border: 1px solid #555;
+    border-radius: 3px;
+    padding: 1px;
+    flex-shrink: 0;
+}
+
+.figura-mini-celda {
+    background: #ffffff;
+    border-radius: 1px;
+}
+
+.figura-mini-celda.activa {
+    background: #2196f3;
+}
+
+.figura-nombre {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.figura-borrar {
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #e57373;
+    font-size: 0.9rem;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    flex-shrink: 0;
+}
+
+.figura-borrar:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.figura-borrar:active {
+    background: #333;
+}
+
+.figura-placeholder {
+    border: 1px dashed #2196f3;
+    border-radius: 8px;
+    background: rgba(33, 150, 243, 0.08);
+    flex-shrink: 0;
+}
+
+.btn-figura-nueva {
+    background: #2196f3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 6px;
+    touch-action: manipulation;
+}
+
+.btn-figura-nueva:active {
+    filter: brightness(0.85);
+}
+
+/* ============================================
+   EDITOR DE FIGURA NUEVA
+   ============================================ */
+.editor-titulo {
+    font-size: 1rem;
+    color: #fff;
+    font-weight: 900;
+    margin: 0;
+}
+
+.input-texto {
+    background: #262a33;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.input-texto:focus {
+    border-color: #2e7d32;
+}
+
+.editor-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: 100%;
+    max-width: 260px;
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+}
+
+.editor-celda {
+    background: #ffffff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+    touch-action: manipulation;
+}
+
+.editor-celda.activa {
+    background: #2196f3;
+    border-color: #1976d2;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+.editor-celda:active {
+    filter: brightness(0.85);
+}
+
+.btn-figura-guardar {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 900;
+    font-size: 0.95rem;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    touch-action: manipulation;
+}
+
+.btn-figura-guardar:active {
+    filter: brightness(0.85);
+}
