@@ -76,11 +76,11 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltado')" onfocus="this.blur()">
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltados')" onfocus="this.blur()">
                         <span class="seccion-icono">✨</span>
                         <span class="seccion-texto">
-                            <strong>Resaltado de figura</strong>
-                            <small>Brillo · Halo suave · Velocidad</small>
+                            <strong>Resaltados</strong>
+                            <small>Figura · Número que falta</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -300,10 +300,37 @@
                 </div>
 
                 <!-- ============================================
+                     PANTALLA: RESALTADOS (MENÚ PADRE)
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaResaltados">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Elige qué resaltado quieres ajustar:</p>
+
+                    <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoFigura')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎯</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de figura</strong>
+                            <small>Brillo · Halo suave · Velocidad</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoNumero')" onfocus="this.blur()">
+                        <span class="seccion-icono">🟡</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de número</strong>
+                            <small>Brillo · Expansión del halo (falta 1)</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+                </div>
+
+                <!-- ============================================
                      PANTALLA: RESALTADO DE FIGURA
                      ============================================ -->
-                <div class="config-pantalla" id="pantallaResaltado">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                <div class="config-pantalla" id="pantallaResaltadoFigura">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
 
                     <div class="form-group">
                         <label for="intensidadGlow">
@@ -327,6 +354,29 @@
                             <span id="valDuracionPorCasilla">260 ms</span>
                         </label>
                         <input type="range" id="duracionPorCasilla" min="60" max="600" value="260" step="20">
+                    </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: RESALTADO DE NÚMERO
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaResaltadoNumero">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="intensidadGlowNumero">
+                            ✨ Intensidad del brillo del número: 
+                            <span id="valIntensidadGlowNumero">95%</span>
+                        </label>
+                        <input type="range" id="intensidadGlowNumero" min="0" max="100" value="95" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intensidadHaloNumero">
+                            🌫️ Expansión del halo suave del número: 
+                            <span id="valIntensidadHaloNumero">55%</span>
+                        </label>
+                        <input type="range" id="intensidadHaloNumero" min="0" max="100" value="55" step="5">
                     </div>
                 </div>
 

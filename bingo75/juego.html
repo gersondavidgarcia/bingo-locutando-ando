@@ -193,6 +193,10 @@
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
 
+        /* 🟡 NUEVAS: resaltado de número */
+        let INTENSIDAD_GLOW_NUMERO = 95;
+        let INTENSIDAD_HALO_NUMERO = 55;
+
         let nombresDeFirebase = [];
         let bombo = [];
         let historialSacadas = [];
@@ -243,6 +247,10 @@
                     INTENSIDAD_GLOW = config.intensidadGlow !== undefined ? parseInt(config.intensidadGlow) : 95;
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
+
+                    /* 🟡 Nuevos: resaltado de número */
+                    INTENSIDAD_GLOW_NUMERO = config.intensidadGlowNumero !== undefined ? parseInt(config.intensidadGlowNumero) : 95;
+                    INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
 
                     if (Array.isArray(config.figurasPersonalizadas)) {
                         figurasPersonalizadas = config.figurasPersonalizadas;
@@ -447,7 +455,7 @@
         }
 
         /* ============================================
-           APLICAR PARÁMETROS DEL RESALTADO DE FIGURA
+           APLICAR PARÁMETROS DEL RESALTADO
            ============================================ */
         function aplicarParametrosResaltado() {
             const estiloComputado = getComputedStyle(document.body);
@@ -472,6 +480,13 @@
 
             document.body.style.setProperty('--color-figura-glow', `rgba(${r}, ${g}, ${b}, ${glowAlpha})`);
             document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${suaveAlpha})`);
+
+            /* 🟡 Resaltado de número (amarillo) */
+            const glowNumero = INTENSIDAD_GLOW_NUMERO / 100;
+            const haloNumero = INTENSIDAD_HALO_NUMERO / 100;
+
+            document.body.style.setProperty('--amarillo-glow', glowNumero);
+            document.body.style.setProperty('--amarillo-halo', haloNumero);
         }
 
         /* ============================================
@@ -562,6 +577,7 @@
                     <span class="rotulo-todo">TODO</span>
                     <div class="carton-header">
                         <span class="carton-title">${textoCabecera}</span>
+                        <span class="punto-alerta"></span>
                     </div>
                     <div class="bingo-header-row">
                         <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
@@ -659,7 +675,7 @@
         }
 
         /* ============================================
-           RENDERIZAR TABLA DE CONTROL
+           RENDERIZAR TABLA DE CONTROL (SIN CLICK)
            ============================================ */
         function renderizarTablaControl() {
             const tabla = document.getElementById('tablaNumeros');
@@ -918,7 +934,152 @@
         }
 
         /* ============================================
-           SACAR BOLA — con bloqueo durante toda la animación
+           🎯 CALCULAR SI UN CARTÓN ESTÁ A 1
+           ============================================ */
+        function estaAUno(carton, celdas, patronFigura) {
+            // --- FIGURA ---
+            if (!figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+                let faltantes = 0;
+                let total = 0;
+                for (let f = 0; f < 5; f++) {
+                    for (let c = 0; c < 5; c++) {
+                        if (patronFigura[f][c] !== 1) continue;
+                        total++;
+                        const idx = f * 5 + c;
+                        const celda = celdas[idx];
+                        if (!celda) continue;
+                        const marcada = celda.classList.contains('marcada') ||
+                                        celda.classList.contains('vacia');
+                        if (!marcada) faltantes++;
+                    }
+                }
+                if (total > 0 && faltantes === 1) return true;
+            }
+
+            // --- BINGO ---
+            if (!llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+                let faltantes = 0;
+                celdas.forEach(celda => {
+                    const marcada = celda.classList.contains('marcada') ||
+                                    celda.classList.contains('vacia');
+                    if (!marcada) faltantes++;
+                });
+                if (faltantes === 1) return true;
+            }
+
+            return false;
+        }
+
+        /* ============================================
+           🟡 OBTENER LA CELDA FALTANTE (para pintarla amarilla)
+           ============================================ */
+        function obtenerCeldaFaltante(carton, celdas, patronFigura) {
+            // FIGURA
+            let celdaFaltanteFigura = null;
+            if (!figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+                let faltantes = 0;
+                let total = 0;
+                let candidata = null;
+                for (let f = 0; f < 5; f++) {
+                    for (let c = 0; c < 5; c++) {
+                        if (patronFigura[f][c] !== 1) continue;
+                        total++;
+                        const idx = f * 5 + c;
+                        const celda = celdas[idx];
+                        if (!celda) continue;
+                        const marcada = celda.classList.contains('marcada') ||
+                                        celda.classList.contains('vacia');
+                        if (!marcada) {
+                            faltantes++;
+                            candidata = celda;
+                        }
+                    }
+                }
+                if (total > 0 && faltantes === 1) {
+                    celdaFaltanteFigura = candidata;
+                }
+            }
+
+            // BINGO
+            let celdaFaltanteBingo = null;
+            if (!llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+                let faltantes = 0;
+                let candidata = null;
+                celdas.forEach(celda => {
+                    const marcada = celda.classList.contains('marcada') ||
+                                    celda.classList.contains('vacia');
+                    if (!marcada) {
+                        faltantes++;
+                        candidata = celda;
+                    }
+                });
+                if (faltantes === 1) {
+                    celdaFaltanteBingo = candidata;
+                }
+            }
+
+            // Prioridad: bingo (si es la misma, da igual, es una sola celda)
+            return celdaFaltanteBingo || celdaFaltanteFigura || null;
+        }
+
+        /* ============================================
+           🟡 APLICAR PARPADEO AMARILLO A LAS CELDAS FALTANTES
+           ============================================ */
+        function actualizarResaltadosAmarillos() {
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+
+            // Primero limpiamos todos los resaltados amarillos
+            document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
+                .forEach(c => c.classList.remove('falta-amarillo'));
+
+            if (partidaTerminada) return;
+
+            cartones.forEach((carton) => {
+                if (carton.classList.contains('ganador-figura-1') ||
+                    carton.classList.contains('ganador-bingo')) return;
+
+                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                const celdaFaltante = obtenerCeldaFaltante(carton, celdas, patronFigura);
+
+                if (celdaFaltante) {
+                    celdaFaltante.classList.add('falta-amarillo');
+                }
+            });
+        }
+
+        /* ============================================
+           🔵 ACTUALIZAR PUNTOS DE ALERTA (solo el punto del header)
+           ============================================ */
+        function actualizarPuntosAlerta() {
+            if (partidaTerminada) return;
+
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+
+            cartones.forEach((carton) => {
+                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                const punto = carton.querySelector('.punto-alerta');
+                if (!punto) return;
+
+                const aUno = estaAUno(carton, celdas, patronFigura);
+
+                if (aUno) {
+                    if (!punto.classList.contains('activo')) {
+                        punto.classList.add('activo');
+                        punto.classList.remove('titilar');
+                        void punto.offsetWidth;
+                        punto.classList.add('titilar');
+                        setTimeout(() => punto.classList.remove('titilar'), 800);
+                    }
+                } else {
+                    punto.classList.remove('activo');
+                }
+            });
+        }
+
+        /* ============================================
+           SACAR BOLA
            ============================================ */
         function sacarBola(e) {
             if (isAnimating) return;
@@ -928,7 +1089,6 @@
             const btn = document.getElementById('btnSacarBola');
             const sphere = document.getElementById('bolilleroSphere');
 
-            // Bloqueo visual inmediato
             if (btn) {
                 btn.classList.add('bloqueado');
                 btn.classList.remove('presionado');
@@ -938,7 +1098,16 @@
 
             isAnimating = true;
 
+            // 🔥 Al pulsar SACAR BOLAS:
+            // 1) Se apaga el resaltado amarillo
+            // 2) Se enciende el punto al lado del nombre (si sigue a 1)
+            document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
+                .forEach(c => c.classList.remove('falta-amarillo'));
+
+            actualizarPuntosAlerta();
+
             apagarResaltadoDeTodos();
+
             if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
             if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
 
@@ -965,7 +1134,7 @@
                 }
 
                 const display = document.getElementById('numeroDisplay');
-                if (display) display.innerHTML = `<span class="letra-display">${letra}</span>${numero}`;
+                if (display) display.textContent = numero;
 
                 if (sphere) {
                     sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(numero));
@@ -988,7 +1157,7 @@
                 const recientesLista = document.getElementById('recientesLista');
                 if (recientesLista) {
                     recientesLista.innerHTML = '';
-                    historialSacadas.slice(0, 6).forEach(item => {
+                    historialSacadas.slice(1, 7).forEach(item => {
                         const bola = document.createElement('div');
                         bola.className = 'mini-bola entrando';
                         bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
@@ -997,7 +1166,6 @@
                     });
                 }
 
-                // Esperar a que termine la animación de entrada + verificar premios
                 setTimeout(() => {
                     if (sphere) sphere.classList.remove('rodar-entrada');
 
@@ -1037,9 +1205,11 @@
 
                     if (cartonesGanadores.size > 0) {
                         ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
+                            actualizarResaltadosAmarillos();
                             liberarBloqueo();
                         });
                     } else {
+                        actualizarResaltadosAmarillos();
                         liberarBloqueo();
                     }
                 }, 650);
@@ -1098,6 +1268,10 @@
             primeraBolaYaSalio = false;
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.remove('bloqueado', 'presionado');
+            document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
+                .forEach(c => c.classList.remove('falta-amarillo'));
+            document.querySelectorAll('.cartones-grid.modo-15 .carton .punto-alerta')
+                .forEach(p => p.classList.remove('activo', 'titilar'));
             renderizarEstructura();
         }
 

@@ -31,8 +31,6 @@ let editorPatronActual = Array.from({length: 5}, () => Array(5).fill(0));
 
 /* ============================================
    BLOQUEO DE MOVIMIENTO
-   Evita que dos pulsaciones rápidas seguidas
-   desordenen el array antes del re-render.
    ============================================ */
 let bloqueoMover = false;
 
@@ -64,13 +62,15 @@ function mostrarPantallaConfig(idPantalla) {
     const titulo = document.getElementById('modalTitulo');
     if (!titulo) return;
     switch (idPantalla) {
-        case 'pantallaGeneral':       titulo.textContent = '⚙️ General'; break;
-        case 'pantallaTemas':         titulo.textContent = '🎨 Temas'; break;
-        case 'pantallaFiguras':       titulo.textContent = '🎯 Figuras'; break;
-        case 'pantallaEditorFigura':  titulo.textContent = '✏️ Nueva figura'; break;
-        case 'pantallaResaltado':     titulo.textContent = '✨ Resaltado de figura'; break;
-        case 'pantallaApariencia':    titulo.textContent = '📐 Apariencia'; break;
-        default:                      titulo.textContent = '⚙️ Configuración';
+        case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
+        case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
+        case 'pantallaFiguras':          titulo.textContent = '🎯 Figuras'; break;
+        case 'pantallaEditorFigura':     titulo.textContent = '✏️ Nueva figura'; break;
+        case 'pantallaResaltados':       titulo.textContent = '✨ Resaltados'; break;
+        case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
+        case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
+        case 'pantallaApariencia':       titulo.textContent = '📐 Apariencia'; break;
+        default:                         titulo.textContent = '⚙️ Configuración';
     }
 
     const box = document.querySelector('.modal-box');
@@ -82,7 +82,7 @@ function abrirSeccionConfig(nombre) {
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'figuras':    abrirPantallaFiguras(); break;
-        case 'resaltado':  mostrarPantallaConfig('pantallaResaltado'); break;
+        case 'resaltados': mostrarPantallaConfig('pantallaResaltados'); break;
         case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
         default:           volverAlMenuConfig();
     }
@@ -114,6 +114,10 @@ function cargarConfigEnModal() {
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
             setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+
+            /* 🟡 Resaltado de número */
+            setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
+            setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
 
             const temasGuardados = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                 ? config.temasActivos : ['Verde'];
@@ -166,6 +170,21 @@ function actualizarLabelsSliders() {
         valDur.textContent = rangoDur.value + ' ms';
         rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
     }
+
+    /* 🟡 Sliders del resaltado de número */
+    const rangoGlowNum = document.getElementById('intensidadGlowNumero');
+    const valGlowNum = document.getElementById('valIntensidadGlowNumero');
+    if (rangoGlowNum && valGlowNum) {
+        valGlowNum.textContent = rangoGlowNum.value + '%';
+        rangoGlowNum.oninput = () => { valGlowNum.textContent = rangoGlowNum.value + '%'; };
+    }
+
+    const rangoHaloNum = document.getElementById('intensidadHaloNumero');
+    const valHaloNum = document.getElementById('valIntensidadHaloNumero');
+    if (rangoHaloNum && valHaloNum) {
+        valHaloNum.textContent = rangoHaloNum.value + '%';
+        rangoHaloNum.oninput = () => { valHaloNum.textContent = rangoHaloNum.value + '%'; };
+    }
 }
 
 /* ============================================
@@ -191,6 +210,8 @@ function guardarConfiguracion() {
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
         duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+        intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
+        intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas
     };
@@ -220,6 +241,8 @@ function iniciarJuegoDirecto() {
             intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
             intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+            intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
+            intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
             temasActivos: temasActivos,
             figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)]
         };
@@ -283,20 +306,16 @@ function renderizarListaFiguras(idDestacado) {
         item.className = 'figura-item';
         item.dataset.id = fig.id;
 
-        // Si es la que acaba de moverse, marcarla como destacada
         if (idDestacado && fig.id === idDestacado) {
             item.classList.add('destacado');
-            // Quitar el destaque al terminar la animación
             setTimeout(() => item.classList.remove('destacado'), 700);
         }
 
-        // Checkbox activa
         const chk = document.createElement('input');
         chk.type = 'checkbox';
         chk.className = 'figura-check';
         chk.checked = fig.activa !== false;
         chk.addEventListener('change', () => {
-            // Validación: no se puede desactivar la única activa
             if (!chk.checked) {
                 const figurasActuales = leerFigurasPersonalizadas();
                 const activas = figurasActuales.filter(f => f.activa !== false);
@@ -309,7 +328,6 @@ function renderizarListaFiguras(idDestacado) {
             toggleActivaFigura(fig.id, chk.checked);
         });
 
-        // Mini-cartón de vista previa
         const mini = document.createElement('div');
         mini.className = 'figura-mini';
         for (let f = 0; f < 5; f++) {
@@ -321,12 +339,10 @@ function renderizarListaFiguras(idDestacado) {
             }
         }
 
-        // Nombre
         const nombre = document.createElement('span');
         nombre.className = 'figura-nombre';
         nombre.textContent = fig.nombre;
 
-        // Flechas de orden
         const flechas = document.createElement('div');
         flechas.className = 'figura-flechas';
 
@@ -345,7 +361,6 @@ function renderizarListaFiguras(idDestacado) {
         flechas.appendChild(btnUp);
         flechas.appendChild(btnDown);
 
-        // Botón borrar
         const btnBorrar = document.createElement('button');
         btnBorrar.className = 'figura-borrar';
         btnBorrar.textContent = '🗑️';
@@ -383,12 +398,10 @@ function borrarFigura(id) {
 }
 
 function moverFigura(id, direccion) {
-    // Evitar dobles pulsaciones rápidas que rompían el orden
     if (bloqueoMover) return;
     bloqueoMover = true;
 
     try {
-        // Leer SIEMPRE fresco desde localStorage
         const figuras = leerFigurasPersonalizadas();
         const idx = figuras.findIndex(f => f.id === id);
 
@@ -396,21 +409,16 @@ function moverFigura(id, direccion) {
 
         const nuevoIdx = idx + direccion;
 
-        // Si el movimiento no cambia nada, salir sin re-renderizar
         if (nuevoIdx < 0 || nuevoIdx >= figuras.length) return;
 
-        // Intercambio
         const temp = figuras[idx];
         figuras[idx] = figuras[nuevoIdx];
         figuras[nuevoIdx] = temp;
 
         escribirFigurasPersonalizadas(figuras);
 
-        // Re-render destacando la figura movida
         renderizarListaFiguras(id);
     } finally {
-        // Suelta el bloqueo en el siguiente frame para permitir pulsaciones rápidas
-        // pero no dos swaps en el mismo frame
         requestAnimationFrame(() => {
             bloqueoMover = false;
         });

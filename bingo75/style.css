@@ -1028,20 +1028,21 @@ body {
 .recientes-container {
     width: 100%;
     max-width: 200px;
+    height: 28px;
     margin-left: 0;
     margin-right: auto;
     background: #7a0000;
     border-radius: 5px;
-    padding: 3px 5px;
+    padding: 0 5px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-    min-height: 22px;
     gap: 3px;
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .recientes-lista {
@@ -1054,21 +1055,33 @@ body {
 }
 
 .mini-bola {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: var(--bola-bg, #ffeb3b);
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.45rem;
+    font-size: 0.5rem;
     font-weight: 900;
     color: #000000 !important;
     box-shadow:
-        0 1px 2px rgba(0,0,0,0.3),
+        0 1.5px 2px rgba(0,0,0,0.3),
         inset -1px -1px 2px rgba(0,0,0,0.3),
         inset 1px 1px 1.5px rgba(255,255,255,0.6);
     flex-shrink: 0;
+}
+
+.mini-bola::before {
+    content: '';
+    position: absolute;
+    width: 65%;
+    height: 65%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e6e6e6 100%);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+    z-index: 1;
 }
 
 .mini-bola span {
@@ -2124,4 +2137,90 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     0%   { transform: scale(1); background: #262a33; }
     30%  { transform: scale(1.03); background: #2c3140; }
     100% { transform: scale(1); background: #262a33; }
+}
+
+/* ============================================
+   🔵 PUNTO DE ALERTA EN EL HEADER
+   ============================================ */
+.cartones-grid.modo-15 .carton .carton-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.cartones-grid.modo-15 .carton .punto-alerta {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: var(--header-color, #fff);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    transition: width 0.35s ease, height 0.35s ease, opacity 0.35s ease;
+    opacity: 0;
+    flex-shrink: 0;
+}
+
+.cartones-grid.modo-15 .carton .punto-alerta.activo {
+    width: 8px;
+    height: 8px;
+    opacity: 1;
+}
+
+.cartones-grid.modo-15 .carton .punto-alerta.titilar {
+    animation: puntoTitila 0.8s ease-in-out;
+}
+
+@keyframes puntoTitila {
+    0%   { transform: scale(0.4); opacity: 0.4; }
+    35%  { transform: scale(1.6); opacity: 1; }
+    65%  { transform: scale(0.9); opacity: 0.85; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   🟡 RESALTADO AMARILLO DEL NÚMERO QUE FALTA
+   Controlado por:
+     --amarillo-glow (0-1)  → intensidad del brillo
+     --amarillo-halo (0-1)  → expansión del halo suave
+   ============================================ */
+:root {
+    --amarillo-glow: 0.95;
+    --amarillo-halo: 0.55;
+}
+
+.cartones-grid.modo-15 .celda.falta-amarillo {
+    animation: parpadeoAmarillo 0.8s ease-in-out infinite alternate;
+    z-index: 9;
+}
+
+.cartones-grid.modo-15 .celda.falta-amarillo .num-val {
+    color: #000000 !important;
+    position: relative;
+    z-index: 3;
+    text-shadow: 0 0 4px rgba(0, 0, 0, calc(var(--amarillo-halo) * 0.7));
+}
+
+@keyframes parpadeoAmarillo {
+    0% {
+        background: #fff9c4;
+        box-shadow:
+            inset 0 0 0 2px #ffeb3b,
+            inset 0 0 calc(6px * var(--amarillo-glow)) rgba(255, 235, 59, calc(var(--amarillo-glow) * 0.7)),
+            0 0 calc(6px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.6));
+    }
+    50% {
+        background: #ffee58;
+        box-shadow:
+            inset 0 0 0 2px #fbc02d,
+            inset 0 0 calc(10px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
+            0 0 calc(10px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.9));
+    }
+    100% {
+        background: #fff176;
+        box-shadow:
+            inset 0 0 0 2px #f9a825,
+            inset 0 0 calc(14px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
+            0 0 calc(14px * var(--amarillo-halo)) rgba(255, 235, 59, var(--amarillo-glow));
+    }
 }
