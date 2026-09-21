@@ -85,6 +85,15 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('velocidad')" onfocus="this.blur()">
+                        <span class="seccion-icono">⚡</span>
+                        <span class="seccion-texto">
+                            <strong>Velocidad de bola</strong>
+                            <small>Tiempo que tarda en salir la bola grande</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('apariencia')" onfocus="this.blur()">
                         <span class="seccion-icono">📐</span>
                         <span class="seccion-texto">
@@ -378,6 +387,25 @@
                         </label>
                         <input type="range" id="intensidadHaloNumero" min="0" max="100" value="55" step="5">
                     </div>
+                </div>
+
+                <!-- ============================================
+                     PANTALLA: VELOCIDAD DE BOLA
+                     ============================================ -->
+                <div class="config-pantalla" id="pantallaVelocidad">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="velocidadBola">
+                            ⚡ Tiempo de entrada de la bola: 
+                            <span id="valVelocidadBola">650 ms</span>
+                        </label>
+                        <input type="range" id="velocidadBola" min="200" max="1500" value="650" step="50">
+                    </div>
+
+                    <p class="config-hint">
+                        Más bajo = más rápido. Afecta el tiempo que tarda la bola grande en rodar y mostrar el número.
+                    </p>
                 </div>
 
                 <!-- ============================================

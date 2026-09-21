@@ -69,6 +69,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaResaltados':       titulo.textContent = '✨ Resaltados'; break;
         case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
+        case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaApariencia':       titulo.textContent = '📐 Apariencia'; break;
         default:                         titulo.textContent = '⚙️ Configuración';
     }
@@ -83,6 +84,7 @@ function abrirSeccionConfig(nombre) {
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'figuras':    abrirPantallaFiguras(); break;
         case 'resaltados': mostrarPantallaConfig('pantallaResaltados'); break;
+        case 'velocidad':  mostrarPantallaConfig('pantallaVelocidad'); break;
         case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
         default:           volverAlMenuConfig();
     }
@@ -115,9 +117,10 @@ function cargarConfigEnModal() {
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
             setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
 
-            /* 🟡 Resaltado de número */
             setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
             setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
+
+            setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
 
             const temasGuardados = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                 ? config.temasActivos : ['Verde'];
@@ -171,7 +174,6 @@ function actualizarLabelsSliders() {
         rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
     }
 
-    /* 🟡 Sliders del resaltado de número */
     const rangoGlowNum = document.getElementById('intensidadGlowNumero');
     const valGlowNum = document.getElementById('valIntensidadGlowNumero');
     if (rangoGlowNum && valGlowNum) {
@@ -184,6 +186,13 @@ function actualizarLabelsSliders() {
     if (rangoHaloNum && valHaloNum) {
         valHaloNum.textContent = rangoHaloNum.value + '%';
         rangoHaloNum.oninput = () => { valHaloNum.textContent = rangoHaloNum.value + '%'; };
+    }
+
+    const rangoVel = document.getElementById('velocidadBola');
+    const valVel = document.getElementById('valVelocidadBola');
+    if (rangoVel && valVel) {
+        valVel.textContent = rangoVel.value + ' ms';
+        rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
     }
 }
 
@@ -212,6 +221,7 @@ function guardarConfiguracion() {
         duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
+        velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas
     };
@@ -243,6 +253,7 @@ function iniciarJuegoDirecto() {
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
+            velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
             temasActivos: temasActivos,
             figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)]
         };

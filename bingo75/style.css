@@ -6,6 +6,8 @@
     --color-figura: #ffd700;
     --color-figura-glow: rgba(255, 215, 0, 0.9);
     --color-figura-suave: rgba(255, 215, 0, 0.55);
+    --amarillo-glow: 0.95;
+    --amarillo-halo: 0.55;
 }
 
 * {
@@ -561,6 +563,10 @@ body {
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
     position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .carton-title { display: block; line-height: 1.3; }
@@ -642,6 +648,10 @@ body {
     box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
 }
 
+/* ============================================
+   LA BOLITA GRIS — aparece a los 1.2s (después del zoom)
+   Con z-index 20 queda por ENCIMA del número (que tiene z-index 10)
+   ============================================ */
 .cartones-grid.modo-15 .celda.marcada::after {
     content: '';
     position: absolute;
@@ -653,9 +663,34 @@ body {
         rgba(0, 0, 0, 0.15) 100%);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
     pointer-events: none;
+    opacity: 0;
+    z-index: 20;
+    animation: aparecerBolita 0.5s ease-out 1.2s forwards;
 }
 
-.cartones-grid.modo-15 .celda.marcada .num-val { opacity: 0; }
+@keyframes aparecerBolita {
+    0%   { opacity: 0; transform: scale(0.4); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================
+   EL NÚMERO — visible durante el zoom y la aparición de la bolita.
+   Se desvanece al final (a los 1.7s).
+   FORZADO en color negro y z-index 10 para que se vea SIEMPRE
+   durante el zoom aunque el tema ponga color:transparent.
+   ============================================ */
+.cartones-grid.modo-15 .celda.marcada .num-val {
+    color: #000000 !important;
+    opacity: 1;
+    z-index: 10;
+    position: relative;
+    animation: ocultarNumero 0.5s ease-out 1.7s forwards;
+}
+
+@keyframes ocultarNumero {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
 
 /* ============================================
    FREE CENTRAL
@@ -687,18 +722,67 @@ body {
     z-index: 1;
 }
 
-.animar-marca { animation: marcarCelda 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* ============================================
+   🎯 ZOOM + DESTELLO ARCOÍRIS (ÚNICO)
+   Duración total: 1.2s
+   El número se ve todo el tiempo porque está forzado arriba.
+   ============================================ */
+.cartones-grid.modo-15 .celda.animar-marca {
+    animation: zoomConArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+    z-index: 5;
+    position: relative;
+}
 
-@keyframes marcarCelda {
-    0%   { transform: scale(1); }
-    45%  { transform: scale(1.2); }
-    100% { transform: scale(1); }
+@keyframes zoomConArcoiris {
+    0% {
+        transform: scale(1);
+        background-color: var(--carton-color, #2e7d32);
+    }
+    10% {
+        transform: scale(1.25);
+        background-color: #ffee00;
+        box-shadow: 0 0 14px 3px rgba(255, 238, 0, 0.9);
+    }
+    22% {
+        transform: scale(1.5);
+        background-color: #ff9100;
+        box-shadow: 0 0 22px 6px rgba(255, 145, 0, 0.9);
+    }
+    35% {
+        transform: scale(1.55);
+        background-color: #ff4081;
+        box-shadow: 0 0 24px 8px rgba(255, 64, 129, 0.9);
+    }
+    48% {
+        transform: scale(1.5);
+        background-color: #00e5ff;
+        box-shadow: 0 0 22px 6px rgba(0, 229, 255, 0.9);
+    }
+    60% {
+        transform: scale(1.35);
+        background-color: #b2ff59;
+        box-shadow: 0 0 18px 5px rgba(178, 255, 89, 0.9);
+    }
+    72% {
+        transform: scale(1.18);
+        background-color: #ffee00;
+        box-shadow: 0 0 14px 3px rgba(255, 234, 0, 0.85);
+    }
+    85% {
+        transform: scale(1.08);
+        background-color: var(--carton-color, #2e7d32);
+        box-shadow: 0 0 8px 2px var(--carton-color, #2e7d32);
+    }
+    100% {
+        transform: scale(1);
+        background-color: var(--carton-color, #2e7d32);
+        box-shadow: none;
+    }
 }
 
 /* ============================================
    BOLILLERO
    ============================================ */
-
 .bolillero-container {
     width: 442px;
     height: 106px;
@@ -796,7 +880,7 @@ body {
     justify-content: center;
     transition: background 0.4s ease;
     overflow: hidden;
-    box-shadow: 
+    box-shadow:
         0 5px 10px rgba(0, 0, 0, 0.25),
         inset -4px -4px 8px rgba(0, 0, 0, 0.45),
         inset 4px 4px 8px rgba(255, 255, 255, 0.75);
@@ -810,7 +894,7 @@ body {
     height: 66%;
     border-radius: 50%;
     background: radial-gradient(circle at 40% 35%, #ffffff 0%, #ebebeb 70%, #d2d2d2 100%);
-    box-shadow: 
+    box-shadow:
         inset 2px 3px 6px rgba(0, 0, 0, 0.45),
         0 2px 5px rgba(0, 0, 0, 0.25);
     z-index: 1;
@@ -1976,8 +2060,8 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     border-radius: 4px;
     color: #ccc;
     font-size: 0.9rem;
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
     padding: 0;
     display: flex;
@@ -1987,7 +2071,7 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 }
 
 .figura-flecha:disabled {
-    opacity: 0.3;
+    opacity: 0.25;
     pointer-events: none;
 }
 
@@ -2117,16 +2201,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 /* ============================================
    MEJORAS DE LA LISTA DE FIGURAS
    ============================================ */
-.figura-flecha {
-    min-width: 36px;
-    min-height: 36px;
-    font-size: 1rem;
-}
-
-.figura-flecha:disabled {
-    opacity: 0.25;
-}
-
 .figura-item.destacado {
     border-color: #2196f3;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.5), 0 6px 18px rgba(33, 150, 243, 0.35);
@@ -2142,13 +2216,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 /* ============================================
    🔵 PUNTO DE ALERTA EN EL HEADER
    ============================================ */
-.cartones-grid.modo-15 .carton .carton-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-}
-
 .cartones-grid.modo-15 .carton .punto-alerta {
     display: inline-block;
     width: 0;
@@ -2180,17 +2247,13 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 
 /* ============================================
    🟡 RESALTADO AMARILLO DEL NÚMERO QUE FALTA
-   Controlado por:
-     --amarillo-glow (0-1)  → intensidad del brillo
-     --amarillo-halo (0-1)  → expansión del halo suave
    ============================================ */
-:root {
-    --amarillo-glow: 0.95;
-    --amarillo-halo: 0.55;
-}
-
 .cartones-grid.modo-15 .celda.falta-amarillo {
-    animation: parpadeoAmarillo 0.8s ease-in-out infinite alternate;
+    background: #ffee00 !important;
+    box-shadow:
+        inset 0 0 0 2px #f9a825,
+        inset 0 0 calc(8px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
+        0 0 calc(8px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.9));
     z-index: 9;
 }
 
@@ -2198,29 +2261,172 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     color: #000000 !important;
     position: relative;
     z-index: 3;
-    text-shadow: 0 0 4px rgba(0, 0, 0, calc(var(--amarillo-halo) * 0.7));
+    font-weight: 900 !important;
 }
 
-@keyframes parpadeoAmarillo {
+/* ============================================
+   🟡 PARPADEO DEL HEADER CUANDO FALTA 1 BOLA
+   ============================================ */
+body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
+    animation: parpadeoHeaderBucle 0.8s ease-in-out infinite alternate !important;
+    animation-fill-mode: both !important;
+    background: var(--header-bg, var(--carton-color, #2e7d32)) !important;
+    color: var(--header-color, #fff) !important;
+}
+
+@keyframes parpadeoHeaderBucle {
     0% {
-        background: #fff9c4;
-        box-shadow:
-            inset 0 0 0 2px #ffeb3b,
-            inset 0 0 calc(6px * var(--amarillo-glow)) rgba(255, 235, 59, calc(var(--amarillo-glow) * 0.7)),
-            0 0 calc(6px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.6));
-    }
-    50% {
-        background: #ffee58;
-        box-shadow:
-            inset 0 0 0 2px #fbc02d,
-            inset 0 0 calc(10px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
-            0 0 calc(10px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.9));
+        background: var(--header-bg, var(--carton-color, #2e7d32));
+        color: var(--header-color, #fff);
+        box-shadow: none;
     }
     100% {
-        background: #fff176;
-        box-shadow:
-            inset 0 0 0 2px #f9a825,
-            inset 0 0 calc(14px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
-            0 0 calc(14px * var(--amarillo-halo)) rgba(255, 235, 59, var(--amarillo-glow));
+        background: #ffee00;
+        color: #000000;
+        box-shadow: 0 0 14px rgba(255, 235, 59, 0.95);
+    }
+}
+
+/* ============================================
+   CONTROL 1-75 CLICKEABLE
+   ============================================ */
+.control-grid .bolita.clickeable {
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.control-grid .bolita.clickeable:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1px #ffffff, 0 0 8px rgba(255, 255, 255, 0.5);
+    z-index: 2;
+}
+
+.control-grid .bolita.clickeable:active {
+    transform: scale(0.92);
+}
+
+
+/* =========================================================
+   🌈 ARCOÍRIS REAL PARA CELDA ANIMADA
+   NO TOCA EL BACKGROUND DE LA CELDA
+   ========================================================= */
+
+.cartones-grid.modo-15 .celda.animar-marca {
+    position: relative !important;
+    z-index: 50 !important;
+    transform-origin: center center !important;
+    animation: zoomCeldaArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+}
+
+/* Capa de color por encima del verde del tema */
+.cartones-grid.modo-15 .celda.animar-marca::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    background: #ffee00;
+
+    pointer-events: none;
+
+    animation:
+        arcoirisCelda 1.2s linear both !important;
+}
+
+/* El número queda por encima del arcoíris */
+.cartones-grid.modo-15 .celda.animar-marca .num-val {
+    position: relative !important;
+    z-index: 10 !important;
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   ZOOM
+   ========================================================= */
+
+@keyframes zoomCeldaArcoiris {
+
+    0% {
+        transform: scale(1);
+    }
+
+    10% {
+        transform: scale(1.25);
+    }
+
+    22% {
+        transform: scale(1.5);
+    }
+
+    35% {
+        transform: scale(1.55);
+    }
+
+    48% {
+        transform: scale(1.5);
+    }
+
+    60% {
+        transform: scale(1.35);
+    }
+
+    72% {
+        transform: scale(1.18);
+    }
+
+    85% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   🌈 COLORES ARCOÍRIS
+   ========================================================= */
+
+@keyframes arcoirisCelda {
+
+    0% {
+        background: #ffee00;
+        box-shadow: 0 0 14px 3px rgba(255, 238, 0, 0.95);
+    }
+
+    15% {
+        background: #ff9100;
+        box-shadow: 0 0 20px 5px rgba(255, 145, 0, 0.95);
+    }
+
+    30% {
+        background: #ff1744;
+        box-shadow: 0 0 24px 7px rgba(255, 23, 68, 0.95);
+    }
+
+    45% {
+        background: #ff00ff;
+        box-shadow: 0 0 25px 8px rgba(255, 0, 255, 0.95);
+    }
+
+    60% {
+        background: #00e5ff;
+        box-shadow: 0 0 24px 7px rgba(0, 229, 255, 0.95);
+    }
+
+    75% {
+        background: #2979ff;
+        box-shadow: 0 0 20px 6px rgba(41, 121, 255, 0.95);
+    }
+
+    88% {
+        background: #76ff03;
+        box-shadow: 0 0 17px 4px rgba(118, 255, 3, 0.95);
+    }
+
+    100% {
+        background: #ffee00;
+        box-shadow: 0 0 10px 2px rgba(255, 238, 0, 0.8);
     }
 }
