@@ -665,7 +665,8 @@ body {
     pointer-events: none;
     opacity: 0;
     z-index: 20;
-    animation: aparecerBolita 0.5s ease-out 1.2s forwards;
+    animation: aparecerBolita 0.5s ease-out 1.0s forwards;
+    
 }
 
 @keyframes aparecerBolita {
@@ -684,7 +685,7 @@ body {
     opacity: 1;
     z-index: 10;
     position: relative;
-    animation: ocultarNumero 0.5s ease-out 1.7s forwards;
+    animation: ocultarNumero 0.5s ease-out 1.0s forwards;
 }
 
 @keyframes ocultarNumero {
@@ -2347,36 +2348,82 @@ body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
 
 @keyframes zoomCeldaArcoiris {
 
+    0% {transform: scale(1);}
+    10% {transform: scale(1.25); }
+    22% {transform: scale(1.5);}
+    35% {transform: scale(1.55);}
+    48% {transform: scale(1.5);}
+    60% {transform: scale(1.35);}
+    72% {transform: scale(1.18);}
+    85% {transform: scale(1.08);}
+    100% {transform: scale(1);}
+}
+
+/* =========================================================
+   🌈 ARCOÍRIS LIGERO + ZOOM
+   Optimizado para consumir menos recursos
+   ========================================================= */
+
+.cartones-grid.modo-15 .celda.animar-marca {
+    position: relative !important;
+    z-index: 50 !important;
+    transform-origin: center center !important;
+
+    animation: zoomCeldaLigero 1.3s ease-out both !important;
+
+    will-change: transform;
+}
+
+/* Capa del arcoíris */
+.cartones-grid.modo-15 .celda.animar-marca::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    background: #ffee00;
+
+    pointer-events: none;
+
+    animation: arcoirisLigero 1.3s linear both !important;
+
+    will-change: background-color;
+}
+
+/* Número siempre arriba */
+.cartones-grid.modo-15 .celda.animar-marca .num-val {
+    position: relative !important;
+    z-index: 10 !important;
+
+    color: #000 !important;
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   🔍 ZOOM LIGERO
+   ========================================================= */
+
+@keyframes zoomCeldaLigero {
+
     0% {
         transform: scale(1);
     }
 
-    10% {
-        transform: scale(1.25);
+    20% {
+        transform: scale(1.30);
     }
 
-    22% {
-        transform: scale(1.5);
+    38% {
+        transform: scale(1.6);
     }
 
-    35% {
-        transform: scale(1.55);
+    55% {
+        transform: scale(1.30);
     }
 
-    48% {
-        transform: scale(1.5);
-    }
-
-    60% {
-        transform: scale(1.35);
-    }
-
-    72% {
-        transform: scale(1.18);
-    }
-
-    85% {
-        transform: scale(1.08);
+    75% {
+        transform: scale(1.10);
     }
 
     100% {
@@ -2384,49 +2431,44 @@ body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
     }
 }
 
+
 /* =========================================================
-   🌈 COLORES ARCOÍRIS
+   🌈 ARCOÍRIS LIGERO
+   Solo cambia background-color
+   Sin sombras ni efectos pesados
    ========================================================= */
 
-@keyframes arcoirisCelda {
+@keyframes arcoirisLigero {
 
     0% {
-        background: #ffee00;
-        box-shadow: 0 0 14px 3px rgba(255, 238, 0, 0.95);
+        background-color: #ffee00;
     }
 
-    15% {
-        background: #ff9100;
-        box-shadow: 0 0 20px 5px rgba(255, 145, 0, 0.95);
+    18% {
+        background-color: #ff9100;
     }
 
-    30% {
-        background: #ff1744;
-        box-shadow: 0 0 24px 7px rgba(255, 23, 68, 0.95);
+    35% {
+        background-color: #ff1744;
     }
 
-    45% {
-        background: #ff00ff;
-        box-shadow: 0 0 25px 8px rgba(255, 0, 255, 0.95);
+    52% {
+        background-color: #ff00ff;
     }
 
-    60% {
-        background: #00e5ff;
-        box-shadow: 0 0 24px 7px rgba(0, 229, 255, 0.95);
+    68% {
+        background-color: #00e5ff;
     }
 
-    75% {
-        background: #2979ff;
-        box-shadow: 0 0 20px 6px rgba(41, 121, 255, 0.95);
+    80% {
+        background-color: #76ff03;
     }
 
-    88% {
-        background: #76ff03;
-        box-shadow: 0 0 17px 4px rgba(118, 255, 3, 0.95);
+    90% {
+        background-color: #76ff03;
     }
 
     100% {
-        background: #ffee00;
-        box-shadow: 0 0 10px 2px rgba(255, 238, 0, 0.8);
+        background-color: var(--carton-color);
     }
 }
