@@ -568,6 +568,8 @@
                 carton.style.setProperty('--carton-color-dark', colorDark);
                 carton.dataset.enAlerta = '0';
                 carton.dataset.pausadoPorSacar = '0';
+                carton.dataset.yaAvisoFigura = '0';
+                carton.dataset.yaAvisoBingo = '0';
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
                     textoCabecera = nombresDeFirebase[i - 1];
@@ -635,6 +637,8 @@
                     );
                     c.dataset.enAlerta = '0';
                     c.dataset.pausadoPorSacar = '0';
+                    c.dataset.yaAvisoFigura = '0';
+                    c.dataset.yaAvisoBingo = '0';
                     c.querySelectorAll('.celda.en-figura')
                         .forEach(celda => {
                             celda.classList.remove('en-figura');
@@ -990,6 +994,48 @@
         }
 
         /* ============================================
+           🟡 DETECTAR SI FALTA 1 PARA FIGURA
+           ============================================ */
+        function detectarFaltaParaFigura(carton, celdas, patronFigura) {
+            if (CANTIDAD_FIGURAS < 1) return false;
+            if (figuraYaGanada) return false;
+            if (carton.classList.contains('ganador-figura-1')) return false;
+            if (!patronFigura) return false;
+
+            let faltantes = 0;
+            let total = 0;
+            for (let f = 0; f < 5; f++) {
+                for (let c = 0; c < 5; c++) {
+                    if (patronFigura[f][c] !== 1) continue;
+                    total++;
+                    const idx = f * 5 + c;
+                    const celda = celdas[idx];
+                    if (!celda) continue;
+                    const marcada = celda.classList.contains('marcada') ||
+                                    celda.classList.contains('vacia');
+                    if (!marcada) faltantes++;
+                }
+            }
+            return total > 0 && faltantes === 1;
+        }
+
+        /* ============================================
+           🟡 DETECTAR SI FALTA 1 PARA BINGO
+           ============================================ */
+        function detectarFaltaParaBingo(carton, celdas) {
+            if (llenoYaGanado) return false;
+            if (carton.classList.contains('ganador-bingo')) return false;
+
+            let faltantes = 0;
+            celdas.forEach(celda => {
+                const marcada = celda.classList.contains('marcada') ||
+                                celda.classList.contains('vacia');
+                if (!marcada) faltantes++;
+            });
+            return faltantes === 1;
+        }
+
+        /* ============================================
            🟡 OBTENER LAS CELDAS FALTANTES (1 o 2)
            ============================================ */
         function obtenerCeldasFaltantes(carton, celdas, patronFigura) {
@@ -1044,6 +1090,9 @@
 
         /* ============================================
            🟡 RESALTADO AMARILLO + PARPADEO DEL HEADER
+           Dos avisos independientes por cartón:
+           - Aviso FIGURA (una sola vez)
+           - Aviso BINGO  (una sola vez)
            ============================================ */
         function actualizarResaltadosAmarillos() {
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
@@ -1051,38 +1100,70 @@
 
             document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
                 .forEach(c => c.classList.remove('falta-amarillo'));
-            document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
-                .forEach(c => c.classList.remove('alerta-header'));
 
-            if (partidaTerminada) return;
+            if (partidaTerminada) {
+                document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
+                    .forEach(c => c.classList.remove('alerta-header'));
+                return;
+            }
 
             let hayNuevoDestello = false;
 
             cartones.forEach((carton) => {
                 if (carton.classList.contains('ganador-bingo')) {
+                    carton.classList.remove('alerta-header');
                     carton.dataset.enAlerta = '0';
                     carton.dataset.pausadoPorSacar = '0';
                     return;
                 }
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
-                const celdasFaltantes = obtenerCeldasFaltantes(carton, celdas, patronFigura);
 
+                const faltaParaFigura = detectarFaltaParaFigura(carton, celdas, patronFigura);
+                const faltaParaBingo  = detectarFaltaParaBingo(carton, celdas);
+
+                // Pintar las celdas amarillas que faltan (figura + bingo)
+                const celdasFaltantes = obtenerCeldasFaltantes(carton, celdas, patronFigura);
                 if (celdasFaltantes.length > 0) {
                     celdasFaltantes.forEach(c => c.classList.add('falta-amarillo'));
+                }
 
-                    // Siempre ponemos alerta-header si el cartón está a 1.
-                    // El parpadeo se mantiene infinitamente hasta que se pulse SACAR BOLAS.
-                    carton.classList.add('alerta-header');
+                let debeParpadear = false;
 
-                    const yaEstabaEnAlerta = carton.dataset.enAlerta === '1';
-                    if (!yaEstabaEnAlerta) {
-                        carton.dataset.enAlerta = '1';
-                        hayNuevoDestello = true;
+                // Aviso de FIGURA (solo la primera vez)
+                if (faltaParaFigura && carton.dataset.yaAvisoFigura !== '1') {
+                    debeParpadear = true;
+                    carton.dataset.yaAvisoFigura = '1';
+                }
+
+                // Aviso de BINGO (solo la primera vez)
+                if (faltaParaBingo && carton.dataset.yaAvisoBingo !== '1') {
+                    debeParpadear = true;
+                    carton.dataset.yaAvisoBingo = '1';
+                }
+
+                // Resetear el flag de figura si ya no está a 1 y no ganó figura
+                if (!faltaParaFigura) {
+                    if (!carton.classList.contains('ganador-figura-1')) {
+                        carton.dataset.yaAvisoFigura = '0';
                     }
+                }
+
+                // Resetear el flag de bingo si ya no está a 1
+                if (!faltaParaBingo) {
+                    carton.dataset.yaAvisoBingo = '0';
+                }
+
+                if (debeParpadear) {
+                    carton.classList.add('alerta-header');
+                    carton.dataset.enAlerta = '1';
+                    hayNuevoDestello = true;
                 } else {
-                    carton.dataset.enAlerta = '0';
-                    carton.dataset.pausadoPorSacar = '0';
+                    carton.classList.remove('alerta-header');
+                    if (!faltaParaFigura && !faltaParaBingo) {
+                        carton.dataset.enAlerta = '0';
+                        carton.dataset.pausadoPorSacar = '0';
+                    }
                 }
             });
 
@@ -1148,10 +1229,9 @@
         function ejecutarSaqueDeBola(numero) {
             const sphere = document.getElementById('bolilleroSphere');
 
-            // Quitar parpadeo del header
-            document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header').forEach(c => {
-                c.classList.remove('alerta-header');
-            });
+            // Quitar el parpadeo visualmente (los datasets yaAvisoFigura/yaAvisoBingo NO se tocan)
+            document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
+                .forEach(c => c.classList.remove('alerta-header'));
 
             actualizarPuntosAlerta();
             apagarResaltadoDeTodos();
@@ -1197,13 +1277,13 @@
                 const stats = document.getElementById('statsDisplay');
                 if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
-               document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
-    el.classList.add('marcada');
-    el.classList.add('animar-marca');
-    setTimeout(() => {
-        el.classList.remove('animar-marca');
-    }, 1200);
-});
+                document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
+                    el.classList.add('marcada');
+                    el.classList.add('animar-marca');
+                    setTimeout(() => {
+                        el.classList.remove('animar-marca');
+                    }, 1200);
+                });
 
                 const ctrlEl = document.getElementById(`ctrl-${numero}`);
                 if (ctrlEl) {
@@ -1385,6 +1465,8 @@
                 .forEach(c => {
                     c.dataset.enAlerta = '0';
                     c.dataset.pausadoPorSacar = '0';
+                    c.dataset.yaAvisoFigura = '0';
+                    c.dataset.yaAvisoBingo = '0';
                 });
             renderizarEstructura();
         }

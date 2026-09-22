@@ -2268,23 +2268,42 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 /* ============================================
    🟡 PARPADEO DEL HEADER CUANDO FALTA 1 BOLA
    ============================================ */
-body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
-    animation: parpadeoHeaderBucle 0.8s ease-in-out infinite alternate !important;
-    animation-fill-mode: both !important;
-    background: var(--header-bg, var(--carton-color, #2e7d32)) !important;
-    color: var(--header-color, #fff) !important;
-}
-
 @keyframes parpadeoHeaderBucle {
     0% {
-        background: var(--header-bg, var(--carton-color, #2e7d32));
+        background-color: var(--header-bg, var(--carton-color, #2e7d32));
         color: var(--header-color, #fff);
         box-shadow: none;
     }
-    100% {
-        background: #ffee00;
+    50% {
+        background-color: #ffee00;
         color: #000000;
         box-shadow: 0 0 14px rgba(255, 235, 59, 0.95);
+    }
+    100% {
+        background-color: var(--header-bg, var(--carton-color, #2e7d32));
+        color: var(--header-color, #fff);
+        box-shadow: none;
+    }
+}
+
+body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
+    animation: parpadeoHeaderBucle 1s ease-in-out infinite !important;
+    animation-fill-mode: both !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+body .cartones-grid.modo-15 .carton.alerta-header {
+    animation: bordeAlerta 1s ease-in-out infinite !important;
+}
+
+@keyframes bordeAlerta {
+    0%, 100% {
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 16px 4px rgba(255, 235, 59, 0.95),
+                    0 3px 8px rgba(0, 0, 0, 0.45);
     }
 }
 
