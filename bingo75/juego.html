@@ -123,6 +123,84 @@
         }
 
         /* ============================================
+           🔔 SISTEMA DE SONIDOS
+           Rutas base de los audios en GitHub
+           ============================================ */
+        const RUTA_AUDIOS = 'https://bingo-locutando-ando.github.io/bingo75/Audios/Sonidos/';
+        // Si tus archivos están en otro dominio/carpeta, cambia esta constante.
+        // Ejemplo alternativo si los sirves desde el propio repo sin Pages:
+        // const RUTA_AUDIOS = 'Audios/Sonidos/';
+
+        let audioMusica = null;
+        let audioCampana = null;
+        let audioTactac = null;
+        let musicaIniciada = false;
+        let desbloqueoSonidoHecho = false;
+
+        function inicializarAudios() {
+            try {
+                audioMusica  = new Audio(RUTA_AUDIOS + 'Musica.mp3');
+                audioCampana = new Audio(RUTA_AUDIOS + 'Campana.mp3');
+                audioTactac  = new Audio(RUTA_AUDIOS + 'tactac.mp3');
+
+                audioMusica.loop = true;
+                audioMusica.volume = 0.35;   // Música suave de fondo
+                audioMusica.preload = 'auto';
+
+                audioCampana.volume = 0.85;
+                audioCampana.preload = 'auto';
+
+                audioTactac.volume = 0.95;
+                audioTactac.preload = 'auto';
+            } catch (e) {
+                console.warn('⚠️ No se pudieron inicializar los audios:', e);
+            }
+        }
+
+        function reproducirCampana() {
+            if (!audioCampana) return;
+            try {
+                // Reiniciamos para permitir disparos rápidos consecutivos
+                audioCampana.currentTime = 0;
+                const p = audioCampana.play();
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+
+        function reproducirTactac() {
+            if (!audioTactac) return;
+            try {
+                audioTactac.currentTime = 0;
+                const p = audioTactac.play();
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+
+        function iniciarMusicaFondo() {
+            if (!audioMusica) return;
+            if (musicaIniciada) return;
+            musicaIniciada = true;
+            try {
+                audioMusica.currentTime = 0;
+                const p = audioMusica.play();
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+
+        // Llamar una sola vez, tras la primera interacción del usuario
+        function desbloquearSonidos() {
+            if (desbloqueoSonidoHecho) return;
+            desbloqueoSonidoHecho = true;
+            // Tocar un audio en volumen 0 para desbloquear el contexto
+            try {
+                const u = new Audio(RUTA_AUDIOS + 'tactac.mp3');
+                u.volume = 0;
+                u.play().catch(() => {});
+            } catch (e) {}
+            iniciarMusicaFondo();
+        }
+
+        /* ============================================
            FIGURA DIAGONAL BASE
            ============================================ */
         const FIGURA_DIAGONAL = {
@@ -205,6 +283,13 @@
         let INTENSIDAD_HALO_NUMERO = 55;
 
         let VELOCIDAD_BOLA = 650;
+
+        /* ============================================
+           🎨 MODO DE TEMAS + CARTONES COMBINADOS
+           ============================================ */
+        let MODO_TEMAS = 'simple';          // 'simple' | 'combinado'
+        let CC_SECUENCIAS = [];             // [{id, nombre, temas:[...]}]
+        let CC_SECUENCIA_EN_USO = '';       // id de la secuencia en uso
 
         /* ============================================
            CONFIGURACIÓN DE VOZ
@@ -290,6 +375,19 @@
                     VOZ_SELECCIONADA = config.vozSeleccionada || '';
                     VOZ_REPETIR = config.vozRepetir !== undefined ? parseInt(config.vozRepetir) : 1;
 
+                    // ===== MODO DE TEMAS =====
+                    const cc = config.cartonesCombinados || {};
+                    CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
+                    CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
+
+                    if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
+                        MODO_TEMAS = config.modoTemas;
+                    } else if (cc.activo === true) {
+                        MODO_TEMAS = 'combinado';
+                    } else {
+                        MODO_TEMAS = 'simple';
+                    }
+
                     if (Array.isArray(config.figurasPersonalizadas)) {
                         figurasPersonalizadas = config.figurasPersonalizadas;
                     }
@@ -297,14 +395,33 @@
             } catch (e) {}
 
             FIGURAS = {};
-            FIGURAS['diagonal'] = FIGURA_DIAGONAL.patron;
-            ORDEN_FIGURAS = ['diagonal'];
+            ORDEN_FIGURAS = [];
 
-            figurasPersonalizadas.forEach(fig => {
+            FIGURAS['diagonal'] = FIGURA_DIAGONAL.patron;
+
+            let diagonalActiva = true;
+            let idxDiagonal = -1;
+
+            figurasPersonalizadas.forEach((fig, idx) => {
                 if (!fig || !fig.id || !Array.isArray(fig.patron)) return;
+
+                if (fig.id === 'diagonal') {
+                    diagonalActiva = fig.activa !== false;
+                    idxDiagonal = idx;
+                    return;
+                }
+
                 FIGURAS[fig.id] = fig.patron;
                 if (fig.activa !== false) ORDEN_FIGURAS.push(fig.id);
             });
+
+            if (diagonalActiva) {
+                if (idxDiagonal === -1) {
+                    ORDEN_FIGURAS.unshift('diagonal');
+                } else {
+                    ORDEN_FIGURAS.splice(idxDiagonal, 0, 'diagonal');
+                }
+            }
 
             if (ORDEN_FIGURAS.length === 0) ORDEN_FIGURAS = ['diagonal'];
             figuraActual = ORDEN_FIGURAS[0];
@@ -313,6 +430,32 @@
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
+        }
+
+        /* ============================================
+           🎨 OBTENER PALETA / TEMA POR CARTÓN
+           ============================================ */
+        function obtenerPaletaParaCarton(indiceCarton) {
+            if (MODO_TEMAS !== 'combinado') {
+                return PALETAS[paletaActual];
+            }
+
+            const secuencia = CC_SECUENCIAS.find(s => s.id === CC_SECUENCIA_EN_USO);
+            if (!secuencia || !Array.isArray(secuencia.temas) || secuencia.temas.length === 0) {
+                return PALETAS[paletaActual];
+            }
+
+            const bloque = Math.floor(indiceCarton / 3);
+            const temaNombre = secuencia.temas[bloque % secuencia.temas.length];
+
+            const idxTema = PALETAS.findIndex(p => p.nombre === temaNombre);
+            if (idxTema !== -1) return PALETAS[idxTema];
+
+            return PALETAS[paletaActual];
+        }
+
+        function obtenerNombreTemaPorCarton(indiceCarton) {
+            return obtenerPaletaParaCarton(indiceCarton).nombre;
         }
 
         /* ============================================
@@ -562,9 +705,28 @@
         }
 
         function aplicarPaleta() {
-            const paleta = PALETAS[paletaActual];
+            let idxParaFondo = paletaActual;
+            if (MODO_TEMAS === 'combinado') {
+                const paletaPrimerBloque = obtenerPaletaParaCarton(0);
+                const idx = PALETAS.findIndex(p => p.nombre === paletaPrimerBloque.nombre);
+                if (idx !== -1) idxParaFondo = idx;
+            }
+
+            const paleta = PALETAS[idxParaFondo];
             document.documentElement.style.setProperty('--tema-color', paleta.tema);
-            aplicarTemaEnBody();
+
+            document.body.classList.remove(
+                'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
+                'tema-naranja', 'tema-morado', 'tema-clasico',
+                'tema-dorado', 'tema-madera',
+                'tema-kate', 'tema-cyberpunk', 'tema-volcano', 'tema-pixel',
+                'tema-esmeralda', 'tema-candy', 'tema-oro', 'tema-pacifico',
+                'tema-halloween', 'tema-sport', 'tema-titan', 'tema-bronce'
+            );
+            const nombre = paleta.nombre.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            document.body.classList.add('tema-' + nombre);
+
             aplicarParametrosResaltado();
         }
 
@@ -598,8 +760,11 @@
 
         function actualizarMiniCartones() {
             if (CANTIDAD_FIGURAS === 0) return;
-            const paleta = PALETAS[paletaActual];
-            const colorTema = paleta.tema;
+            let paletaParaMini = PALETAS[paletaActual];
+            if (MODO_TEMAS === 'combinado') {
+                paletaParaMini = obtenerPaletaParaCarton(0);
+            }
+            const colorTema = paletaParaMini.tema;
             if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
             if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron, colorTema);
             if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
@@ -612,15 +777,19 @@
             const grid = document.getElementById('cartonesGrid');
             if (!grid) return;
             grid.innerHTML = '';
-            const paleta = PALETAS[paletaActual];
-            const colores = paleta.colores;
+
             for (let i = 1; i <= TOTAL_CARTONES; i++) {
                 const datos = generarCarton75();
                 const carton = document.createElement('div');
                 carton.className = 'carton';
+
+                const paletaCarton = obtenerPaletaParaCarton(i - 1);
+                const colores = paletaCarton.colores;
+
                 const idxTono = obtenerIndiceTonoPorCarton(i - 1);
                 const colorHex = colores[idxTono];
-                const colorDark = paleta.colores[0];
+                const colorDark = paletaCarton.colores[0];
+
                 carton.style.setProperty('--carton-color', colorHex);
                 carton.style.setProperty('--carton-color-dark', colorDark);
                 carton.dataset.enAlerta = '0';
@@ -897,6 +1066,17 @@
             if (btn) btn.classList.add('bloqueado');
             bloqueadoPorAnimacion = true;
 
+            // 🔔 Sonido tactac: al menos un cartón completó figura o bingo
+            let hayGanadorFigura = false;
+            let hayGanadorBingo = false;
+            cartonesInfo.forEach(({ ganoFigura, ganoBingo }) => {
+                if (ganoFigura) hayGanadorFigura = true;
+                if (ganoBingo) hayGanadorBingo = true;
+            });
+            if (hayGanadorFigura || hayGanadorBingo) {
+                reproducirTactac();
+            }
+
             const PAUSA_FINAL = 600;
             cartonesInfo.forEach(({ carton, ganoFigura, ganoBingo }) => {
                 if (ganoFigura) carton.classList.add('ganador-figura-1');
@@ -1093,7 +1273,11 @@
                     }
                 }
             });
-            if (hayNuevoDestello) bloquearBotonPorDestello();
+            if (hayNuevoDestello) {
+                // 🔔 Campana: al menos un cartón empezó a parpadear
+                reproducirCampana();
+                bloquearBotonPorDestello();
+            }
         }
 
         function bloquearBotonPorDestello() {
@@ -1297,6 +1481,8 @@
                     paletaActual: paletaActual,
                     indiceRotacionActual: indiceRotacionActual,
                     figuraActual: figuraActual,
+                    modoTemas: MODO_TEMAS,
+                    ccSecuenciaEnUso: CC_SECUENCIA_EN_USO,
                     cartonesFueraDeJuego: Array.from(cartonesFueraDeJuego),
                     cartones: cartones
                 };
@@ -1343,6 +1529,8 @@
             paletaActual = typeof partida.paletaActual === 'number' ? partida.paletaActual : 0;
             indiceRotacionActual = typeof partida.indiceRotacionActual === 'number' ? partida.indiceRotacionActual : 0;
             if (partida.figuraActual && FIGURAS[partida.figuraActual]) figuraActual = partida.figuraActual;
+            if (partida.modoTemas === 'simple' || partida.modoTemas === 'combinado') MODO_TEMAS = partida.modoTemas;
+            if (partida.ccSecuenciaEnUso) CC_SECUENCIA_EN_USO = partida.ccSecuenciaEnUso;
             cartonesFueraDeJuego = new Set(Array.isArray(partida.cartonesFueraDeJuego) ? partida.cartonesFueraDeJuego : []);
 
             renderizarEstructura();
@@ -1580,6 +1768,9 @@
             if (bombo.length === 0) return;
             if (modoRevanchaActivo) return;
 
+            // Aseguramos el desbloqueo de sonido en la primera interacción
+            desbloquearSonidos();
+
             const btn = document.getElementById('btnSacarBola');
             if (btn) {
                 btn.classList.add('bloqueado');
@@ -1598,6 +1789,8 @@
             if (modoRevanchaActivo) return;
             if (historialSacadas.some(h => h.numero === numero)) return;
             if (bombo.indexOf(numero) === -1) return;
+
+            desbloquearSonidos();
 
             const btn = document.getElementById('btnSacarBola');
             if (btn) {
@@ -1658,19 +1851,37 @@
                     if (Array.isArray(config.temasActivos) && config.temasActivos.length > 0) {
                         TEMAS_ACTIVOS = config.temasActivos;
                     }
+                    const cc = config.cartonesCombinados || {};
+                    CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
+                    CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
+                    if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
+                        MODO_TEMAS = config.modoTemas;
+                    } else if (cc.activo === true) {
+                        MODO_TEMAS = 'combinado';
+                    } else {
+                        MODO_TEMAS = 'simple';
+                    }
                 }
             } catch (e) {}
 
-            const indicesActivos = PALETAS
-                .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
-                .filter(i => i !== -1);
-
-            if (indicesActivos.length > 0) {
-                indiceRotacionActual = (indiceRotacionActual + 1) % indicesActivos.length;
-                paletaActual = indicesActivos[indiceRotacionActual];
+            if (MODO_TEMAS === 'combinado') {
+                if (CC_SECUENCIAS.length > 1) {
+                    const idxActual = CC_SECUENCIAS.findIndex(s => s.id === CC_SECUENCIA_EN_USO);
+                    const idxNuevo = (idxActual + 1) % CC_SECUENCIAS.length;
+                    CC_SECUENCIA_EN_USO = CC_SECUENCIAS[idxNuevo].id;
+                }
             } else {
-                indiceRotacionActual = (indiceRotacionActual + 1) % PALETAS.length;
-                paletaActual = indiceRotacionActual;
+                const indicesActivos = PALETAS
+                    .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
+                    .filter(i => i !== -1);
+
+                if (indicesActivos.length > 0) {
+                    indiceRotacionActual = (indiceRotacionActual + 1) % indicesActivos.length;
+                    paletaActual = indicesActivos[indiceRotacionActual];
+                } else {
+                    indiceRotacionActual = (indiceRotacionActual + 1) % PALETAS.length;
+                    paletaActual = indiceRotacionActual;
+                }
             }
 
             if (CANTIDAD_FIGURAS >= 1 && ORDEN_FIGURAS.length > 0) {
@@ -1695,11 +1906,13 @@
            ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
+                inicializarAudios();
                 cargarConfiguracion();
                 initVoces();
 
                 const desbloquear = () => {
                     desbloquearVoz();
+                    desbloquearSonidos();
                     document.removeEventListener('touchstart', desbloquear);
                     document.removeEventListener('click', desbloquear);
                 };

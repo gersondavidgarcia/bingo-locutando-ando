@@ -21,7 +21,8 @@ const FIGURA_DIAGONAL = {
         [0,0,0,1,0],
         [0,0,0,0,1]
     ],
-    activa: true
+    activa: true,
+    fija: true
 };
 
 /* ============================================
@@ -44,6 +45,20 @@ let VOZ_TONO = 1.0;
 let VOZ_SELECCIONADA = '';
 let VOZ_REPETIR = 1;
 let vocesDisponibles = [];
+
+/* ============================================
+   🎨 MODO DE TEMAS (NUEVO)
+   'simple'    → un tema a la vez (rota con CAMBIAR)
+   'combinado' → mezcla temas por bloques de 3 cartones
+   ============================================ */
+let MODO_TEMAS = 'simple';
+
+/* ============================================
+   CARTONES COMBINADOS (estado en memoria)
+   ============================================ */
+let CC_SECUENCIAS = [];         // [{id, nombre, temas: ['Azul','Negro']}]
+let CC_SECUENCIA_EN_USO = '';   // id de la secuencia en uso
+let CC_EDITANDO_ID = null;      // id de la secuencia que se está editando (null = nueva)
 
 /* ============================================
    ABRIR / CERRAR MODAL
@@ -75,6 +90,7 @@ function mostrarPantallaConfig(idPantalla) {
     switch (idPantalla) {
         case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
         case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
+        case 'pantallaModoTemas':        titulo.textContent = '🎨 Modo de temas'; break;
         case 'pantallaFiguras':          titulo.textContent = '🎯 Figuras'; break;
         case 'pantallaEditorFigura':     titulo.textContent = '✏️ Nueva figura'; break;
         case 'pantallaResaltados':       titulo.textContent = '✨ Resaltados'; break;
@@ -83,7 +99,20 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
         case 'pantallaApariencia':       titulo.textContent = '📐 Apariencia'; break;
+        case 'pantallaCombinados':       titulo.textContent = '🧩 Cartones Combinados'; break;
+        case 'pantallaEditorSecuencia':  titulo.textContent = '✏️ Editar secuencia'; break;
         default:                         titulo.textContent = '⚙️ Configuración';
+    }
+
+    // Refrescos específicos por pantalla
+    if (idPantalla === 'pantallaModoTemas') {
+        renderizarModoTemas();
+    }
+    if (idPantalla === 'pantallaTemas') {
+        actualizarIndicadorModoEnTemas();
+    }
+    if (idPantalla === 'pantallaCombinados') {
+        actualizarAvisoModoEnCombinados();
     }
 
     const box = document.querySelector('.modal-box');
@@ -94,17 +123,92 @@ function abrirSeccionConfig(nombre) {
     switch (nombre) {
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
+        case 'modoTemas':  mostrarPantallaConfig('pantallaModoTemas'); break;
         case 'figuras':    abrirPantallaFiguras(); break;
         case 'resaltados': mostrarPantallaConfig('pantallaResaltados'); break;
         case 'velocidad':  mostrarPantallaConfig('pantallaVelocidad'); break;
         case 'voz':        abrirPantallaVoz(); break;
         case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
+        case 'combinados': abrirPantallaCombinados(); break;
         default:           volverAlMenuConfig();
     }
 }
 
 function volverAlMenuConfig() {
     mostrarPantallaConfig('pantallaMenu');
+}
+
+/* ============================================
+   🎨 MODO DE TEMAS — UI
+   ============================================ */
+function seleccionarModoTemas(modo) {
+    if (modo !== 'simple' && modo !== 'combinado') return;
+
+    // Validación: si quiere combinado, exigir secuencias
+    if (modo === 'combinado') {
+        const validas = CC_SECUENCIAS.filter(s => Array.isArray(s.temas) && s.temas.length > 0);
+        if (validas.length === 0) {
+            alert('Para usar Temas Combinados necesitas crear al menos una secuencia con temas.\n\nVe a "Cartones Combinados" para crearla.');
+            return;
+        }
+    }
+
+    MODO_TEMAS = modo;
+    renderizarModoTemas();
+    actualizarIndicadorModoEnTemas();
+    actualizarAvisoModoEnCombinados();
+}
+
+function renderizarModoTemas() {
+    const btnSimple = document.getElementById('modoSimpleBtn');
+    const btnCombinado = document.getElementById('modoCombinadoBtn');
+    const chkSimple = document.getElementById('modoSimpleCheck');
+    const chkCombinado = document.getElementById('modoCombinadoCheck');
+    const aviso = document.getElementById('modoTemasAviso');
+
+    // Pintar botones
+    if (btnSimple) btnSimple.classList.toggle('seleccionado', MODO_TEMAS === 'simple');
+    if (btnCombinado) btnCombinado.classList.toggle('seleccionado', MODO_TEMAS === 'combinado');
+
+    // Mostrar/ocultar el check
+    if (chkSimple) chkSimple.style.display = (MODO_TEMAS === 'simple') ? '' : 'none';
+    if (chkCombinado) chkCombinado.style.display = (MODO_TEMAS === 'combinado') ? '' : 'none';
+
+    // Aviso dinámico
+    if (aviso) {
+        if (MODO_TEMAS === 'simple') {
+            aviso.textContent = '✅ Se usará el tema activo actual. Puedes cambiarlo en pleno juego con el botón CAMBIAR.';
+        } else {
+            const sec = CC_SECUENCIAS.find(s => s.id === CC_SECUENCIA_EN_USO);
+            if (!sec) {
+                aviso.textContent = '⚠️ No hay una secuencia en uso válida. Ve a "Cartones Combinados" para elegir o crear una.';
+            } else if (!Array.isArray(sec.temas) || sec.temas.length === 0) {
+                aviso.textContent = `⚠️ La secuencia "${sec.nombre}" no tiene temas. Edítala en "Cartones Combinados".`;
+            } else {
+                aviso.textContent = `✅ Se usará la secuencia: "${sec.nombre}" (${sec.temas.join(' → ')}).`;
+            }
+        }
+    }
+}
+
+function actualizarIndicadorModoEnTemas() {
+    const cont = document.getElementById('temasModoIndicador');
+    if (!cont) return;
+    const icono = MODO_TEMAS === 'simple' ? '🎨' : '🧩';
+    const texto = MODO_TEMAS === 'simple' ? 'Tema simple' : 'Temas combinados';
+    cont.innerHTML = `Modo actual: <strong>${icono} ${texto}</strong> ` +
+        `<button class="btn-link-inline" onclick="mostrarPantallaConfig('pantallaModoTemas')" onfocus="this.blur()">cambiar</button>`;
+}
+
+function actualizarAvisoModoEnCombinados() {
+    const aviso = document.getElementById('ccAvisoModo');
+    if (!aviso) return;
+    if (MODO_TEMAS === 'combinado') {
+        aviso.innerHTML = '✅ Este modo está <strong>activo</strong>. Estas secuencias se usarán al jugar.';
+    } else {
+        aviso.innerHTML = '⚠️ Para usar estas secuencias, activa el modo <strong>"Temas combinados"</strong>. ' +
+            '<button class="btn-link-inline" onclick="seleccionarModoTemas(\'combinado\')" onfocus="this.blur()">Activar modo combinado</button>';
+    }
 }
 
 /* ============================================
@@ -158,13 +262,35 @@ function cargarConfigEnModal() {
             document.querySelectorAll('.tema-check').forEach(chk => {
                 chk.checked = temasGuardados.includes(chk.value);
             });
+
+            // ===== CARTONES COMBINADOS =====
+            const cc = config.cartonesCombinados || {};
+            CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
+            CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
+
+            // ===== MODO DE TEMAS =====
+            // Prioridad: campo nuevo `modoTemas`.
+            // Retrocompatibilidad: si no existe, mirar `cartonesCombinados.activo`.
+            if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
+                MODO_TEMAS = config.modoTemas;
+            } else if (cc.activo === true) {
+                MODO_TEMAS = 'combinado';
+            } else {
+                MODO_TEMAS = 'simple';
+            }
         } else {
             document.querySelectorAll('.tema-check').forEach(chk => {
                 chk.checked = chk.value === 'Verde';
             });
+            CC_SECUENCIAS = [];
+            CC_SECUENCIA_EN_USO = '';
+            MODO_TEMAS = 'simple';
         }
     } catch (e) {}
     actualizarLabelsSliders();
+    renderizarModoTemas();
+    actualizarIndicadorModoEnTemas();
+    actualizarAvisoModoEnCombinados();
 }
 
 /* ============================================
@@ -261,6 +387,19 @@ function guardarConfiguracion() {
 
     let figurasPersonalizadas = leerFigurasPersonalizadas();
 
+    // ===== VALIDACIÓN DE MODO COMBINADO =====
+    if (MODO_TEMAS === 'combinado') {
+        const secuenciasValidas = CC_SECUENCIAS.filter(s => Array.isArray(s.temas) && s.temas.length > 0);
+        if (secuenciasValidas.length === 0) {
+            alert('No puedes guardar en modo "Temas combinados" sin al menos una secuencia con temas.\n\nVe a "Cartones Combinados" para crear una, o cambia a "Tema simple".');
+            return;
+        }
+        CC_SECUENCIAS = secuenciasValidas;
+        if (!CC_SECUENCIAS.some(s => s.id === CC_SECUENCIA_EN_USO)) {
+            CC_SECUENCIA_EN_USO = CC_SECUENCIAS[0].id;
+        }
+    }
+
     const config = {
         cartones: document.getElementById('cantCartones')?.value || '15',
         modo: '75',
@@ -283,7 +422,15 @@ function guardarConfiguracion() {
         vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
         vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
         temasActivos: temasActivos,
-        figurasPersonalizadas: figurasPersonalizadas
+        figurasPersonalizadas: figurasPersonalizadas,
+        // ===== MODO DE TEMAS (NUEVO) =====
+        modoTemas: MODO_TEMAS,
+        // ===== CARTONES COMBINADOS (compatibilidad con juego.html) =====
+        cartonesCombinados: {
+            activo: MODO_TEMAS === 'combinado',
+            secuenciaEnUsoId: CC_SECUENCIA_EN_USO,
+            secuencias: CC_SECUENCIAS
+        }
     };
     localStorage.setItem('bingo_config', JSON.stringify(config));
     cerrarConfiguracion();
@@ -321,7 +468,13 @@ function iniciarJuegoDirecto() {
             vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
             vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
             temasActivos: temasActivos,
-            figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)]
+            figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)],
+            modoTemas: 'simple',
+            cartonesCombinados: {
+                activo: false,
+                secuenciaEnUsoId: '',
+                secuencias: []
+            }
         };
         localStorage.setItem('bingo_config', JSON.stringify(config));
     }
@@ -344,7 +497,11 @@ function leerFigurasPersonalizadas() {
         const raw = localStorage.getItem('bingo_config');
         if (raw) {
             const config = JSON.parse(raw);
-            if (Array.isArray(config.figurasPersonalizadas) && config.figurasPersonalizadas.length > 0) {
+            if (Array.isArray(config.figurasPersonalizadas)) {
+                const existeDiagonal = config.figurasPersonalizadas.some(f => f && f.id === 'diagonal');
+                if (!existeDiagonal) {
+                    config.figurasPersonalizadas.unshift(Object.assign({}, FIGURA_DIAGONAL));
+                }
                 return config.figurasPersonalizadas;
             }
         }
@@ -441,7 +598,7 @@ function renderizarListaFiguras(idDestacado) {
         const btnBorrar = document.createElement('button');
         btnBorrar.className = 'figura-borrar';
         btnBorrar.textContent = '🗑️';
-        btnBorrar.disabled = total <= 1;
+        btnBorrar.disabled = total <= 1 || fig.id === 'diagonal';
         btnBorrar.addEventListener('click', () => borrarFigura(fig.id));
 
         item.appendChild(chk);
@@ -463,6 +620,10 @@ function toggleActivaFigura(id, activa) {
 }
 
 function borrarFigura(id) {
+    if (id === 'diagonal') {
+        alert('La figura diagonal no se puede borrar, solo desactivar.');
+        return;
+    }
     let figuras = leerFigurasPersonalizadas();
     if (figuras.length <= 1) {
         alert('Debe quedar al menos una figura');
@@ -566,12 +727,324 @@ function guardarFiguraNueva() {
 }
 
 /* ============================================
+   🧩 CARTONES COMBINADOS
+   ============================================ */
+function abrirPantallaCombinados() {
+    CC_EDITANDO_ID = null;
+    renderizarPantallaCombinados();
+    mostrarPantallaConfig('pantallaCombinados');
+}
+
+function renderizarPantallaCombinados() {
+    renderizarListaSecuenciasCC();
+    renderizarSelectorSecuenciaEnUso();
+    actualizarAvisoTemasInsuficientesCC();
+    actualizarAvisoModoEnCombinados();
+}
+
+function renderizarListaSecuenciasCC() {
+    const cont = document.getElementById('ccListaSecuencias');
+    if (!cont) return;
+    cont.innerHTML = '';
+
+    if (CC_SECUENCIAS.length === 0) {
+        const vacio = document.createElement('p');
+        vacio.className = 'config-hint';
+        vacio.textContent = 'No hay secuencias creadas todavía.';
+        cont.appendChild(vacio);
+        return;
+    }
+
+    CC_SECUENCIAS.forEach((sec) => {
+        const item = document.createElement('div');
+        item.className = 'cc-secuencia-item';
+        if (sec.id === CC_SECUENCIA_EN_USO) item.classList.add('en-uso');
+
+        const cab = document.createElement('div');
+        cab.className = 'cc-secuencia-cab';
+
+        const nombre = document.createElement('strong');
+        nombre.className = 'cc-secuencia-nombre';
+        nombre.textContent = sec.nombre;
+        cab.appendChild(nombre);
+
+        if (sec.id === CC_SECUENCIA_EN_USO) {
+            const badge = document.createElement('span');
+            badge.className = 'cc-badge-en-uso';
+            badge.textContent = 'EN USO';
+            cab.appendChild(badge);
+        }
+
+        const chips = document.createElement('div');
+        chips.className = 'cc-chips';
+        sec.temas.forEach((tema) => {
+            const chip = document.createElement('span');
+            chip.className = 'cc-chip';
+            chip.textContent = tema;
+            chips.appendChild(chip);
+        });
+        if (sec.temas.length === 0) {
+            const chipVacio = document.createElement('span');
+            chipVacio.className = 'cc-chip cc-chip-vacio';
+            chipVacio.textContent = '(sin temas)';
+            chips.appendChild(chipVacio);
+        }
+
+        const acciones = document.createElement('div');
+        acciones.className = 'cc-secuencia-acciones';
+
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'cc-btn-accion';
+        btnEditar.textContent = '✏️ Editar';
+        btnEditar.addEventListener('click', () => abrirEditorSecuenciaCC(sec.id));
+
+        const btnBorrar = document.createElement('button');
+        btnBorrar.className = 'cc-btn-accion cc-btn-borrar';
+        btnBorrar.textContent = '🗑️ Borrar';
+        btnBorrar.addEventListener('click', () => borrarSecuenciaCC(sec.id));
+
+        acciones.appendChild(btnEditar);
+        acciones.appendChild(btnBorrar);
+
+        item.appendChild(cab);
+        item.appendChild(chips);
+        item.appendChild(acciones);
+
+        cont.appendChild(item);
+    });
+}
+
+function renderizarSelectorSecuenciaEnUso() {
+    const sel = document.getElementById('ccSecuenciaEnUso');
+    const wrap = document.getElementById('ccWrapSecuenciaEnUso');
+    if (!sel) return;
+
+    sel.innerHTML = '';
+
+    if (CC_SECUENCIAS.length === 0) {
+        if (wrap) wrap.style.display = 'none';
+        return;
+    }
+    if (wrap) wrap.style.display = '';
+
+    CC_SECUENCIAS.forEach(sec => {
+        const opt = document.createElement('option');
+        opt.value = sec.id;
+        opt.textContent = sec.nombre;
+        sel.appendChild(opt);
+    });
+
+    if (!CC_SECUENCIAS.some(s => s.id === CC_SECUENCIA_EN_USO)) {
+        CC_SECUENCIA_EN_USO = CC_SECUENCIAS[0].id;
+    }
+    sel.value = CC_SECUENCIA_EN_USO;
+
+    sel.onchange = () => {
+        CC_SECUENCIA_EN_USO = sel.value;
+        renderizarListaSecuenciasCC();
+        renderizarModoTemas();
+    };
+}
+
+function actualizarAvisoTemasInsuficientesCC() {
+    const aviso = document.getElementById('ccAvisoTemas');
+    if (!aviso) return;
+    const temasActivos = [];
+    document.querySelectorAll('.tema-check').forEach(chk => {
+        if (chk.checked) temasActivos.push(chk.value);
+    });
+    if (temasActivos.length < 2) {
+        aviso.style.display = '';
+        aviso.textContent = `⚠️ Solo tienes ${temasActivos.length} tema(s) activo(s). Activa al menos 2 en la pestaña "Temas" para aprovechar los Cartones Combinados.`;
+    } else {
+        aviso.style.display = 'none';
+    }
+}
+
+function abrirEditorSecuenciaCC(id) {
+    CC_EDITANDO_ID = id || null;
+    const sec = id ? CC_SECUENCIAS.find(s => s.id === id) : null;
+
+    const inputNombre = document.getElementById('ccNombreSecuencia');
+    if (inputNombre) {
+        inputNombre.value = sec ? sec.nombre : `Secuencia ${CC_SECUENCIAS.length + 1}`;
+    }
+
+    renderizarChipsEditorCC(sec ? sec.temas.slice() : []);
+    renderizarSelectorAgregarTemaCC();
+    mostrarPantallaConfig('pantallaEditorSecuencia');
+}
+
+function cerrarEditorSecuenciaCC() {
+    abrirPantallaCombinados();
+}
+
+/* Estado temporal del editor de secuencia */
+let CC_EDITOR_TEMAS = [];
+
+function renderizarChipsEditorCC(temas) {
+    CC_EDITOR_TEMAS = temas || [];
+
+    const cont = document.getElementById('ccChipsEditor');
+    if (!cont) return;
+    cont.innerHTML = '';
+
+    if (CC_EDITOR_TEMAS.length === 0) {
+        const vacio = document.createElement('span');
+        vacio.className = 'config-hint';
+        vacio.textContent = 'Aún no has añadido temas a esta secuencia.';
+        cont.appendChild(vacio);
+        return;
+    }
+
+    CC_EDITOR_TEMAS.forEach((tema, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'cc-chip-editor';
+
+        const txt = document.createElement('span');
+        txt.className = 'cc-chip-editor-texto';
+        txt.textContent = tema;
+
+        const btnIzq = document.createElement('button');
+        btnIzq.className = 'cc-chip-mini';
+        btnIzq.textContent = '◀';
+        btnIzq.disabled = idx === 0;
+        btnIzq.addEventListener('click', () => moverTemaEditorCC(idx, -1));
+
+        const btnDer = document.createElement('button');
+        btnDer.className = 'cc-chip-mini';
+        btnDer.textContent = '▶';
+        btnDer.disabled = idx === CC_EDITOR_TEMAS.length - 1;
+        btnDer.addEventListener('click', () => moverTemaEditorCC(idx, +1));
+
+        const btnX = document.createElement('button');
+        btnX.className = 'cc-chip-mini cc-chip-x';
+        btnX.textContent = '✕';
+        btnX.addEventListener('click', () => quitarTemaEditorCC(idx));
+
+        chip.appendChild(btnIzq);
+        chip.appendChild(txt);
+        chip.appendChild(btnDer);
+        chip.appendChild(btnX);
+
+        cont.appendChild(chip);
+    });
+}
+
+function moverTemaEditorCC(idx, dir) {
+    const nuevo = idx + dir;
+    if (nuevo < 0 || nuevo >= CC_EDITOR_TEMAS.length) return;
+    const temp = CC_EDITOR_TEMAS[idx];
+    CC_EDITOR_TEMAS[idx] = CC_EDITOR_TEMAS[nuevo];
+    CC_EDITOR_TEMAS[nuevo] = temp;
+    renderizarChipsEditorCC(CC_EDITOR_TEMAS);
+}
+
+function quitarTemaEditorCC(idx) {
+    CC_EDITOR_TEMAS.splice(idx, 1);
+    renderizarChipsEditorCC(CC_EDITOR_TEMAS);
+}
+
+function renderizarSelectorAgregarTemaCC() {
+    const sel = document.getElementById('ccAgregarTema');
+    if (!sel) return;
+    sel.innerHTML = '';
+
+    const temasActivos = [];
+    document.querySelectorAll('.tema-check').forEach(chk => {
+        if (chk.checked) temasActivos.push(chk.value);
+    });
+
+    if (temasActivos.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '⚠️ No hay temas activos';
+        opt.disabled = true;
+        sel.appendChild(opt);
+        return;
+    }
+
+    const optDefecto = document.createElement('option');
+    optDefecto.value = '';
+    optDefecto.textContent = '-- Elegir tema --';
+    sel.appendChild(optDefecto);
+
+    temasActivos.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        sel.appendChild(opt);
+    });
+}
+
+function agregarTemaEditorCC() {
+    const sel = document.getElementById('ccAgregarTema');
+    if (!sel) return;
+    const tema = sel.value;
+    if (!tema) return;
+    if (CC_EDITOR_TEMAS.length >= 10) {
+        alert('Máximo 10 temas por secuencia.');
+        return;
+    }
+    CC_EDITOR_TEMAS.push(tema);
+    sel.value = '';
+    renderizarChipsEditorCC(CC_EDITOR_TEMAS);
+}
+
+function guardarSecuenciaCC() {
+    const inputNombre = document.getElementById('ccNombreSecuencia');
+    const nombre = (inputNombre?.value || '').trim() || `Secuencia ${CC_SECUENCIAS.length + 1}`;
+
+    if (CC_EDITOR_TEMAS.length === 0) {
+        alert('Añade al menos un tema a la secuencia.');
+        return;
+    }
+
+    if (CC_EDITANDO_ID) {
+        const sec = CC_SECUENCIAS.find(s => s.id === CC_EDITANDO_ID);
+        if (sec) {
+            sec.nombre = nombre;
+            sec.temas = CC_EDITOR_TEMAS.slice();
+        }
+    } else {
+        if (CC_SECUENCIAS.length >= 10) {
+            alert('Máximo 10 secuencias.');
+            return;
+        }
+        const nueva = {
+            id: 'sec_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+            nombre: nombre,
+            temas: CC_EDITOR_TEMAS.slice()
+        };
+        CC_SECUENCIAS.push(nueva);
+        if (!CC_SECUENCIA_EN_USO) CC_SECUENCIA_EN_USO = nueva.id;
+    }
+
+    CC_EDITANDO_ID = null;
+    abrirPantallaCombinados();
+}
+
+function borrarSecuenciaCC(id) {
+    if (!confirm('¿Borrar esta secuencia?')) return;
+    CC_SECUENCIAS = CC_SECUENCIAS.filter(s => s.id !== id);
+    if (CC_SECUENCIA_EN_USO === id) {
+        CC_SECUENCIA_EN_USO = CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '';
+    }
+    // Si borramos la última secuencia y estamos en modo combinado,
+    // forzamos vuelta a modo simple para no quedar en estado inválido.
+    if (CC_SECUENCIAS.length === 0 && MODO_TEMAS === 'combinado') {
+        MODO_TEMAS = 'simple';
+    }
+    renderizarPantallaCombinados();
+    renderizarModoTemas();
+}
+
+/* ============================================
    🎙️ SISTEMA DE VOZ (SOLO ESPAÑOL)
    ============================================ */
 function cargarVocesDisponibles() {
     if (!('speechSynthesis' in window)) return;
     const todas = window.speechSynthesis.getVoices();
-    // ✅ SOLO voces en español
     vocesDisponibles = todas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
 
     const select = document.getElementById('vozSeleccionada');
@@ -589,7 +1062,6 @@ function cargarVocesDisponibles() {
         return;
     }
 
-    // Ordenar por nombre para que sea más fácil encontrar
     vocesDisponibles.sort((a, b) => a.name.localeCompare(b.name));
 
     vocesDisponibles.forEach(v => {
@@ -667,7 +1139,6 @@ function probarVozConfig() {
                 utter.lang = voz.lang;
             }
         } else {
-            // Automática: primera voz en español
             utter.voice = vocesDisponibles[0];
             utter.lang = vocesDisponibles[0].lang;
         }
@@ -741,3 +1212,31 @@ function actualizarBotonCargar() {
 
 document.addEventListener('DOMContentLoaded', actualizarBotonCargar);
 
+/* ============================================
+   🌐 EXPOSICIÓN GLOBAL DE FUNCIONES
+   (para usarlas desde el HTML con onclick)
+   ============================================ */
+window.abrirConfiguracion = abrirConfiguracion;
+window.cerrarConfiguracion = cerrarConfiguracion;
+window.mostrarPantallaConfig = mostrarPantallaConfig;
+window.abrirSeccionConfig = abrirSeccionConfig;
+window.volverAlMenuConfig = volverAlMenuConfig;
+window.guardarConfiguracion = guardarConfiguracion;
+window.iniciarJuegoDirecto = iniciarJuegoDirecto;
+window.iniciarRevanchaDesdeMenu = iniciarRevanchaDesdeMenu;
+window.cargarPartidaDesdeMenu = cargarPartidaDesdeMenu;
+
+window.abrirPantallaCombinados = abrirPantallaCombinados;
+window.abrirEditorSecuenciaCC = abrirEditorSecuenciaCC;
+window.cerrarEditorSecuenciaCC = cerrarEditorSecuenciaCC;
+window.agregarTemaEditorCC = agregarTemaEditorCC;
+window.guardarSecuenciaCC = guardarSecuenciaCC;
+window.borrarSecuenciaCC = borrarSecuenciaCC;
+
+window.abrirEditorFiguraNueva = abrirEditorFiguraNueva;
+window.cerrarEditorFigura = cerrarEditorFigura;
+window.guardarFiguraNueva = guardarFiguraNueva;
+window.probarVozConfig = probarVozConfig;
+
+// 🎨 NUEVO: modo de temas
+window.seleccionarModoTemas = seleccionarModoTemas;

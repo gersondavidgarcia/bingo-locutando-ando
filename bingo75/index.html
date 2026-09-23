@@ -67,6 +67,24 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎨</span>
+                        <span class="seccion-texto">
+                            <strong>Modo de temas</strong>
+                            <small>Elige cómo se aplican: simple o combinado</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('combinados')" onfocus="this.blur()">
+                        <span class="seccion-icono">🧩</span>
+                        <span class="seccion-texto">
+                            <strong>Cartones Combinados</strong>
+                            <small>Mezcla temas por bloques de 3 cartones</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
                         <span class="seccion-icono">🎯</span>
                         <span class="seccion-texto">
@@ -162,6 +180,11 @@
                 <!-- PANTALLA: TEMAS -->
                 <div class="config-pantalla" id="pantallaTemas">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint" id="temasModoIndicador">
+                        Modo actual: <strong>—</strong>
+                        <button class="btn-link-inline" onclick="mostrarPantallaConfig('pantallaModoTemas')" onfocus="this.blur()">cambiar</button>
+                    </p>
 
                     <div class="form-group">
                         <label>Temas activos:</label>
@@ -273,6 +296,93 @@
                             </label>
                         </div>
                     </div>
+                </div>
+
+                <!-- PANTALLA: MODO DE TEMAS (NUEVA) -->
+                <div class="config-pantalla" id="pantallaModoTemas">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Elige cómo quieres aplicar los temas en la partida.</p>
+
+                    <button class="modo-tema-btn" id="modoSimpleBtn" onclick="seleccionarModoTemas('simple')" onfocus="this.blur()">
+                        <span class="modo-tema-icono">🎨</span>
+                        <span class="modo-tema-texto">
+                            <strong>Tema simple</strong>
+                            <small>Un tema a la vez. El botón CAMBIAR rota entre los temas activos.</small>
+                        </span>
+                        <span class="modo-tema-check" id="modoSimpleCheck">✓</span>
+                    </button>
+
+                    <button class="modo-tema-btn" id="modoCombinadoBtn" onclick="seleccionarModoTemas('combinado')" onfocus="this.blur()">
+                        <span class="modo-tema-icono">🧩</span>
+                        <span class="modo-tema-texto">
+                            <strong>Temas combinados</strong>
+                            <small>Mezcla varios temas en bloques de 3 cartones usando una secuencia.</small>
+                        </span>
+                        <span class="modo-tema-check" id="modoCombinadoCheck">✓</span>
+                    </button>
+
+                    <p class="config-hint" id="modoTemasAviso"></p>
+
+                    <button class="btn-secundario" id="btnIrASecuencias" onclick="abrirSeccionConfig('combinados')" onfocus="this.blur()">
+                        ➕ Crear o editar secuencias
+                    </button>
+                </div>
+
+                <!-- PANTALLA: CARTONES COMBINADOS -->
+                <div class="config-pantalla" id="pantallaCombinados">
+                    <button class="btn-volver" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">
+                        Mezcla varios temas en una misma partida. Cada tema cubre <strong>3 cartones seguidos</strong> y la secuencia se repite si hay más cartones.
+                    </p>
+
+                    <p class="config-hint" id="ccAvisoModo"></p>
+
+                    <p class="config-hint" id="ccAvisoTemas" style="display:none;"></p>
+
+                    <div class="form-group">
+                        <label>Mis secuencias:</label>
+                        <div class="cc-lista-secuencias" id="ccListaSecuencias"></div>
+                    </div>
+
+                    <button class="btn-figura-nueva" onclick="abrirEditorSecuenciaCC(null)" onfocus="this.blur()">
+                        ➕ Crear secuencia nueva
+                    </button>
+
+                    <div class="form-group" id="ccWrapSecuenciaEnUso">
+                        <label for="ccSecuenciaEnUso">Secuencia en uso:</label>
+                        <select id="ccSecuenciaEnUso"></select>
+                    </div>
+                </div>
+
+                <!-- PANTALLA: EDITOR DE SECUENCIA -->
+                <div class="config-pantalla" id="pantallaEditorSecuencia">
+                    <button class="btn-volver" onclick="cerrarEditorSecuenciaCC()" onfocus="this.blur()">‹ Volver</button>
+
+                    <h3 class="editor-titulo">✏️ Editar secuencia</h3>
+
+                    <div class="form-group">
+                        <label for="ccNombreSecuencia">Nombre de la secuencia:</label>
+                        <input type="text" id="ccNombreSecuencia" class="input-texto" placeholder="Ej: Sala A, Cumpleaños..." maxlength="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Temas de la secuencia (bloques de 3 cartones cada uno):</label>
+                        <div class="cc-chips-editor" id="ccChipsEditor"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ccAgregarTema">Añadir tema:</label>
+                        <div class="cc-agregar-fila">
+                            <select id="ccAgregarTema"></select>
+                            <button class="cc-btn-agregar" onclick="agregarTemaEditorCC()" onfocus="this.blur()">➕ Añadir</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-figura-guardar" onclick="guardarSecuenciaCC()" onfocus="this.blur()">
+                        💾 Guardar secuencia
+                    </button>
                 </div>
 
                 <!-- PANTALLA: FIGURAS -->
