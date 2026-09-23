@@ -711,3 +711,33 @@ function iniciarRevanchaDesdeMenu() {
     localStorage.setItem('bingo_modo_revancha', '1');
     window.location.href = 'juego.html';
 }
+
+/* ============================================
+   📂 CARGAR PARTIDA DESDE EL MENÚ
+   ============================================ */
+function cargarPartidaDesdeMenu() {
+    const raw = localStorage.getItem('bingo_partida_guardada');
+    if (!raw) {
+        alert('No hay ninguna partida guardada.');
+        return;
+    }
+    localStorage.setItem('bingo_modo_cargar', '1');
+    window.location.href = 'juego.html';
+}
+
+/* ============================================
+   📂 ACTUALIZAR ESTADO DEL BOTÓN CARGAR
+   ============================================ */
+function actualizarBotonCargar() {
+    const btn = document.getElementById('btnCargarMenu');
+    if (!btn) return;
+    const hayPartida = !!localStorage.getItem('bingo_partida_guardada');
+    if (!hayPartida) {
+        btn.classList.add('sin-partida');
+    } else {
+        btn.classList.remove('sin-partida');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', actualizarBotonCargar);
+

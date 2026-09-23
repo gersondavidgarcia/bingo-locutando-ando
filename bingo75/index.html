@@ -27,11 +27,12 @@
     <div class="menu-container">
         <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
 
-      <div class="menu-card">
-    <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
-    <button class="btn-revancha-menu" onclick="iniciarRevanchaDesdeMenu()" onfocus="this.blur()">🔄 REVANCHA</button>
-    <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
-</div>
+        <div class="menu-card">
+            <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
+            <button class="btn-revancha-menu" onclick="iniciarRevanchaDesdeMenu()" onfocus="this.blur()">🔄 REVANCHA</button>
+            <button class="btn-cargar-menu" id="btnCargarMenu" onclick="cargarPartidaDesdeMenu()" onfocus="this.blur()">📂 CARGAR</button>
+            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
+        </div>
     </div>
 
     <!-- MODAL DE CONFIGURACIÓN -->

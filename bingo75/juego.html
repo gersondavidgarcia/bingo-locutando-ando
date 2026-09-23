@@ -54,6 +54,10 @@
 
             </div>
 
+            <button id="btnGuardarPartida" class="btn-guardar-partida" onclick="guardarPartida()" onfocus="this.blur()">
+                💾 GUARDAR
+            </button>
+
             <div class="recientes-container">
                 <div class="recientes-lista" id="recientesLista"></div>
             </div>
@@ -1252,6 +1256,184 @@
         }
 
         /* ============================================
+           💾 GUARDAR PARTIDA
+           ============================================ */
+        function guardarPartida() {
+            try {
+                const cartones = [];
+                document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach((carton, idx) => {
+                    const celdas = [];
+                    carton.querySelectorAll('.carton-grid-inner .celda').forEach(celda => {
+                        celdas.push({
+                            valor: celda.dataset.valor || null,
+                            marcada: celda.classList.contains('marcada'),
+                            vacia: celda.classList.contains('vacia')
+                        });
+                    });
+                    cartones.push({
+                        index: idx,
+                        titulo: carton.querySelector('.carton-title')?.textContent || '',
+                        color: carton.style.getPropertyValue('--carton-color'),
+                        colorDark: carton.style.getPropertyValue('--carton-color-dark'),
+                        celdas: celdas,
+                        tienePrimeraBola: carton.classList.contains('tiene-primera-bola'),
+                        ganoFigura: carton.classList.contains('ganador-figura-1'),
+                        ganoBingo: carton.classList.contains('ganador-bingo'),
+                        fueraDeJuego: carton.classList.contains('fuera-de-juego')
+                    });
+                });
+
+                const partida = {
+                    version: 1,
+                    fecha: Date.now(),
+                    totalCartones: TOTAL_CARTONES,
+                    historialSacadas: historialSacadas.slice(),
+                    bombo: bombo.slice(),
+                    primeraBolaYaSalio: primeraBolaYaSalio,
+                    primeraBolaNumero: primeraBolaNumero,
+                    figuraYaGanada: figuraYaGanada,
+                    llenoYaGanado: llenoYaGanado,
+                    partidaTerminada: partidaTerminada,
+                    paletaActual: paletaActual,
+                    indiceRotacionActual: indiceRotacionActual,
+                    figuraActual: figuraActual,
+                    cartonesFueraDeJuego: Array.from(cartonesFueraDeJuego),
+                    cartones: cartones
+                };
+
+                localStorage.setItem('bingo_partida_guardada', JSON.stringify(partida));
+
+                const btn = document.getElementById('btnGuardarPartida');
+                if (btn) {
+                    btn.classList.add('guardado');
+                    btn.textContent = '✅ GUARDADO';
+                    setTimeout(() => {
+                        btn.classList.remove('guardado');
+                        btn.textContent = '💾 GUARDAR';
+                    }, 1200);
+                }
+            } catch (e) {
+                console.error('Error guardando partida:', e);
+                alert('No se pudo guardar la partida.');
+            }
+        }
+
+        /* ============================================
+           📂 CARGAR PARTIDA GUARDADA
+           ============================================ */
+        function cargarPartidaGuardada() {
+            let partida = null;
+            try {
+                const raw = localStorage.getItem('bingo_partida_guardada');
+                if (!raw) return false;
+                partida = JSON.parse(raw);
+                if (!partida || !Array.isArray(partida.cartones)) return false;
+            } catch (e) {
+                return false;
+            }
+
+            TOTAL_CARTONES = partida.totalCartones || TOTAL_CARTONES;
+            historialSacadas = Array.isArray(partida.historialSacadas) ? partida.historialSacadas.slice() : [];
+            bombo = Array.isArray(partida.bombo) ? partida.bombo.slice() : Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
+            primeraBolaYaSalio = partida.primeraBolaYaSalio === true;
+            primeraBolaNumero = partida.primeraBolaNumero || null;
+            figuraYaGanada = partida.figuraYaGanada === true;
+            llenoYaGanado = partida.llenoYaGanado === true;
+            partidaTerminada = partida.partidaTerminada === true;
+            paletaActual = typeof partida.paletaActual === 'number' ? partida.paletaActual : 0;
+            indiceRotacionActual = typeof partida.indiceRotacionActual === 'number' ? partida.indiceRotacionActual : 0;
+            if (partida.figuraActual && FIGURAS[partida.figuraActual]) figuraActual = partida.figuraActual;
+            cartonesFueraDeJuego = new Set(Array.isArray(partida.cartonesFueraDeJuego) ? partida.cartonesFueraDeJuego : []);
+
+            renderizarEstructura();
+
+            const cartonesDOM = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            partida.cartones.forEach((dataCarton, idx) => {
+                const carton = cartonesDOM[idx];
+                if (!carton) return;
+
+                if (dataCarton.color) carton.style.setProperty('--carton-color', dataCarton.color);
+                if (dataCarton.colorDark) carton.style.setProperty('--carton-color-dark', dataCarton.colorDark);
+
+                const titleEl = carton.querySelector('.carton-title');
+                if (titleEl && dataCarton.titulo) titleEl.textContent = dataCarton.titulo;
+
+                const celdasDOM = carton.querySelectorAll('.carton-grid-inner .celda');
+                dataCarton.celdas.forEach((celdaData, iCelda) => {
+                    const celda = celdasDOM[iCelda];
+                    if (!celda) return;
+                    if (celdaData.vacia) {
+                        celda.classList.add('vacia');
+                    } else if (celdaData.valor !== null && celdaData.valor !== undefined) {
+                        celda.dataset.valor = celdaData.valor;
+                        const numVal = celda.querySelector('.num-val');
+                        if (numVal) numVal.textContent = celdaData.valor;
+                    }
+                    if (celdaData.marcada) {
+                        celda.classList.add('marcada');
+                        celda.classList.remove('animar-marca');
+                    } else {
+                        celda.classList.remove('marcada');
+                    }
+                });
+
+                if (dataCarton.tienePrimeraBola) carton.classList.add('tiene-primera-bola');
+                if (dataCarton.ganoFigura) carton.classList.add('ganador-figura-1');
+                if (dataCarton.ganoBingo) carton.classList.add('ganador-bingo');
+            });
+
+            aplicarCartonesFueraDeJuego();
+
+            const display = document.getElementById('numeroDisplay');
+            if (display) {
+                if (historialSacadas.length > 0) {
+                    display.textContent = historialSacadas[0].numero;
+                    const sphere = document.getElementById('bolilleroSphere');
+                    if (sphere) {
+                        sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(historialSacadas[0].numero));
+                    }
+                } else {
+                    display.textContent = '--';
+                }
+            }
+
+            const stats = document.getElementById('statsDisplay');
+            if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
+
+            const recientesLista = document.getElementById('recientesLista');
+            if (recientesLista) {
+                recientesLista.innerHTML = '';
+                historialSacadas.slice(1, 7).forEach(item => {
+                    const bola = document.createElement('div');
+                    bola.className = 'mini-bola';
+                    bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
+                    bola.innerHTML = `<span>${item.numero}</span>`;
+                    recientesLista.appendChild(bola);
+                });
+            }
+
+            historialSacadas.forEach(item => {
+                const ctrlEl = document.getElementById(`ctrl-${item.numero}`);
+                if (ctrlEl) {
+                    ctrlEl.classList.add('marcada');
+                    ctrlEl.classList.remove('clickeable');
+                    ctrlEl.style.pointerEvents = 'none';
+                }
+            });
+
+            aplicarPaleta();
+            aplicarTamanoControl();
+            aplicarConfigFiguras();
+
+            setTimeout(() => {
+                actualizarPuntosAlerta();
+                actualizarResaltadosAmarillos();
+            }, 300);
+
+            return true;
+        }
+
+        /* ============================================
            LÓGICA DE SAQUE
            ============================================ */
         function ejecutarSaqueDeBola(numero) {
@@ -1506,6 +1688,7 @@
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
         window.confirmarRevancha = confirmarRevancha;
+        window.guardarPartida = guardarPartida;
 
         /* ============================================
            INICIALIZACIÓN
@@ -1535,15 +1718,25 @@
 
                 if (USAR_BASE_DATOS) suscribirNombresFirebase();
 
-                // 🔄 ¿Viene del index con modo revancha activado?
+                const modoCargarPartida = localStorage.getItem('bingo_modo_cargar');
+                if (modoCargarPartida === '1') {
+                    localStorage.removeItem('bingo_modo_cargar');
+                }
+
                 const modoRevanchaDesdeIndex = localStorage.getItem('bingo_modo_revancha');
                 if (modoRevanchaDesdeIndex === '1') {
                     localStorage.removeItem('bingo_modo_revancha');
                 }
 
-                reiniciarJuego();
+                let partidaCargada = false;
+                if (modoCargarPartida === '1') {
+                    partidaCargada = cargarPartidaGuardada();
+                }
 
-                // Si venía del index con revancha, activarlo automáticamente
+                if (!partidaCargada) {
+                    reiniciarJuego();
+                }
+
                 if (modoRevanchaDesdeIndex === '1') {
                     setTimeout(() => activarModoRevancha(), 900);
                 }
