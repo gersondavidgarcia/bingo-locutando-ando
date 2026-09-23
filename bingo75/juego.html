@@ -178,14 +178,6 @@
         }
 
         /* ============================================
-           🎙️ CONFIGURACIÓN DE AUDIO DE VOZ (GER)
-           ============================================ */
-        let audioVolumen   = parseFloat(localStorage.getItem('audioVolumen'))   || 1.0;
-        let audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
-
-        const RUTA_AUDIOS_GER = 'Audios/Ger/Numeros del 1-75/';
-
-        /* ============================================
            CONFIGURACIÓN GLOBAL
            ============================================ */
         let TOTAL_CARTONES = 15;
@@ -205,6 +197,17 @@
         let INTENSIDAD_HALO_NUMERO = 55;
 
         let VELOCIDAD_BOLA = 650;
+
+        /* ============================================
+           CONFIGURACIÓN DE VOZ
+           ============================================ */
+        let VOZ_ACTIVADA = false;
+        let VOZ_VOLUMEN = 1.0;
+        let VOZ_VELOCIDAD = 1.0;
+        let VOZ_TONO = 1.0;
+        let VOZ_SELECCIONADA = '';
+        let VOZ_REPETIR = 1;
+        let vocesDisponibles = [];
 
         let nombresDeFirebase = [];
         let bombo = [];
@@ -263,6 +266,14 @@
                     INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
 
                     VELOCIDAD_BOLA = config.velocidadBola !== undefined ? parseInt(config.velocidadBola) : 650;
+
+                    // ===== CONFIGURACIÓN DE VOZ =====
+                    VOZ_ACTIVADA = config.vozActivada === true;
+                    VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
+                    VOZ_VELOCIDAD = (config.vozVelocidad !== undefined ? config.vozVelocidad : 100) / 100;
+                    VOZ_TONO = (config.vozTono !== undefined ? config.vozTono : 100) / 100;
+                    VOZ_SELECCIONADA = config.vozSeleccionada || '';
+                    VOZ_REPETIR = config.vozRepetir !== undefined ? parseInt(config.vozRepetir) : 1;
 
                     if (Array.isArray(config.figurasPersonalizadas)) {
                         figurasPersonalizadas = config.figurasPersonalizadas;
@@ -437,6 +448,76 @@
             if (num <= 45) return 'N';
             if (num <= 60) return 'G';
             return 'O';
+        }
+
+        /* ============================================
+           🎙️ SISTEMA DE VOZ (Android + Windows 11)
+           ============================================ */
+        function cargarVocesDisponibles() {
+            if (!('speechSynthesis' in window)) return;
+            vocesDisponibles = window.speechSynthesis.getVoices();
+        }
+
+        function initVoces() {
+            if (!('speechSynthesis' in window)) {
+                console.warn('⚠️ Este dispositivo no soporta síntesis de voz');
+                return;
+            }
+            cargarVocesDisponibles();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = cargarVocesDisponibles;
+            }
+        }
+
+        function cantarBola(numero) {
+            if (!VOZ_ACTIVADA) return;
+            if (!('speechSynthesis' in window)) return;
+
+            const letra = obtenerLetra(numero);
+            const texto = `${letra} ${numero}`;
+
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+
+            const hablar = () => {
+                const utter = new SpeechSynthesisUtterance(texto);
+                utter.volume = VOZ_VOLUMEN;
+                utter.rate = VOZ_VELOCIDAD;
+                utter.pitch = VOZ_TONO;
+                utter.lang = 'es-ES';
+
+                if (VOZ_SELECCIONADA) {
+                    const voz = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA);
+                    if (voz) {
+                        utter.voice = voz;
+                        utter.lang = voz.lang;
+                    }
+                } else {
+                    const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+                    if (vozEspanol) {
+                        utter.voice = vozEspanol;
+                        utter.lang = vozEspanol.lang;
+                    }
+                }
+
+                window.speechSynthesis.speak(utter);
+            };
+
+            for (let i = 0; i < VOZ_REPETIR; i++) {
+                if (i === 0) {
+                    hablar();
+                } else {
+                    setTimeout(hablar, 1200 * i);
+                }
+            }
+        }
+
+        function desbloquearVoz() {
+            if (!('speechSynthesis' in window)) return;
+            try {
+                const u = new SpeechSynthesisUtterance('');
+                u.volume = 0;
+                window.speechSynthesis.speak(u);
+            } catch (e) {}
         }
 
         /* ============================================
@@ -1217,42 +1298,11 @@
         }
 
         /* ============================================
-           🎙️ DECIR NÚMERO (VOZ GER) — REPRODUCCIÓN SIMPLE
-           ============================================ */
-        function decirNumero(numero) {
-            try {
-                const ruta = `${RUTA_AUDIOS_GER}${numero}.mp3`;
-                const audio = new Audio(ruta);
-                audio.volume = Math.min(audioVolumen, 1.0);
-                audio.playbackRate = audioVelocidad;
-                audio.preload = 'auto';
-
-                audio.onerror = () => {
-                    console.warn('❌ No se pudo reproducir:', ruta);
-                };
-
-                const playPromise = audio.play();
-                if (playPromise && typeof playPromise.catch === 'function') {
-                    playPromise.catch(err => {
-                        console.warn('❌ Error al reproducir audio:', err);
-                    });
-                }
-            } catch (e) {
-                console.warn('❌ Error voz:', e);
-            }
-        }
-
-        /* ============================================
            LÓGICA COMPARTIDA: SACAR BOLA Y MARCARLA
            ============================================ */
         function ejecutarSaqueDeBola(numero) {
             const sphere = document.getElementById('bolilleroSphere');
 
-            // 🔄 Recargar ajustes de audio por si el usuario los cambió
-            audioVolumen   = parseFloat(localStorage.getItem('audioVolumen'))   || 1.0;
-            audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
-
-            // Quitar el parpadeo visualmente
             document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
                 .forEach(c => c.classList.remove('alerta-header'));
 
@@ -1273,7 +1323,6 @@
             });
 
             const ejecutarEntradaNuevaBola = () => {
-                // Quitar la bola del bombo (por su índice)
                 const idx = bombo.indexOf(numero);
                 if (idx === -1) return;
                 bombo.splice(idx, 1);
@@ -1290,6 +1339,9 @@
                 const display = document.getElementById('numeroDisplay');
                 if (display) display.textContent = numero;
 
+                // 🎙️ Cantar la bola con voz
+                cantarBola(numero);
+
                 if (sphere) {
                     sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(numero));
                     sphere.classList.remove('rodar-salida', 'rodar-entrada');
@@ -1300,10 +1352,6 @@
                 const stats = document.getElementById('statsDisplay');
                 if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
-                // 🎙️ Reproducir audio EN PARALELO (no bloquea nada)
-                decirNumero(numero);
-
-                // ⚡ Marcar las celdas INMEDIATAMENTE (al mismo tiempo que suena el audio)
                 document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
                     el.classList.add('marcada');
                     el.classList.add('animar-marca');
@@ -1312,7 +1360,6 @@
                     }, 1200);
                 });
 
-                // Marcar en el panel de control
                 const ctrlEl = document.getElementById(`ctrl-${numero}`);
                 if (ctrlEl) {
                     ctrlEl.classList.add('marcada');
@@ -1320,7 +1367,6 @@
                     ctrlEl.style.pointerEvents = 'none';
                 }
 
-                // Actualizar recientes
                 const recientesLista = document.getElementById('recientesLista');
                 if (recientesLista) {
                     recientesLista.innerHTML = '';
@@ -1333,7 +1379,6 @@
                     });
                 }
 
-                // Verificar premios después de VELOCIDAD_BOLA
                 setTimeout(() => {
                     if (sphere) sphere.classList.remove('rodar-entrada');
 
@@ -1549,6 +1594,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 cargarConfiguracion();
+
+                // 🎙️ Inicializar sistema de voz
+                initVoces();
+
+                // Desbloquear audio al primer toque (necesario en Android)
+                const desbloquear = () => {
+                    desbloquearVoz();
+                    document.removeEventListener('touchstart', desbloquear);
+                    document.removeEventListener('click', desbloquear);
+                };
+                document.addEventListener('touchstart', desbloquear, { once: true });
+                document.addEventListener('click', desbloquear, { once: true });
 
                 const indicesActivos = PALETAS
                     .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)

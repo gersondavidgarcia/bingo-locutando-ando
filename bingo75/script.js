@@ -35,6 +35,17 @@ let editorPatronActual = Array.from({length: 5}, () => Array(5).fill(0));
 let bloqueoMover = false;
 
 /* ============================================
+   CONFIGURACIÓN DE VOZ
+   ============================================ */
+let VOZ_ACTIVADA = false;
+let VOZ_VOLUMEN = 1.0;
+let VOZ_VELOCIDAD = 1.0;
+let VOZ_TONO = 1.0;
+let VOZ_SELECCIONADA = '';
+let VOZ_REPETIR = 1;
+let vocesDisponibles = [];
+
+/* ============================================
    ABRIR / CERRAR MODAL
    ============================================ */
 function abrirConfiguracion() {
@@ -62,7 +73,6 @@ function mostrarPantallaConfig(idPantalla) {
     const titulo = document.getElementById('modalTitulo');
     if (!titulo) return;
     switch (idPantalla) {
-        case 'pantallaAudio':            titulo.textContent = '🔊 Audio de voz'; break;
         case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
         case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
         case 'pantallaFiguras':          titulo.textContent = '🎯 Figuras'; break;
@@ -71,6 +81,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
+        case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
         case 'pantallaApariencia':       titulo.textContent = '📐 Apariencia'; break;
         default:                         titulo.textContent = '⚙️ Configuración';
     }
@@ -81,12 +92,12 @@ function mostrarPantallaConfig(idPantalla) {
 
 function abrirSeccionConfig(nombre) {
     switch (nombre) {
-        case 'audio':      mostrarPantallaConfig('pantallaAudio'); break;
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'figuras':    abrirPantallaFiguras(); break;
         case 'resaltados': mostrarPantallaConfig('pantallaResaltados'); break;
         case 'velocidad':  mostrarPantallaConfig('pantallaVelocidad'); break;
+        case 'voz':        abrirPantallaVoz(); break;
         case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
         default:           volverAlMenuConfig();
     }
@@ -124,6 +135,25 @@ function cargarConfigEnModal() {
 
             setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
 
+            // ===== CONFIGURACIÓN DE VOZ =====
+            VOZ_ACTIVADA = config.vozActivada === true;
+            VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
+            VOZ_VELOCIDAD = (config.vozVelocidad !== undefined ? config.vozVelocidad : 100) / 100;
+            VOZ_TONO = (config.vozTono !== undefined ? config.vozTono : 100) / 100;
+            VOZ_SELECCIONADA = config.vozSeleccionada || '';
+            VOZ_REPETIR = config.vozRepetir !== undefined ? parseInt(config.vozRepetir) : 1;
+
+            setVal('vozActivada', VOZ_ACTIVADA ? 'si' : 'no');
+            setVal('vozVolumen', Math.round(VOZ_VOLUMEN * 100));
+            setVal('vozVelocidad', Math.round(VOZ_VELOCIDAD * 100));
+            setVal('vozTono', Math.round(VOZ_TONO * 100));
+            setVal('vozRepetir', VOZ_REPETIR);
+            // La voz seleccionada se asigna después de cargar las voces
+            setTimeout(() => {
+                const sel = document.getElementById('vozSeleccionada');
+                if (sel && VOZ_SELECCIONADA) sel.value = VOZ_SELECCIONADA;
+            }, 300);
+
             const temasGuardados = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                 ? config.temasActivos : ['Verde'];
             document.querySelectorAll('.tema-check').forEach(chk => {
@@ -136,7 +166,6 @@ function cargarConfigEnModal() {
         }
     } catch (e) {}
     actualizarLabelsSliders();
-    cargarControlesAudio();
 }
 
 /* ============================================
@@ -197,39 +226,27 @@ function actualizarLabelsSliders() {
         valVel.textContent = rangoVel.value + ' ms';
         rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
     }
-}
 
-/* ============================================
-   🎛️ AUDIO DE VOZ - CARGAR Y GUARDAR
-   ============================================ */
-function cargarControlesAudio() {
-    const rangoVol = document.getElementById('audioVolumen');
-    const valVol = document.getElementById('valAudioVolumen');
-    const rangoVel = document.getElementById('audioVelocidad');
-    const valVel = document.getElementById('valAudioVelocidad');
-
-    if (rangoVol && valVol) {
-        const guardado = parseFloat(localStorage.getItem('audioVolumen'));
-        const valor = !isNaN(guardado) ? guardado : 1.0;
-        rangoVol.value = Math.round(valor * 100);
-        valVol.textContent = Math.round(valor * 100) + '%';
-        rangoVol.oninput = () => {
-            const val = rangoVol.value;
-            valVol.textContent = val + '%';
-            localStorage.setItem('audioVolumen', val / 100);
-        };
+    // ===== SLIDERS DE VOZ =====
+    const rangoVozVol = document.getElementById('vozVolumen');
+    const valVozVol = document.getElementById('valVozVolumen');
+    if (rangoVozVol && valVozVol) {
+        valVozVol.textContent = rangoVozVol.value + '%';
+        rangoVozVol.oninput = () => { valVozVol.textContent = rangoVozVol.value + '%'; };
     }
 
-    if (rangoVel && valVel) {
-        const guardado = parseFloat(localStorage.getItem('audioVelocidad'));
-        const valor = !isNaN(guardado) ? guardado : 1.0;
-        rangoVel.value = Math.round(valor * 100);
-        valVel.textContent = valor.toFixed(2) + 'x';
-        rangoVel.oninput = () => {
-            const val = rangoVel.value / 100;
-            valVel.textContent = val.toFixed(2) + 'x';
-            localStorage.setItem('audioVelocidad', val);
-        };
+    const rangoVozVel = document.getElementById('vozVelocidad');
+    const valVozVel = document.getElementById('valVozVelocidad');
+    if (rangoVozVel && valVozVel) {
+        valVozVel.textContent = rangoVozVel.value + '%';
+        rangoVozVel.oninput = () => { valVozVel.textContent = rangoVozVel.value + '%'; };
+    }
+
+    const rangoVozTono = document.getElementById('vozTono');
+    const valVozTono = document.getElementById('valVozTono');
+    if (rangoVozTono && valVozTono) {
+        valVozTono.textContent = rangoVozTono.value + '%';
+        rangoVozTono.oninput = () => { valVozTono.textContent = rangoVozTono.value + '%'; };
     }
 }
 
@@ -259,6 +276,13 @@ function guardarConfiguracion() {
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
         velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+        // ===== CONFIGURACIÓN DE VOZ =====
+        vozActivada: document.getElementById('vozActivada')?.value === 'si',
+        vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
+        vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
+        vozTono: parseInt(document.getElementById('vozTono')?.value || '100'),
+        vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
+        vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas
     };
@@ -291,6 +315,13 @@ function iniciarJuegoDirecto() {
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
             velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+            // ===== CONFIGURACIÓN DE VOZ =====
+            vozActivada: document.getElementById('vozActivada')?.value === 'si',
+            vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
+            vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
+            vozTono: parseInt(document.getElementById('vozTono')?.value || '100'),
+            vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
+            vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
             temasActivos: temasActivos,
             figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)]
         };
@@ -535,3 +566,205 @@ function guardarFiguraNueva() {
     escribirFigurasPersonalizadas(figuras);
     abrirPantallaFiguras();
 }
+
+/* ============================================
+   🎙️ SISTEMA DE VOZ (Android + Windows 11)
+   ============================================ */
+function cargarVocesDisponibles() {
+    if (!('speechSynthesis' in window)) return;
+    vocesDisponibles = window.speechSynthesis.getVoices();
+    const select = document.getElementById('vozSeleccionada');
+    if (!select) return;
+
+    const valorActual = select.value || VOZ_SELECCIONADA;
+    select.innerHTML = '<option value="">-- Automática (recomendada) --</option>';
+
+    // Filtrar y ordenar: primero español, luego el resto
+    const vocesEspanol = vocesDisponibles.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+    const otrasVoces = vocesDisponibles.filter(v => !v.lang || !v.lang.toLowerCase().startsWith('es'));
+
+    if (vocesEspanol.length > 0) {
+        const grupo = document.createElement('optgroup');
+        grupo.label = '🇪🇸 Español';
+        vocesEspanol.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = `${v.name} (${v.lang})`;
+            grupo.appendChild(opt);
+        });
+        select.appendChild(grupo);
+    }
+
+    if (otrasVoces.length > 0) {
+        const grupo = document.createElement('optgroup');
+        grupo.label = '🌍 Otros idiomas';
+        otrasVoces.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.name;
+            opt.textContent = `${v.name} (${v.lang})`;
+            grupo.appendChild(opt);
+        });
+        select.appendChild(grupo);
+    }
+
+    if (valorActual) select.value = valorActual;
+}
+
+function initVoces() {
+    if (!('speechSynthesis' in window)) {
+        console.warn('⚠️ Este dispositivo no soporta síntesis de voz');
+        return;
+    }
+    cargarVocesDisponibles();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = cargarVocesDisponibles;
+    }
+}
+
+function abrirPantallaVoz() {
+    // Asegurar que las voces estén cargadas antes de mostrar
+    if ('speechSynthesis' in window) {
+        vocesDisponibles = window.speechSynthesis.getVoices();
+        cargarVocesDisponibles();
+    }
+    mostrarPantallaConfig('pantallaVoz');
+}
+
+/* ============================================
+   FUNCIÓN PARA HABLAR "B7", "I22", etc.
+   ============================================ */
+function cantarBola(numero) {
+    if (!VOZ_ACTIVADA) return;
+    if (!('speechSynthesis' in window)) return;
+
+    const letra = (() => {
+        if (numero <= 15) return 'B';
+        if (numero <= 30) return 'I';
+        if (numero <= 45) return 'N';
+        if (numero <= 60) return 'G';
+        return 'O';
+    })();
+
+    // Texto con espacio entre letra y número
+    const texto = `${letra} ${numero}`;
+
+    // Cancelar cualquier cola anterior para no retrasar
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+
+    const hablar = () => {
+        const utter = new SpeechSynthesisUtterance(texto);
+        utter.volume = VOZ_VOLUMEN;
+        utter.rate = VOZ_VELOCIDAD;
+        utter.pitch = VOZ_TONO;
+        utter.lang = 'es-ES';
+
+        // Elegir voz preferida
+        if (VOZ_SELECCIONADA) {
+            const voz = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA);
+            if (voz) {
+                utter.voice = voz;
+                utter.lang = voz.lang;
+            }
+        } else {
+            // Automática: buscar una voz en español
+            const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+            if (vozEspanol) {
+                utter.voice = vozEspanol;
+                utter.lang = vozEspanol.lang;
+            }
+        }
+
+        window.speechSynthesis.speak(utter);
+    };
+
+    // Repetir N veces
+    for (let i = 0; i < VOZ_REPETIR; i++) {
+        if (i === 0) {
+            hablar();
+        } else {
+            setTimeout(hablar, 1200 * i);
+        }
+    }
+}
+
+// Desbloquear audio en móviles: el usuario debe tocar la pantalla una vez
+function desbloquearVoz() {
+    if (!('speechSynthesis' in window)) return;
+    try {
+        const u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+    } catch (e) {}
+}
+
+/* ============================================
+   PROBAR VOZ DESDE LA CONFIGURACIÓN
+   ============================================ */
+function probarVozConfig() {
+    if (!('speechSynthesis' in window)) {
+        alert('Este dispositivo no soporta síntesis de voz');
+        return;
+    }
+
+    // Leer valores actuales de los sliders (sin guardar)
+    const volumen = parseInt(document.getElementById('vozVolumen')?.value || '100') / 100;
+    const velocidad = parseInt(document.getElementById('vozVelocidad')?.value || '100') / 100;
+    const tono = parseInt(document.getElementById('vozTono')?.value || '100') / 100;
+    const repetir = parseInt(document.getElementById('vozRepetir')?.value || '1');
+    const vozSel = document.getElementById('vozSeleccionada')?.value || '';
+
+    // Asegurar voces cargadas
+    if (vocesDisponibles.length === 0 && 'speechSynthesis' in window) {
+        vocesDisponibles = window.speechSynthesis.getVoices();
+    }
+
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+
+    const hablar = () => {
+        const utter = new SpeechSynthesisUtterance('B 7');
+        utter.volume = volumen;
+        utter.rate = velocidad;
+        utter.pitch = tono;
+        utter.lang = 'es-ES';
+
+        if (vozSel) {
+            const voz = vocesDisponibles.find(v => v.name === vozSel);
+            if (voz) {
+                utter.voice = voz;
+                utter.lang = voz.lang;
+            }
+        } else {
+            const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+            if (vozEspanol) {
+                utter.voice = vozEspanol;
+                utter.lang = vozEspanol.lang;
+            }
+        }
+
+        window.speechSynthesis.speak(utter);
+    };
+
+    for (let i = 0; i < repetir; i++) {
+        if (i === 0) {
+            hablar();
+        } else {
+            setTimeout(hablar, 1200 * i);
+        }
+    }
+}
+
+/* ============================================
+   INICIALIZAR SISTEMA DE VOZ
+   ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+    initVoces();
+
+    // Desbloquear audio al primer toque (necesario en Android/Chrome)
+    const desbloquear = () => {
+        desbloquearVoz();
+        document.removeEventListener('touchstart', desbloquear);
+        document.removeEventListener('click', desbloquear);
+    };
+    document.addEventListener('touchstart', desbloquear, { once: true });
+    document.addEventListener('click', desbloquear, { once: true });
+});
