@@ -62,6 +62,7 @@ function mostrarPantallaConfig(idPantalla) {
     const titulo = document.getElementById('modalTitulo');
     if (!titulo) return;
     switch (idPantalla) {
+        case 'pantallaAudio':            titulo.textContent = '🔊 Audio de voz'; break;
         case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
         case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
         case 'pantallaFiguras':          titulo.textContent = '🎯 Figuras'; break;
@@ -80,6 +81,7 @@ function mostrarPantallaConfig(idPantalla) {
 
 function abrirSeccionConfig(nombre) {
     switch (nombre) {
+        case 'audio':      mostrarPantallaConfig('pantallaAudio'); break;
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'figuras':    abrirPantallaFiguras(); break;
@@ -134,6 +136,7 @@ function cargarConfigEnModal() {
         }
     } catch (e) {}
     actualizarLabelsSliders();
+    cargarControlesAudio();
 }
 
 /* ============================================
@@ -193,6 +196,40 @@ function actualizarLabelsSliders() {
     if (rangoVel && valVel) {
         valVel.textContent = rangoVel.value + ' ms';
         rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
+    }
+}
+
+/* ============================================
+   🎛️ AUDIO DE VOZ - CARGAR Y GUARDAR
+   ============================================ */
+function cargarControlesAudio() {
+    const rangoVol = document.getElementById('audioVolumen');
+    const valVol = document.getElementById('valAudioVolumen');
+    const rangoVel = document.getElementById('audioVelocidad');
+    const valVel = document.getElementById('valAudioVelocidad');
+
+    if (rangoVol && valVol) {
+        const guardado = parseFloat(localStorage.getItem('audioVolumen'));
+        const valor = !isNaN(guardado) ? guardado : 1.0;
+        rangoVol.value = Math.round(valor * 100);
+        valVol.textContent = Math.round(valor * 100) + '%';
+        rangoVol.oninput = () => {
+            const val = rangoVol.value;
+            valVol.textContent = val + '%';
+            localStorage.setItem('audioVolumen', val / 100);
+        };
+    }
+
+    if (rangoVel && valVel) {
+        const guardado = parseFloat(localStorage.getItem('audioVelocidad'));
+        const valor = !isNaN(guardado) ? guardado : 1.0;
+        rangoVel.value = Math.round(valor * 100);
+        valVel.textContent = valor.toFixed(2) + 'x';
+        rangoVel.oninput = () => {
+            const val = rangoVel.value / 100;
+            valVel.textContent = val.toFixed(2) + 'x';
+            localStorage.setItem('audioVelocidad', val);
+        };
     }
 }
 

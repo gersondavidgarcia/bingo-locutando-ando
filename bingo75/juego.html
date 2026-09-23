@@ -178,6 +178,14 @@
         }
 
         /* ============================================
+           🎙️ CONFIGURACIÓN DE AUDIO DE VOZ (GER)
+           ============================================ */
+        let audioVolumen   = parseFloat(localStorage.getItem('audioVolumen'))   || 1.0;
+        let audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
+
+        const RUTA_AUDIOS_GER = 'Audios/Ger/Numeros del 1-75/';
+
+        /* ============================================
            CONFIGURACIÓN GLOBAL
            ============================================ */
         let TOTAL_CARTONES = 15;
@@ -688,7 +696,6 @@
 
         /* ============================================
            RENDERIZAR TABLA DE CONTROL (CLICKEABLE)
-           Cada bolita, al pulsarla, saca ese número concreto.
            ============================================ */
         function renderizarTablaControl() {
             const tabla = document.getElementById('tablaNumeros');
@@ -719,11 +726,9 @@
                     bolita.id = `ctrl-${num}`;
                     bolita.textContent = num;
                     bolita.dataset.num = num;
-                    // Hacerla clickeable para sacar ese número concreto
                     bolita.addEventListener('click', function() {
                         sacarBolaEspecifica(num);
                     });
-                    // Si ya está marcada (ya salió), no es clickeable
                     if (historialSacadas.some(h => h.numero === num)) {
                         bolita.classList.add('marcada');
                         bolita.style.pointerEvents = 'none';
@@ -1041,7 +1046,6 @@
         function obtenerCeldasFaltantes(carton, celdas, patronFigura) {
             const resultado = [];
 
-            // --- FIGURA ---
             if (!figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
                 let faltantes = 0;
                 let total = 0;
@@ -1066,7 +1070,6 @@
                 }
             }
 
-            // --- BINGO ---
             if (!llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
                 let faltantes = 0;
                 let candidata = null;
@@ -1090,9 +1093,6 @@
 
         /* ============================================
            🟡 RESALTADO AMARILLO + PARPADEO DEL HEADER
-           Dos avisos independientes por cartón:
-           - Aviso FIGURA (una sola vez)
-           - Aviso BINGO  (una sola vez)
            ============================================ */
         function actualizarResaltadosAmarillos() {
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
@@ -1122,7 +1122,6 @@
                 const faltaParaFigura = detectarFaltaParaFigura(carton, celdas, patronFigura);
                 const faltaParaBingo  = detectarFaltaParaBingo(carton, celdas);
 
-                // Pintar las celdas amarillas que faltan (figura + bingo)
                 const celdasFaltantes = obtenerCeldasFaltantes(carton, celdas, patronFigura);
                 if (celdasFaltantes.length > 0) {
                     celdasFaltantes.forEach(c => c.classList.add('falta-amarillo'));
@@ -1130,26 +1129,22 @@
 
                 let debeParpadear = false;
 
-                // Aviso de FIGURA (solo la primera vez)
                 if (faltaParaFigura && carton.dataset.yaAvisoFigura !== '1') {
                     debeParpadear = true;
                     carton.dataset.yaAvisoFigura = '1';
                 }
 
-                // Aviso de BINGO (solo la primera vez)
                 if (faltaParaBingo && carton.dataset.yaAvisoBingo !== '1') {
                     debeParpadear = true;
                     carton.dataset.yaAvisoBingo = '1';
                 }
 
-                // Resetear el flag de figura si ya no está a 1 y no ganó figura
                 if (!faltaParaFigura) {
                     if (!carton.classList.contains('ganador-figura-1')) {
                         carton.dataset.yaAvisoFigura = '0';
                     }
                 }
 
-                // Resetear el flag de bingo si ya no está a 1
                 if (!faltaParaBingo) {
                     carton.dataset.yaAvisoBingo = '0';
                 }
@@ -1222,14 +1217,56 @@
         }
 
         /* ============================================
+           🎙️ DECIR NÚMERO (VOZ GER) CON CALLBACK
+           ============================================ */
+        function decirNumero(numero, callback) {
+            try {
+                const ruta = `${RUTA_AUDIOS_GER}${numero}.mp3`;
+                const audio = new Audio(ruta);
+                audio.volume = Math.min(audioVolumen, 1.0);
+                audio.playbackRate = audioVelocidad;
+                audio.preload = 'auto';
+
+                let yaLlamo = false;
+                const llamarCallback = () => {
+                    if (yaLlamo) return;
+                    yaLlamo = true;
+                    if (callback) callback();
+                };
+
+                audio.onended = llamarCallback;
+                audio.onerror = () => {
+                    console.warn('❌ No se pudo reproducir:', ruta);
+                    llamarCallback();
+                };
+
+                // Timeout de seguridad: si en 6s no terminó, liberamos
+                setTimeout(llamarCallback, 6000);
+
+                const playPromise = audio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(err => {
+                        console.warn('❌ Error al reproducir audio:', err);
+                        llamarCallback();
+                    });
+                }
+            } catch (e) {
+                console.warn('❌ Error voz:', e);
+                if (callback) callback();
+            }
+        }
+
+        /* ============================================
            LÓGICA COMPARTIDA: SACAR BOLA Y MARCARLA
-           Se usa tanto para el botón aleatorio como para
-           el clic directo en el panel de control.
            ============================================ */
         function ejecutarSaqueDeBola(numero) {
             const sphere = document.getElementById('bolilleroSphere');
 
-            // Quitar el parpadeo visualmente (los datasets yaAvisoFigura/yaAvisoBingo NO se tocan)
+            // 🔄 Recargar ajustes de audio por si el usuario los cambió
+            audioVolumen   = parseFloat(localStorage.getItem('audioVolumen'))   || 1.0;
+            audioVelocidad = parseFloat(localStorage.getItem('audioVelocidad')) || 1.0;
+
+            // Quitar el parpadeo visualmente
             document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
                 .forEach(c => c.classList.remove('alerta-header'));
 
@@ -1277,80 +1314,87 @@
                 const stats = document.getElementById('statsDisplay');
                 if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
-                document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
-                    el.classList.add('marcada');
-                    el.classList.add('animar-marca');
-                    setTimeout(() => {
-                        el.classList.remove('animar-marca');
-                    }, 1200);
-                });
-
-                const ctrlEl = document.getElementById(`ctrl-${numero}`);
-                if (ctrlEl) {
-                    ctrlEl.classList.add('marcada');
-                    ctrlEl.classList.remove('clickeable');
-                    ctrlEl.style.pointerEvents = 'none';
-                }
-
-                const recientesLista = document.getElementById('recientesLista');
-                if (recientesLista) {
-                    recientesLista.innerHTML = '';
-                    historialSacadas.slice(1, 7).forEach(item => {
-                        const bola = document.createElement('div');
-                        bola.className = 'mini-bola entrando';
-                        bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
-                        bola.innerHTML = `<span>${item.numero}</span>`;
-                        recientesLista.appendChild(bola);
+                // 🎙️ Decir el número y esperar a que termine
+                decirNumero(numero, () => {
+                    // Marcar las celdas del número en los cartones
+                    document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
+                        el.classList.add('marcada');
+                        el.classList.add('animar-marca');
+                        setTimeout(() => {
+                            el.classList.remove('animar-marca');
+                        }, 1200);
                     });
-                }
 
-                setTimeout(() => {
-                    if (sphere) sphere.classList.remove('rodar-entrada');
+                    // Marcar en el panel de control
+                    const ctrlEl = document.getElementById(`ctrl-${numero}`);
+                    if (ctrlEl) {
+                        ctrlEl.classList.add('marcada');
+                        ctrlEl.classList.remove('clickeable');
+                        ctrlEl.style.pointerEvents = 'none';
+                    }
 
-                    const resultadoFigura = comprobarFiguraEnCartones();
-                    const resultadoLleno = comprobarLlenoEnCartones();
-
-                    const cartonesGanadores = new Map();
-
-                    if (resultadoFigura.hayGanador) {
-                        figuraYaGanada = true;
-                        resultadoFigura.infoGanadores.forEach(info => {
-                            cartonesGanadores.set(info.carton, {
-                                carton: info.carton,
-                                celdasDeLaFigura: info.celdasDeLaFigura || [],
-                                ganoFigura: true,
-                                ganoBingo: false
-                            });
+                    // Actualizar recientes
+                    const recientesLista = document.getElementById('recientesLista');
+                    if (recientesLista) {
+                        recientesLista.innerHTML = '';
+                        historialSacadas.slice(1, 7).forEach(item => {
+                            const bola = document.createElement('div');
+                            bola.className = 'mini-bola entrando';
+                            bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
+                            bola.innerHTML = `<span>${item.numero}</span>`;
+                            recientesLista.appendChild(bola);
                         });
                     }
 
-                    if (resultadoLleno.hayGanador) {
-                        llenoYaGanado = true;
-                        partidaTerminada = true;
-                        resultadoLleno.infoGanadores.forEach(info => {
-                            if (cartonesGanadores.has(info.carton)) {
-                                cartonesGanadores.get(info.carton).ganoBingo = true;
-                            } else {
+                    // Verificar premios
+                    setTimeout(() => {
+                        if (sphere) sphere.classList.remove('rodar-entrada');
+
+                        const resultadoFigura = comprobarFiguraEnCartones();
+                        const resultadoLleno = comprobarLlenoEnCartones();
+
+                        const cartonesGanadores = new Map();
+
+                        if (resultadoFigura.hayGanador) {
+                            figuraYaGanada = true;
+                            resultadoFigura.infoGanadores.forEach(info => {
                                 cartonesGanadores.set(info.carton, {
                                     carton: info.carton,
                                     celdasDeLaFigura: info.celdasDeLaFigura || [],
-                                    ganoFigura: false,
-                                    ganoBingo: true
+                                    ganoFigura: true,
+                                    ganoBingo: false
                                 });
-                            }
-                        });
-                    }
+                            });
+                        }
 
-                    if (cartonesGanadores.size > 0) {
-                        ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
+                        if (resultadoLleno.hayGanador) {
+                            llenoYaGanado = true;
+                            partidaTerminada = true;
+                            resultadoLleno.infoGanadores.forEach(info => {
+                                if (cartonesGanadores.has(info.carton)) {
+                                    cartonesGanadores.get(info.carton).ganoBingo = true;
+                                } else {
+                                    cartonesGanadores.set(info.carton, {
+                                        carton: info.carton,
+                                        celdasDeLaFigura: info.celdasDeLaFigura || [],
+                                        ganoFigura: false,
+                                        ganoBingo: true
+                                    });
+                                }
+                            });
+                        }
+
+                        if (cartonesGanadores.size > 0) {
+                            ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
+                                actualizarResaltadosAmarillos();
+                                liberarBloqueo();
+                            });
+                        } else {
                             actualizarResaltadosAmarillos();
                             liberarBloqueo();
-                        });
-                    } else {
-                        actualizarResaltadosAmarillos();
-                        liberarBloqueo();
-                    }
-                }, VELOCIDAD_BOLA);
+                        }
+                    }, VELOCIDAD_BOLA);
+                });
             };
 
             const liberarBloqueo = () => {
