@@ -698,3 +698,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchstart', desbloquear, { once: true });
     document.addEventListener('click', desbloquear, { once: true });
 });
+
+/* ============================================
+   🔄 INICIAR REVANCHA DESDE EL MENÚ
+   ============================================ */
+function iniciarRevanchaDesdeMenu() {
+    const raw = localStorage.getItem('bingo_config');
+    if (!raw) {
+        iniciarJuegoDirecto();
+        return;
+    }
+    localStorage.setItem('bingo_modo_revancha', '1');
+    window.location.href = 'juego.html';
+}
