@@ -904,16 +904,16 @@ body {
 .bolillero-sphere::after {
     content: '';
     position: absolute;
-    top: 8%;
-    left: 15%;
+    top: 8%;     /* Se mantienen fijos */
+    left: 15%;   /* Se mantienen fijos */
     width: 28%;
     height: 18%;
     border-radius: 50%;
     background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 60%, rgba(255, 255, 255, 0) 100%);
-    transform: rotate(-30deg);
     pointer-events: none;
     z-index: 4;
     animation: orbita-3d-infinita-lenta 6s linear infinite;
+    will-change: transform, opacity; /* GPU Aceleración */
 }
 
 .bolillero-numero {
@@ -955,11 +955,11 @@ body {
 }
 
 @keyframes orbita-3d-infinita-lenta {
-    0% { top: 8%; left: 15%; opacity: 0.9; transform: rotate(-30deg); }
-    25% { top: 15%; left: 62%; opacity: 0.5; transform: rotate(30deg); }
-    50% { top: 62%; left: 55%; opacity: 0.15; transform: rotate(120deg); }
-    75% { top: 55%; left: 8%; opacity: 0.5; transform: rotate(210deg); }
-    100% { top: 8%; left: 15%; opacity: 0.9; transform: rotate(-30deg); }
+    0% { transform: translate(0, 0) rotate(-30deg); opacity: 0.9; }
+    25% { transform: translate(25px, 5px) rotate(30deg); opacity: 0.5; }
+    50% { transform: translate(20px, 30px) rotate(120deg); opacity: 0.15; }
+    75% { transform: translate(-5px, 25px) rotate(210deg); opacity: 0.5; }
+    100% { transform: translate(0, 0) rotate(-30deg); opacity: 0.9; }
 }
 
 @keyframes sombra-3d-infinita-lenta {
@@ -2256,6 +2256,8 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
         inset 0 0 calc(8px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
         0 0 calc(8px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.9));
     z-index: 9;
+    will-change: box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO */
 }
 
 .cartones-grid.modo-15 .celda.falta-amarillo .num-val {
@@ -2291,10 +2293,14 @@ body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
     animation-fill-mode: both !important;
     position: relative !important;
     z-index: 10 !important;
+    will-change: background-color, box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO: Fuerza renderizado por GPU */
 }
 
 body .cartones-grid.modo-15 .carton.alerta-header {
     animation: bordeAlerta 1s ease-in-out infinite !important;
+    will-change: box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO: Fuerza renderizado por GPU */
 }
 
 @keyframes bordeAlerta {
