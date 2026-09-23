@@ -1217,9 +1217,9 @@
         }
 
         /* ============================================
-           🎙️ DECIR NÚMERO (VOZ GER) CON CALLBACK
+           🎙️ DECIR NÚMERO (VOZ GER) — REPRODUCCIÓN SIMPLE
            ============================================ */
-        function decirNumero(numero, callback) {
+        function decirNumero(numero) {
             try {
                 const ruta = `${RUTA_AUDIOS_GER}${numero}.mp3`;
                 const audio = new Audio(ruta);
@@ -1227,32 +1227,18 @@
                 audio.playbackRate = audioVelocidad;
                 audio.preload = 'auto';
 
-                let yaLlamo = false;
-                const llamarCallback = () => {
-                    if (yaLlamo) return;
-                    yaLlamo = true;
-                    if (callback) callback();
-                };
-
-                audio.onended = llamarCallback;
                 audio.onerror = () => {
                     console.warn('❌ No se pudo reproducir:', ruta);
-                    llamarCallback();
                 };
-
-                // Timeout de seguridad: si en 6s no terminó, liberamos
-                setTimeout(llamarCallback, 6000);
 
                 const playPromise = audio.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
                     playPromise.catch(err => {
                         console.warn('❌ Error al reproducir audio:', err);
-                        llamarCallback();
                     });
                 }
             } catch (e) {
                 console.warn('❌ Error voz:', e);
-                if (callback) callback();
             }
         }
 
@@ -1314,87 +1300,87 @@
                 const stats = document.getElementById('statsDisplay');
                 if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
-                // 🎙️ Decir el número y esperar a que termine
-                decirNumero(numero, () => {
-                    // Marcar las celdas del número en los cartones
-                    document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
-                        el.classList.add('marcada');
-                        el.classList.add('animar-marca');
-                        setTimeout(() => {
-                            el.classList.remove('animar-marca');
-                        }, 1200);
+                // 🎙️ Reproducir audio EN PARALELO (no bloquea nada)
+                decirNumero(numero);
+
+                // ⚡ Marcar las celdas INMEDIATAMENTE (al mismo tiempo que suena el audio)
+                document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
+                    el.classList.add('marcada');
+                    el.classList.add('animar-marca');
+                    setTimeout(() => {
+                        el.classList.remove('animar-marca');
+                    }, 1200);
+                });
+
+                // Marcar en el panel de control
+                const ctrlEl = document.getElementById(`ctrl-${numero}`);
+                if (ctrlEl) {
+                    ctrlEl.classList.add('marcada');
+                    ctrlEl.classList.remove('clickeable');
+                    ctrlEl.style.pointerEvents = 'none';
+                }
+
+                // Actualizar recientes
+                const recientesLista = document.getElementById('recientesLista');
+                if (recientesLista) {
+                    recientesLista.innerHTML = '';
+                    historialSacadas.slice(1, 7).forEach(item => {
+                        const bola = document.createElement('div');
+                        bola.className = 'mini-bola entrando';
+                        bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
+                        bola.innerHTML = `<span>${item.numero}</span>`;
+                        recientesLista.appendChild(bola);
                     });
+                }
 
-                    // Marcar en el panel de control
-                    const ctrlEl = document.getElementById(`ctrl-${numero}`);
-                    if (ctrlEl) {
-                        ctrlEl.classList.add('marcada');
-                        ctrlEl.classList.remove('clickeable');
-                        ctrlEl.style.pointerEvents = 'none';
-                    }
+                // Verificar premios después de VELOCIDAD_BOLA
+                setTimeout(() => {
+                    if (sphere) sphere.classList.remove('rodar-entrada');
 
-                    // Actualizar recientes
-                    const recientesLista = document.getElementById('recientesLista');
-                    if (recientesLista) {
-                        recientesLista.innerHTML = '';
-                        historialSacadas.slice(1, 7).forEach(item => {
-                            const bola = document.createElement('div');
-                            bola.className = 'mini-bola entrando';
-                            bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
-                            bola.innerHTML = `<span>${item.numero}</span>`;
-                            recientesLista.appendChild(bola);
+                    const resultadoFigura = comprobarFiguraEnCartones();
+                    const resultadoLleno = comprobarLlenoEnCartones();
+
+                    const cartonesGanadores = new Map();
+
+                    if (resultadoFigura.hayGanador) {
+                        figuraYaGanada = true;
+                        resultadoFigura.infoGanadores.forEach(info => {
+                            cartonesGanadores.set(info.carton, {
+                                carton: info.carton,
+                                celdasDeLaFigura: info.celdasDeLaFigura || [],
+                                ganoFigura: true,
+                                ganoBingo: false
+                            });
                         });
                     }
 
-                    // Verificar premios
-                    setTimeout(() => {
-                        if (sphere) sphere.classList.remove('rodar-entrada');
-
-                        const resultadoFigura = comprobarFiguraEnCartones();
-                        const resultadoLleno = comprobarLlenoEnCartones();
-
-                        const cartonesGanadores = new Map();
-
-                        if (resultadoFigura.hayGanador) {
-                            figuraYaGanada = true;
-                            resultadoFigura.infoGanadores.forEach(info => {
+                    if (resultadoLleno.hayGanador) {
+                        llenoYaGanado = true;
+                        partidaTerminada = true;
+                        resultadoLleno.infoGanadores.forEach(info => {
+                            if (cartonesGanadores.has(info.carton)) {
+                                cartonesGanadores.get(info.carton).ganoBingo = true;
+                            } else {
                                 cartonesGanadores.set(info.carton, {
                                     carton: info.carton,
                                     celdasDeLaFigura: info.celdasDeLaFigura || [],
-                                    ganoFigura: true,
-                                    ganoBingo: false
+                                    ganoFigura: false,
+                                    ganoBingo: true
                                 });
-                            });
-                        }
+                            }
+                        });
+                    }
 
-                        if (resultadoLleno.hayGanador) {
-                            llenoYaGanado = true;
-                            partidaTerminada = true;
-                            resultadoLleno.infoGanadores.forEach(info => {
-                                if (cartonesGanadores.has(info.carton)) {
-                                    cartonesGanadores.get(info.carton).ganoBingo = true;
-                                } else {
-                                    cartonesGanadores.set(info.carton, {
-                                        carton: info.carton,
-                                        celdasDeLaFigura: info.celdasDeLaFigura || [],
-                                        ganoFigura: false,
-                                        ganoBingo: true
-                                    });
-                                }
-                            });
-                        }
-
-                        if (cartonesGanadores.size > 0) {
-                            ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
-                                actualizarResaltadosAmarillos();
-                                liberarBloqueo();
-                            });
-                        } else {
+                    if (cartonesGanadores.size > 0) {
+                        ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
                             actualizarResaltadosAmarillos();
                             liberarBloqueo();
-                        }
-                    }, VELOCIDAD_BOLA);
-                });
+                        });
+                    } else {
+                        actualizarResaltadosAmarillos();
+                        liberarBloqueo();
+                    }
+                }, VELOCIDAD_BOLA);
             };
 
             const liberarBloqueo = () => {
