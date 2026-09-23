@@ -451,11 +451,13 @@
         }
 
         /* ============================================
-           🎙️ SISTEMA DE VOZ (Android + Windows 11)
+           🎙️ SISTEMA DE VOZ (SOLO ESPAÑOL)
            ============================================ */
         function cargarVocesDisponibles() {
             if (!('speechSynthesis' in window)) return;
-            vocesDisponibles = window.speechSynthesis.getVoices();
+            const todas = window.speechSynthesis.getVoices();
+            // ✅ SOLO voces en español
+            vocesDisponibles = todas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
         }
 
         function initVoces() {
@@ -472,6 +474,7 @@
         function cantarBola(numero) {
             if (!VOZ_ACTIVADA) return;
             if (!('speechSynthesis' in window)) return;
+            if (vocesDisponibles.length === 0) return;
 
             const letra = obtenerLetra(numero);
             const texto = `${letra} ${numero}`;
@@ -490,13 +493,13 @@
                     if (voz) {
                         utter.voice = voz;
                         utter.lang = voz.lang;
+                    } else {
+                        utter.voice = vocesDisponibles[0];
+                        utter.lang = vocesDisponibles[0].lang;
                     }
                 } else {
-                    const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
-                    if (vozEspanol) {
-                        utter.voice = vozEspanol;
-                        utter.lang = vozEspanol.lang;
-                    }
+                    utter.voice = vocesDisponibles[0];
+                    utter.lang = vocesDisponibles[0].lang;
                 }
 
                 window.speechSynthesis.speak(utter);
@@ -1122,7 +1125,7 @@
         }
 
         /* ============================================
-           🟡 OBTENER LAS CELDAS FALTANTES (1 o 2)
+           🟡 OBTENER LAS CELDAS FALTANTES
            ============================================ */
         function obtenerCeldasFaltantes(carton, celdas, patronFigura) {
             const resultado = [];

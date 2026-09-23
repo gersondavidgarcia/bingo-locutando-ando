@@ -148,7 +148,6 @@ function cargarConfigEnModal() {
             setVal('vozVelocidad', Math.round(VOZ_VELOCIDAD * 100));
             setVal('vozTono', Math.round(VOZ_TONO * 100));
             setVal('vozRepetir', VOZ_REPETIR);
-            // La voz seleccionada se asigna después de cargar las voces
             setTimeout(() => {
                 const sel = document.getElementById('vozSeleccionada');
                 if (sel && VOZ_SELECCIONADA) sel.value = VOZ_SELECCIONADA;
@@ -315,7 +314,6 @@ function iniciarJuegoDirecto() {
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
             velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
-            // ===== CONFIGURACIÓN DE VOZ =====
             vozActivada: document.getElementById('vozActivada')?.value === 'si',
             vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
             vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
@@ -568,46 +566,42 @@ function guardarFiguraNueva() {
 }
 
 /* ============================================
-   🎙️ SISTEMA DE VOZ (Android + Windows 11)
+   🎙️ SISTEMA DE VOZ (SOLO ESPAÑOL)
    ============================================ */
 function cargarVocesDisponibles() {
     if (!('speechSynthesis' in window)) return;
-    vocesDisponibles = window.speechSynthesis.getVoices();
+    const todas = window.speechSynthesis.getVoices();
+    // ✅ SOLO voces en español
+    vocesDisponibles = todas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+
     const select = document.getElementById('vozSeleccionada');
     if (!select) return;
 
     const valorActual = select.value || VOZ_SELECCIONADA;
     select.innerHTML = '<option value="">-- Automática (recomendada) --</option>';
 
-    // Filtrar y ordenar: primero español, luego el resto
-    const vocesEspanol = vocesDisponibles.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
-    const otrasVoces = vocesDisponibles.filter(v => !v.lang || !v.lang.toLowerCase().startsWith('es'));
-
-    if (vocesEspanol.length > 0) {
-        const grupo = document.createElement('optgroup');
-        grupo.label = '🇪🇸 Español';
-        vocesEspanol.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.textContent = `${v.name} (${v.lang})`;
-            grupo.appendChild(opt);
-        });
-        select.appendChild(grupo);
+    if (vocesDisponibles.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = '⚠️ No hay voces en español instaladas';
+        opt.disabled = true;
+        select.appendChild(opt);
+        return;
     }
 
-    if (otrasVoces.length > 0) {
-        const grupo = document.createElement('optgroup');
-        grupo.label = '🌍 Otros idiomas';
-        otrasVoces.forEach(v => {
-            const opt = document.createElement('option');
-            opt.value = v.name;
-            opt.textContent = `${v.name} (${v.lang})`;
-            grupo.appendChild(opt);
-        });
-        select.appendChild(grupo);
-    }
+    // Ordenar por nombre para que sea más fácil encontrar
+    vocesDisponibles.sort((a, b) => a.name.localeCompare(b.name));
 
-    if (valorActual) select.value = valorActual;
+    vocesDisponibles.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v.name;
+        opt.textContent = `${v.name} (${v.lang})`;
+        select.appendChild(opt);
+    });
+
+    if (valorActual && vocesDisponibles.some(v => v.name === valorActual)) {
+        select.value = valorActual;
+    }
 }
 
 function initVoces() {
@@ -622,72 +616,12 @@ function initVoces() {
 }
 
 function abrirPantallaVoz() {
-    // Asegurar que las voces estén cargadas antes de mostrar
     if ('speechSynthesis' in window) {
-        vocesDisponibles = window.speechSynthesis.getVoices();
         cargarVocesDisponibles();
     }
     mostrarPantallaConfig('pantallaVoz');
 }
 
-/* ============================================
-   FUNCIÓN PARA HABLAR "B7", "I22", etc.
-   ============================================ */
-function cantarBola(numero) {
-    if (!VOZ_ACTIVADA) return;
-    if (!('speechSynthesis' in window)) return;
-
-    const letra = (() => {
-        if (numero <= 15) return 'B';
-        if (numero <= 30) return 'I';
-        if (numero <= 45) return 'N';
-        if (numero <= 60) return 'G';
-        return 'O';
-    })();
-
-    // Texto con espacio entre letra y número
-    const texto = `${letra} ${numero}`;
-
-    // Cancelar cualquier cola anterior para no retrasar
-    try { window.speechSynthesis.cancel(); } catch (e) {}
-
-    const hablar = () => {
-        const utter = new SpeechSynthesisUtterance(texto);
-        utter.volume = VOZ_VOLUMEN;
-        utter.rate = VOZ_VELOCIDAD;
-        utter.pitch = VOZ_TONO;
-        utter.lang = 'es-ES';
-
-        // Elegir voz preferida
-        if (VOZ_SELECCIONADA) {
-            const voz = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA);
-            if (voz) {
-                utter.voice = voz;
-                utter.lang = voz.lang;
-            }
-        } else {
-            // Automática: buscar una voz en español
-            const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
-            if (vozEspanol) {
-                utter.voice = vozEspanol;
-                utter.lang = vozEspanol.lang;
-            }
-        }
-
-        window.speechSynthesis.speak(utter);
-    };
-
-    // Repetir N veces
-    for (let i = 0; i < VOZ_REPETIR; i++) {
-        if (i === 0) {
-            hablar();
-        } else {
-            setTimeout(hablar, 1200 * i);
-        }
-    }
-}
-
-// Desbloquear audio en móviles: el usuario debe tocar la pantalla una vez
 function desbloquearVoz() {
     if (!('speechSynthesis' in window)) return;
     try {
@@ -706,17 +640,16 @@ function probarVozConfig() {
         return;
     }
 
-    // Leer valores actuales de los sliders (sin guardar)
+    if (vocesDisponibles.length === 0) {
+        alert('No hay voces en español instaladas. Ve a los ajustes de tu dispositivo para descargar una.');
+        return;
+    }
+
     const volumen = parseInt(document.getElementById('vozVolumen')?.value || '100') / 100;
     const velocidad = parseInt(document.getElementById('vozVelocidad')?.value || '100') / 100;
     const tono = parseInt(document.getElementById('vozTono')?.value || '100') / 100;
     const repetir = parseInt(document.getElementById('vozRepetir')?.value || '1');
     const vozSel = document.getElementById('vozSeleccionada')?.value || '';
-
-    // Asegurar voces cargadas
-    if (vocesDisponibles.length === 0 && 'speechSynthesis' in window) {
-        vocesDisponibles = window.speechSynthesis.getVoices();
-    }
 
     try { window.speechSynthesis.cancel(); } catch (e) {}
 
@@ -734,11 +667,9 @@ function probarVozConfig() {
                 utter.lang = voz.lang;
             }
         } else {
-            const vozEspanol = vocesDisponibles.find(v => v.lang && v.lang.toLowerCase().startsWith('es'));
-            if (vozEspanol) {
-                utter.voice = vozEspanol;
-                utter.lang = vozEspanol.lang;
-            }
+            // Automática: primera voz en español
+            utter.voice = vocesDisponibles[0];
+            utter.lang = vocesDisponibles[0].lang;
         }
 
         window.speechSynthesis.speak(utter);
@@ -759,7 +690,6 @@ function probarVozConfig() {
 document.addEventListener('DOMContentLoaded', () => {
     initVoces();
 
-    // Desbloquear audio al primer toque (necesario en Android/Chrome)
     const desbloquear = () => {
         desbloquearVoz();
         document.removeEventListener('touchstart', desbloquear);
