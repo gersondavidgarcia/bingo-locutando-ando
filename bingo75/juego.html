@@ -1273,32 +1273,43 @@
         /* ============================================
            🔵 ACTUALIZAR PUNTOS DE ALERTA
            ============================================ */
-        function actualizarPuntosAlerta() {
-            if (partidaTerminada) return;
+      function actualizarPuntosAlerta() {
+    if (partidaTerminada) return;
 
-            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
-            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+    const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+    const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+    
+    // NUEVO: Arreglo para guardar los puntos que necesitan parpadear
+    let puntosAAnimar = []; 
 
-            cartones.forEach((carton) => {
-                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
-                const punto = carton.querySelector('.punto-alerta');
-                if (!punto) return;
+    cartones.forEach((carton) => {
+        const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+        const punto = carton.querySelector('.punto-alerta');
+        if (!punto) return;
 
-                const aUno = estaAUno(carton, celdas, patronFigura);
+        const aUno = estaAUno(carton, celdas, patronFigura);
 
-                if (aUno) {
-                    if (!punto.classList.contains('activo')) {
-                        punto.classList.add('activo');
-                        punto.classList.remove('titilar');
-                        void punto.offsetWidth;
-                        punto.classList.add('titilar');
-                        setTimeout(() => punto.classList.remove('titilar'), 800);
-                    }
-                } else {
-                    punto.classList.remove('activo');
-                }
-            });
+        if (aUno) {
+            if (!punto.classList.contains('activo')) {
+                punto.classList.add('activo');
+                punto.classList.remove('titilar');
+                // Guardamos el punto en lugar de detener el navegador aquí
+                puntosAAnimar.push(punto); 
+            }
+        } else {
+            punto.classList.remove('activo');
         }
+    });
+
+    // NUEVO: Redibujamos la pantalla 1 sola vez y aplicamos la animación a todos
+    if (puntosAAnimar.length > 0) {
+        void document.body.offsetWidth; 
+        puntosAAnimar.forEach(punto => {
+            punto.classList.add('titilar');
+            setTimeout(() => punto.classList.remove('titilar'), 800);
+        });
+    }
+}
 
         /* ============================================
            LÓGICA COMPARTIDA: SACAR BOLA Y MARCARLA

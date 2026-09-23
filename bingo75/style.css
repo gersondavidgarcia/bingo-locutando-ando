@@ -809,9 +809,11 @@ body {
     outline: 3px solid #ffffff;
     outline-offset: -2px;
     box-shadow:
-        0 4px 10px rgba(0, 0, 0, 0.2),
-        inset 0 0 12px var(--tema-color, #2e7d32);
+    0 4px 10px rgba(0, 0, 0, 0.2),
+    inset 0 0 12px var(--tema-color, #2e7d32);
     animation: ondasColoridas 12s ease-in-out infinite;
+    will-change: background-position, box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO */
 }
 
 .bolillero-container::before {
@@ -2338,10 +2340,11 @@ body .cartones-grid.modo-15 .carton.alerta-header {
    ========================================================= */
 
 .cartones-grid.modo-15 .celda.animar-marca {
-    position: relative !important;
-    z-index: 50 !important;
-    transform-origin: center center !important;
-    animation: zoomCeldaArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+    animation: zoomConArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+    z-index: 5;
+    position: relative;
+    will-change: transform, box-shadow, background-color; /* NUEVO: Preparar GPU */
+    transform: translateZ(0); /* NUEVO: Aislar en capa 3D */
 }
 
 /* Capa de color por encima del verde del tema */
