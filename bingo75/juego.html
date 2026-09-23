@@ -208,9 +208,6 @@
         let VOZ_SELECCIONADA = '';
         let VOZ_REPETIR = 1;
         let vocesDisponibles = [];
-        /* ✅ Cache de la voz elegida y utterance reutilizable */
-        let vozSeleccionadaObj = null;
-        let utteranceReutilizable = null;
 
         let nombresDeFirebase = [];
         let bombo = [];
@@ -235,25 +232,12 @@
 
         let timeoutBloqueoDestello = null;
 
-        /* ============================================
-           ✅ TIMEOUTS SEGUROS (evita acumulación de recursos)
-           ============================================ */
-        const timeoutsActivos = new Set();
-        function setTimeoutSeguro(fn, ms) {
-            const id = setTimeout(() => {
-                timeoutsActivos.delete(id);
-                fn();
-            }, ms);
-            timeoutsActivos.add(id);
-            return id;
-        }
-        function limpiarTimeoutsSeguros() {
-            timeoutsActivos.forEach(id => clearTimeout(id));
-            timeoutsActivos.clear();
-        }
-
         const RANGOS_BINGO = {
-            B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75]
+            B: [1, 15],
+            I: [16, 30],
+            N: [31, 45],
+            G: [46, 60],
+            O: [61, 75]
         };
 
         /* ============================================
@@ -435,9 +419,7 @@
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan) {
                     headerSpan.textContent = textoCabecera;
-                    if (USAR_BASE_DATOS && nombresDeFirebase[i]) {
-                        setTimeoutSeguro(() => ajustarTamanoNombre(headerSpan), 0);
-                    }
+                    if (USAR_BASE_DATOS && nombresDeFirebase[i]) setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
                 }
             });
         }
@@ -476,15 +458,6 @@
             const todas = window.speechSynthesis.getVoices();
             // ✅ SOLO voces en español
             vocesDisponibles = todas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
-
-            // ✅ Cachear la voz elegida una sola vez
-            if (VOZ_SELECCIONADA) {
-                vozSeleccionadaObj = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA)
-                                     || vocesDisponibles[0]
-                                     || null;
-            } else {
-                vozSeleccionadaObj = vocesDisponibles[0] || null;
-            }
         }
 
         function initVoces() {
@@ -501,38 +474,43 @@
         function cantarBola(numero) {
             if (!VOZ_ACTIVADA) return;
             if (!('speechSynthesis' in window)) return;
-            if (!vozSeleccionadaObj) return;
+            if (vocesDisponibles.length === 0) return;
 
             const letra = obtenerLetra(numero);
             const texto = `${letra} ${numero}`;
 
             try { window.speechSynthesis.cancel(); } catch (e) {}
 
-            // ✅ Reutilizar SIEMPRE la misma instancia (evita fuga de memoria)
-            if (!utteranceReutilizable) {
-                utteranceReutilizable = new SpeechSynthesisUtterance();
-            }
-            utteranceReutilizable.text = texto;
-            utteranceReutilizable.volume = VOZ_VOLUMEN;
-            utteranceReutilizable.rate = VOZ_VELOCIDAD;
-            utteranceReutilizable.pitch = VOZ_TONO;
-            utteranceReutilizable.voice = vozSeleccionadaObj;
-            utteranceReutilizable.lang = vozSeleccionadaObj.lang;
+            const hablar = () => {
+                const utter = new SpeechSynthesisUtterance(texto);
+                utter.volume = VOZ_VOLUMEN;
+                utter.rate = VOZ_VELOCIDAD;
+                utter.pitch = VOZ_TONO;
+                utter.lang = 'es-ES';
 
-            window.speechSynthesis.speak(utteranceReutilizable);
+                if (VOZ_SELECCIONADA) {
+                    const voz = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA);
+                    if (voz) {
+                        utter.voice = voz;
+                        utter.lang = voz.lang;
+                    } else {
+                        utter.voice = vocesDisponibles[0];
+                        utter.lang = vocesDisponibles[0].lang;
+                    }
+                } else {
+                    utter.voice = vocesDisponibles[0];
+                    utter.lang = vocesDisponibles[0].lang;
+                }
 
-            // Repeticiones con timeout seguro (cancelables)
-            for (let i = 1; i < VOZ_REPETIR; i++) {
-                setTimeoutSeguro(() => {
-                    if (!VOZ_ACTIVADA) return;
-                    const u = new SpeechSynthesisUtterance(texto);
-                    u.volume = VOZ_VOLUMEN;
-                    u.rate = VOZ_VELOCIDAD;
-                    u.pitch = VOZ_TONO;
-                    u.voice = vozSeleccionadaObj;
-                    u.lang = vozSeleccionadaObj.lang;
-                    window.speechSynthesis.speak(u);
-                }, 1200 * i);
+                window.speechSynthesis.speak(utter);
+            };
+
+            for (let i = 0; i < VOZ_REPETIR; i++) {
+                if (i === 0) {
+                    hablar();
+                } else {
+                    setTimeout(hablar, 1200 * i);
+                }
             }
         }
 
@@ -708,7 +686,7 @@
                 grid.appendChild(carton);
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan && USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
-                    setTimeoutSeguro(() => ajustarTamanoNombre(headerSpan), 0);
+                    setTimeout(() => ajustarTamanoNombre(headerSpan), 0);
                 }
                 const innerGrid = carton.querySelector('.carton-grid-inner');
                 for (let fila = 0; fila < 5; fila++) {
@@ -1034,7 +1012,7 @@
                 const lista = celdasDeLaFigura || [];
                 if (lista.length > maxCeldas) maxCeldas = lista.length;
                 lista.forEach((celda, i) => {
-                    const t = setTimeoutSeguro(() => {
+                    const t = setTimeout(() => {
                         celda.classList.add('en-figura');
                     }, i * DURACION_POR_CASILLA);
                     timeoutsFase1.push(t);
@@ -1295,43 +1273,43 @@
         /* ============================================
            🔵 ACTUALIZAR PUNTOS DE ALERTA
            ============================================ */
-        function actualizarPuntosAlerta() {
-            if (partidaTerminada) return;
+      function actualizarPuntosAlerta() {
+    if (partidaTerminada) return;
 
-            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
-            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+    const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+    const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+    
+    // NUEVO: Arreglo para guardar los puntos que necesitan parpadear
+    let puntosAAnimar = []; 
 
-            // NUEVO: Arreglo para guardar los puntos que necesitan parpadear
-            let puntosAAnimar = [];
+    cartones.forEach((carton) => {
+        const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+        const punto = carton.querySelector('.punto-alerta');
+        if (!punto) return;
 
-            cartones.forEach((carton) => {
-                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
-                const punto = carton.querySelector('.punto-alerta');
-                if (!punto) return;
+        const aUno = estaAUno(carton, celdas, patronFigura);
 
-                const aUno = estaAUno(carton, celdas, patronFigura);
-
-                if (aUno) {
-                    if (!punto.classList.contains('activo')) {
-                        punto.classList.add('activo');
-                        punto.classList.remove('titilar');
-                        // Guardamos el punto en lugar de detener el navegador aquí
-                        puntosAAnimar.push(punto);
-                    }
-                } else {
-                    punto.classList.remove('activo');
-                }
-            });
-
-            // NUEVO: Redibujamos la pantalla 1 sola vez y aplicamos la animación a todos
-            if (puntosAAnimar.length > 0) {
-                void document.body.offsetWidth;
-                puntosAAnimar.forEach(punto => {
-                    punto.classList.add('titilar');
-                    setTimeoutSeguro(() => punto.classList.remove('titilar'), 800);
-                });
+        if (aUno) {
+            if (!punto.classList.contains('activo')) {
+                punto.classList.add('activo');
+                punto.classList.remove('titilar');
+                // Guardamos el punto en lugar de detener el navegador aquí
+                puntosAAnimar.push(punto); 
             }
+        } else {
+            punto.classList.remove('activo');
         }
+    });
+
+    // NUEVO: Redibujamos la pantalla 1 sola vez y aplicamos la animación a todos
+    if (puntosAAnimar.length > 0) {
+        void document.body.offsetWidth; 
+        puntosAAnimar.forEach(punto => {
+            punto.classList.add('titilar');
+            setTimeout(() => punto.classList.remove('titilar'), 800);
+        });
+    }
+}
 
         /* ============================================
            LÓGICA COMPARTIDA: SACAR BOLA Y MARCARLA
@@ -1391,7 +1369,7 @@
                 document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
                     el.classList.add('marcada');
                     el.classList.add('animar-marca');
-                    setTimeoutSeguro(() => {
+                    setTimeout(() => {
                         el.classList.remove('animar-marca');
                     }, 1200);
                 });
@@ -1415,7 +1393,7 @@
                     });
                 }
 
-                setTimeoutSeguro(() => {
+                setTimeout(() => {
                     if (sphere) sphere.classList.remove('rodar-entrada');
 
                     const resultadoFigura = comprobarFiguraEnCartones();
@@ -1481,7 +1459,7 @@
                     void sphere.offsetWidth;
                     sphere.classList.add('rodar-salida');
 
-                    setTimeoutSeguro(() => {
+                    setTimeout(() => {
                         ejecutarEntradaNuevaBola();
                     }, 480);
                 } else {
@@ -1542,9 +1520,6 @@
            REINICIAR JUEGO
            ============================================ */
         function reiniciarJuego() {
-            // ✅ Limpiar TODOS los timeouts pendientes (evita acumulación)
-            limpiarTimeoutsSeguros();
-
             bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
             historialSacadas = [];
             const display = document.getElementById('numeroDisplay');
@@ -1559,12 +1534,6 @@
             if (timeoutBloqueoDestello) { clearTimeout(timeoutBloqueoDestello); timeoutBloqueoDestello = null; }
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
-
-            // ✅ Cancelar voz pendiente
-            if ('speechSynthesis' in window) {
-                try { window.speechSynthesis.cancel(); } catch (e) {}
-            }
-
             bloqueadoPorAnimacion = false;
             isAnimating = false;
             figuraYaGanada = false;
@@ -1673,29 +1642,6 @@
                     btnCambiar.onclick = cambiarCartonesYPaleta;
                 }
             }
-        });
-
-        /* ============================================
-           ✅ PAUSAR ANIMACIONES CUANDO LA PESTAÑA NO ESTÁ VISIBLE
-           ============================================ */
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                document.body.classList.add('pausa-animaciones');
-                if ('speechSynthesis' in window) {
-                    try { window.speechSynthesis.cancel(); } catch (e) {}
-                }
-            } else {
-                document.body.classList.remove('pausa-animaciones');
-            }
-        });
-
-        /* ============================================
-           ✅ LIMPIAR RECURSOS AL SALIR DE LA PÁGINA
-           ============================================ */
-        window.addEventListener('beforeunload', () => {
-            limpiarTimeoutsSeguros();
-            if (unsubscribeSnapshot) { try { unsubscribeSnapshot(); } catch (e) {} }
-            if ('speechSynthesis' in window) { try { window.speechSynthesis.cancel(); } catch (e) {} }
         });
     </script>
 </body>

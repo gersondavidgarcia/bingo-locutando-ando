@@ -2500,12 +2500,3 @@ body .cartones-grid.modo-15 .carton.alerta-header {
         background-color: var(--carton-color);
     }
 }
-
-/* ============================================
-   ✅ PAUSAR ANIMACIONES CUANDO LA PESTAÑA NO ESTÁ VISIBLE
-   ============================================ */
-body.pausa-animaciones *,
-body.pausa-animaciones *::before,
-body.pausa-animaciones *::after {
-    animation-play-state: paused !important;
-}
