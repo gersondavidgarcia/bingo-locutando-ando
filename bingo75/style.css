@@ -10,6 +10,18 @@
     --amarillo-halo: 0.55;
 }
 
+html, body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+
 * {
     -webkit-tap-highlight-color: transparent !important;
     tap-highlight-color: transparent !important;

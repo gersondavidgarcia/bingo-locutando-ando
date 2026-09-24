@@ -1260,3 +1260,17 @@ window.probarVozConfig = probarVozConfig;
 
 window.seleccionarModoTemas = seleccionarModoTemas;
 window.abrirPantallaSonidos = abrirPantallaSonidos;
+
+/* ============================================
+   🚫 BLOQUEAR MENÚ CONTEXTUAL SOLO EN MÓVIL
+   ============================================ */
+document.addEventListener('contextmenu', function(e) {
+    // Si es un input o textarea, siempre permitir
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    // Detectar si es móvil/táctil
+    const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (!esMovil) return;
+
+    e.preventDefault();
+});
