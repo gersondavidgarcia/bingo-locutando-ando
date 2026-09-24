@@ -47,7 +47,7 @@ let VOZ_REPETIR = 1;
 let vocesDisponibles = [];
 
 /* ============================================
-   🎨 MODO DE TEMAS (NUEVO)
+   🎨 MODO DE TEMAS
    'simple'    → un tema a la vez (rota con CAMBIAR)
    'combinado' → mezcla temas por bloques de 3 cartones
    ============================================ */
@@ -226,6 +226,8 @@ function cargarConfigEnModal() {
             setVal('cantidadFiguras', config.cantidadFiguras);
             setVal('tamanoControl', config.tamanoControl);
             setVal('tamanoFiguras', config.tamanoFiguras);
+            // ✅ NUEVO: espacio superior para el notch
+            setVal('espacioNotch', config.espacioNotch !== undefined ? config.espacioNotch : 1);
 
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
@@ -280,6 +282,9 @@ function cargarConfigEnModal() {
             CC_SECUENCIAS = [];
             CC_SECUENCIA_EN_USO = '';
             MODO_TEMAS = 'simple';
+            // ✅ NUEVO: valor por defecto del espacio notch
+            const selNotch = document.getElementById('espacioNotch');
+            if (selNotch) selNotch.value = '1';
         }
     } catch (e) {}
     actualizarLabelsSliders();
@@ -372,7 +377,7 @@ function actualizarLabelsSliders() {
 }
 
 /* ============================================
-   🎵 SONIDOS - CARGAR Y GUARDAR (NUEVO)
+   🎵 SONIDOS - CARGAR Y GUARDAR
    ============================================ */
 function cargarControlesSonidos() {
     const configSonido = (idRango, idVal, clave, porDefecto) => {
@@ -434,6 +439,8 @@ function guardarConfiguracion() {
         cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
         tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
         tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+        // ✅ NUEVO: espacio superior para el notch
+        espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
         duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
@@ -478,6 +485,8 @@ function iniciarJuegoDirecto() {
             cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
             tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
             tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+            // ✅ NUEVO: espacio superior para el notch
+            espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
             intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
             intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),

@@ -373,6 +373,9 @@
         let TAMANO_FIGURAS = 42;
         let TEMAS_ACTIVOS = ['Verde'];
 
+        // ✅ NUEVO: espacio superior para el notch (0, 1 o 2 renglones)
+        let ESPACIO_NOTCH = 1;
+
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
@@ -454,6 +457,10 @@
                     TAMANO_CONTROL = config.tamanoControl !== undefined ? parseInt(config.tamanoControl) : 58;
                     FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
+
+                    // ✅ NUEVO: espacio superior para el notch
+                    ESPACIO_NOTCH = config.espacioNotch !== undefined ? parseInt(config.espacioNotch) : 1;
+
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                         ? config.temasActivos : ['Verde'];
 
@@ -527,6 +534,21 @@
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
+
+            // ✅ NUEVO: aplicar el espacio superior para el notch
+            aplicarEspacioNotch();
+        }
+
+        /* ✅ NUEVO: aplica el padding superior según la config */
+        function aplicarEspacioNotch() {
+            const app = document.querySelector('.bingo-app');
+            if (!app) return;
+
+            // Altura de un "renglón" ~ 8px (ajústalo a tu gusto)
+            const ALTO_RENGLON = 8;
+            const padding = ESPACIO_NOTCH * ALTO_RENGLON;
+
+            app.style.paddingTop = padding + 'px';
         }
 
         /* ============================================
@@ -943,6 +965,8 @@
             renderizarTablaControl();
             aplicarTamanoControl();
             aplicarConfigFiguras();
+            // ✅ NUEVO: reaplicar espacio notch tras cada render
+            aplicarEspacioNotch();
 
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
                 c.classList.remove(
@@ -1713,6 +1737,8 @@
             aplicarPaleta();
             aplicarTamanoControl();
             aplicarConfigFiguras();
+            // ✅ NUEVO: reaplicar espacio notch
+            aplicarEspacioNotch();
 
             setTimeout(() => {
                 actualizarPuntosAlerta();
@@ -1995,6 +2021,8 @@
             reiniciarJuego();
             aplicarTamanoControl();
             aplicarConfigFiguras();
+            // ✅ NUEVO: reaplicar espacio notch
+            aplicarEspacioNotch();
         }
 
         /* ============================================
@@ -2022,6 +2050,8 @@
             if (document.getElementById('cartonesGrid')) {
                 inicializarAudios();
                 cargarConfiguracion();
+                // ✅ NUEVO: aplicar espacio notch tras cargar config
+                aplicarEspacioNotch();
                 initVoces();
 
                 // El botón ATRÁS pasa por fade out antes de redirigir

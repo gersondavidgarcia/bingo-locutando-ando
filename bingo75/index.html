@@ -134,7 +134,7 @@
                         <span class="seccion-icono">📐</span>
                         <span class="seccion-texto">
                             <strong>Apariencia</strong>
-                            <small>Ancho del control · Tamaño mini-cartones</small>
+                            <small>Ancho del control · Tamaño mini-cartones · Espacio notch</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -578,7 +578,7 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: SONIDOS (NUEVA) -->
+                <!-- PANTALLA: SONIDOS -->
                 <div class="config-pantalla" id="pantallaSonidos">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -627,6 +627,16 @@
                             <span id="valTamanoFiguras">42px</span>
                         </label>
                         <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
+                    </div>
+
+                    <!-- ✅ NUEVO: Espacio superior para el notch -->
+                    <div class="form-group">
+                        <label for="espacioNotch">📱 Espacio superior (notch / barra de estado):</label>
+                        <select id="espacioNotch">
+                            <option value="0">0 - Sin espacio (pegado arriba)</option>
+                            <option value="1" selected>1 - Un renglón</option>
+                            <option value="2">2 - Dos renglones</option>
+                        </select>
                     </div>
                 </div>
 
