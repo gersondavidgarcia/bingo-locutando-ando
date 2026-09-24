@@ -123,6 +123,44 @@
         }
 
         /* ============================================
+           ⚡ OPTIMIZACIÓN: PAUSAR ANIMACIONES CUANDO NO SE USAN
+           ============================================ */
+        (function optimizacionAnimaciones() {
+            // 1. Pausar cuando la pestaña/app no está visible
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    document.body.classList.add('animaciones-pausadas');
+                } else {
+                    document.body.classList.remove('animaciones-pausadas');
+                }
+            });
+
+            // 2. Pausar cuando el celular no se toca por 15 segundos
+            let timeoutInactividad = null;
+            const reiniciarTimer = () => {
+                document.body.classList.remove('animaciones-pausadas');
+                if (timeoutInactividad) clearTimeout(timeoutInactividad);
+                timeoutInactividad = setTimeout(() => {
+                    document.body.classList.add('animaciones-pausadas');
+                }, 15000);
+            };
+
+            ['touchstart', 'click', 'keydown'].forEach(ev => {
+                document.addEventListener(ev, reiniciarTimer, { passive: true });
+            });
+            reiniciarTimer();
+
+            // 3. Detectar gama baja y activar modo lite
+            const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const nucleos = navigator.hardwareConcurrency || 4;
+            const gamaBaja = esMovil && nucleos <= 4;
+            if (gamaBaja) {
+                document.body.classList.add('modo-lite');
+                console.log('⚡ Modo lite activado (dispositivo de gama baja)');
+            }
+        })();
+
+        /* ============================================
            🔔 SISTEMA DE SONIDOS
            Rutas base de los audios en GitHub
            ============================================ */
@@ -711,8 +749,7 @@
             cartones.forEach((carton, i) => {
                 let textoCabecera = `CARTÓN ${i + 1}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i] && nombresDeFirebase[i].trim() !== "") {
-                    // ✅ NUEVO: número + guion + nombre (ej: "2 - Liliana")
-                     textoCabecera = `${i + 1} - ${nombresDeFirebase[i]}`;
+                    textoCabecera = `${i + 1} - ${nombresDeFirebase[i]}`;
                 }
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan) {
@@ -941,7 +978,6 @@
                 carton.dataset.yaAvisoBingo = '0';
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
-                    // ✅ NUEVO: número + guion + nombre (ej: "2 - Liliana")
                     textoCabecera = `${i} - ${nombresDeFirebase[i - 1]}`;
                 }
 
@@ -991,7 +1027,6 @@
             renderizarTablaControl();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
             aplicarBloqueoScroll();
 
@@ -1760,7 +1795,6 @@
             aplicarPaleta();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
             aplicarBloqueoScroll();
 
@@ -2039,19 +2073,43 @@
             reiniciarJuego();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
             aplicarBloqueoScroll();
         }
 
         /* ============================================
-           🚪 SALIR AL MENÚ (con fade out de música)
+           🚪 SALIR AL MENÚ (con fade out de música y limpieza)
            ============================================ */
         function salirAlMenu() {
             if (saliendoDelJuego) return;
             saliendoDelJuego = true;
+
+            // ✅ Limpiar estilos inline que pusimos en el body
+            const body = document.body;
+            body.style.overflow = '';
+            body.style.height = '';
+            body.style.position = '';
+            body.style.inset = '';
+            body.style.overscrollBehavior = '';
+            body.style.paddingTop = '';
+            body.style.paddingBottom = '';
+            document.documentElement.style.overflow = '';
+
+            // ✅ Quitar clases que agregamos al body
+            body.classList.remove(
+                'modo-revancha',
+                'animaciones-pausadas',
+                'modo-lite',
+                'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
+                'tema-naranja', 'tema-morado', 'tema-clasico',
+                'tema-dorado', 'tema-madera', 'tema-kate', 'tema-cyberpunk',
+                'tema-volcano', 'tema-pixel', 'tema-esmeralda', 'tema-candy',
+                'tema-oro', 'tema-pacifico', 'tema-halloween', 'tema-sport',
+                'tema-titan', 'tema-bronce'
+            );
+
             hacerFadeOutMusica(1500, () => {
-                window.location.href = 'index.html';
+                window.location.replace('index.html?t=' + Date.now());
             });
         }
 
@@ -2069,7 +2127,6 @@
             if (document.getElementById('cartonesGrid')) {
                 inicializarAudios();
                 cargarConfiguracion();
-                // ✅ Reaplicar espacio notch y bloqueo scroll
                 aplicarEspacioNotch();
                 aplicarBloqueoScroll();
                 initVoces();
