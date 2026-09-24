@@ -47,7 +47,7 @@ let VOZ_REPETIR = 1;
 let vocesDisponibles = [];
 
 /* ============================================
-   🎨 MODO DE TEMAS
+   🎨 MODO DE TEMAS (NUEVO)
    'simple'    → un tema a la vez (rota con CAMBIAR)
    'combinado' → mezcla temas por bloques de 3 cartones
    ============================================ */
@@ -88,8 +88,6 @@ function mostrarPantallaConfig(idPantalla) {
     const titulo = document.getElementById('modalTitulo');
     if (!titulo) return;
     switch (idPantalla) {
-        case 'pantallaAudio':            titulo.textContent = '🔊 Audio de voz'; break;
-        case 'pantallaSonidos':          titulo.textContent = '🎵 Sonidos'; break;
         case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
         case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
         case 'pantallaModoTemas':        titulo.textContent = '🎨 Modo de temas'; break;
@@ -100,6 +98,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
+        case 'pantallaSonidos':          titulo.textContent = '🎵 Sonidos'; break;
         case 'pantallaApariencia':       titulo.textContent = '📐 Apariencia'; break;
         case 'pantallaCombinados':       titulo.textContent = '🧩 Cartones Combinados'; break;
         case 'pantallaEditorSecuencia':  titulo.textContent = '✏️ Editar secuencia'; break;
@@ -122,8 +121,6 @@ function mostrarPantallaConfig(idPantalla) {
 
 function abrirSeccionConfig(nombre) {
     switch (nombre) {
-        case 'audio':      mostrarPantallaConfig('pantallaAudio'); break;
-        case 'sonidos':    abrirPantallaSonidos(); break;
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'modoTemas':  mostrarPantallaConfig('pantallaModoTemas'); break;
@@ -131,6 +128,7 @@ function abrirSeccionConfig(nombre) {
         case 'resaltados': mostrarPantallaConfig('pantallaResaltados'); break;
         case 'velocidad':  mostrarPantallaConfig('pantallaVelocidad'); break;
         case 'voz':        abrirPantallaVoz(); break;
+        case 'sonidos':    abrirPantallaSonidos(); break;
         case 'apariencia': mostrarPantallaConfig('pantallaApariencia'); break;
         case 'combinados': abrirPantallaCombinados(); break;
         default:           volverAlMenuConfig();
@@ -285,7 +283,6 @@ function cargarConfigEnModal() {
         }
     } catch (e) {}
     actualizarLabelsSliders();
-    cargarControlesAudio();
     cargarControlesSonidos();
     renderizarModoTemas();
     actualizarIndicadorModoEnTemas();
@@ -375,42 +372,7 @@ function actualizarLabelsSliders() {
 }
 
 /* ============================================
-   🎛️ AUDIO DE VOZ - CARGAR Y GUARDAR
-   ============================================ */
-function cargarControlesAudio() {
-    const rangoVol = document.getElementById('audioVolumen');
-    const valVol = document.getElementById('valAudioVolumen');
-    const rangoVel = document.getElementById('audioVelocidad');
-    const valVel = document.getElementById('valAudioVelocidad');
-
-    if (rangoVol && valVol) {
-        const guardado = parseFloat(localStorage.getItem('audioVolumen'));
-        const valor = !isNaN(guardado) ? guardado : 1.0;
-        rangoVol.value = Math.round(valor * 100);
-        valVol.textContent = Math.round(valor * 100) + '%';
-        rangoVol.oninput = () => {
-            const val = rangoVol.value;
-            valVol.textContent = val + '%';
-            localStorage.setItem('audioVolumen', val / 100);
-        };
-    }
-
-    if (rangoVel && valVel) {
-        const guardado = parseFloat(localStorage.getItem('audioVelocidad'));
-        const valor = !isNaN(guardado) ? guardado : 1.0;
-        rangoVel.value = Math.round(valor * 100);
-        valVel.textContent = valor.toFixed(2) + 'x';
-        rangoVel.oninput = () => {
-            const val = rangoVel.value / 100;
-            valVel.textContent = val.toFixed(2) + 'x';
-            localStorage.setItem('audioVelocidad', val);
-        };
-    }
-}
-
-/* ============================================
-   🎵 SONIDOS - CARGAR Y GUARDAR
-   (Música, Campana, Tactac)
+   🎵 SONIDOS - CARGAR Y GUARDAR (NUEVO)
    ============================================ */
 function cargarControlesSonidos() {
     const configSonido = (idRango, idVal, clave, porDefecto) => {
@@ -435,9 +397,6 @@ function cargarControlesSonidos() {
     configSonido('sonidoTactacVolumen',  'valSonidoTactacVolumen',  'sonidoTactacVolumen',  0.95);
 }
 
-/* ============================================
-   ABRIR PANTALLA SONIDOS
-   ============================================ */
 function abrirPantallaSonidos() {
     cargarControlesSonidos();
     mostrarPantallaConfig('pantallaSonidos');
@@ -455,7 +414,6 @@ function guardarConfiguracion() {
 
     let figurasPersonalizadas = leerFigurasPersonalizadas();
 
-    // ===== VALIDACIÓN DE MODO COMBINADO =====
     if (MODO_TEMAS === 'combinado') {
         const secuenciasValidas = CC_SECUENCIAS.filter(s => Array.isArray(s.temas) && s.temas.length > 0);
         if (secuenciasValidas.length === 0) {
@@ -482,7 +440,6 @@ function guardarConfiguracion() {
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
         velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
-        // ===== CONFIGURACIÓN DE VOZ =====
         vozActivada: document.getElementById('vozActivada')?.value === 'si',
         vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
         vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
@@ -491,9 +448,7 @@ function guardarConfiguracion() {
         vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas,
-        // ===== MODO DE TEMAS =====
         modoTemas: MODO_TEMAS,
-        // ===== CARTONES COMBINADOS =====
         cartonesCombinados: {
             activo: MODO_TEMAS === 'combinado',
             secuenciaEnUsoId: CC_SECUENCIA_EN_USO,
