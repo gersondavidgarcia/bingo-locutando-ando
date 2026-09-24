@@ -2,7 +2,7 @@
    SERVICE WORKER - Bingo Tradicional
    Permite que la app funcione offline y cargue rápido.
    ============================================ */
-const CACHE_NAME = 'bingo-tradicional-v3';
+const CACHE_NAME = 'bingo-tradicional-v2';
 
 // Archivos que se guardan para funcionar sin internet
 const ARCHIVOS_CACHE = [
