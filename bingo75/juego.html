@@ -539,14 +539,16 @@
             aplicarEspacioNotch();
         }
 
-        /* ✅ NUEVO: aplica el padding superior según la config */
+             /* ✅ NUEVO: aplica el padding superior según la config */
         function aplicarEspacioNotch() {
             const app = document.querySelector('.bingo-app');
             if (!app) return;
 
-            // Altura de un "renglón" ~ 8px (ajústalo a tu gusto)
+            // Altura de un "renglón" ~ 8px
+            // El valor guardado (1 o 2) se multiplica por 2 para dar 2 o 4 renglones reales.
             const ALTO_RENGLON = 8;
-            const padding = ESPACIO_NOTCH * ALTO_RENGLON;
+            const RENGLONES_REALES = ESPACIO_NOTCH * 2; // 1 → 2 renglones, 2 → 4 renglones
+            const padding = RENGLONES_REALES * ALTO_RENGLON;
 
             app.style.paddingTop = padding + 'px';
         }
