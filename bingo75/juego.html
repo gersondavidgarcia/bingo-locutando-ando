@@ -127,15 +127,18 @@
            Rutas base de los audios en GitHub
            ============================================ */
         const RUTA_AUDIOS = 'Audios/Sonidos/';
-        // Si tus archivos están en otro dominio/carpeta, cambia esta constante.
-        // Ejemplo alternativo si los sirves desde el propio repo sin Pages:
-        // const RUTA_AUDIOS = 'Audios/Sonidos/';
 
         let audioMusica = null;
         let audioCampana = null;
         let audioTactac = null;
         let musicaIniciada = false;
         let desbloqueoSonidoHecho = false;
+
+        // Lee el volumen guardado del slider (o usa el default si no existe)
+        function obtenerVolumenSonido(clave, porDefecto) {
+            const guardado = parseFloat(localStorage.getItem(clave));
+            return !isNaN(guardado) ? guardado : porDefecto;
+        }
 
         function inicializarAudios() {
             try {
@@ -144,14 +147,14 @@
                 audioTactac  = new Audio(RUTA_AUDIOS + 'tactac.mp3');
 
                 audioMusica.loop = true;
-                audioMusica.volume = 0.35;   // Música suave de fondo
                 audioMusica.preload = 'auto';
+                audioMusica.volume = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
 
-                audioCampana.volume = 0.85;
                 audioCampana.preload = 'auto';
+                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
 
-                audioTactac.volume = 0.95;
                 audioTactac.preload = 'auto';
+                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
             } catch (e) {
                 console.warn('⚠️ No se pudieron inicializar los audios:', e);
             }
@@ -160,6 +163,8 @@
         function reproducirCampana() {
             if (!audioCampana) return;
             try {
+                // Releemos el volumen por si el usuario lo cambió desde el menú
+                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
                 // Reiniciamos para permitir disparos rápidos consecutivos
                 audioCampana.currentTime = 0;
                 const p = audioCampana.play();
@@ -170,6 +175,7 @@
         function reproducirTactac() {
             if (!audioTactac) return;
             try {
+                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
                 audioTactac.currentTime = 0;
                 const p = audioTactac.play();
                 if (p && p.catch) p.catch(() => {});
@@ -181,6 +187,7 @@
             if (musicaIniciada) return;
             musicaIniciada = true;
             try {
+                audioMusica.volume = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
                 audioMusica.currentTime = 0;
                 const p = audioMusica.play();
                 if (p && p.catch) p.catch(() => {});
@@ -287,9 +294,9 @@
         /* ============================================
            🎨 MODO DE TEMAS + CARTONES COMBINADOS
            ============================================ */
-        let MODO_TEMAS = 'simple';          // 'simple' | 'combinado'
-        let CC_SECUENCIAS = [];             // [{id, nombre, temas:[...]}]
-        let CC_SECUENCIA_EN_USO = '';       // id de la secuencia en uso
+        let MODO_TEMAS = 'simple';
+        let CC_SECUENCIAS = [];
+        let CC_SECUENCIA_EN_USO = '';
 
         /* ============================================
            CONFIGURACIÓN DE VOZ
@@ -375,7 +382,6 @@
                     VOZ_SELECCIONADA = config.vozSeleccionada || '';
                     VOZ_REPETIR = config.vozRepetir !== undefined ? parseInt(config.vozRepetir) : 1;
 
-                    // ===== MODO DE TEMAS =====
                     const cc = config.cartonesCombinados || {};
                     CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
                     CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
