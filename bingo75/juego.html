@@ -1787,10 +1787,6 @@
             if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
             if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
 
-            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
-                c.classList.remove('mostrar-rotulo-bingo', 'mostrar-rotulo-figura',
-                    'mostrar-rotulo-gana', 'mostrar-rotulo-todo', 'apagando-resaltado');
-            });
 
             const ejecutarEntradaNuevaBola = () => {
                 const idx = bombo.indexOf(numero);

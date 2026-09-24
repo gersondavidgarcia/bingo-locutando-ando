@@ -1592,6 +1592,12 @@ body .cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa 
    COLOR DE RESALTE DE FIGURA POR TEMA
    ============================================ */
 body.tema-verde      { --color-figura: #ffd700; --color-figura-glow: rgba(255, 215, 0, 0.95);  --color-figura-suave: rgba(255, 215, 0, 0.55); }
+body.tema-verde .cartones-grid.modo-15 .carton .bingo-header-row {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
 body.tema-azul       { --color-figura: #ffb300; --color-figura-glow: rgba(255, 179, 0, 0.95);  --color-figura-suave: rgba(255, 179, 0, 0.55); }
 body.tema-rojo       { --color-figura: #00e5ff; --color-figura-glow: rgba(0, 229, 255, 0.95);  --color-figura-suave: rgba(0, 229, 255, 0.55); }
 body.tema-negro      { --color-figura: #ffea00; --color-figura-glow: rgba(255, 234, 0, 0.95);  --color-figura-suave: rgba(255, 234, 0, 0.55); }
@@ -3039,3 +3045,5 @@ body.modo-revancha .btn-confirmar-revancha.sin-seleccion {
 .cc-btn-agregar:active {
     filter: brightness(0.85);
 }
+
+
