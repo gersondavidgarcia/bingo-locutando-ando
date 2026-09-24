@@ -81,11 +81,8 @@ button, button:focus, button:active, select, select:focus, select:active {
     padding-top: max(20px, env(safe-area-inset-top));
     padding-bottom: max(20px, env(safe-area-inset-bottom));
     width: 100%;
-    overflow: hidden;      /* ← NUEVO */
-    overscroll-behavior: none;  /* ← NUEVO */
-    position: fixed;       /* ← NUEVO */
-    inset: 0;              /* ← NUEVO */
-    height: 100dvh;        /* ← NUEVO */
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 .menu-container {
