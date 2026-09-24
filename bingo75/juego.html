@@ -82,7 +82,7 @@
                 🔄 CAMBIAR
                 </button>
 
-                <button onclick="window.location.href='index.html'" class="btn-atras" onfocus="this.blur()">
+                <button id="btnAtrasJuego" class="btn-atras" onfocus="this.blur()">
                 ⬅ ATRÁS
                 </button>
 
@@ -133,6 +133,8 @@
         let audioTactac = null;
         let musicaIniciada = false;
         let desbloqueoSonidoHecho = false;
+        let fadeIntervalId = null;
+        let saliendoDelJuego = false;
 
         // Lee el volumen guardado del slider (o usa el default si no existe)
         function obtenerVolumenSonido(clave, porDefecto) {
@@ -148,24 +150,94 @@
 
                 audioMusica.loop = true;
                 audioMusica.preload = 'auto';
-                audioMusica.volume = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
+                audioMusica.volume = 0; // arranca en 0 para el fade in
 
                 audioCampana.preload = 'auto';
                 audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
 
                 audioTactac.preload = 'auto';
+                audioTactac.loop = true; // tactac en bucle durante la animación
                 audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
             } catch (e) {
                 console.warn('⚠️ No se pudieron inicializar los audios:', e);
             }
         }
 
+        /* ============================================
+           🎵 FADE IN / FADE OUT DE LA MÚSICA
+           ============================================ */
+        function cancelarFade() {
+            if (fadeIntervalId) {
+                clearInterval(fadeIntervalId);
+                fadeIntervalId = null;
+            }
+        }
+
+        // Fade in: sube el volumen de audioMusica desde 0 hasta el valor guardado
+        // en el slider, en 'duracionMs' milisegundos.
+        function hacerFadeInMusica(duracionMs) {
+            if (!audioMusica) return;
+            cancelarFade();
+
+            const volumenObjetivo = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
+            if (volumenObjetivo <= 0) {
+                audioMusica.volume = 0;
+                return;
+            }
+
+            const pasos = 40;
+            const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
+            const incremento = volumenObjetivo / pasos;
+            let actual = 0;
+            audioMusica.volume = 0;
+
+            fadeIntervalId = setInterval(() => {
+                actual += incremento;
+                if (actual >= volumenObjetivo) {
+                    audioMusica.volume = volumenObjetivo;
+                    cancelarFade();
+                    return;
+                }
+                audioMusica.volume = actual;
+            }, intervaloMs);
+        }
+
+        // Fade out: baja el volumen de audioMusica desde el valor actual hasta 0
+        // en 'duracionMs' milisegundos y luego ejecuta 'callback'.
+        function hacerFadeOutMusica(duracionMs, callback) {
+            if (!audioMusica) {
+                if (callback) callback();
+                return;
+            }
+            cancelarFade();
+
+            const volumenInicial = audioMusica.volume;
+            if (volumenInicial <= 0) {
+                if (callback) callback();
+                return;
+            }
+
+            const pasos = 40;
+            const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
+            const decremento = volumenInicial / pasos;
+            let actual = volumenInicial;
+
+            fadeIntervalId = setInterval(() => {
+                actual -= decremento;
+                if (actual <= 0) {
+                    audioMusica.volume = 0;
+                    cancelarFade();
+                    if (callback) callback();
+                    return;
+                }
+                audioMusica.volume = actual;
+            }, intervaloMs);
+        }
+
         function reproducirCampana() {
             if (!audioCampana) return;
             try {
-                // Releemos el volumen por si el usuario lo cambió desde el menú
                 audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
-                // Reiniciamos para permitir disparos rápidos consecutivos
                 audioCampana.currentTime = 0;
                 const p = audioCampana.play();
                 if (p && p.catch) p.catch(() => {});
@@ -182,16 +254,35 @@
             } catch (e) {}
         }
 
+        function detenerTactac() {
+            if (!audioTactac) return;
+            try {
+                audioTactac.pause();
+                audioTactac.currentTime = 0;
+            } catch (e) {}
+        }
+
         function iniciarMusicaFondo() {
             if (!audioMusica) return;
             if (musicaIniciada) return;
             musicaIniciada = true;
             try {
-                audioMusica.volume = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
+                audioMusica.volume = 0;
                 audioMusica.currentTime = 0;
                 const p = audioMusica.play();
-                if (p && p.catch) p.catch(() => {});
-            } catch (e) {}
+                if (p && p.then) {
+                    p.then(() => {
+                        hacerFadeInMusica(1500);
+                    }).catch(() => {
+                        // El navegador bloqueó el autoplay. Esperamos a interacción.
+                        musicaIniciada = false;
+                    });
+                } else {
+                    hacerFadeInMusica(1500);
+                }
+            } catch (e) {
+                musicaIniciada = false;
+            }
         }
 
         // Llamar una sola vez, tras la primera interacción del usuario
@@ -1080,6 +1171,7 @@
                 if (ganoBingo) hayGanadorBingo = true;
             });
             if (hayGanadorFigura || hayGanadorBingo) {
+                // Arranca el tactac en loop durante toda la animación
                 reproducirTactac();
             }
 
@@ -1109,6 +1201,9 @@
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
                 timeoutAnimacion = setTimeout(() => {
+                    // Al terminar la animación, cortamos el tactac
+                    detenerTactac();
+
                     cartonesInfo.forEach(({ carton }) => {
                         carton.classList.remove('animando');
                         carton.classList.add('resaltando', 'secuencia-completa');
@@ -1824,6 +1919,8 @@
             if (timeoutBloqueoDestello) { clearTimeout(timeoutBloqueoDestello); timeoutBloqueoDestello = null; }
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
+            // Cortamos el tactac si estaba sonando por una animación anterior
+            detenerTactac();
             bloqueadoPorAnimacion = false;
             isAnimating = false;
             figuraYaGanada = false;
@@ -1900,6 +1997,17 @@
             aplicarConfigFiguras();
         }
 
+        /* ============================================
+           🚪 SALIR AL MENÚ (con fade out de música)
+           ============================================ */
+        function salirAlMenu() {
+            if (saliendoDelJuego) return;
+            saliendoDelJuego = true;
+            hacerFadeOutMusica(1500, () => {
+                window.location.href = 'index.html';
+            });
+        }
+
         window.sacarBola = sacarBola;
         window.sacarBolaEspecifica = sacarBolaEspecifica;
         window.reiniciarJuego = reiniciarJuego;
@@ -1915,6 +2023,14 @@
                 inicializarAudios();
                 cargarConfiguracion();
                 initVoces();
+
+                // El botón ATRÁS pasa por fade out antes de redirigir
+                const btnAtras = document.getElementById('btnAtrasJuego');
+                if (btnAtras) btnAtras.addEventListener('click', salirAlMenu);
+
+                // Intento de arrancar la música automáticamente.
+                // Si el navegador lo bloquea, queda esperando la primera interacción.
+                iniciarMusicaFondo();
 
                 const desbloquear = () => {
                     desbloquearVoz();
