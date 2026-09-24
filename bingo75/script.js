@@ -47,7 +47,7 @@ let VOZ_REPETIR = 1;
 let vocesDisponibles = [];
 
 /* ============================================
-   🎨 MODO DE TEMAS (NUEVO)
+   🎨 MODO DE TEMAS
    'simple'    → un tema a la vez (rota con CAMBIAR)
    'combinado' → mezcla temas por bloques de 3 cartones
    ============================================ */
@@ -56,9 +56,9 @@ let MODO_TEMAS = 'simple';
 /* ============================================
    CARTONES COMBINADOS (estado en memoria)
    ============================================ */
-let CC_SECUENCIAS = [];         // [{id, nombre, temas: ['Azul','Negro']}]
-let CC_SECUENCIA_EN_USO = '';   // id de la secuencia en uso
-let CC_EDITANDO_ID = null;      // id de la secuencia que se está editando (null = nueva)
+let CC_SECUENCIAS = [];
+let CC_SECUENCIA_EN_USO = '';
+let CC_EDITANDO_ID = null;
 
 /* ============================================
    ABRIR / CERRAR MODAL
@@ -88,6 +88,8 @@ function mostrarPantallaConfig(idPantalla) {
     const titulo = document.getElementById('modalTitulo');
     if (!titulo) return;
     switch (idPantalla) {
+        case 'pantallaAudio':            titulo.textContent = '🔊 Audio de voz'; break;
+        case 'pantallaSonidos':          titulo.textContent = '🎵 Sonidos'; break;
         case 'pantallaGeneral':          titulo.textContent = '⚙️ General'; break;
         case 'pantallaTemas':            titulo.textContent = '🎨 Temas'; break;
         case 'pantallaModoTemas':        titulo.textContent = '🎨 Modo de temas'; break;
@@ -104,7 +106,6 @@ function mostrarPantallaConfig(idPantalla) {
         default:                         titulo.textContent = '⚙️ Configuración';
     }
 
-    // Refrescos específicos por pantalla
     if (idPantalla === 'pantallaModoTemas') {
         renderizarModoTemas();
     }
@@ -121,6 +122,8 @@ function mostrarPantallaConfig(idPantalla) {
 
 function abrirSeccionConfig(nombre) {
     switch (nombre) {
+        case 'audio':      mostrarPantallaConfig('pantallaAudio'); break;
+        case 'sonidos':    abrirPantallaSonidos(); break;
         case 'general':    mostrarPantallaConfig('pantallaGeneral'); break;
         case 'temas':      mostrarPantallaConfig('pantallaTemas'); break;
         case 'modoTemas':  mostrarPantallaConfig('pantallaModoTemas'); break;
@@ -144,7 +147,6 @@ function volverAlMenuConfig() {
 function seleccionarModoTemas(modo) {
     if (modo !== 'simple' && modo !== 'combinado') return;
 
-    // Validación: si quiere combinado, exigir secuencias
     if (modo === 'combinado') {
         const validas = CC_SECUENCIAS.filter(s => Array.isArray(s.temas) && s.temas.length > 0);
         if (validas.length === 0) {
@@ -166,15 +168,12 @@ function renderizarModoTemas() {
     const chkCombinado = document.getElementById('modoCombinadoCheck');
     const aviso = document.getElementById('modoTemasAviso');
 
-    // Pintar botones
     if (btnSimple) btnSimple.classList.toggle('seleccionado', MODO_TEMAS === 'simple');
     if (btnCombinado) btnCombinado.classList.toggle('seleccionado', MODO_TEMAS === 'combinado');
 
-    // Mostrar/ocultar el check
     if (chkSimple) chkSimple.style.display = (MODO_TEMAS === 'simple') ? '' : 'none';
     if (chkCombinado) chkCombinado.style.display = (MODO_TEMAS === 'combinado') ? '' : 'none';
 
-    // Aviso dinámico
     if (aviso) {
         if (MODO_TEMAS === 'simple') {
             aviso.textContent = '✅ Se usará el tema activo actual. Puedes cambiarlo en pleno juego con el botón CAMBIAR.';
@@ -269,8 +268,6 @@ function cargarConfigEnModal() {
             CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
 
             // ===== MODO DE TEMAS =====
-            // Prioridad: campo nuevo `modoTemas`.
-            // Retrocompatibilidad: si no existe, mirar `cartonesCombinados.activo`.
             if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
                 MODO_TEMAS = config.modoTemas;
             } else if (cc.activo === true) {
@@ -288,6 +285,8 @@ function cargarConfigEnModal() {
         }
     } catch (e) {}
     actualizarLabelsSliders();
+    cargarControlesAudio();
+    cargarControlesSonidos();
     renderizarModoTemas();
     actualizarIndicadorModoEnTemas();
     actualizarAvisoModoEnCombinados();
@@ -376,6 +375,75 @@ function actualizarLabelsSliders() {
 }
 
 /* ============================================
+   🎛️ AUDIO DE VOZ - CARGAR Y GUARDAR
+   ============================================ */
+function cargarControlesAudio() {
+    const rangoVol = document.getElementById('audioVolumen');
+    const valVol = document.getElementById('valAudioVolumen');
+    const rangoVel = document.getElementById('audioVelocidad');
+    const valVel = document.getElementById('valAudioVelocidad');
+
+    if (rangoVol && valVol) {
+        const guardado = parseFloat(localStorage.getItem('audioVolumen'));
+        const valor = !isNaN(guardado) ? guardado : 1.0;
+        rangoVol.value = Math.round(valor * 100);
+        valVol.textContent = Math.round(valor * 100) + '%';
+        rangoVol.oninput = () => {
+            const val = rangoVol.value;
+            valVol.textContent = val + '%';
+            localStorage.setItem('audioVolumen', val / 100);
+        };
+    }
+
+    if (rangoVel && valVel) {
+        const guardado = parseFloat(localStorage.getItem('audioVelocidad'));
+        const valor = !isNaN(guardado) ? guardado : 1.0;
+        rangoVel.value = Math.round(valor * 100);
+        valVel.textContent = valor.toFixed(2) + 'x';
+        rangoVel.oninput = () => {
+            const val = rangoVel.value / 100;
+            valVel.textContent = val.toFixed(2) + 'x';
+            localStorage.setItem('audioVelocidad', val);
+        };
+    }
+}
+
+/* ============================================
+   🎵 SONIDOS - CARGAR Y GUARDAR
+   (Música, Campana, Tactac)
+   ============================================ */
+function cargarControlesSonidos() {
+    const configSonido = (idRango, idVal, clave, porDefecto) => {
+        const rango = document.getElementById(idRango);
+        const val = document.getElementById(idVal);
+        if (!rango || !val) return;
+
+        const guardado = parseFloat(localStorage.getItem(clave));
+        const valor = !isNaN(guardado) ? guardado : porDefecto;
+        rango.value = Math.round(valor * 100);
+        val.textContent = Math.round(valor * 100) + '%';
+
+        rango.oninput = () => {
+            const v = rango.value;
+            val.textContent = v + '%';
+            localStorage.setItem(clave, v / 100);
+        };
+    };
+
+    configSonido('sonidoMusicaVolumen',  'valSonidoMusicaVolumen',  'sonidoMusicaVolumen',  0.35);
+    configSonido('sonidoCampanaVolumen', 'valSonidoCampanaVolumen', 'sonidoCampanaVolumen', 0.85);
+    configSonido('sonidoTactacVolumen',  'valSonidoTactacVolumen',  'sonidoTactacVolumen',  0.95);
+}
+
+/* ============================================
+   ABRIR PANTALLA SONIDOS
+   ============================================ */
+function abrirPantallaSonidos() {
+    cargarControlesSonidos();
+    mostrarPantallaConfig('pantallaSonidos');
+}
+
+/* ============================================
    GUARDAR CONFIGURACIÓN
    ============================================ */
 function guardarConfiguracion() {
@@ -423,9 +491,9 @@ function guardarConfiguracion() {
         vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas,
-        // ===== MODO DE TEMAS (NUEVO) =====
+        // ===== MODO DE TEMAS =====
         modoTemas: MODO_TEMAS,
-        // ===== CARTONES COMBINADOS (compatibilidad con juego.html) =====
+        // ===== CARTONES COMBINADOS =====
         cartonesCombinados: {
             activo: MODO_TEMAS === 'combinado',
             secuenciaEnUsoId: CC_SECUENCIA_EN_USO,
@@ -1030,8 +1098,6 @@ function borrarSecuenciaCC(id) {
     if (CC_SECUENCIA_EN_USO === id) {
         CC_SECUENCIA_EN_USO = CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '';
     }
-    // Si borramos la última secuencia y estamos en modo combinado,
-    // forzamos vuelta a modo simple para no quedar en estado inválido.
     if (CC_SECUENCIAS.length === 0 && MODO_TEMAS === 'combinado') {
         MODO_TEMAS = 'simple';
     }
@@ -1214,7 +1280,6 @@ document.addEventListener('DOMContentLoaded', actualizarBotonCargar);
 
 /* ============================================
    🌐 EXPOSICIÓN GLOBAL DE FUNCIONES
-   (para usarlas desde el HTML con onclick)
    ============================================ */
 window.abrirConfiguracion = abrirConfiguracion;
 window.cerrarConfiguracion = cerrarConfiguracion;
@@ -1238,5 +1303,5 @@ window.cerrarEditorFigura = cerrarEditorFigura;
 window.guardarFiguraNueva = guardarFiguraNueva;
 window.probarVozConfig = probarVozConfig;
 
-// 🎨 NUEVO: modo de temas
 window.seleccionarModoTemas = seleccionarModoTemas;
+window.abrirPantallaSonidos = abrirPantallaSonidos;

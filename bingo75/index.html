@@ -49,6 +49,24 @@
                 <div class="config-pantalla visible" id="pantallaMenu">
                     <p class="config-hint">Elige qué quieres configurar:</p>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('audio')" onfocus="this.blur()">
+                        <span class="seccion-icono">🔊</span>
+                        <span class="seccion-texto">
+                            <strong>Audio de voz</strong>
+                            <small>Volumen · Velocidad del locutor</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('sonidos')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎵</span>
+                        <span class="seccion-texto">
+                            <strong>Sonidos</strong>
+                            <small>Música · Campana · Tactac</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('general')" onfocus="this.blur()">
                         <span class="seccion-icono">⚙️</span>
                         <span class="seccion-texto">
@@ -129,6 +147,60 @@
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
+                </div>
+
+                <!-- PANTALLA: AUDIO DE VOZ -->
+                <div class="config-pantalla" id="pantallaAudio">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="audioVolumen">
+                            🔊 Volumen: 
+                            <span id="valAudioVolumen">100%</span>
+                        </label>
+                        <input type="range" id="audioVolumen" min="0" max="150" value="100" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="audioVelocidad">
+                            ⏩ Velocidad: 
+                            <span id="valAudioVelocidad">1.00x</span>
+                        </label>
+                        <input type="range" id="audioVelocidad" min="50" max="200" value="100" step="5">
+                    </div>
+
+                    <p class="config-hint">
+                        Estos ajustes se guardan automáticamente y se aplican al locutor GER dentro del juego.
+                    </p>
+                </div>
+
+                <!-- PANTALLA: SONIDOS (NUEVA) -->
+                <div class="config-pantalla" id="pantallaSonidos">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="sonidoMusicaVolumen">
+                            🎵 Música de fondo: 
+                            <span id="valSonidoMusicaVolumen">35%</span>
+                        </label>
+                        <input type="range" id="sonidoMusicaVolumen" min="0" max="100" value="35" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sonidoCampanaVolumen">
+                            🔔 Campana (falta 1 bola): 
+                            <span id="valSonidoCampanaVolumen">85%</span>
+                        </label>
+                        <input type="range" id="sonidoCampanaVolumen" min="0" max="100" value="85" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sonidoTactacVolumen">
+                            🥁 Tactac (figura / bingo): 
+                            <span id="valSonidoTactacVolumen">95%</span>
+                        </label>
+                        <input type="range" id="sonidoTactacVolumen" min="0" max="100" value="95" step="5">
+                    </div>
                 </div>
 
                 <!-- PANTALLA: GENERAL -->
@@ -298,7 +370,7 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: MODO DE TEMAS (NUEVA) -->
+                <!-- PANTALLA: MODO DE TEMAS -->
                 <div class="config-pantalla" id="pantallaModoTemas">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
