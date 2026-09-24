@@ -2,7 +2,7 @@
    SERVICE WORKER - Bingo Tradicional
    Permite que la app funcione offline y cargue rápido.
    ============================================ */
-const CACHE_NAME = 'bingo-tradicional-v2';
+const CACHE_NAME = 'bingo-tradicional-v3';
 
 // Archivos que se guardan para funcionar sin internet
 const ARCHIVOS_CACHE = [
@@ -53,37 +53,34 @@ self.addEventListener('activate', (event) => {
 });
 
 /* --------------------------------------------
-   FETCH: servir desde caché, si no desde internet
+   FETCH: red primero, caché como respaldo
+   (así siempre se ve la última versión)
    -------------------------------------------- */
 self.addEventListener('fetch', (event) => {
     // Solo manejamos peticiones GET
     if (event.request.method !== 'GET') return;
 
     event.respondWith(
-        caches.match(event.request).then((respuestaCache) => {
-            if (respuestaCache) {
-                // Está en caché → devolverlo al instante
-                return respuestaCache;
-            }
-
-            // No está en caché → ir a internet
-            return fetch(event.request)
-                .then((respuestaRed) => {
-                    // Guardar copia para la próxima vez (opcional)
-                    if (respuestaRed && respuestaRed.status === 200) {
-                        const copia = respuestaRed.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, copia);
-                        });
-                    }
-                    return respuestaRed;
-                })
-                .catch(() => {
-                    // Sin internet y sin caché → si es navegación, mostrar index
+        fetch(event.request)
+            .then((respuestaRed) => {
+                // Guardar copia actualizada en caché
+                if (respuestaRed && respuestaRed.status === 200) {
+                    const copia = respuestaRed.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, copia);
+                    });
+                }
+                return respuestaRed;
+            })
+            .catch(() => {
+                // Sin internet → usar caché
+                return caches.match(event.request).then((respuestaCache) => {
+                    if (respuestaCache) return respuestaCache;
+                    // Si es navegación y no hay caché, mostrar index
                     if (event.request.mode === 'navigate') {
                         return caches.match('./index.html');
                     }
                 });
-        })
+            })
     );
 });
