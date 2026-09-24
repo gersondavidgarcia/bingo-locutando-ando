@@ -496,7 +496,7 @@ button, button:focus, button:active, select, select:focus, select:active {
 /* ============================================
    ESTILOS DEL JUEGO
    ============================================ */
-body {
+body:not(.body-center) {
     background-color: #12121c;
     color: #fff;
     display: flex;
