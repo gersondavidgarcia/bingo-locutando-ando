@@ -711,7 +711,8 @@
             cartones.forEach((carton, i) => {
                 let textoCabecera = `CARTÓN ${i + 1}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i] && nombresDeFirebase[i].trim() !== "") {
-                    textoCabecera = nombresDeFirebase[i];
+                    // ✅ NUEVO: número + guion + nombre (ej: "2 - Liliana")
+                     textoCabecera = `${i + 1} - ${nombresDeFirebase[i]}`;
                 }
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan) {
@@ -940,8 +941,10 @@
                 carton.dataset.yaAvisoBingo = '0';
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
-                    textoCabecera = nombresDeFirebase[i - 1];
+                    // ✅ NUEVO: número + guion + nombre (ej: "2 - Liliana")
+                    textoCabecera = `${i} - ${nombresDeFirebase[i - 1]}`;
                 }
+
                 carton.innerHTML = `
                     <span class="emoji-primera-bola">🎱</span>
                     <span class="emoji-figura">🎯</span>
