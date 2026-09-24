@@ -226,8 +226,12 @@ function cargarConfigEnModal() {
             setVal('cantidadFiguras', config.cantidadFiguras);
             setVal('tamanoControl', config.tamanoControl);
             setVal('tamanoFiguras', config.tamanoFiguras);
+
             // ✅ NUEVO: espacio superior para el notch
             setVal('espacioNotch', config.espacioNotch !== undefined ? config.espacioNotch : 1);
+
+            // ✅ NUEVO: bloquear scroll en juego.html
+            setVal('bloquearScroll', config.bloquearScroll !== undefined ? config.bloquearScroll : 'si');
 
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
@@ -282,9 +286,14 @@ function cargarConfigEnModal() {
             CC_SECUENCIAS = [];
             CC_SECUENCIA_EN_USO = '';
             MODO_TEMAS = 'simple';
+
             // ✅ NUEVO: valor por defecto del espacio notch
             const selNotch = document.getElementById('espacioNotch');
             if (selNotch) selNotch.value = '1';
+
+            // ✅ NUEVO: valor por defecto del bloquear scroll
+            const selScroll = document.getElementById('bloquearScroll');
+            if (selScroll) selScroll.value = 'si';
         }
     } catch (e) {}
     actualizarLabelsSliders();
@@ -439,8 +448,13 @@ function guardarConfiguracion() {
         cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
         tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
         tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+
         // ✅ NUEVO: espacio superior para el notch
         espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
+
+        // ✅ NUEVO: bloquear scroll en juego.html
+        bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
+
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
         duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
@@ -485,8 +499,13 @@ function iniciarJuegoDirecto() {
             cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
             tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
             tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
+
             // ✅ NUEVO: espacio superior para el notch
             espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
+
+            // ✅ NUEVO: bloquear scroll en juego.html
+            bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
+
             intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
             intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),

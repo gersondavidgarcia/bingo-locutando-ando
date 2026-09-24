@@ -599,7 +599,7 @@
                         <span class="seccion-icono">📐</span>
                         <span class="seccion-texto">
                             <strong>Apariencia</strong>
-                            <small>Ancho del control · Tamaño mini-cartones · Espacio notch</small>
+                            <small>Ancho del control · Tamaño mini-cartones · Espacio notch · Bloqueo de scroll</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -1101,6 +1101,15 @@
                             <option value="0">0 - Sin espacio (pegado arriba)</option>
                             <option value="1" selected>2 - Dos renglones</option>
                             <option value="2">4 - Cuatro renglones</option>
+                        </select>
+                    </div>
+
+                    <!-- ✅ NUEVO: Bloquear scroll en juego.html -->
+                    <div class="form-group">
+                        <label for="bloquearScroll">🔒 Bloquear scroll en el juego:</label>
+                        <select id="bloquearScroll">
+                            <option value="no">NO - Permitir scroll</option>
+                            <option value="si" selected>SÍ - Sin scroll (fijo)</option>
                         </select>
                     </div>
                 </div>

@@ -173,8 +173,6 @@
             }
         }
 
-        // Fade in: sube el volumen de audioMusica desde 0 hasta el valor guardado
-        // en el slider, en 'duracionMs' milisegundos.
         function hacerFadeInMusica(duracionMs) {
             if (!audioMusica) return;
             cancelarFade();
@@ -202,8 +200,6 @@
             }, intervaloMs);
         }
 
-        // Fade out: baja el volumen de audioMusica desde el valor actual hasta 0
-        // en 'duracionMs' milisegundos y luego ejecuta 'callback'.
         function hacerFadeOutMusica(duracionMs, callback) {
             if (!audioMusica) {
                 if (callback) callback();
@@ -274,7 +270,6 @@
                     p.then(() => {
                         hacerFadeInMusica(1500);
                     }).catch(() => {
-                        // El navegador bloqueó el autoplay. Esperamos a interacción.
                         musicaIniciada = false;
                     });
                 } else {
@@ -285,11 +280,9 @@
             }
         }
 
-        // Llamar una sola vez, tras la primera interacción del usuario
         function desbloquearSonidos() {
             if (desbloqueoSonidoHecho) return;
             desbloqueoSonidoHecho = true;
-            // Tocar un audio en volumen 0 para desbloquear el contexto
             try {
                 const u = new Audio(RUTA_AUDIOS + 'tactac.mp3');
                 u.volume = 0;
@@ -373,8 +366,11 @@
         let TAMANO_FIGURAS = 42;
         let TEMAS_ACTIVOS = ['Verde'];
 
-        // ✅ NUEVO: espacio superior para el notch (0, 1 o 2 renglones)
+        // ✅ Espacio superior para el notch (0, 1 o 2 renglones)
         let ESPACIO_NOTCH = 1;
+
+        // ✅ Bloquear scroll (si/no)
+        let BLOQUEAR_SCROLL = 'si';
 
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
@@ -458,8 +454,11 @@
                     FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
 
-                    // ✅ NUEVO: espacio superior para el notch
+                    // ✅ Espacio superior para el notch
                     ESPACIO_NOTCH = config.espacioNotch !== undefined ? parseInt(config.espacioNotch) : 1;
+
+                    // ✅ Bloquear scroll
+                    BLOQUEAR_SCROLL = config.bloquearScroll !== undefined ? config.bloquearScroll : 'si';
 
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                         ? config.temasActivos : ['Verde'];
@@ -535,22 +534,44 @@
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
 
-            // ✅ NUEVO: aplicar el espacio superior para el notch
+            // ✅ Aplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
+            aplicarBloqueoScroll();
         }
 
-             /* ✅ NUEVO: aplica el padding superior según la config */
+        /* ✅ Aplica el padding superior según la config */
         function aplicarEspacioNotch() {
             const app = document.querySelector('.bingo-app');
             if (!app) return;
 
-            // Altura de un "renglón" ~ 8px
-            // El valor guardado (1 o 2) se multiplica por 2 para dar 2 o 4 renglones reales.
             const ALTO_RENGLON = 8;
-            const RENGLONES_REALES = ESPACIO_NOTCH * 2; // 1 → 2 renglones, 2 → 4 renglones
+            const RENGLONES_REALES = ESPACIO_NOTCH * 2;
             const padding = RENGLONES_REALES * ALTO_RENGLON;
 
             app.style.paddingTop = padding + 'px';
+        }
+
+        /* ✅ Aplica o quita el bloqueo de scroll */
+        function aplicarBloqueoScroll() {
+            const body = document.body;
+            if (!body) return;
+
+            if (BLOQUEAR_SCROLL === 'si') {
+                body.style.overflow = 'hidden';
+                body.style.height = '100vh';
+                body.style.height = '100dvh';
+                body.style.position = 'fixed';
+                body.style.inset = '0';
+                body.style.overscrollBehavior = 'none';
+                document.documentElement.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+                body.style.height = '';
+                body.style.position = '';
+                body.style.inset = '';
+                body.style.overscrollBehavior = '';
+                document.documentElement.style.overflow = '';
+            }
         }
 
         /* ============================================
@@ -967,8 +988,9 @@
             renderizarTablaControl();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ NUEVO: reaplicar espacio notch tras cada render
+            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
+            aplicarBloqueoScroll();
 
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
                 c.classList.remove(
@@ -1189,7 +1211,6 @@
             if (btn) btn.classList.add('bloqueado');
             bloqueadoPorAnimacion = true;
 
-            // 🔔 Sonido tactac: al menos un cartón completó figura o bingo
             let hayGanadorFigura = false;
             let hayGanadorBingo = false;
             cartonesInfo.forEach(({ ganoFigura, ganoBingo }) => {
@@ -1197,7 +1218,6 @@
                 if (ganoBingo) hayGanadorBingo = true;
             });
             if (hayGanadorFigura || hayGanadorBingo) {
-                // Arranca el tactac en loop durante toda la animación
                 reproducirTactac();
             }
 
@@ -1227,7 +1247,6 @@
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
                 timeoutAnimacion = setTimeout(() => {
-                    // Al terminar la animación, cortamos el tactac
                     detenerTactac();
 
                     cartonesInfo.forEach(({ carton }) => {
@@ -1401,7 +1420,6 @@
                 }
             });
             if (hayNuevoDestello) {
-                // 🔔 Campana: al menos un cartón empezó a parpadear
                 reproducirCampana();
                 bloquearBotonPorDestello();
             }
@@ -1739,8 +1757,9 @@
             aplicarPaleta();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ NUEVO: reaplicar espacio notch
+            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
+            aplicarBloqueoScroll();
 
             setTimeout(() => {
                 actualizarPuntosAlerta();
@@ -1897,7 +1916,6 @@
             if (bombo.length === 0) return;
             if (modoRevanchaActivo) return;
 
-            // Aseguramos el desbloqueo de sonido en la primera interacción
             desbloquearSonidos();
 
             const btn = document.getElementById('btnSacarBola');
@@ -1947,7 +1965,6 @@
             if (timeoutBloqueoDestello) { clearTimeout(timeoutBloqueoDestello); timeoutBloqueoDestello = null; }
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
-            // Cortamos el tactac si estaba sonando por una animación anterior
             detenerTactac();
             bloqueadoPorAnimacion = false;
             isAnimating = false;
@@ -2023,8 +2040,9 @@
             reiniciarJuego();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            // ✅ NUEVO: reaplicar espacio notch
+            // ✅ Reaplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
+            aplicarBloqueoScroll();
         }
 
         /* ============================================
@@ -2052,16 +2070,14 @@
             if (document.getElementById('cartonesGrid')) {
                 inicializarAudios();
                 cargarConfiguracion();
-                // ✅ NUEVO: aplicar espacio notch tras cargar config
+                // ✅ Reaplicar espacio notch y bloqueo scroll
                 aplicarEspacioNotch();
+                aplicarBloqueoScroll();
                 initVoces();
 
-                // El botón ATRÁS pasa por fade out antes de redirigir
                 const btnAtras = document.getElementById('btnAtrasJuego');
                 if (btnAtras) btnAtras.addEventListener('click', salirAlMenu);
 
-                // Intento de arrancar la música automáticamente.
-                // Si el navegador lo bloquea, queda esperando la primera interacción.
                 iniciarMusicaFondo();
 
                 const desbloquear = () => {
@@ -2117,13 +2133,9 @@
    🚫 BLOQUEAR MENÚ CONTEXTUAL SOLO EN MÓVIL
    ============================================ */
 document.addEventListener('contextmenu', function(e) {
-    // Si es un input o textarea, siempre permitir
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    // Detectar si es móvil/táctil
     const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     if (!esMovil) return;
-
     e.preventDefault();
 });
 
