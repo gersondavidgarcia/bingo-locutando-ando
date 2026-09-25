@@ -8,9 +8,6 @@ const TEMAS_DISPONIBLES = [
     'Candy', 'Oro', 'Pacifico', 'Halloween', 'Sport', 'Titan', 'Bronce'
 ];
 
-/* ============================================
-   FIGURA DIAGONAL POR DEFECTO
-   ============================================ */
 const FIGURA_DIAGONAL = {
     id: 'diagonal',
     nombre: 'Diagonal',
@@ -25,19 +22,9 @@ const FIGURA_DIAGONAL = {
     fija: true
 };
 
-/* ============================================
-   ESTADO DEL EDITOR
-   ============================================ */
 let editorPatronActual = Array.from({length: 5}, () => Array(5).fill(0));
-
-/* ============================================
-   BLOQUEO DE MOVIMIENTO
-   ============================================ */
 let bloqueoMover = false;
 
-/* ============================================
-   CONFIGURACIÓN DE VOZ
-   ============================================ */
 let VOZ_ACTIVADA = false;
 let VOZ_VOLUMEN = 1.0;
 let VOZ_VELOCIDAD = 1.0;
@@ -46,21 +33,11 @@ let VOZ_SELECCIONADA = '';
 let VOZ_REPETIR = 1;
 let vocesDisponibles = [];
 
-/* ============================================
-   🎨 MODO DE TEMAS
-   ============================================ */
 let MODO_TEMAS = 'simple';
-
-/* ============================================
-   CARTONES COMBINADOS (estado en memoria)
-   ============================================ */
 let CC_SECUENCIAS = [];
 let CC_SECUENCIA_EN_USO = '';
 let CC_EDITANDO_ID = null;
 
-/* ============================================
-   ABRIR / CERRAR MODAL
-   ============================================ */
 function abrirConfiguracion() {
     const modal = document.getElementById('modalConfig');
     if (modal) {
@@ -75,9 +52,6 @@ function cerrarConfiguracion() {
     if (modal) modal.classList.remove('visible');
 }
 
-/* ============================================
-   NAVEGACIÓN ENTRE PANTALLAS DEL MODAL
-   ============================================ */
 function mostrarPantallaConfig(idPantalla) {
     document.querySelectorAll('.config-pantalla').forEach(p => p.classList.remove('visible'));
     const pantalla = document.getElementById(idPantalla);
@@ -103,15 +77,9 @@ function mostrarPantallaConfig(idPantalla) {
         default:                         titulo.textContent = '⚙️ Configuración';
     }
 
-    if (idPantalla === 'pantallaModoTemas') {
-        renderizarModoTemas();
-    }
-    if (idPantalla === 'pantallaTemas') {
-        actualizarIndicadorModoEnTemas();
-    }
-    if (idPantalla === 'pantallaCombinados') {
-        actualizarAvisoModoEnCombinados();
-    }
+    if (idPantalla === 'pantallaModoTemas') renderizarModoTemas();
+    if (idPantalla === 'pantallaTemas') actualizarIndicadorModoEnTemas();
+    if (idPantalla === 'pantallaCombinados') actualizarAvisoModoEnCombinados();
 
     const box = document.querySelector('.modal-box');
     if (box) box.scrollTop = 0;
@@ -137,12 +105,8 @@ function volverAlMenuConfig() {
     mostrarPantallaConfig('pantallaMenu');
 }
 
-/* ============================================
-   🎨 MODO DE TEMAS — UI
-   ============================================ */
 function seleccionarModoTemas(modo) {
     if (modo !== 'simple' && modo !== 'combinado') return;
-
     if (modo === 'combinado') {
         const validas = CC_SECUENCIAS.filter(s => Array.isArray(s.temas) && s.temas.length > 0);
         if (validas.length === 0) {
@@ -150,7 +114,6 @@ function seleccionarModoTemas(modo) {
             return;
         }
     }
-
     MODO_TEMAS = modo;
     renderizarModoTemas();
     actualizarIndicadorModoEnTemas();
@@ -206,9 +169,6 @@ function actualizarAvisoModoEnCombinados() {
     }
 }
 
-/* ============================================
-   CARGAR CONFIGURACIÓN EN EL MODAL
-   ============================================ */
 function cargarConfigEnModal() {
     try {
         const raw = localStorage.getItem('bingo_config');
@@ -224,18 +184,15 @@ function cargarConfigEnModal() {
             setVal('cantidadFiguras', config.cantidadFiguras);
             setVal('tamanoControl', config.tamanoControl);
             setVal('tamanoFiguras', config.tamanoFiguras);
-
             setVal('espacioNotch', config.espacioNotch !== undefined ? config.espacioNotch : 1);
             setVal('bloquearScroll', config.bloquearScroll !== undefined ? config.bloquearScroll : 'si');
-
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
             setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
-
             setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
             setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
-
             setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
+            setVal('velocidadRevancha', config.velocidadRevancha !== undefined ? config.velocidadRevancha : 1);
 
             VOZ_ACTIVADA = config.vozActivada === true;
             VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
@@ -278,10 +235,8 @@ function cargarConfigEnModal() {
             CC_SECUENCIAS = [];
             CC_SECUENCIA_EN_USO = '';
             MODO_TEMAS = 'simple';
-
             const selNotch = document.getElementById('espacioNotch');
             if (selNotch) selNotch.value = '1';
-
             const selScroll = document.getElementById('bloquearScroll');
             if (selScroll) selScroll.value = 'si';
         }
@@ -293,9 +248,6 @@ function cargarConfigEnModal() {
     actualizarAvisoModoEnCombinados();
 }
 
-/* ============================================
-   LABELS DINÁMICOS DE LOS SLIDERS
-   ============================================ */
 function actualizarLabelsSliders() {
     const rangoTamano = document.getElementById('tamanoControl');
     const rangoFiguras = document.getElementById('tamanoFiguras');
@@ -352,6 +304,17 @@ function actualizarLabelsSliders() {
         rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
     }
 
+    const rangoVelRev = document.getElementById('velocidadRevancha');
+    const valVelRev = document.getElementById('valVelocidadRevancha');
+    if (rangoVelRev && valVelRev) {
+        const v = parseFloat(rangoVelRev.value);
+        valVelRev.textContent = v.toFixed(2) + 'x';
+        rangoVelRev.oninput = () => {
+            const valor = parseFloat(rangoVelRev.value);
+            valVelRev.textContent = valor.toFixed(2) + 'x';
+        };
+    }
+
     const rangoVozVol = document.getElementById('vozVolumen');
     const valVozVol = document.getElementById('valVozVolumen');
     if (rangoVozVol && valVozVol) {
@@ -374,9 +337,6 @@ function actualizarLabelsSliders() {
     }
 }
 
-/* ============================================
-   🎵 SONIDOS - CARGAR Y GUARDAR
-   ============================================ */
 function cargarControlesSonidos() {
     const configSonido = (idRango, idVal, clave, porDefecto) => {
         const rango = document.getElementById(idRango);
@@ -405,9 +365,6 @@ function abrirPantallaSonidos() {
     mostrarPantallaConfig('pantallaSonidos');
 }
 
-/* ============================================
-   GUARDAR CONFIGURACIÓN
-   ============================================ */
 function guardarConfiguracion() {
     const temasActivos = [];
     document.querySelectorAll('.tema-check').forEach(chk => {
@@ -445,6 +402,7 @@ function guardarConfiguracion() {
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
         velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+        velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
         vozActivada: document.getElementById('vozActivada')?.value === 'si',
         vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
         vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
@@ -464,9 +422,6 @@ function guardarConfiguracion() {
     cerrarConfiguracion();
 }
 
-/* ============================================
-   INICIAR JUEGO DIRECTO
-   ============================================ */
 function iniciarJuegoDirecto() {
     const existente = localStorage.getItem('bingo_config');
     if (!existente) {
@@ -491,6 +446,7 @@ function iniciarJuegoDirecto() {
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
             velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+            velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
             vozActivada: document.getElementById('vozActivada')?.value === 'si',
             vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
             vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
@@ -508,21 +464,15 @@ function iniciarJuegoDirecto() {
         };
         localStorage.setItem('bingo_config', JSON.stringify(config));
     }
-    localStorage.setItem('bingo_modo_juego', 'ambos');   // ← LÍNEA NUEVA
+    localStorage.setItem('bingo_modo_juego', 'ambos');
     window.location.href = 'juego.html';
 }
 
-/* ============================================
-   CLICK FUERA DEL MODAL → CERRAR
-   ============================================ */
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('modalConfig');
     if (modal && e.target === modal) cerrarConfiguracion();
 });
 
-/* ============================================
-   LECTURA/ESCRITURA DE FIGURAS EN LOCALSTORAGE
-   ============================================ */
 function leerFigurasPersonalizadas() {
     try {
         const raw = localStorage.getItem('bingo_config');
@@ -537,7 +487,6 @@ function leerFigurasPersonalizadas() {
             }
         }
     } catch (e) {}
-
     return [Object.assign({}, FIGURA_DIAGONAL)];
 }
 
@@ -550,9 +499,6 @@ function escribirFigurasPersonalizadas(figuras) {
     } catch (e) {}
 }
 
-/* ============================================
-   LISTA DE FIGURAS EN EL MODAL
-   ============================================ */
 function abrirPantallaFiguras() {
     renderizarListaFiguras();
     mostrarPantallaConfig('pantallaFiguras');
@@ -673,19 +619,13 @@ function moverFigura(id, direccion) {
     try {
         const figuras = leerFigurasPersonalizadas();
         const idx = figuras.findIndex(f => f.id === id);
-
         if (idx === -1) return;
-
         const nuevoIdx = idx + direccion;
-
         if (nuevoIdx < 0 || nuevoIdx >= figuras.length) return;
-
         const temp = figuras[idx];
         figuras[idx] = figuras[nuevoIdx];
         figuras[nuevoIdx] = temp;
-
         escribirFigurasPersonalizadas(figuras);
-
         renderizarListaFiguras(id);
     } finally {
         requestAnimationFrame(() => {
@@ -694,9 +634,6 @@ function moverFigura(id, direccion) {
     }
 }
 
-/* ============================================
-   EDITOR DE FIGURA NUEVA
-   ============================================ */
 function abrirEditorFiguraNueva() {
     editorPatronActual = Array.from({length: 5}, () => Array(5).fill(0));
     const inputNombre = document.getElementById('nombreFigura');
@@ -757,9 +694,6 @@ function guardarFiguraNueva() {
     abrirPantallaFiguras();
 }
 
-/* ============================================
-   🧩 CARTONES COMBINADOS
-   ============================================ */
 function abrirPantallaCombinados() {
     CC_EDITANDO_ID = null;
     renderizarPantallaCombinados();
@@ -1067,9 +1001,6 @@ function borrarSecuenciaCC(id) {
     renderizarModoTemas();
 }
 
-/* ============================================
-   🎙️ SISTEMA DE VOZ (SOLO ESPAÑOL)
-   ============================================ */
 function cargarVocesDisponibles() {
     if (!('speechSynthesis' in window)) return;
     const todas = window.speechSynthesis.getVoices();
@@ -1192,9 +1123,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', desbloquear, { once: true });
 });
 
-/* ============================================
-   🔄 REVANCHA — MODAL DE MODO DE JUEGO
-   ============================================ */
 function iniciarRevanchaDesdeMenu() {
     const raw = localStorage.getItem('bingo_config');
     if (!raw) {
@@ -1207,7 +1135,6 @@ function iniciarRevanchaDesdeMenu() {
 function abrirModalModoRevancha() {
     const modal = document.getElementById('modalModoRevancha');
     if (!modal) {
-        // Si por alguna razón no existe el modal, arrancamos directo
         localStorage.setItem('bingo_modo_revancha', '1');
         localStorage.setItem('bingo_modo_juego', 'ambos');
         window.location.href = 'juego.html';
@@ -1218,7 +1145,6 @@ function abrirModalModoRevancha() {
     const chkBingo  = document.getElementById('chkRevanchaBingo');
     const btnEmpezar = document.getElementById('btnEmpezarRevancha');
 
-    // Por defecto, marcar ambos
     if (chkFigura) chkFigura.checked = true;
     if (chkBingo)  chkBingo.checked  = true;
 
@@ -1235,7 +1161,7 @@ function abrirModalModoRevancha() {
             let modo = 'ambos';
             if (fig && !bin) modo = 'figura';
             else if (!fig && bin) modo = 'bingo';
-            else if (fig && bin) modo = 'ambos';
+            else if (fig && bin) modo = 'mixto';
 
             localStorage.setItem('bingo_modo_juego', modo);
             localStorage.setItem('bingo_modo_revancha', '1');
@@ -1273,9 +1199,6 @@ function actualizarBotonEmpezarRevancha() {
     }
 }
 
-/* ============================================
-   📂 CARGAR PARTIDA DESDE EL MENÚ
-   ============================================ */
 function cargarPartidaDesdeMenu() {
     const raw = localStorage.getItem('bingo_partida_guardada');
     if (!raw) {
@@ -1286,9 +1209,6 @@ function cargarPartidaDesdeMenu() {
     window.location.href = 'juego.html';
 }
 
-/* ============================================
-   📂 ACTUALIZAR ESTADO DEL BOTÓN CARGAR
-   ============================================ */
 function actualizarBotonCargar() {
     const btn = document.getElementById('btnCargarMenu');
     if (!btn) return;
@@ -1302,9 +1222,6 @@ function actualizarBotonCargar() {
 
 document.addEventListener('DOMContentLoaded', actualizarBotonCargar);
 
-/* ============================================
-   🌐 EXPOSICIÓN GLOBAL DE FUNCIONES
-   ============================================ */
 window.abrirConfiguracion = abrirConfiguracion;
 window.cerrarConfiguracion = cerrarConfiguracion;
 window.mostrarPantallaConfig = mostrarPantallaConfig;
@@ -1333,9 +1250,6 @@ window.probarVozConfig = probarVozConfig;
 window.seleccionarModoTemas = seleccionarModoTemas;
 window.abrirPantallaSonidos = abrirPantallaSonidos;
 
-/* ============================================
-   🚫 BLOQUEAR MENÚ CONTEXTUAL SOLO EN MÓVIL
-   ============================================ */
 document.addEventListener('contextmenu', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);

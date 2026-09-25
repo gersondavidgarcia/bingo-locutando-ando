@@ -119,9 +119,6 @@
             console.warn("⚠️ Firebase no inicializado:", e);
         }
 
-        /* ============================================
-           ⚡ OPTIMIZACIÓN DE ANIMACIONES
-           ============================================ */
         (function optimizacionAnimaciones() {
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
@@ -374,12 +371,12 @@
         let INTENSIDAD_HALO_NUMERO = 55;
 
         let VELOCIDAD_BOLA = 650;
+        let VELOCIDAD_REVANCHA = 1;
 
         let MODO_TEMAS = 'simple';
         let CC_SECUENCIAS = [];
         let CC_SECUENCIA_EN_USO = '';
 
-        // ✅ Modo de juego: 'figura', 'bingo' o 'ambos'
         let MODO_JUEGO = 'ambos';
 
         let VOZ_ACTIVADA = false;
@@ -408,7 +405,10 @@
 
         let celdasCentroPendientes = 0;
 
-        // ✅ NOTA: eliminadas "primeraBolaNumero" y "primeraBolaYaSalio"
+        let modoAsignacionActivo = false;
+        let cartonesAsignadosBingo = new Set();
+        let cartonesAsignadosFigura = new Set();
+        let listenerAsignacionCartones = null;
 
         let timeoutBloqueoDestello = null;
 
@@ -425,6 +425,7 @@
             if (autoActivo) return;
             if (partidaTerminada) return;
             if (modoRevanchaActivo) return;
+            if (modoAsignacionActivo) return;
             if (bombo.length === 0) return;
             autoActivo = true;
             programarSiguienteAuto(0);
@@ -447,6 +448,7 @@
                 if (!autoActivo) return;
                 if (partidaTerminada) { detenerAuto(); return; }
                 if (modoRevanchaActivo) { detenerAuto(); return; }
+                if (modoAsignacionActivo) { detenerAuto(); return; }
                 if (bombo.length === 0) { detenerAuto(); return; }
                 if (isAnimating || bloqueadoPorAnimacion) {
                     programarSiguienteAuto(120);
@@ -520,6 +522,7 @@
                     INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
 
                     VELOCIDAD_BOLA = config.velocidadBola !== undefined ? parseInt(config.velocidadBola) : 650;
+                    VELOCIDAD_REVANCHA = config.velocidadRevancha !== undefined ? parseFloat(config.velocidadRevancha) : 1;
 
                     VOZ_ACTIVADA = config.vozActivada === true;
                     VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
@@ -547,6 +550,17 @@
             } catch (e) {}
 
             MODO_JUEGO = localStorage.getItem('bingo_modo_juego') || 'ambos';
+
+            const esRevancha = localStorage.getItem('bingo_modo_revancha') === '1' 
+                || MODO_JUEGO === 'figura' 
+                || MODO_JUEGO === 'bingo' 
+                || MODO_JUEGO === 'mixto';
+
+if (esRevancha && VELOCIDAD_REVANCHA > 1) {
+    VELOCIDAD_BOLA = Math.max(150, Math.round(VELOCIDAD_BOLA / VELOCIDAD_REVANCHA));
+    VOZ_VELOCIDAD = VOZ_VELOCIDAD * VELOCIDAD_REVANCHA;
+    DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
+}
 
             FIGURAS = {};
             ORDEN_FIGURAS = [];
@@ -576,7 +590,7 @@
             }
 
             if (ORDEN_FIGURAS.length === 0) ORDEN_FIGURAS = ['diagonal'];
-            figuraActual = ORDEN_FIGURAS[0];
+            figuraActual = ORDEN_FIGURAS[Math.floor(Math.random() * ORDEN_FIGURAS.length)];
 
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
@@ -959,7 +973,6 @@
                     textoCabecera = `${i} - ${nombresDeFirebase[i - 1]}`;
                 }
 
-                // ✅ Se quitó el <span class="emoji-primera-bola">🎱</span>
                 carton.innerHTML = `
                     <span class="emoji-figura">🎯</span>
                     <span class="emoji-carton-lleno">👑</span>
@@ -1014,9 +1027,10 @@
                     'animando', 'secuencia-completa',
                     'tiene-lleno', 'mostrar-rotulo-bingo', 'mostrar-rotulo-figura',
                     'mostrar-rotulo-gana', 'mostrar-rotulo-todo',
-                    'apagando-resaltado', 'alerta-header'
+                    'apagando-resaltado', 'alerta-header',
+                    'asignado-bingo', 'asignado-figura',
+                    'tiene-asignacion-bingo', 'tiene-asignacion-figura'
                 );
-                // ✅ Se quitó "tiene-primera-bola" y "tiene-lleno" quedó
                 c.dataset.enAlerta = '0';
                 c.dataset.pausadoPorSacar = '0';
                 c.dataset.yaAvisoFigura = '0';
@@ -1108,6 +1122,7 @@
 
         function comprobarFiguraEnCartones() {
             if (MODO_JUEGO === 'bingo') return { hayGanador: false, infoGanadores: [] };
+            if (MODO_JUEGO === 'mixto' && cartonesAsignadosFigura.size === 0) return { hayGanador: false, infoGanadores: [] };
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
             if (figuraYaGanada) return { hayGanador: false, infoGanadores: [] };
 
@@ -1117,9 +1132,10 @@
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             const infoGanadores = [];
 
-            cartones.forEach((carton) => {
+            cartones.forEach((carton, idx) => {
                 if (carton.classList.contains('fuera-de-juego')) return;
                 if (carton.classList.contains('ganador-figura-1')) return;
+                if (MODO_JUEGO === 'mixto' && !cartonesAsignadosFigura.has(idx)) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
                 let completa = true;
@@ -1127,8 +1143,8 @@
 
                 for (let f = 0; f < 5 && completa; f++) {
                     for (let c = 0; c < 5; c++) {
-                        const idx = f * 5 + c;
-                        const celda = celdas[idx];
+                        const idxCelda = f * 5 + c;
+                        const celda = celdas[idxCelda];
                         if (!celda) { completa = false; break; }
                         if (patronFigura[f][c] !== 1) continue;
                         celdasDeLaFigura.push(celda);
@@ -1143,14 +1159,16 @@
         }
 
         function comprobarLlenoEnCartones() {
-              if (MODO_JUEGO === 'figura') return { hayGanador: false, infoGanadores: [] };
+            if (MODO_JUEGO === 'figura') return { hayGanador: false, infoGanadores: [] };
+            if (MODO_JUEGO === 'mixto' && cartonesAsignadosBingo.size === 0) return { hayGanador: false, infoGanadores: [] };
             if (llenoYaGanado) return { hayGanador: false, infoGanadores: [] };
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             const infoGanadores = [];
 
-            cartones.forEach((carton) => {
+            cartones.forEach((carton, idx) => {
                 if (carton.classList.contains('fuera-de-juego')) return;
                 if (carton.classList.contains('ganador-bingo')) return;
+                if (MODO_JUEGO === 'mixto' && !cartonesAsignadosBingo.has(idx)) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
                 let todasMarcadas = true;
@@ -1166,8 +1184,6 @@
 
             return { hayGanador: infoGanadores.length > 0, infoGanadores };
         }
-
-        // ✅ Eliminada la función marcarCartonesConPrimeraBola()
 
         function apagarResaltadoDeTodos() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
@@ -1200,9 +1216,9 @@
         function mostrarRotulosDeGanadores() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
                 if (carton.classList.contains('fuera-de-juego')) return;
+                if (modoAsignacionActivo) return;
                 const ganoFigura = carton.classList.contains('ganador-figura-1');
                 const ganoBingo = carton.classList.contains('ganador-bingo');
-                // ✅ AHORA: GANA TODO = FIGURA + BINGO
                 const ganoTodo = ganoFigura && ganoBingo;
                 if (ganoTodo) {
                     carton.classList.add('mostrar-rotulo-gana', 'mostrar-rotulo-todo');
@@ -1281,7 +1297,12 @@
         function estaAUno(carton, celdas, patronFigura) {
             if (carton.classList.contains('fuera-de-juego')) return false;
 
-            if (MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+            const todosCartones = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const idxCarton = todosCartones.indexOf(carton);
+            const enFigura = (MODO_JUEGO !== 'mixto') || cartonesAsignadosFigura.has(idxCarton);
+            const enBingo = (MODO_JUEGO !== 'mixto') || cartonesAsignadosBingo.has(idxCarton);
+
+            if (enFigura && MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
                 let faltantes = 0, total = 0;
                 for (let f = 0; f < 5; f++) {
                     for (let c = 0; c < 5; c++) {
@@ -1296,7 +1317,7 @@
                 if (total > 0 && faltantes === 1) return true;
             }
 
-            if (!llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+            if (enBingo && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
                 let faltantes = 0;
                 celdas.forEach(celda => {
                     const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
@@ -1313,6 +1334,10 @@
             if (CANTIDAD_FIGURAS < 1 || figuraYaGanada) return false;
             if (carton.classList.contains('ganador-figura-1')) return false;
             if (!patronFigura) return false;
+            if (MODO_JUEGO === 'mixto') {
+                const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                if (!cartonesAsignadosFigura.has(todos.indexOf(carton))) return false;
+            }
 
             let faltantes = 0, total = 0;
             for (let f = 0; f < 5; f++) {
@@ -1332,6 +1357,10 @@
             if (MODO_JUEGO === 'figura') return false;
             if (carton.classList.contains('fuera-de-juego')) return false;
             if (llenoYaGanado || carton.classList.contains('ganador-bingo')) return false;
+            if (MODO_JUEGO === 'mixto') {
+                const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                if (!cartonesAsignadosBingo.has(todos.indexOf(carton))) return false;
+            }
             let faltantes = 0;
             celdas.forEach(celda => {
                 const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
@@ -1344,7 +1373,12 @@
             const resultado = [];
             if (carton.classList.contains('fuera-de-juego')) return resultado;
 
-            if (MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+            const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const idxCarton = todos.indexOf(carton);
+            const enFigura = (MODO_JUEGO !== 'mixto') || cartonesAsignadosFigura.has(idxCarton);
+            const enBingo = (MODO_JUEGO !== 'mixto') || cartonesAsignadosBingo.has(idxCarton);
+
+            if (enFigura && MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
                 let faltantes = 0, total = 0, candidata = null;
                 for (let f = 0; f < 5; f++) {
                     for (let c = 0; c < 5; c++) {
@@ -1359,15 +1393,15 @@
                 if (total > 0 && faltantes === 1 && candidata) resultado.push(candidata);
             }
 
-        if (MODO_JUEGO !== 'figura' && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
-         let faltantes = 0, candidata = null;
-         celdas.forEach(celda => {
-        const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
-        if (!marcada) { faltantes++; candidata = celda; }
-      });
-     if (faltantes === 1 && candidata && !resultado.includes(candidata)) resultado.push(candidata);
-}
-return resultado;
+            if (enBingo && MODO_JUEGO !== 'figura' && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+                let faltantes = 0, candidata = null;
+                celdas.forEach(celda => {
+                    const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                    if (!marcada) { faltantes++; candidata = celda; }
+                });
+                if (faltantes === 1 && candidata && !resultado.includes(candidata)) resultado.push(candidata);
+            }
+            return resultado;
         }
 
         function actualizarResaltadosAmarillos() {
@@ -1377,7 +1411,7 @@ return resultado;
             document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
                 .forEach(c => c.classList.remove('falta-amarillo'));
 
-            if (partidaTerminada) {
+            if (partidaTerminada || modoAsignacionActivo) {
                 document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
                     .forEach(c => c.classList.remove('alerta-header'));
                 return;
@@ -1542,7 +1576,105 @@ return resultado;
             }
         }
 
+        function activarModoAsignacion() {
+            modoAsignacionActivo = true;
+            cartonesAsignadosBingo.clear();
+            cartonesAsignadosFigura.clear();
+            document.body.classList.add('modo-asignacion');
+
+            const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            todos.forEach(c => {
+                c.classList.remove('asignado-bingo', 'asignado-figura');
+            });
+
+            listenerAsignacionCartones = function(e) {
+                if (!modoAsignacionActivo) return;
+                const carton = e.target.closest('.cartones-grid.modo-15 .carton');
+                if (!carton) return;
+
+                e.stopPropagation();
+                e.preventDefault();
+
+                const todosArr = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                const idx = todosArr.indexOf(carton);
+                if (idx === -1) return;
+
+                if (cartonesAsignadosBingo.has(idx)) {
+                    cartonesAsignadosBingo.delete(idx);
+                    cartonesAsignadosFigura.add(idx);
+                    carton.classList.remove('asignado-bingo');
+                    carton.classList.add('asignado-figura');
+                } else if (cartonesAsignadosFigura.has(idx)) {
+                    cartonesAsignadosFigura.delete(idx);
+                    carton.classList.remove('asignado-figura');
+                } else {
+                    cartonesAsignadosBingo.add(idx);
+                    carton.classList.add('asignado-bingo');
+                }
+            };
+
+            document.addEventListener('click', listenerAsignacionCartones, true);
+            actualizarBotonConfirmarAsignacion();
+        }
+
+        function actualizarBotonConfirmarAsignacion() {
+            const btn = document.getElementById('btnConfirmarRevancha');
+            if (!btn) return;
+            if (cartonesAsignadosBingo.size + cartonesAsignadosFigura.size === 0) {
+                btn.classList.add('sin-seleccion');
+            } else {
+                btn.classList.remove('sin-seleccion');
+            }
+        }
+
+        function confirmarAsignacionMixta() {
+            if (cartonesAsignadosBingo.size + cartonesAsignadosFigura.size === 0) {
+                const btn = document.getElementById('btnConfirmarRevancha');
+                if (btn) {
+                    btn.style.background = '#ff1744';
+                    setTimeout(() => { btn.style.background = ''; }, 600);
+                }
+                return;
+            }
+
+            document.body.classList.add('modo-mixto-jugando');
+
+            modoAsignacionActivo = false;
+            document.body.classList.remove('modo-asignacion');
+
+            if (listenerAsignacionCartones) {
+                document.removeEventListener('click', listenerAsignacionCartones, true);
+                listenerAsignacionCartones = null;
+            }
+
+            const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            todos.forEach((carton, idx) => {
+                carton.classList.remove('asignado-bingo', 'asignado-figura', 'tiene-asignacion-bingo', 'tiene-asignacion-figura');
+
+                const enBingo = cartonesAsignadosBingo.has(idx);
+                const enFigura = cartonesAsignadosFigura.has(idx);
+
+                if (enBingo) {
+                    carton.classList.add('tiene-asignacion-bingo');
+                } else if (enFigura) {
+                    carton.classList.add('tiene-asignacion-figura');
+                }
+
+                if (!enBingo && !enFigura) {
+                    cartonesFueraDeJuego.add(idx);
+                } else {
+                    cartonesFueraDeJuego.delete(idx);
+                }
+            });
+
+            reiniciarJuego();
+        }
+
         function confirmarRevancha() {
+            if (modoAsignacionActivo) {
+                confirmarAsignacionMixta();
+                return;
+            }
             if (cartonesSeleccionadosRevancha.size === 0) {
                 const btn = document.getElementById('btnConfirmarRevancha');
                 if (btn) {
@@ -1625,6 +1757,8 @@ return resultado;
                     modoJuego: MODO_JUEGO,
                     ccSecuenciaEnUso: CC_SECUENCIA_EN_USO,
                     cartonesFueraDeJuego: Array.from(cartonesFueraDeJuego),
+                    cartonesAsignadosBingo: Array.from(cartonesAsignadosBingo),
+                    cartonesAsignadosFigura: Array.from(cartonesAsignadosFigura),
                     cartones: cartones
                 };
 
@@ -1664,13 +1798,26 @@ return resultado;
             indiceRotacionActual = typeof partida.indiceRotacionActual === 'number' ? partida.indiceRotacionActual : 0;
             if (partida.figuraActual && FIGURAS[partida.figuraActual]) figuraActual = partida.figuraActual;
             if (partida.modoTemas === 'simple' || partida.modoTemas === 'combinado') MODO_TEMAS = partida.modoTemas;
-            if (partida.modoJuego === 'figura' || partida.modoJuego === 'bingo' || partida.modoJuego === 'ambos') {
+            if (partida.modoJuego === 'figura' || partida.modoJuego === 'bingo' || partida.modoJuego === 'ambos' || partida.modoJuego === 'mixto') {
                 MODO_JUEGO = partida.modoJuego;
             }
             if (partida.ccSecuenciaEnUso) CC_SECUENCIA_EN_USO = partida.ccSecuenciaEnUso;
             cartonesFueraDeJuego = new Set(Array.isArray(partida.cartonesFueraDeJuego) ? partida.cartonesFueraDeJuego : []);
+            cartonesAsignadosBingo = new Set(Array.isArray(partida.cartonesAsignadosBingo) ? partida.cartonesAsignadosBingo : []);
+            cartonesAsignadosFigura = new Set(Array.isArray(partida.cartonesAsignadosFigura) ? partida.cartonesAsignadosFigura : []);
 
             renderizarEstructura();
+
+            if (MODO_JUEGO === 'mixto' && (cartonesAsignadosBingo.size > 0 || cartonesAsignadosFigura.size > 0)) {
+                document.body.classList.add('modo-mixto-jugando');
+                const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+                todos.forEach((carton, idx) => {
+                    const enBingo = cartonesAsignadosBingo.has(idx);
+                    const enFigura = cartonesAsignadosFigura.has(idx);
+                    if (enBingo) carton.classList.add('tiene-asignacion-bingo');
+                    else if (enFigura) carton.classList.add('tiene-asignacion-figura');
+                });
+            }
 
             const cartonesDOM = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             partida.cartones.forEach((dataCarton, idx) => {
@@ -1777,8 +1924,6 @@ return resultado;
                 const letra = obtenerLetra(numero);
                 historialSacadas.unshift({ numero, letra });
 
-                // ✅ Eliminada la lógica de primera bola
-
                 const display = document.getElementById('numeroDisplay');
                 if (display) display.textContent = numero;
 
@@ -1859,6 +2004,14 @@ return resultado;
                         partidaTerminada = true;
                     }
 
+                    if (MODO_JUEGO === 'mixto') {
+                        const figuraOk = (cartonesAsignadosFigura.size === 0) || figuraYaGanada;
+                        const bingoOk = (cartonesAsignadosBingo.size === 0) || llenoYaGanado;
+                        if (figuraOk && bingoOk) {
+                            partidaTerminada = true;
+                        }
+                    }
+
                     if (cartonesGanadores.size > 0) {
                         detenerAuto();
                         ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
@@ -1893,6 +2046,7 @@ return resultado;
         }
 
         function sacarBola(e) {
+            if (modoAsignacionActivo) return;
             if (isAnimating || bloqueadoPorAnimacion) return;
             if (bombo.length === 0) return;
             if (modoRevanchaActivo) return;
@@ -1914,6 +2068,7 @@ return resultado;
         }
 
         function sacarBolaEspecifica(numero) {
+            if (modoAsignacionActivo) return;
             if (isAnimating || bloqueadoPorAnimacion) return;
             if (partidaTerminada) return;
             if (modoRevanchaActivo) return;
@@ -1970,9 +2125,20 @@ return resultado;
                 c.dataset.yaAvisoBingo = '0';
             });
             renderizarEstructura();
+
+            if (MODO_JUEGO === 'mixto' && (cartonesAsignadosBingo.size > 0 || cartonesAsignadosFigura.size > 0)) {
+                const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+                todos.forEach((carton, idx) => {
+                    const enBingo = cartonesAsignadosBingo.has(idx);
+                    const enFigura = cartonesAsignadosFigura.has(idx);
+                    if (enBingo) carton.classList.add('tiene-asignacion-bingo');
+                    else if (enFigura) carton.classList.add('tiene-asignacion-figura');
+                });
+            }
         }
 
         function cambiarCartonesYPaleta() {
+            if (modoAsignacionActivo) return;
             detenerAuto();
             cartonesFueraDeJuego.clear();
             desactivarModoRevancha();
@@ -2018,8 +2184,15 @@ return resultado;
             }
 
             if (CANTIDAD_FIGURAS >= 1 && ORDEN_FIGURAS.length > 0) {
-                const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
-                figuraActual = ORDEN_FIGURAS[(idxFigura + 1) % ORDEN_FIGURAS.length];
+                if (ORDEN_FIGURAS.length === 1) {
+                    figuraActual = ORDEN_FIGURAS[0];
+                } else {
+                    let nuevaFigura = figuraActual;
+                    while (nuevaFigura === figuraActual) {
+                        nuevaFigura = ORDEN_FIGURAS[Math.floor(Math.random() * ORDEN_FIGURAS.length)];
+                    }
+                    figuraActual = nuevaFigura;
+                }
             }
 
             reiniciarJuego();
@@ -2047,6 +2220,8 @@ return resultado;
 
             body.classList.remove(
                 'modo-revancha',
+                'modo-asignacion',
+                'modo-mixto-jugando',
                 'animaciones-pausadas',
                 'modo-lite',
                 'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
@@ -2122,7 +2297,9 @@ return resultado;
                     reiniciarJuego();
                 }
 
-                if (modoRevanchaDesdeIndex === '1') {
+                if (MODO_JUEGO === 'mixto' && !partidaCargada) {
+                    setTimeout(() => activarModoAsignacion(), 600);
+                } else if (modoRevanchaDesdeIndex === '1') {
                     setTimeout(() => activarModoRevancha(), 900);
                 }
 

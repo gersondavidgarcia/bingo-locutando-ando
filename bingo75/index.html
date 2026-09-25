@@ -24,9 +24,6 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* ========================================================= */
-        /* MENÚ PRINCIPAL — DISEÑO BINGO 75                          */
-        /* ========================================================= */
         body.body-center {
             background-color: #030406;
             background-image:
@@ -347,7 +344,6 @@
             50% { opacity: 0.3; }
         }
 
-        /* Ajuste del modal de reglas para el nuevo diseño */
         .modal-reglas-box {
             background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
             border: 1px solid rgba(245,200,66,0.35);
@@ -401,9 +397,6 @@
             transform: scale(0.96);
         }
 
-        /* ========================================================= */
-        /* MODAL DE MODO DE REVANCHA                                 */
-        /* ========================================================= */
         .modo-revancha-box {
             background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
             border: 1px solid rgba(245,200,66,0.35);
@@ -504,7 +497,6 @@
     <canvas id="canvasParticulas"></canvas>
 
     <div class="menu-container">
-        <!-- Dado -->
         <div class="dice-container">
             <div class="dice">
                 <div class="dot dot-top-left"></div>
@@ -515,18 +507,15 @@
             </div>
         </div>
 
-        <!-- Logo y subtítulo -->
         <div class="logo-box">
             <h1><span class="bingo-text">BINGO</span><span class="ninety-text">75</span></h1>
             <p class="subtitle">Múltiples Modalidades</p>
         </div>
 
-        <!-- Botón principal: JUGAR -->
         <button class="btn-jugar" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">
             <i class="fa-solid fa-play"></i> JUGAR
         </button>
 
-        <!-- Botones secundarios -->
         <div class="menu-options-wrapper">
             <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">
                 <span class="btn-content">
@@ -569,7 +558,6 @@
             </button>
         </div>
 
-        <!-- Footer -->
         <div class="footer-menu">
             <div class="audio-wave"><span></span><span></span><span></span></div>
             <div class="status-dot"></div>
@@ -578,9 +566,6 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- MODAL DE REGLAS (solo para el menú)                       -->
-    <!-- ========================================================= -->
     <div class="modal-overlay" id="modalReglas">
         <div class="modal-reglas-box">
             <h2>📖 Reglas del Bingo 75</h2>
@@ -594,9 +579,6 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- MODAL DE MODO DE REVANCHA                                 -->
-    <!-- ========================================================= -->
     <div class="modal-overlay" id="modalModoRevancha">
         <div class="modo-revancha-box">
             <h2>🎯 ¿Qué se juega?</h2>
@@ -618,9 +600,6 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- MODAL DE CONFIGURACIÓN                                    -->
-    <!-- ========================================================= -->
     <div class="modal-overlay" id="modalConfig">
         <div class="modal-box">
             <div class="modal-header">
@@ -630,7 +609,6 @@
 
             <div class="modal-body">
 
-                <!-- PANTALLA: MENÚ PRINCIPAL -->
                 <div class="config-pantalla visible" id="pantallaMenu">
                     <p class="config-hint">Elige qué quieres configurar:</p>
 
@@ -638,7 +616,7 @@
                         <span class="seccion-icono">⚙️</span>
                         <span class="seccion-texto">
                             <strong>General</strong>
-                            <small>Cartones · Firebase · Formato control</small>
+                            <small>Cartones · Firebase · Formato control · Velocidad revancha</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -725,7 +703,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: GENERAL -->
                 <div class="config-pantalla" id="pantallaGeneral">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -769,9 +746,20 @@
                             <option value="3">3 - Lleno + Figura + Extra</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="velocidadRevancha">
+                            🏁 Velocidad de revancha: 
+                            <span id="valVelocidadRevancha">1.0x</span>
+                        </label>
+                        <input type="range" id="velocidadRevancha" min="1" max="2" value="1" step="0.05">
+                        <p class="config-hint" style="margin-top: 4px;">
+                            1.0x = igual que siempre · 2.0x = al doble de rápido (bola y voz).
+                            Solo aplica en partidas de revancha.
+                        </p>
+                    </div>
                 </div>
 
-                <!-- PANTALLA: TEMAS -->
                 <div class="config-pantalla" id="pantallaTemas">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -892,7 +880,6 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: MODO DE TEMAS -->
                 <div class="config-pantalla" id="pantallaModoTemas">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -923,7 +910,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: CARTONES COMBINADOS -->
                 <div class="config-pantalla" id="pantallaCombinados">
                     <button class="btn-volver" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">‹ Volver</button>
 
@@ -950,7 +936,6 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: EDITOR DE SECUENCIA -->
                 <div class="config-pantalla" id="pantallaEditorSecuencia">
                     <button class="btn-volver" onclick="cerrarEditorSecuenciaCC()" onfocus="this.blur()">‹ Volver</button>
 
@@ -979,7 +964,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: FIGURAS -->
                 <div class="config-pantalla" id="pantallaFiguras">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -992,7 +976,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: EDITOR DE FIGURA -->
                 <div class="config-pantalla" id="pantallaEditorFigura">
                     <button class="btn-volver" onclick="cerrarEditorFigura()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1013,7 +996,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: RESALTADOS -->
                 <div class="config-pantalla" id="pantallaResaltados">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1038,7 +1020,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: RESALTADO DE FIGURA -->
                 <div class="config-pantalla" id="pantallaResaltadoFigura">
                     <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
 
@@ -1067,7 +1048,6 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: RESALTADO DE NÚMERO -->
                 <div class="config-pantalla" id="pantallaResaltadoNumero">
                     <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
 
@@ -1088,7 +1068,6 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: VELOCIDAD -->
                 <div class="config-pantalla" id="pantallaVelocidad">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1105,7 +1084,6 @@
                     </p>
                 </div>
 
-                <!-- PANTALLA: VOZ -->
                 <div class="config-pantalla" id="pantallaVoz">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1163,7 +1141,6 @@
                     </button>
                 </div>
 
-                <!-- PANTALLA: SONIDOS -->
                 <div class="config-pantalla" id="pantallaSonidos">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1194,7 +1171,6 @@
                     </div>
                 </div>
 
-                <!-- PANTALLA: APARIENCIA -->
                 <div class="config-pantalla" id="pantallaApariencia">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -1241,14 +1217,8 @@
         </div>
     </div>
 
-    <!-- ========================================================= -->
-    <!-- SCRIPT.JS                                                -->
-    <!-- ========================================================= -->
     <script src="script.js"></script>
 
-    <!-- ========================================================= -->
-    <!-- SCRIPT LOCAL: MENÚ, PARTÍCULAS, REGLAS, SALIR             -->
-    <!-- ========================================================= -->
     <script>
         function abrirReglas() {
             document.getElementById('modalReglas').classList.add('visible');
