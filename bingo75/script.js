@@ -48,8 +48,6 @@ let vocesDisponibles = [];
 
 /* ============================================
    🎨 MODO DE TEMAS
-   'simple'    → un tema a la vez (rota con CAMBIAR)
-   'combinado' → mezcla temas por bloques de 3 cartones
    ============================================ */
 let MODO_TEMAS = 'simple';
 
@@ -227,10 +225,7 @@ function cargarConfigEnModal() {
             setVal('tamanoControl', config.tamanoControl);
             setVal('tamanoFiguras', config.tamanoFiguras);
 
-            // ✅ NUEVO: espacio superior para el notch
             setVal('espacioNotch', config.espacioNotch !== undefined ? config.espacioNotch : 1);
-
-            // ✅ NUEVO: bloquear scroll en juego.html
             setVal('bloquearScroll', config.bloquearScroll !== undefined ? config.bloquearScroll : 'si');
 
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
@@ -242,7 +237,6 @@ function cargarConfigEnModal() {
 
             setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
 
-            // ===== CONFIGURACIÓN DE VOZ =====
             VOZ_ACTIVADA = config.vozActivada === true;
             VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
             VOZ_VELOCIDAD = (config.vozVelocidad !== undefined ? config.vozVelocidad : 100) / 100;
@@ -266,12 +260,10 @@ function cargarConfigEnModal() {
                 chk.checked = temasGuardados.includes(chk.value);
             });
 
-            // ===== CARTONES COMBINADOS =====
             const cc = config.cartonesCombinados || {};
             CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
             CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
 
-            // ===== MODO DE TEMAS =====
             if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
                 MODO_TEMAS = config.modoTemas;
             } else if (cc.activo === true) {
@@ -287,11 +279,9 @@ function cargarConfigEnModal() {
             CC_SECUENCIA_EN_USO = '';
             MODO_TEMAS = 'simple';
 
-            // ✅ NUEVO: valor por defecto del espacio notch
             const selNotch = document.getElementById('espacioNotch');
             if (selNotch) selNotch.value = '1';
 
-            // ✅ NUEVO: valor por defecto del bloquear scroll
             const selScroll = document.getElementById('bloquearScroll');
             if (selScroll) selScroll.value = 'si';
         }
@@ -362,7 +352,6 @@ function actualizarLabelsSliders() {
         rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
     }
 
-    // ===== SLIDERS DE VOZ =====
     const rangoVozVol = document.getElementById('vozVolumen');
     const valVozVol = document.getElementById('valVozVolumen');
     if (rangoVozVol && valVozVol) {
@@ -448,13 +437,8 @@ function guardarConfiguracion() {
         cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
         tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
         tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
-
-        // ✅ NUEVO: espacio superior para el notch
         espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
-
-        // ✅ NUEVO: bloquear scroll en juego.html
         bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
-
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
         duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
@@ -499,13 +483,8 @@ function iniciarJuegoDirecto() {
             cantidadFiguras: parseInt(document.getElementById('cantidadFiguras')?.value || '2'),
             tamanoControl: parseInt(document.getElementById('tamanoControl')?.value || '58'),
             tamanoFiguras: parseInt(document.getElementById('tamanoFiguras')?.value || '42'),
-
-            // ✅ NUEVO: espacio superior para el notch
             espacioNotch: parseInt(document.getElementById('espacioNotch')?.value || '1'),
-
-            // ✅ NUEVO: bloquear scroll en juego.html
             bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
-
             intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
             intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
@@ -529,6 +508,7 @@ function iniciarJuegoDirecto() {
         };
         localStorage.setItem('bingo_config', JSON.stringify(config));
     }
+    localStorage.setItem('bingo_modo_juego', 'ambos');   // ← LÍNEA NUEVA
     window.location.href = 'juego.html';
 }
 
@@ -930,7 +910,6 @@ function cerrarEditorSecuenciaCC() {
     abrirPantallaCombinados();
 }
 
-/* Estado temporal del editor de secuencia */
 let CC_EDITOR_TEMAS = [];
 
 function renderizarChipsEditorCC(temas) {
@@ -1152,9 +1131,6 @@ function desbloquearVoz() {
     } catch (e) {}
 }
 
-/* ============================================
-   PROBAR VOZ DESDE LA CONFIGURACIÓN
-   ============================================ */
 function probarVozConfig() {
     if (!('speechSynthesis' in window)) {
         alert('Este dispositivo no soporta síntesis de voz');
@@ -1204,9 +1180,6 @@ function probarVozConfig() {
     }
 }
 
-/* ============================================
-   INICIALIZAR SISTEMA DE VOZ
-   ============================================ */
 document.addEventListener('DOMContentLoaded', () => {
     initVoces();
 
@@ -1220,7 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================
-   🔄 INICIAR REVANCHA DESDE EL MENÚ
+   🔄 REVANCHA — MODAL DE MODO DE JUEGO
    ============================================ */
 function iniciarRevanchaDesdeMenu() {
     const raw = localStorage.getItem('bingo_config');
@@ -1228,8 +1201,76 @@ function iniciarRevanchaDesdeMenu() {
         iniciarJuegoDirecto();
         return;
     }
-    localStorage.setItem('bingo_modo_revancha', '1');
-    window.location.href = 'juego.html';
+    abrirModalModoRevancha();
+}
+
+function abrirModalModoRevancha() {
+    const modal = document.getElementById('modalModoRevancha');
+    if (!modal) {
+        // Si por alguna razón no existe el modal, arrancamos directo
+        localStorage.setItem('bingo_modo_revancha', '1');
+        localStorage.setItem('bingo_modo_juego', 'ambos');
+        window.location.href = 'juego.html';
+        return;
+    }
+
+    const chkFigura = document.getElementById('chkRevanchaFigura');
+    const chkBingo  = document.getElementById('chkRevanchaBingo');
+    const btnEmpezar = document.getElementById('btnEmpezarRevancha');
+
+    // Por defecto, marcar ambos
+    if (chkFigura) chkFigura.checked = true;
+    if (chkBingo)  chkBingo.checked  = true;
+
+    actualizarBotonEmpezarRevancha();
+
+    if (chkFigura) chkFigura.onchange = actualizarBotonEmpezarRevancha;
+    if (chkBingo)  chkBingo.onchange  = actualizarBotonEmpezarRevancha;
+
+    if (btnEmpezar) {
+        btnEmpezar.onclick = () => {
+            const fig = chkFigura && chkFigura.checked;
+            const bin = chkBingo && chkBingo.checked;
+
+            let modo = 'ambos';
+            if (fig && !bin) modo = 'figura';
+            else if (!fig && bin) modo = 'bingo';
+            else if (fig && bin) modo = 'ambos';
+
+            localStorage.setItem('bingo_modo_juego', modo);
+            localStorage.setItem('bingo_modo_revancha', '1');
+
+            cerrarModalModoRevancha();
+            window.location.href = 'juego.html';
+        };
+    }
+
+    modal.classList.add('visible');
+}
+
+function cerrarModalModoRevancha() {
+    const modal = document.getElementById('modalModoRevancha');
+    if (modal) modal.classList.remove('visible');
+}
+
+function actualizarBotonEmpezarRevancha() {
+    const chkFigura = document.getElementById('chkRevanchaFigura');
+    const chkBingo  = document.getElementById('chkRevanchaBingo');
+    const btnEmpezar = document.getElementById('btnEmpezarRevancha');
+    if (!btnEmpezar) return;
+
+    const fig = chkFigura && chkFigura.checked;
+    const bin = chkBingo && chkBingo.checked;
+
+    if (!fig && !bin) {
+        btnEmpezar.disabled = true;
+        btnEmpezar.style.opacity = '0.5';
+        btnEmpezar.style.pointerEvents = 'none';
+    } else {
+        btnEmpezar.disabled = false;
+        btnEmpezar.style.opacity = '';
+        btnEmpezar.style.pointerEvents = '';
+    }
 }
 
 /* ============================================
@@ -1274,6 +1315,9 @@ window.iniciarJuegoDirecto = iniciarJuegoDirecto;
 window.iniciarRevanchaDesdeMenu = iniciarRevanchaDesdeMenu;
 window.cargarPartidaDesdeMenu = cargarPartidaDesdeMenu;
 
+window.abrirModalModoRevancha = abrirModalModoRevancha;
+window.cerrarModalModoRevancha = cerrarModalModoRevancha;
+
 window.abrirPantallaCombinados = abrirPantallaCombinados;
 window.abrirEditorSecuenciaCC = abrirEditorSecuenciaCC;
 window.cerrarEditorSecuenciaCC = cerrarEditorSecuenciaCC;
@@ -1293,12 +1337,8 @@ window.abrirPantallaSonidos = abrirPantallaSonidos;
    🚫 BLOQUEAR MENÚ CONTEXTUAL SOLO EN MÓVIL
    ============================================ */
 document.addEventListener('contextmenu', function(e) {
-    // Si es un input o textarea, siempre permitir
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    // Detectar si es móvil/táctil
     const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
     if (!esMovil) return;
-
     e.preventDefault();
 });

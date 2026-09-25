@@ -1391,38 +1391,6 @@ body:not(.body-center) {
 /* ============================================
    EMOJIS CON CÍRCULO BLANCO
    ============================================ */
-.cartones-grid.modo-15 .carton .emoji-primera-bola {
-    display: none;
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 31;
-    pointer-events: none;
-    line-height: 1;
-
-    width: clamp(1.1rem, 3.8vw, 1.6rem);
-    height: clamp(1.1rem, 3.8vw, 1.6rem);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #000000;
-    box-sizing: border-box;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: clamp(0.6rem, 2.2vw, 0.9rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    transition: right 0.25s ease;
-}
-
-.cartones-grid.modo-15 .carton.tiene-primera-bola .emoji-primera-bola {
-    display: flex;
-    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.cartones-grid.modo-15 .carton.tiene-primera-bola.ganador-figura-1 .emoji-primera-bola {
-    right: calc(clamp(1.2rem, 4.2vw, 1.8rem) + 6px);
-}
 
 .cartones-grid.modo-15 .carton .emoji-figura {
     display: none;

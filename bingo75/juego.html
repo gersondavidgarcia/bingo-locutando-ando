@@ -30,7 +30,7 @@
             <div class="bolillero-top-row">
 
                 <div class="bolillero-stage">
-                    <div class="bolillero-sphere" id="bolilleroSphere" onclick="sacarBola(event)" onfocus="this.blur()">
+                    <div class="bolillero-sphere" id="bolilleroSphere" onclick="toggleAuto(event)" onfocus="this.blur()">
                         <span class="bolillero-numero" id="numeroDisplay">--</span>
                     </div>
                 </div>
@@ -97,9 +97,6 @@
     </div>
 
     <script type="module">
-        /* ============================================
-           IMPORTACIONES DE FIREBASE
-           ============================================ */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -123,10 +120,9 @@
         }
 
         /* ============================================
-           ⚡ OPTIMIZACIÓN: PAUSAR ANIMACIONES CUANDO NO SE USAN
+           ⚡ OPTIMIZACIÓN DE ANIMACIONES
            ============================================ */
         (function optimizacionAnimaciones() {
-            // 1. Pausar cuando la pestaña/app no está visible
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
                     document.body.classList.add('animaciones-pausadas');
@@ -135,7 +131,6 @@
                 }
             });
 
-            // 2. Pausar cuando el celular no se toca por 15 segundos
             let timeoutInactividad = null;
             const reiniciarTimer = () => {
                 document.body.classList.remove('animaciones-pausadas');
@@ -150,20 +145,15 @@
             });
             reiniciarTimer();
 
-            // 3. Detectar gama baja y activar modo lite
             const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
             const nucleos = navigator.hardwareConcurrency || 4;
             const gamaBaja = esMovil && nucleos <= 4;
             if (gamaBaja) {
                 document.body.classList.add('modo-lite');
-                console.log('⚡ Modo lite activado (dispositivo de gama baja)');
+                console.log('⚡ Modo lite activado');
             }
         })();
 
-        /* ============================================
-           🔔 SISTEMA DE SONIDOS
-           Rutas base de los audios en GitHub
-           ============================================ */
         const RUTA_AUDIOS = 'Audios/Sonidos/';
 
         let audioMusica = null;
@@ -174,7 +164,6 @@
         let fadeIntervalId = null;
         let saliendoDelJuego = false;
 
-        // Lee el volumen guardado del slider (o usa el default si no existe)
         function obtenerVolumenSonido(clave, porDefecto) {
             const guardado = parseFloat(localStorage.getItem(clave));
             return !isNaN(guardado) ? guardado : porDefecto;
@@ -188,22 +177,17 @@
 
                 audioMusica.loop = true;
                 audioMusica.preload = 'auto';
-                audioMusica.volume = 0; // arranca en 0 para el fade in
+                audioMusica.volume = 0;
 
                 audioCampana.preload = 'auto';
                 audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
 
                 audioTactac.preload = 'auto';
-                audioTactac.loop = true; // tactac en bucle durante la animación
+                audioTactac.loop = true;
                 audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
-            } catch (e) {
-                console.warn('⚠️ No se pudieron inicializar los audios:', e);
-            }
+            } catch (e) {}
         }
 
-        /* ============================================
-           🎵 FADE IN / FADE OUT DE LA MÚSICA
-           ============================================ */
         function cancelarFade() {
             if (fadeIntervalId) {
                 clearInterval(fadeIntervalId);
@@ -214,12 +198,8 @@
         function hacerFadeInMusica(duracionMs) {
             if (!audioMusica) return;
             cancelarFade();
-
             const volumenObjetivo = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
-            if (volumenObjetivo <= 0) {
-                audioMusica.volume = 0;
-                return;
-            }
+            if (volumenObjetivo <= 0) { audioMusica.volume = 0; return; }
 
             const pasos = 40;
             const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
@@ -239,17 +219,11 @@
         }
 
         function hacerFadeOutMusica(duracionMs, callback) {
-            if (!audioMusica) {
-                if (callback) callback();
-                return;
-            }
+            if (!audioMusica) { if (callback) callback(); return; }
             cancelarFade();
 
             const volumenInicial = audioMusica.volume;
-            if (volumenInicial <= 0) {
-                if (callback) callback();
-                return;
-            }
+            if (volumenInicial <= 0) { if (callback) callback(); return; }
 
             const pasos = 40;
             const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
@@ -305,11 +279,8 @@
                 audioMusica.currentTime = 0;
                 const p = audioMusica.play();
                 if (p && p.then) {
-                    p.then(() => {
-                        hacerFadeInMusica(1500);
-                    }).catch(() => {
-                        musicaIniciada = false;
-                    });
+                    p.then(() => hacerFadeInMusica(1500))
+                     .catch(() => { musicaIniciada = false; });
                 } else {
                     hacerFadeInMusica(1500);
                 }
@@ -329,9 +300,6 @@
             iniciarMusicaFondo();
         }
 
-        /* ============================================
-           FIGURA DIAGONAL BASE
-           ============================================ */
         const FIGURA_DIAGONAL = {
             id: 'diagonal',
             nombre: 'Diagonal',
@@ -350,9 +318,6 @@
         let ORDEN_FIGURAS = ['diagonal'];
         let figuraActual = 'diagonal';
 
-        /* ============================================
-           PALETAS DE COLOR (21 temas)
-           ============================================ */
         const PALETAS = [
             { nombre: 'Verde',       colores: ['#1b5e20', '#2e7d32', '#388e3c', '#43a047', '#4caf50'], tema: '#2e7d32' },
             { nombre: 'Azul',        colores: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3'], tema: '#1565c0' },
@@ -380,9 +345,6 @@
         let paletaActual = 0;
         let indiceRotacionActual = 0;
 
-        /* ============================================
-           COLORES EXTERIORES DE LA BOLA
-           ============================================ */
         const COLORES_EXTERIOR_BOLA = [
             '#1f77b4', '#2ca02c', '#d62728', '#9467bd',
             '#17becf', '#e377c2', '#393b79', '#6b6ecf'
@@ -392,9 +354,6 @@
             return COLORES_EXTERIOR_BOLA[idx];
         }
 
-        /* ============================================
-           CONFIGURACIÓN GLOBAL
-           ============================================ */
         let TOTAL_CARTONES = 15;
         const MAX_BALOTAS = 75;
         let USAR_BASE_DATOS = true;
@@ -404,10 +363,7 @@
         let TAMANO_FIGURAS = 42;
         let TEMAS_ACTIVOS = ['Verde'];
 
-        // ✅ Espacio superior para el notch (0, 1 o 2 renglones)
         let ESPACIO_NOTCH = 1;
-
-        // ✅ Bloquear scroll (si/no)
         let BLOQUEAR_SCROLL = 'si';
 
         let INTENSIDAD_GLOW = 95;
@@ -419,16 +375,13 @@
 
         let VELOCIDAD_BOLA = 650;
 
-        /* ============================================
-           🎨 MODO DE TEMAS + CARTONES COMBINADOS
-           ============================================ */
         let MODO_TEMAS = 'simple';
         let CC_SECUENCIAS = [];
         let CC_SECUENCIA_EN_USO = '';
 
-        /* ============================================
-           CONFIGURACIÓN DE VOZ
-           ============================================ */
+        // ✅ Modo de juego: 'figura', 'bingo' o 'ambos'
+        let MODO_JUEGO = 'ambos';
+
         let VOZ_ACTIVADA = false;
         let VOZ_VOLUMEN = 1.0;
         let VOZ_VELOCIDAD = 1.0;
@@ -455,30 +408,91 @@
 
         let celdasCentroPendientes = 0;
 
-        let primeraBolaNumero = null;
-        let primeraBolaYaSalio = false;
+        // ✅ NOTA: eliminadas "primeraBolaNumero" y "primeraBolaYaSalio"
 
         let timeoutBloqueoDestello = null;
 
-        /* ============================================
-           🔄 ESTADO DE REVANCHA
-           ============================================ */
+        let autoActivo = false;
+        let timeoutAuto = null;
+
+        function toggleAuto(e) {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            if (autoActivo) detenerAuto();
+            else iniciarAuto();
+        }
+
+        function iniciarAuto() {
+            if (autoActivo) return;
+            if (partidaTerminada) return;
+            if (modoRevanchaActivo) return;
+            if (bombo.length === 0) return;
+            autoActivo = true;
+            programarSiguienteAuto(0);
+        }
+
+        function detenerAuto() {
+            autoActivo = false;
+            if (timeoutAuto) {
+                clearTimeout(timeoutAuto);
+                timeoutAuto = null;
+            }
+        }
+
+        function programarSiguienteAuto(delayMs) {
+            if (timeoutAuto) clearTimeout(timeoutAuto);
+            if (!autoActivo) return;
+            const delay = (typeof delayMs === 'number') ? delayMs : 0;
+
+            timeoutAuto = setTimeout(() => {
+                if (!autoActivo) return;
+                if (partidaTerminada) { detenerAuto(); return; }
+                if (modoRevanchaActivo) { detenerAuto(); return; }
+                if (bombo.length === 0) { detenerAuto(); return; }
+                if (isAnimating || bloqueadoPorAnimacion) {
+                    programarSiguienteAuto(120);
+                    return;
+                }
+                sacarBolaAuto();
+            }, delay);
+        }
+
+        function sacarBolaAuto() {
+            if (!autoActivo) return;
+            if (isAnimating || bloqueadoPorAnimacion) {
+                programarSiguienteAuto(120);
+                return;
+            }
+            if (bombo.length === 0) { detenerAuto(); return; }
+
+            desbloquearSonidos();
+
+            const btn = document.getElementById('btnSacarBola');
+            if (btn) {
+                btn.classList.add('bloqueado');
+                btn.classList.remove('presionado');
+                void btn.offsetWidth;
+                btn.classList.add('presionado');
+            }
+            isAnimating = true;
+            const idx = Math.floor(Math.random() * bombo.length);
+            ejecutarSaqueDeBola(bombo[idx]);
+
+            const variacion = Math.floor(Math.random() * 250);
+            const proximoDelay = VELOCIDAD_BOLA + 480 + variacion + 20;
+            programarSiguienteAuto(proximoDelay);
+        }
+
+        window.toggleAuto = toggleAuto;
+
         let modoRevanchaActivo = false;
         let cartonesSeleccionadosRevancha = new Set();
         let cartonesFueraDeJuego = new Set();
         let listenerRevanchaCartones = null;
 
         const RANGOS_BINGO = {
-            B: [1, 15],
-            I: [16, 30],
-            N: [31, 45],
-            G: [46, 60],
-            O: [61, 75]
+            B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75]
         };
 
-        /* ============================================
-           CARGAR CONFIGURACIÓN Y FIGURAS
-           ============================================ */
         function cargarConfiguracion() {
             let figurasPersonalizadas = [];
             try {
@@ -492,10 +506,7 @@
                     FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
 
-                    // ✅ Espacio superior para el notch
                     ESPACIO_NOTCH = config.espacioNotch !== undefined ? parseInt(config.espacioNotch) : 1;
-
-                    // ✅ Bloquear scroll
                     BLOQUEAR_SCROLL = config.bloquearScroll !== undefined ? config.bloquearScroll : 'si';
 
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
@@ -535,6 +546,8 @@
                 }
             } catch (e) {}
 
+            MODO_JUEGO = localStorage.getItem('bingo_modo_juego') || 'ambos';
+
             FIGURAS = {};
             ORDEN_FIGURAS = [];
 
@@ -545,13 +558,11 @@
 
             figurasPersonalizadas.forEach((fig, idx) => {
                 if (!fig || !fig.id || !Array.isArray(fig.patron)) return;
-
                 if (fig.id === 'diagonal') {
                     diagonalActiva = fig.activa !== false;
                     idxDiagonal = idx;
                     return;
                 }
-
                 FIGURAS[fig.id] = fig.patron;
                 if (fig.activa !== false) ORDEN_FIGURAS.push(fig.id);
             });
@@ -572,28 +583,22 @@
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
 
-            // ✅ Aplicar espacio notch y bloqueo scroll
             aplicarEspacioNotch();
             aplicarBloqueoScroll();
         }
 
-        /* ✅ Aplica el padding superior según la config */
         function aplicarEspacioNotch() {
             const app = document.querySelector('.bingo-app');
             if (!app) return;
-
             const ALTO_RENGLON = 8;
             const RENGLONES_REALES = ESPACIO_NOTCH * 2;
             const padding = RENGLONES_REALES * ALTO_RENGLON;
-
             app.style.paddingTop = padding + 'px';
         }
 
-        /* ✅ Aplica o quita el bloqueo de scroll */
         function aplicarBloqueoScroll() {
             const body = document.body;
             if (!body) return;
-
             if (BLOQUEAR_SCROLL === 'si') {
                 body.style.overflow = 'hidden';
                 body.style.height = '100vh';
@@ -612,25 +617,16 @@
             }
         }
 
-        /* ============================================
-           🎨 OBTENER PALETA / TEMA POR CARTÓN
-           ============================================ */
         function obtenerPaletaParaCarton(indiceCarton) {
-            if (MODO_TEMAS !== 'combinado') {
-                return PALETAS[paletaActual];
-            }
-
+            if (MODO_TEMAS !== 'combinado') return PALETAS[paletaActual];
             const secuencia = CC_SECUENCIAS.find(s => s.id === CC_SECUENCIA_EN_USO);
             if (!secuencia || !Array.isArray(secuencia.temas) || secuencia.temas.length === 0) {
                 return PALETAS[paletaActual];
             }
-
             const bloque = Math.floor(indiceCarton / 3);
             const temaNombre = secuencia.temas[bloque % secuencia.temas.length];
-
             const idxTema = PALETAS.findIndex(p => p.nombre === temaNombre);
             if (idxTema !== -1) return PALETAS[idxTema];
-
             return PALETAS[paletaActual];
         }
 
@@ -638,9 +634,6 @@
             return obtenerPaletaParaCarton(indiceCarton).nombre;
         }
 
-        /* ============================================
-           AJUSTAR TAMAÑO DEL CONTROL
-           ============================================ */
         function aplicarTamanoControl() {
             requestAnimationFrame(() => {
                 const panelControl = document.getElementById('panelControl');
@@ -663,9 +656,6 @@
             });
         }
 
-        /* ============================================
-           APLICAR CONFIGURACIÓN DE MINI-CARTONES
-           ============================================ */
         function aplicarConfigFiguras() {
             requestAnimationFrame(() => {
                 const panelFiguras = document.getElementById('panelFiguras');
@@ -700,9 +690,6 @@
             });
         }
 
-        /* ============================================
-           EXTRAER NOMBRES DE FIREBASE
-           ============================================ */
         function extraerNombresDeData(data) {
             const cartones = data.cartones || [];
             const nombres = [];
@@ -720,9 +707,6 @@
             return nombres;
         }
 
-        /* ============================================
-           SUSCRIBIR A FIREBASE
-           ============================================ */
         function suscribirNombresFirebase() {
             if (!docRef || !USAR_BASE_DATOS) return;
             if (unsubscribeSnapshot) {
@@ -779,9 +763,6 @@
             return 'O';
         }
 
-        /* ============================================
-           🎙️ VOZ
-           ============================================ */
         function cargarVocesDisponibles() {
             if (!('speechSynthesis' in window)) return;
             const todas = window.speechSynthesis.getVoices();
@@ -950,9 +931,6 @@
             if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
         }
 
-        /* ============================================
-           RENDERIZAR ESTRUCTURA DE CARTONES
-           ============================================ */
         function renderizarEstructura() {
             const grid = document.getElementById('cartonesGrid');
             if (!grid) return;
@@ -981,8 +959,8 @@
                     textoCabecera = `${i} - ${nombresDeFirebase[i - 1]}`;
                 }
 
+                // ✅ Se quitó el <span class="emoji-primera-bola">🎱</span>
                 carton.innerHTML = `
-                    <span class="emoji-primera-bola">🎱</span>
                     <span class="emoji-figura">🎯</span>
                     <span class="emoji-carton-lleno">👑</span>
                     <span class="rotulo-bingo">BINGO</span>
@@ -1033,11 +1011,12 @@
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
                 c.classList.remove(
                     'ganador-figura-1', 'ganador-bingo', 'resaltando',
-                    'animando', 'secuencia-completa', 'tiene-primera-bola',
+                    'animando', 'secuencia-completa',
                     'tiene-lleno', 'mostrar-rotulo-bingo', 'mostrar-rotulo-figura',
                     'mostrar-rotulo-gana', 'mostrar-rotulo-todo',
                     'apagando-resaltado', 'alerta-header'
                 );
+                // ✅ Se quitó "tiene-primera-bola" y "tiene-lleno" quedó
                 c.dataset.enAlerta = '0';
                 c.dataset.pausadoPorSacar = '0';
                 c.dataset.yaAvisoFigura = '0';
@@ -1127,10 +1106,8 @@
             tabla.appendChild(grid);
         }
 
-        /* ============================================
-           COMPROBACIONES
-           ============================================ */
         function comprobarFiguraEnCartones() {
+            if (MODO_JUEGO === 'bingo') return { hayGanador: false, infoGanadores: [] };
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
             if (figuraYaGanada) return { hayGanador: false, infoGanadores: [] };
 
@@ -1166,6 +1143,7 @@
         }
 
         function comprobarLlenoEnCartones() {
+              if (MODO_JUEGO === 'figura') return { hayGanador: false, infoGanadores: [] };
             if (llenoYaGanado) return { hayGanador: false, infoGanadores: [] };
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             const infoGanadores = [];
@@ -1189,14 +1167,7 @@
             return { hayGanador: infoGanadores.length > 0, infoGanadores };
         }
 
-        function marcarCartonesConPrimeraBola(numero) {
-            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
-            cartones.forEach(carton => {
-                if (carton.classList.contains('fuera-de-juego')) return;
-                const celdaCoincide = carton.querySelector(`.carton-grid-inner .celda[data-valor="${numero}"]`);
-                if (celdaCoincide) carton.classList.add('tiene-primera-bola');
-            });
-        }
+        // ✅ Eliminada la función marcarCartonesConPrimeraBola()
 
         function apagarResaltadoDeTodos() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
@@ -1229,10 +1200,10 @@
         function mostrarRotulosDeGanadores() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
                 if (carton.classList.contains('fuera-de-juego')) return;
-                const tienePrimera = carton.classList.contains('tiene-primera-bola');
                 const ganoFigura = carton.classList.contains('ganador-figura-1');
                 const ganoBingo = carton.classList.contains('ganador-bingo');
-                const ganoTodo = tienePrimera && ganoFigura && ganoBingo;
+                // ✅ AHORA: GANA TODO = FIGURA + BINGO
+                const ganoTodo = ganoFigura && ganoBingo;
                 if (ganoTodo) {
                     carton.classList.add('mostrar-rotulo-gana', 'mostrar-rotulo-todo');
                 } else {
@@ -1310,7 +1281,7 @@
         function estaAUno(carton, celdas, patronFigura) {
             if (carton.classList.contains('fuera-de-juego')) return false;
 
-            if (!figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+            if (MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
                 let faltantes = 0, total = 0;
                 for (let f = 0; f < 5; f++) {
                     for (let c = 0; c < 5; c++) {
@@ -1337,6 +1308,7 @@
         }
 
         function detectarFaltaParaFigura(carton, celdas, patronFigura) {
+            if (MODO_JUEGO === 'bingo') return false;
             if (carton.classList.contains('fuera-de-juego')) return false;
             if (CANTIDAD_FIGURAS < 1 || figuraYaGanada) return false;
             if (carton.classList.contains('ganador-figura-1')) return false;
@@ -1357,6 +1329,7 @@
         }
 
         function detectarFaltaParaBingo(carton, celdas) {
+            if (MODO_JUEGO === 'figura') return false;
             if (carton.classList.contains('fuera-de-juego')) return false;
             if (llenoYaGanado || carton.classList.contains('ganador-bingo')) return false;
             let faltantes = 0;
@@ -1371,7 +1344,7 @@
             const resultado = [];
             if (carton.classList.contains('fuera-de-juego')) return resultado;
 
-            if (!figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+            if (MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
                 let faltantes = 0, total = 0, candidata = null;
                 for (let f = 0; f < 5; f++) {
                     for (let c = 0; c < 5; c++) {
@@ -1386,15 +1359,15 @@
                 if (total > 0 && faltantes === 1 && candidata) resultado.push(candidata);
             }
 
-            if (!llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
-                let faltantes = 0, candidata = null;
-                celdas.forEach(celda => {
-                    const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
-                    if (!marcada) { faltantes++; candidata = celda; }
-                });
-                if (faltantes === 1 && candidata && !resultado.includes(candidata)) resultado.push(candidata);
-            }
-            return resultado;
+        if (MODO_JUEGO !== 'figura' && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+         let faltantes = 0, candidata = null;
+         celdas.forEach(celda => {
+        const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+        if (!marcada) { faltantes++; candidata = celda; }
+      });
+     if (faltantes === 1 && candidata && !resultado.includes(candidata)) resultado.push(candidata);
+}
+return resultado;
         }
 
         function actualizarResaltadosAmarillos() {
@@ -1511,13 +1484,9 @@
             }
         }
 
-        /* ============================================
-           🔄 MODO REVANCHA (activado desde el index)
-           ============================================ */
         function activarModoRevancha() {
             modoRevanchaActivo = true;
             cartonesSeleccionadosRevancha.clear();
-
             document.body.classList.add('modo-revancha');
 
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach((carton, idx) => {
@@ -1549,7 +1518,6 @@
             };
 
             document.addEventListener('click', listenerRevanchaCartones, true);
-
             actualizarBotonConfirmar();
         }
 
@@ -1579,9 +1547,7 @@
                 const btn = document.getElementById('btnConfirmarRevancha');
                 if (btn) {
                     btn.style.background = '#ff1744';
-                    setTimeout(() => {
-                        btn.style.background = '';
-                    }, 600);
+                    setTimeout(() => { btn.style.background = ''; }, 600);
                 }
                 return;
             }
@@ -1599,11 +1565,8 @@
         function actualizarBotonConfirmar() {
             const btn = document.getElementById('btnConfirmarRevancha');
             if (!btn) return;
-            if (cartonesSeleccionadosRevancha.size === 0) {
-                btn.classList.add('sin-seleccion');
-            } else {
-                btn.classList.remove('sin-seleccion');
-            }
+            if (cartonesSeleccionadosRevancha.size === 0) btn.classList.add('sin-seleccion');
+            else btn.classList.remove('sin-seleccion');
         }
 
         function aplicarCartonesFueraDeJuego() {
@@ -1622,9 +1585,6 @@
             });
         }
 
-        /* ============================================
-           💾 GUARDAR PARTIDA
-           ============================================ */
         function guardarPartida() {
             try {
                 const cartones = [];
@@ -1643,7 +1603,6 @@
                         color: carton.style.getPropertyValue('--carton-color'),
                         colorDark: carton.style.getPropertyValue('--carton-color-dark'),
                         celdas: celdas,
-                        tienePrimeraBola: carton.classList.contains('tiene-primera-bola'),
                         ganoFigura: carton.classList.contains('ganador-figura-1'),
                         ganoBingo: carton.classList.contains('ganador-bingo'),
                         fueraDeJuego: carton.classList.contains('fuera-de-juego')
@@ -1656,8 +1615,6 @@
                     totalCartones: TOTAL_CARTONES,
                     historialSacadas: historialSacadas.slice(),
                     bombo: bombo.slice(),
-                    primeraBolaYaSalio: primeraBolaYaSalio,
-                    primeraBolaNumero: primeraBolaNumero,
                     figuraYaGanada: figuraYaGanada,
                     llenoYaGanado: llenoYaGanado,
                     partidaTerminada: partidaTerminada,
@@ -1665,6 +1622,7 @@
                     indiceRotacionActual: indiceRotacionActual,
                     figuraActual: figuraActual,
                     modoTemas: MODO_TEMAS,
+                    modoJuego: MODO_JUEGO,
                     ccSecuenciaEnUso: CC_SECUENCIA_EN_USO,
                     cartonesFueraDeJuego: Array.from(cartonesFueraDeJuego),
                     cartones: cartones
@@ -1687,9 +1645,6 @@
             }
         }
 
-        /* ============================================
-           📂 CARGAR PARTIDA GUARDADA
-           ============================================ */
         function cargarPartidaGuardada() {
             let partida = null;
             try {
@@ -1697,15 +1652,11 @@
                 if (!raw) return false;
                 partida = JSON.parse(raw);
                 if (!partida || !Array.isArray(partida.cartones)) return false;
-            } catch (e) {
-                return false;
-            }
+            } catch (e) { return false; }
 
             TOTAL_CARTONES = partida.totalCartones || TOTAL_CARTONES;
             historialSacadas = Array.isArray(partida.historialSacadas) ? partida.historialSacadas.slice() : [];
             bombo = Array.isArray(partida.bombo) ? partida.bombo.slice() : Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
-            primeraBolaYaSalio = partida.primeraBolaYaSalio === true;
-            primeraBolaNumero = partida.primeraBolaNumero || null;
             figuraYaGanada = partida.figuraYaGanada === true;
             llenoYaGanado = partida.llenoYaGanado === true;
             partidaTerminada = partida.partidaTerminada === true;
@@ -1713,6 +1664,9 @@
             indiceRotacionActual = typeof partida.indiceRotacionActual === 'number' ? partida.indiceRotacionActual : 0;
             if (partida.figuraActual && FIGURAS[partida.figuraActual]) figuraActual = partida.figuraActual;
             if (partida.modoTemas === 'simple' || partida.modoTemas === 'combinado') MODO_TEMAS = partida.modoTemas;
+            if (partida.modoJuego === 'figura' || partida.modoJuego === 'bingo' || partida.modoJuego === 'ambos') {
+                MODO_JUEGO = partida.modoJuego;
+            }
             if (partida.ccSecuenciaEnUso) CC_SECUENCIA_EN_USO = partida.ccSecuenciaEnUso;
             cartonesFueraDeJuego = new Set(Array.isArray(partida.cartonesFueraDeJuego) ? partida.cartonesFueraDeJuego : []);
 
@@ -1748,7 +1702,6 @@
                     }
                 });
 
-                if (dataCarton.tienePrimeraBola) carton.classList.add('tiene-primera-bola');
                 if (dataCarton.ganoFigura) carton.classList.add('ganador-figura-1');
                 if (dataCarton.ganoBingo) carton.classList.add('ganador-bingo');
             });
@@ -1760,9 +1713,7 @@
                 if (historialSacadas.length > 0) {
                     display.textContent = historialSacadas[0].numero;
                     const sphere = document.getElementById('bolilleroSphere');
-                    if (sphere) {
-                        sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(historialSacadas[0].numero));
-                    }
+                    if (sphere) sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(historialSacadas[0].numero));
                 } else {
                     display.textContent = '--';
                 }
@@ -1806,9 +1757,6 @@
             return true;
         }
 
-        /* ============================================
-           LÓGICA DE SAQUE
-           ============================================ */
         function ejecutarSaqueDeBola(numero) {
             const sphere = document.getElementById('bolilleroSphere');
 
@@ -1821,7 +1769,6 @@
             if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
             if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
 
-
             const ejecutarEntradaNuevaBola = () => {
                 const idx = bombo.indexOf(numero);
                 if (idx === -1) return;
@@ -1830,11 +1777,7 @@
                 const letra = obtenerLetra(numero);
                 historialSacadas.unshift({ numero, letra });
 
-                if (!primeraBolaYaSalio) {
-                    primeraBolaYaSalio = true;
-                    primeraBolaNumero = numero;
-                    marcarCartonesConPrimeraBola(numero);
-                }
+                // ✅ Eliminada la lógica de primera bola
 
                 const display = document.getElementById('numeroDisplay');
                 if (display) display.textContent = numero;
@@ -1912,7 +1855,12 @@
                         });
                     }
 
+                    if (MODO_JUEGO === 'figura' && figuraYaGanada) {
+                        partidaTerminada = true;
+                    }
+
                     if (cartonesGanadores.size > 0) {
+                        detenerAuto();
                         ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
                             actualizarResaltadosAmarillos();
                             liberarBloqueo();
@@ -1930,7 +1878,7 @@
                 if (b) { b.classList.remove('presionado'); b.classList.remove('bloqueado'); }
             };
 
-            if (primeraBolaYaSalio === false && historialSacadas.length === 0) {
+            if (historialSacadas.length === 0) {
                 ejecutarEntradaNuevaBola();
             } else {
                 if (sphere) {
@@ -1948,6 +1896,8 @@
             if (isAnimating || bloqueadoPorAnimacion) return;
             if (bombo.length === 0) return;
             if (modoRevanchaActivo) return;
+
+            if (autoActivo) detenerAuto();
 
             desbloquearSonidos();
 
@@ -1970,6 +1920,8 @@
             if (historialSacadas.some(h => h.numero === numero)) return;
             if (bombo.indexOf(numero) === -1) return;
 
+            if (autoActivo) detenerAuto();
+
             desbloquearSonidos();
 
             const btn = document.getElementById('btnSacarBola');
@@ -1984,6 +1936,7 @@
         }
 
         function reiniciarJuego() {
+            detenerAuto();
             bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
             historialSacadas = [];
             const display = document.getElementById('numeroDisplay');
@@ -2005,8 +1958,6 @@
             llenoYaGanado = false;
             partidaTerminada = false;
             celdasCentroPendientes = 0;
-            primeraBolaNumero = null;
-            primeraBolaYaSalio = false;
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.remove('bloqueado', 'presionado');
             document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo').forEach(c => c.classList.remove('falta-amarillo'));
@@ -2022,6 +1973,7 @@
         }
 
         function cambiarCartonesYPaleta() {
+            detenerAuto();
             cartonesFueraDeJuego.clear();
             desactivarModoRevancha();
 
@@ -2077,14 +2029,12 @@
             aplicarBloqueoScroll();
         }
 
-        /* ============================================
-           🚪 SALIR AL MENÚ (con fade out de música y limpieza)
-           ============================================ */
         function salirAlMenu() {
             if (saliendoDelJuego) return;
             saliendoDelJuego = true;
 
-            // ✅ Limpiar estilos inline que pusimos en el body
+            detenerAuto();
+
             const body = document.body;
             body.style.overflow = '';
             body.style.height = '';
@@ -2095,7 +2045,6 @@
             body.style.paddingBottom = '';
             document.documentElement.style.overflow = '';
 
-            // ✅ Quitar clases que agregamos al body
             body.classList.remove(
                 'modo-revancha',
                 'animaciones-pausadas',
@@ -2120,9 +2069,6 @@
         window.confirmarRevancha = confirmarRevancha;
         window.guardarPartida = guardarPartida;
 
-        /* ============================================
-           INICIALIZACIÓN
-           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
                 inicializarAudios();
@@ -2182,12 +2128,15 @@
 
                 const btnCambiar = document.querySelector('.btn-cambiar');
                 if (btnCambiar) btnCambiar.onclick = cambiarCartonesYPaleta;
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && autoActivo) {
+                        detenerAuto();
+                    }
+                });
             }
         });
 
-/* ============================================
-   🚫 BLOQUEAR MENÚ CONTEXTUAL SOLO EN MÓVIL
-   ============================================ */
 document.addEventListener('contextmenu', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);

@@ -400,6 +400,102 @@
         .btn-cerrar-modal:active {
             transform: scale(0.96);
         }
+
+        /* ========================================================= */
+        /* MODAL DE MODO DE REVANCHA                                 */
+        /* ========================================================= */
+        .modo-revancha-box {
+            background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
+            border: 1px solid rgba(245,200,66,0.35);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 340px;
+            width: 92%;
+            color: #e2e8f0;
+            box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
+            text-align: center;
+        }
+
+        .modo-revancha-box h2 {
+            color: #f5c842;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 18px;
+            text-shadow: 0 0 12px rgba(245,200,66,0.3);
+        }
+
+        .modo-revancha-opcion {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .modo-revancha-opcion:active {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .modo-revancha-opcion input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #f5c842;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .modo-revancha-opcion .emoji-opcion {
+            font-size: 1.3rem;
+        }
+
+        .btn-empezar-revancha {
+            width: 100%;
+            margin-top: 14px;
+            padding: 14px;
+            background: linear-gradient(135deg, #f5c842, #d4a020);
+            color: #0a0a12;
+            border: none;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+            font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: 1px;
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        .btn-empezar-revancha:active {
+            transform: scale(0.96);
+        }
+
+        .btn-cancelar-revancha {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-cancelar-revancha:active {
+            transform: scale(0.97);
+            background: rgba(255,255,255,0.05);
+        }
     </style>
 </head>
 <body class="body-center" ontouchstart="">
@@ -499,7 +595,31 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- MODAL DE CONFIGURACIÓN (INTACTO)                          -->
+    <!-- MODAL DE MODO DE REVANCHA                                 -->
+    <!-- ========================================================= -->
+    <div class="modal-overlay" id="modalModoRevancha">
+        <div class="modo-revancha-box">
+            <h2>🎯 ¿Qué se juega?</h2>
+
+            <label class="modo-revancha-opcion">
+                <input type="checkbox" id="chkRevanchaFigura" checked>
+                <span class="emoji-opcion">🎯</span>
+                <span>Figura</span>
+            </label>
+
+            <label class="modo-revancha-opcion">
+                <input type="checkbox" id="chkRevanchaBingo" checked>
+                <span class="emoji-opcion">🏆</span>
+                <span>Bingo</span>
+            </label>
+
+            <button class="btn-empezar-revancha" id="btnEmpezarRevancha">▶ EMPEZAR</button>
+            <button class="btn-cancelar-revancha" onclick="cerrarModalModoRevancha()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- MODAL DE CONFIGURACIÓN                                    -->
     <!-- ========================================================= -->
     <div class="modal-overlay" id="modalConfig">
         <div class="modal-box">
@@ -1094,7 +1214,6 @@
                         <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
                     </div>
 
-                    <!-- ✅ Espacio superior para el notch -->
                     <div class="form-group">
                         <label for="espacioNotch">📱 Espacio superior (notch / barra de estado):</label>
                         <select id="espacioNotch">
@@ -1104,7 +1223,6 @@
                         </select>
                     </div>
 
-                    <!-- ✅ NUEVO: Bloquear scroll en juego.html -->
                     <div class="form-group">
                         <label for="bloquearScroll">🔒 Bloquear scroll en el juego:</label>
                         <select id="bloquearScroll">
@@ -1124,7 +1242,7 @@
     </div>
 
     <!-- ========================================================= -->
-    <!-- SCRIPT.JS (lógica del modal de configuración)            -->
+    <!-- SCRIPT.JS                                                -->
     <!-- ========================================================= -->
     <script src="script.js"></script>
 
@@ -1132,9 +1250,6 @@
     <!-- SCRIPT LOCAL: MENÚ, PARTÍCULAS, REGLAS, SALIR             -->
     <!-- ========================================================= -->
     <script>
-        /* ============================================================
-           📖 MODAL DE REGLAS
-           ============================================================ */
         function abrirReglas() {
             document.getElementById('modalReglas').classList.add('visible');
         }
@@ -1144,9 +1259,6 @@
             if (el) el.classList.remove('visible');
         }
 
-        /* ============================================================
-           🚪 SALIR
-           ============================================================ */
         function salirApp() {
             if (confirm('¿Estás seguro de que quieres salir?')) {
                 if (navigator.app && navigator.app.exitApp) {
@@ -1157,16 +1269,15 @@
             }
         }
 
-        /* Cerrar modales al hacer clic fuera */
         document.addEventListener('click', function(e) {
             if (e.target && e.target.id === 'modalReglas') {
                 cerrarModal('modalReglas');
             }
+            if (e.target && e.target.id === 'modalModoRevancha') {
+                cerrarModalModoRevancha();
+            }
         });
 
-        /* ============================================================
-           🎨 MOTOR DE PARTÍCULAS
-           ============================================================ */
         (function() {
             const canvas = document.getElementById('canvasParticulas');
             if (!canvas) return;
@@ -1190,9 +1301,7 @@
             ];
 
             class DestelloMagico {
-                constructor() {
-                    this.reiniciar();
-                }
+                constructor() { this.reiniciar(); }
                 reiniciar() {
                     this.x = Math.random() * ancho;
                     this.y = Math.random() * alto;
@@ -1210,7 +1319,6 @@
                     this.y += this.velocidadY;
                     this.angulo += this.pulso;
                     this.opacidad = this.opacidadMax * (0.3 + 0.7 * Math.abs(Math.sin(this.angulo)));
-
                     if (this.x < 0) this.x = ancho;
                     if (this.x > ancho) this.x = 0;
                     if (this.y < 0) this.y = alto;
@@ -1245,9 +1353,6 @@
             animar();
         })();
 
-        /* ============================================================
-           💾 ACTUALIZAR ESTADO DEL BOTÓN CARGAR
-           ============================================================ */
         document.addEventListener('DOMContentLoaded', function() {
             const btnCargar = document.getElementById('btnCargarMenu');
             if (btnCargar) {
@@ -1258,9 +1363,6 @@
             }
         });
 
-        /* ============================================================
-           📝 REGISTRO DEL SERVICE WORKER
-           ============================================================ */
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
