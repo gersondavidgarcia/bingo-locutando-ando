@@ -122,7 +122,6 @@
         .pagado { background-color: #28a745 !important; color: #fff !important; }
         .sel { box-shadow: inset 0 0 0 5px #007bff !important; position: relative; z-index: 10; }
         
-        /* ===== RONDA - OCULTA CON DISPLAY:NONE ===== */
         .ronda-grande {
             text-align: center;
             font-size: 36px;
@@ -238,205 +237,36 @@
             font-weight: bold;
         }
 
-        /* ===== ESTILOS DEL RANKING DROPDOWN DENTRO DEL MODAL ===== */
-        .ranking-dropdown-container {
-            position: relative;
-            display: block;
-            width: 100%;
-            font-family: 'Arial Black', sans-serif;
-            margin-bottom: 12px;
-        }
+        /* ===== RANKING DROPDOWN ===== */
+        .ranking-dropdown-container { position: relative; display: block; width: 100%; font-family: 'Arial Black', sans-serif; margin-bottom: 12px; }
+        .ranking-btn-modal { width: 100%; padding: 12px 18px; background: #2c3e50; color: white; border: 2px solid #ffcc00; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .ranking-btn-modal:hover { background: #34495e; }
+        .ranking-btn-modal .btn-arrow { transition: transform 0.3s; font-size: 16px; }
+        .ranking-dropdown-container.active .btn-arrow { transform: rotate(180deg); }
+        .ranking-dropdown-modal { display: none; position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: #1a1a2e; border: 2px solid #ffcc00; border-radius: 8px; overflow: hidden; z-index: 1001; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .ranking-dropdown-container.active .ranking-dropdown-modal { display: block; }
+        .ranking-item-modal { padding: 10px 18px; cursor: pointer; border-bottom: 1px solid #333; color: white; font-size: 14px; font-weight: bold; transition: background 0.2s; text-align: left; }
+        .ranking-item-modal:hover { background: #2a2a4e; }
+        .ranking-item-modal.total { background: #2c3e50; color: #ffcc00; border-bottom: none; font-size: 15px; }
+        .ranking-item-modal.total:hover { background: #34495e; }
+        .ranking-item-modal.afuera { background: #4a0a0a; color: #ff4444; border-top: 1px solid #ff4444; font-size: 15px; }
+        .ranking-item-modal.afuera:hover { background: #5a0a0a; }
 
-        .ranking-btn-modal {
-            width: 100%;
-            padding: 12px 18px;
-            background: #2c3e50;
-            color: white;
-            border: 2px solid #ffcc00;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .ranking-btn-modal:hover {
-            background: #34495e;
-        }
-
-        .ranking-btn-modal .btn-arrow {
-            transition: transform 0.3s;
-            font-size: 16px;
-        }
-
-        .ranking-dropdown-container.active .btn-arrow {
-            transform: rotate(180deg);
-        }
-
-        .ranking-dropdown-modal {
-            display: none;
-            position: absolute;
-            top: calc(100% + 5px);
-            left: 0;
-            right: 0;
-            background: #1a1a2e;
-            border: 2px solid #ffcc00;
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 1001;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
-        }
-
-        .ranking-dropdown-container.active .ranking-dropdown-modal {
-            display: block;
-        }
-
-        .ranking-item-modal {
-            padding: 10px 18px;
-            cursor: pointer;
-            border-bottom: 1px solid #333;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            transition: background 0.2s;
-            text-align: left;
-        }
-
-        .ranking-item-modal:hover {
-            background: #2a2a4e;
-        }
-
-        .ranking-item-modal.total {
-            background: #2c3e50;
-            color: #ffcc00;
-            border-bottom: none;
-            font-size: 15px;
-        }
-
-        .ranking-item-modal.total:hover {
-            background: #34495e;
-        }
-
-        /* ===== ESTILO AFUERA EN DROPDOWN ===== */
-        .ranking-item-modal.afuera {
-            background: #4a0a0a;
-            color: #ff4444;
-            border-top: 1px solid #ff4444;
-            font-size: 15px;
-        }
-        .ranking-item-modal.afuera:hover {
-            background: #5a0a0a;
-        }
-
-        /* ===== ESTILOS DEL CRONÓMETRO ===== */
-        #cronometroOverlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 500;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 20px;
-            box-sizing: border-box;
-            border-radius: 12px;
-            pointer-events: none;
-        }
-        #cronometroOverlay * {
-            pointer-events: none;
-        }
-        #cronometroOverlay.visible {
-            display: flex !important;
-        }
-
-        .cronometro-titulo {
-            font-size: clamp(26px, 5.5vw, 50px);
-            font-weight: 900;
-            color: #ffcc00;
-            margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(255, 204, 0, 0.5);
-            animation: pulseGlow 1.5s ease-in-out infinite;
-            text-align: center;
-            white-space: nowrap;
-            overflow: visible;
-            min-height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-        @keyframes pulseGlow {
-            0%, 100% { text-shadow: 0 0 20px rgba(255, 204, 0, 0.3); }
-            50% { text-shadow: 0 0 60px rgba(255, 204, 0, 0.8), 0 0 100px rgba(255, 204, 0, 0.4); }
-        }
-        .cronometro-tiempo {
-            font-size: 100px;
-            font-weight: 900;
-            color: #ffcc00;
-            margin: 10px 0;
-            text-shadow: 0 0 40px rgba(255, 204, 0, 0.6);
-            font-family: 'Arial Black', sans-serif;
-            line-height: 1;
-        }
-        .cronometro-sub {
-            font-size: 24px;
-            color: #ffffff;
-            margin: 15px 0 5px 0;
-            font-weight: bold;
-        }
-        .cronometro-aviso {
-            font-size: 18px;
-            color: #88ddff;
-            margin-top: 10px;
-            font-weight: bold;
-            background: rgba(255,255,255,0.05);
-            padding: 12px 20px;
-            border-radius: 50px;
-            border: 1px solid rgba(136, 221, 255, 0.2);
-        }
-        .cronometro-aviso span {
-            color: #ffcc00;
-            font-weight: 900;
-        }
-        .cronometro-emojis {
-            font-size: 40px;
-            margin-top: 15px;
-            letter-spacing: 10px;
-            animation: bounceEmojis 1s ease-in-out infinite alternate;
-        }
-        @keyframes bounceEmojis {
-            0% { transform: translateY(0px); }
-            100% { transform: translateY(-10px); }
-        }
-        .cronometro-bar {
-            width: 80%;
-            max-width: 400px;
-            height: 6px;
-            background: #333;
-            border-radius: 10px;
-            margin: 15px auto 0 auto;
-            overflow: hidden;
-        }
-        .cronometro-bar-fill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #ffcc00, #ff8800);
-            border-radius: 10px;
-            transition: width 0.3s linear;
-        }
-        .cronometro-texto-final {
-            margin-top: 20px;
-            color: #888;
-            font-size: 14px;
-            font-weight: bold;
-        }
+        /* ===== CRONÓMETRO ===== */
+        #cronometroOverlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 500; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; border-radius: 12px; pointer-events: none; }
+        #cronometroOverlay * { pointer-events: none; }
+        #cronometroOverlay.visible { display: flex !important; }
+        .cronometro-titulo { font-size: clamp(26px, 5.5vw, 50px); font-weight: 900; color: #ffcc00; margin-bottom: 10px; text-shadow: 0 0 30px rgba(255, 204, 0, 0.5); animation: pulseGlow 1.5s ease-in-out infinite; text-align: center; white-space: nowrap; overflow: visible; min-height: 45px; display: flex; align-items: center; justify-content: center; width: 100%; }
+        @keyframes pulseGlow { 0%, 100% { text-shadow: 0 0 20px rgba(255, 204, 0, 0.3); } 50% { text-shadow: 0 0 60px rgba(255, 204, 0, 0.8), 0 0 100px rgba(255, 204, 0, 0.4); } }
+        .cronometro-tiempo { font-size: 100px; font-weight: 900; color: #ffcc00; margin: 10px 0; text-shadow: 0 0 40px rgba(255, 204, 0, 0.6); font-family: 'Arial Black', sans-serif; line-height: 1; }
+        .cronometro-sub { font-size: 24px; color: #ffffff; margin: 15px 0 5px 0; font-weight: bold; }
+        .cronometro-aviso { font-size: 18px; color: #88ddff; margin-top: 10px; font-weight: bold; background: rgba(255,255,255,0.05); padding: 12px 20px; border-radius: 50px; border: 1px solid rgba(136, 221, 255, 0.2); }
+        .cronometro-aviso span { color: #ffcc00; font-weight: 900; }
+        .cronometro-emojis { font-size: 40px; margin-top: 15px; letter-spacing: 10px; animation: bounceEmojis 1s ease-in-out infinite alternate; }
+        @keyframes bounceEmojis { 0% { transform: translateY(0px); } 100% { transform: translateY(-10px); } }
+        .cronometro-bar { width: 80%; max-width: 400px; height: 6px; background: #333; border-radius: 10px; margin: 15px auto 0 auto; overflow: hidden; }
+        .cronometro-bar-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ffcc00, #ff8800); border-radius: 10px; transition: width 0.3s linear; }
+        .cronometro-texto-final { margin-top: 20px; color: #888; font-size: 14px; font-weight: bold; }
         @media (max-width: 700px) {
             .cronometro-titulo { font-size: clamp(20px, 4.5vw, 32px); min-height: 35px; }
             .cronometro-tiempo { font-size: 70px; }
@@ -445,72 +275,77 @@
             .cronometro-emojis { font-size: 28px; }
         }
 
-        /* ===== ESTILOS AFUERA ===== */
-        .afuera-section {
-            margin-top: 8px;
-            padding: 10px 14px;
-            background: #1a0a0a;
-            border: 2px solid #ff4444;
-            border-radius: 8px;
-        }
-        .afuera-title {
-            color: #ff4444;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-            margin-bottom: 6px;
-            letter-spacing: 2px;
-        }
-        .afuera-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 8px;
-            color: #ff8888;
-            font-size: 13px;
-            border-bottom: 1px solid #331111;
-        }
-        .afuera-item:last-child {
-            border-bottom: none;
-        }
-        .afuera-item .afuera-nombre {
-            font-weight: bold;
-        }
-        .afuera-item .afuera-puntos {
-            color: #ff6666;
-        }
-        .afuera-vacio {
-            color: #88ff88;
-            text-align: center;
-            font-size: 13px;
-            padding: 6px 0;
-        }
+        /* ===== AFUERA ===== */
+        .afuera-section { margin-top: 8px; padding: 10px 14px; background: #1a0a0a; border: 2px solid #ff4444; border-radius: 8px; }
+        .afuera-title { color: #ff4444; font-weight: bold; font-size: 16px; text-align: center; margin-bottom: 6px; letter-spacing: 2px; }
+        .afuera-item { display: flex; justify-content: space-between; padding: 3px 8px; color: #ff8888; font-size: 13px; border-bottom: 1px solid #331111; }
+        .afuera-item:last-child { border-bottom: none; }
+        .afuera-item .afuera-nombre { font-weight: bold; }
+        .afuera-item .afuera-puntos { color: #ff6666; }
+        .afuera-vacio { color: #88ff88; text-align: center; font-size: 13px; padding: 6px 0; }
 
-        /* ===== SECCIÓN CRONÓMETRO CONFIG ===== */
-        .seccion-cronometro {
-            background: #1a1a2e;
-            border: 2px solid #17a2b8;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px auto;
-            max-width: 500px;
-            text-align: center;
-        }
-        .seccion-cronometro label {
-            color: #fff;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .seccion-cronometro input {
-            width: 70px;
-            padding: 8px;
-            border-radius: 6px;
-            border: 2px solid #17a2b8;
-            background: #000;
-            color: #fff;
-            font-size: 16px;
-            font-weight: bold;
-            text-align: center;
-        }
+        /* ===== CRONÓMETRO CONFIG ===== */
+        .seccion-cronometro { background: #1a1a2e; border: 2px solid #17a2b8; border-radius: 8px; padding: 15px; margin: 10px auto; max-width: 500px; text-align: center; }
+        .seccion-cronometro label { color: #fff; font-weight: bold; font-size: 14px; }
+        .seccion-cronometro input { width: 70px; padding: 8px; border-radius: 6px; border: 2px solid #17a2b8; background: #000; color: #fff; font-size: 16px; font-weight: bold; text-align: center; }
+
+        /* ===== MÚLTIPLES GANADORES ===== */
+       /* ===== MÚLTIPLES GANADORES ===== */
+.ganador-bloque {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding-left: 0;
+}
+
+.ganador-bloque .bloque-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 220px;
+    margin: 0;
+}
+.ganador-bloque .bloque-input label {
+    width: 90px;
+    text-align: right;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0;
+}
+.ganador-bloque .bloque-input input {
+    width: 90px;
+    height: 44px;
+    padding: 6px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 6px;
+    border: 2px solid var(--oro);
+    background: #000;
+    color: #fff;
+    flex-shrink: 0;
+}
+.btn-add-bingo, .btn-add-figura {
+    margin-right: 100px;
+    background: #28a745;
+    color: white;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.2s;
+}
+.btn-add-bingo:hover, .btn-add-figura:hover {
+    background: #34ce57;
+    transform: scale(1.03);
+}
     </style>
 </head>
 <body>
@@ -545,7 +380,6 @@
 </div>
 
 <div class="contenedor-tablero" id="contenedorTablero">
-    <!-- ===== CRONÓMETRO ===== -->
     <div id="cronometroOverlay">
         <div style="text-align:center; max-width:600px; width:100%;">
             <div class="cronometro-titulo">🔥 ¡PREPARATE! 🔥</div>
@@ -584,10 +418,22 @@
 
     <div class="seccion-ganador">
         <div style="color: var(--oro); font-weight: bold; text-align: center; margin-bottom: 12px;">🏆 CONTROL DE GANADORES (MULTI LÍNEA)</div>
-        <div class="ganador-inputs">
-            <div class="bloque-input"><label>BINGO #:</label><input type="number" id="numGanador" min="1" placeholder="#"></div>
-            <div class="bloque-input"><label style="color: var(--oro);">RULETA #:</label><input type="number" id="numRuletaFisica" min="1" placeholder="#"></div>
-        </div>
+        
+        <!-- ===== BINGO ===== -->
+     <!-- ===== BINGO ===== -->
+<div class="ganador-bloque">
+    <div class="bloque-input"><label>BINGO #:</label><input type="number" class="bingo-num" min="1" placeholder="#"></div>
+    <div id="bingoInputsExtra"></div>
+    <button type="button" class="btn-add-bingo" onclick="agregarInputBingo()">➕ BINGO</button>
+</div>
+
+<!-- ===== FIGURA ===== -->
+<div class="ganador-bloque">
+    <div class="bloque-input"><label style="color: var(--oro);">FIGURA #:</label><input type="number" class="figura-num" min="1" placeholder="#"></div>
+    <div id="figuraInputsExtra"></div>
+    <button type="button" class="btn-add-figura" onclick="agregarInputFigura()">➕ FIGURA</button>
+</div>
+
         <div class="grupo-botones-ganador">
             <button class="btn-ganador-enviar" onclick="generarMensajeGanadorMulti()">📋 COPIAR MENSAJE GANADOR</button>
             <button class="btn-ganador-caja" onclick="cargarPremiosACajaMulti()">💰 REGISTRAR PREMIOS EN CAJA</button>
@@ -621,7 +467,6 @@
         <button class="btn-ronda-gratis" onclick="copiarListaRondaGratis()">🎁 MANDAR RONDA GRATIS</button>
         <button class="btn-ruleta" onclick="mostrarModalRuleta()">🎲 ASIGNAR AL AZAR</button>
 
-        <!-- ===== CONFIGURACIÓN CRONÓMETRO ===== -->
         <div class="seccion-cronometro">
             <div style="color:#17a2b8; font-size:18px; font-weight:bold; margin-bottom:10px;">⏱️ CRONÓMETRO</div>
             <div style="display:flex; align-items:center; justify-content:center; gap:15px; flex-wrap:wrap;">
@@ -688,12 +533,11 @@
     </div>
 </div>
 
-<!-- MODAL RANKING PUNTOS CON DROPDOWN + AFUERA -->
+<!-- MODAL RANKING PUNTOS -->
 <div id="modalPuntos" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🏆 RANKING (PUNTOS)</h3>
         
-        <!-- DROPDOWN DENTRO DEL MODAL -->
         <div class="ranking-dropdown-container" id="rankingDropdownContainer">
             <button class="ranking-btn-modal" onclick="toggleRankingDropdown()">
                 <span id="tramoSeleccionadoLabel">📊 Seleccionar tramo</span>
@@ -716,7 +560,7 @@
         
         <div class="ronda-nota" style="margin-top: 10px;">
             📌 Los puntos se acumulan por tramos de 20 rondas<br>
-            • Apuntarse: +1 punto | Bingo: +3 puntos | Ruleta: +2 puntos
+            • Apuntarse: +1 punto | Bingo: +3 puntos | Figura: +2 puntos
         </div>
         <div class="modal-buttons" style="margin-top: 12px;">
             <button class="btn-verde" onclick="guardarPuntosTramos()">💾 GUARDAR PUNTOS</button>
@@ -730,9 +574,9 @@
 <div id="modalGanadores" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🏆 GANADORES DE RONDAS</h3>
-        <textarea id="ganadoresTextarea" rows="12" placeholder="RONDA 1&#10;Bingo #5 --- DAVID&#10;Ruleta #3 --- MARIA" style="text-transform: uppercase;"></textarea>
+        <textarea id="ganadoresTextarea" rows="12" placeholder="RONDA 1&#10;Bingo #5 --- DAVID&#10;Figura #3 --- MARIA" style="text-transform: uppercase;"></textarea>
         <div class="ronda-nota" style="margin-bottom: 10px;">
-            📌 Formato: RONDA X | Bingo #X --- NOMBRE | Ruleta #X --- NOMBRE
+            📌 Formato: RONDA X | Bingo #X --- NOMBRE | Figura #X --- NOMBRE
         </div>
         <div class="modal-buttons" style="margin-top: 12px;">
             <button class="btn-verde" onclick="guardarGanadores()">💾 GUARDAR GANADORES</button>
@@ -746,9 +590,9 @@
 <div id="modalNumeros" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--oro);">🎯 NÚMEROS SALIDOS</h3>
-        <textarea id="numerosTextarea" rows="12" placeholder="BINGOS: 2,5,8,10&#10;RULETAS: 3,6,9,12" style="text-transform: uppercase;"></textarea>
+        <textarea id="numerosTextarea" rows="12" placeholder="BINGOS: 2,5,8,10&#10;FIGURAS: 3,6,9,12" style="text-transform: uppercase;"></textarea>
         <div class="ronda-nota" style="margin-bottom: 10px;">
-            📌 BINGOS: números separados por coma | RULETAS: números separados por coma
+            📌 BINGOS: números separados por coma | FIGURAS: números separados por coma
         </div>
         <div class="modal-buttons" style="margin-top: 12px;">
             <button class="btn-verde" onclick="guardarNumeros()">💾 GUARDAR NÚMEROS</button>
@@ -813,41 +657,28 @@
     let rondasPorJugador = {};
     let puntosPorTramo = {};
     let historialGanadores = [];
-    let numerosSalidos = { bingos: [], ruletas: [] };
+    let numerosSalidos = { bingos: [], figuras: [] };
     let pendingUpdate = false;
     let tramoActualEditando = null;
     
-    // Variables del cronómetro
     let cronometroActivo = false;
     let cronometroIntervalo = null;
-    let segundosCronometro = 12; // Valor por defecto
+    let segundosCronometro = 12;
 
-    // ============================================================
-    // FUNCIÓN PARA LIMPIAR NOMBRES
-    // ============================================================
     function limpiarNombre(nombre) {
         return nombre.replace(/^[\d]+[\.\-\)\s]+/, '').trim();
     }
 
-    function getAcumuladoEnPesos() {
-        return acumulado * 2500;
-    }
-
-    function getAcumuladoReservaEnPesos() {
-        return acumuladoReserva * 2500;
-    }
+    function getAcumuladoEnPesos() { return acumulado * 2500; }
+    function getAcumuladoReservaEnPesos() { return acumuladoReserva * 2500; }
 
     function actualizarUIAcumulado() {
         const elem = document.getElementById("acumuladoValor");
         if (elem) elem.innerHTML = `$${getAcumuladoEnPesos().toLocaleString()}`;
         const acumVisible = document.getElementById("acumuladoVisible");
-        if (acumVisible) {
-            acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
-        }
+        if (acumVisible) acumVisible.innerHTML = `🏆 ACUMULADO: $${getAcumuladoEnPesos().toLocaleString()}`;
         const reservaElem = document.getElementById("reservaValor");
-        if (reservaElem) {
-            reservaElem.innerHTML = `$${getAcumuladoReservaEnPesos().toLocaleString()}`;
-        }
+        if (reservaElem) reservaElem.innerHTML = `$${getAcumuladoReservaEnPesos().toLocaleString()}`;
     }
 
     window.toggleCheckbox = () => { 
@@ -860,9 +691,6 @@
         chk.checked = !chk.checked; 
     };
 
-    // ==============================================
-    // FUNCIONES DEL CRONÓMETRO CONFIGURABLE
-    // ==============================================
     window.guardarSegundosCronometro = () => {
         const input = document.getElementById("cronometroSegundos");
         let valor = parseInt(input.value);
@@ -875,140 +703,79 @@
     };
 
     function iniciarCronometroOptimizado() {
-        if (segundosCronometro === 0) {
-            console.log("⏱️ Cronómetro desactivado (0 segundos)");
-            return;
-        }
-        
-        if (cronometroIntervalo) {
-            clearInterval(cronometroIntervalo);
-            cronometroIntervalo = null;
-        }
-        
+        if (segundosCronometro === 0) return;
+        if (cronometroIntervalo) { clearInterval(cronometroIntervalo); cronometroIntervalo = null; }
         cronometroActivo = true;
         const inicio = Date.now();
         const duracion = segundosCronometro;
-        
         const overlay = document.getElementById('cronometroOverlay');
         const numeroElem = document.getElementById('cronometroNumero');
         const barraElem = document.getElementById('cronometroBarra');
-        
         overlay.classList.add('visible');
-        
-        updateDoc(docRef, {
-            cronometroActivo: true,
-            cronometroInicio: inicio,
-            cronometroDuracion: duracion
-        }).catch(err => console.error("Error al guardar cronómetro:", err));
-        
+        updateDoc(docRef, { cronometroActivo: true, cronometroInicio: inicio, cronometroDuracion: duracion }).catch(err => console.error(err));
         function actualizarCronometro() {
             const ahora = Date.now();
             const tiempoTranscurrido = Math.floor((ahora - inicio) / 1000);
             const segundosRestantes = Math.max(0, duracion - tiempoTranscurrido);
-            
             numeroElem.textContent = segundosRestantes;
             barraElem.style.width = (segundosRestantes / duracion * 100) + '%';
             actualizarColoresCronometro(segundosRestantes, numeroElem, barraElem);
-            
             if (segundosRestantes <= 0) {
-                clearInterval(cronometroIntervalo);
-                cronometroIntervalo = null;
-                cronometroActivo = false;
+                clearInterval(cronometroIntervalo); cronometroIntervalo = null; cronometroActivo = false;
                 overlay.classList.remove('visible');
-                
-                updateDoc(docRef, {
-                    cronometroActivo: false,
-                    cronometroInicio: null,
-                    cronometroDuracion: 0
-                }).catch(err => console.error("Error al limpiar cronómetro:", err));
+                updateDoc(docRef, { cronometroActivo: false, cronometroInicio: null, cronometroDuracion: 0 }).catch(err => console.error(err));
             }
         }
-        
         actualizarCronometro();
         cronometroIntervalo = setInterval(actualizarCronometro, 500);
     }
     
     function actualizarColoresCronometro(tiempo, numeroElem, barraElem) {
-        if (tiempo > 8) {
-            numeroElem.style.color = '#ff4444';
-            barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)';
-        } else if (tiempo > 4) {
-            numeroElem.style.color = '#ffcc00';
-            barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)';
-        } else {
-            numeroElem.style.color = '#00ff88';
-            barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)';
-        }
+        if (tiempo > 8) { numeroElem.style.color = '#ff4444'; barraElem.style.background = 'linear-gradient(90deg, #ff4444, #cc0000)'; }
+        else if (tiempo > 4) { numeroElem.style.color = '#ffcc00'; barraElem.style.background = 'linear-gradient(90deg, #ffcc00, #ff8800)'; }
+        else { numeroElem.style.color = '#00ff88'; barraElem.style.background = 'linear-gradient(90deg, #00ff88, #00cc66)'; }
     }
     
     function restaurarCronometro(data) {
-        if (segundosCronometro === 0) {
-            cronometroActivo = false;
-            document.getElementById('cronometroOverlay').classList.remove('visible');
-            return false;
-        }
-        
+        if (segundosCronometro === 0) { cronometroActivo = false; document.getElementById('cronometroOverlay').classList.remove('visible'); return false; }
         if (data && data.cronometroActivo && data.cronometroInicio) {
             const ahora = Date.now();
             const tiempoTranscurrido = Math.floor((ahora - data.cronometroInicio) / 1000);
             const segundosRestantes = Math.max(0, segundosCronometro - tiempoTranscurrido);
-            
             if (segundosRestantes > 0) {
                 cronometroActivo = true;
                 const overlay = document.getElementById('cronometroOverlay');
                 const numeroElem = document.getElementById('cronometroNumero');
                 const barraElem = document.getElementById('cronometroBarra');
-                
                 overlay.classList.add('visible');
                 numeroElem.textContent = segundosRestantes;
                 barraElem.style.width = (segundosRestantes / segundosCronometro * 100) + '%';
                 actualizarColoresCronometro(segundosRestantes, numeroElem, barraElem);
-                
-                if (cronometroIntervalo) {
-                    clearInterval(cronometroIntervalo);
-                    cronometroIntervalo = null;
-                }
-                
+                if (cronometroIntervalo) { clearInterval(cronometroIntervalo); cronometroIntervalo = null; }
                 const inicio = data.cronometroInicio;
                 cronometroIntervalo = setInterval(() => {
                     const ahora2 = Date.now();
                     const tiempoTranscurrido2 = Math.floor((ahora2 - inicio) / 1000);
                     const segundosRestantes2 = Math.max(0, segundosCronometro - tiempoTranscurrido2);
-                    
                     numeroElem.textContent = segundosRestantes2;
                     barraElem.style.width = (segundosRestantes2 / segundosCronometro * 100) + '%';
                     actualizarColoresCronometro(segundosRestantes2, numeroElem, barraElem);
-                    
                     if (segundosRestantes2 <= 0) {
-                        clearInterval(cronometroIntervalo);
-                        cronometroIntervalo = null;
-                        cronometroActivo = false;
+                        clearInterval(cronometroIntervalo); cronometroIntervalo = null; cronometroActivo = false;
                         overlay.classList.remove('visible');
-                        
-                        updateDoc(docRef, {
-                            cronometroActivo: false,
-                            cronometroInicio: null,
-                            cronometroDuracion: 0
-                        }).catch(err => console.error("Error al limpiar cronómetro:", err));
+                        updateDoc(docRef, { cronometroActivo: false, cronometroInicio: null, cronometroDuracion: 0 }).catch(err => console.error(err));
                     }
                 }, 500);
                 return true;
             } else {
                 cronometroActivo = false;
                 document.getElementById('cronometroOverlay').classList.remove('visible');
-                updateDoc(docRef, {
-                    cronometroActivo: false,
-                    cronometroInicio: null,
-                    cronometroDuracion: 0
-                }).catch(err => console.error("Error al limpiar cronómetro:", err));
+                updateDoc(docRef, { cronometroActivo: false, cronometroInicio: null, cronometroDuracion: 0 }).catch(err => console.error(err));
             }
         }
         return false;
     }
 
-    // ==============================================
-    // FUNCIONES DEL RANKING DROPDOWN
-    // ==============================================
     window.toggleRankingDropdown = () => {
         const container = document.getElementById('rankingDropdownContainer');
         container.classList.toggle('active');
@@ -1017,28 +784,20 @@
     function calcularAfuera() {
         const todosLosJugadores = new Set();
         for (let clave in puntosPorTramo) {
-            for (let nombre in puntosPorTramo[clave]) {
-                todosLosJugadores.add(nombre);
-            }
+            for (let nombre in puntosPorTramo[clave]) todosLosJugadores.add(nombre);
         }
-        
         const jugadoresQueEntran = new Set();
         for (let t = 1; t <= 5; t++) {
-            const clave = `tramo_${t}`;
-            const data = puntosPorTramo[clave] || {};
+            const data = puntosPorTramo[`tramo_${t}`] || {};
             const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
-            const top12 = sorted.slice(0, 12);
-            top12.forEach(([nombre]) => jugadoresQueEntran.add(nombre));
+            sorted.slice(0, 12).forEach(([nombre]) => jugadoresQueEntran.add(nombre));
         }
-        
         const afuera = [];
         todosLosJugadores.forEach(nombre => {
             if (!jugadoresQueEntran.has(nombre)) {
                 let totalPuntos = 0;
                 for (let clave in puntosPorTramo) {
-                    if (puntosPorTramo[clave][nombre]) {
-                        totalPuntos += puntosPorTramo[clave][nombre];
-                    }
+                    if (puntosPorTramo[clave][nombre]) totalPuntos += puntosPorTramo[clave][nombre];
                 }
                 afuera.push({ nombre, puntos: totalPuntos });
             }
@@ -1049,54 +808,34 @@
 
     window.seleccionarTramoRanking = (tramo) => {
         document.getElementById('rankingDropdownContainer').classList.remove('active');
-        
         const label = document.getElementById('tramoSeleccionadoLabel');
         const display = document.getElementById('puntosDisplay');
-        
         if (tramo === 'afuera') {
             label.textContent = '🚫 AFUERA';
             tramoActualEditando = null;
-            
             const afuera = calcularAfuera();
-            let texto = "";
             if (afuera.length === 0) {
-                texto = "✅ ¡Todos los jugadores han entrado al menos una vez!";
-                display.innerHTML = `<div style="color:#88ff88; text-align:center; padding:20px; font-size:16px;">${texto}</div>`;
+                display.innerHTML = `<div style="color:#88ff88; text-align:center; padding:20px; font-size:16px;">✅ ¡Todos los jugadores han entrado al menos una vez!</div>`;
             } else {
-                texto = "🚫 JUGADORES FUERA\n\n";
-                afuera.forEach(item => {
-                    texto += `${item.nombre}: ${item.puntos} pts\n`;
-                });
+                let texto = "🚫 JUGADORES FUERA\n\n";
+                afuera.forEach(item => { texto += `${item.nombre}: ${item.puntos} pts\n`; });
                 display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${texto.trim()}</textarea>`;
             }
             return;
         }
-        
-        if (tramo === 'total') {
-            label.textContent = '📊 TOTAL';
-        } else {
-            const nombres = {
-                1: '📊 1-20 (1 RONDA GRATIS)',
-                2: '📊 21-40 (2 RONDA GRATIS)',
-                3: '📊 41-60 (3 RONDA GRATIS)',
-                4: '📊 61-80 (4 RONDA GRATIS)',
-                5: '📊 81-100 (5 RONDA GRATIS)'
-            };
+        if (tramo === 'total') { label.textContent = '📊 TOTAL'; }
+        else {
+            const nombres = { 1: '📊 1-20 (1 RONDA GRATIS)', 2: '📊 21-40 (2 RONDA GRATIS)', 3: '📊 41-60 (3 RONDA GRATIS)', 4: '📊 61-80 (4 RONDA GRATIS)', 5: '📊 81-100 (5 RONDA GRATIS)' };
             label.textContent = nombres[tramo];
         }
-        
         tramoActualEditando = tramo;
         mostrarPuntosTextarea(tramo);
     };
 
     document.addEventListener('click', function(event) {
         const container = document.getElementById('rankingDropdownContainer');
-        if (container && !container.contains(event.target)) {
-            container.classList.remove('active');
-        }
+        if (container && !container.contains(event.target)) container.classList.remove('active');
     });
-
-    // ==============================================
 
     function getTramoActual() {
         if (numeroRonda <= 20) return 1;
@@ -1107,31 +846,16 @@
     }
 
     function getNombreTramo(tramo) {
-        const limites = {
-            1: "1-20",
-            2: "21-40",
-            3: "41-60",
-            4: "61-80",
-            5: "81-100"
-        };
+        const limites = { 1: "1-20", 2: "21-40", 3: "41-60", 4: "61-80", 5: "81-100" };
         return limites[tramo] || `Tramo ${tramo}`;
     }
 
-    function getClaveTramo(tramo) {
-        return `tramo_${tramo}`;
-    }
-
-    function getPuntosTramo(tramo) {
-        const clave = getClaveTramo(tramo);
-        return puntosPorTramo[clave] || {};
-    }
-
+    function getClaveTramo(tramo) { return `tramo_${tramo}`; }
+    function getPuntosTramo(tramo) { return puntosPorTramo[getClaveTramo(tramo)] || {}; }
     function getTotalPuntos() {
         const total = {};
         for (let clave in puntosPorTramo) {
-            for (let nombre in puntosPorTramo[clave]) {
-                total[nombre] = (total[nombre] || 0) + puntosPorTramo[clave][nombre];
-            }
+            for (let nombre in puntosPorTramo[clave]) total[nombre] = (total[nombre] || 0) + puntosPorTramo[clave][nombre];
         }
         return total;
     }
@@ -1140,17 +864,9 @@
         const tramo = getTramoActual();
         tramoActualEditando = tramo;
         document.getElementById("modalPuntos").style.display = "flex";
-        
         const label = document.getElementById('tramoSeleccionadoLabel');
-        const nombres = {
-            1: '📊 1-20 (1 RONDA GRATIS)',
-            2: '📊 21-40 (2 RONDA GRATIS)',
-            3: '📊 41-60 (3 RONDA GRATIS)',
-            4: '📊 61-80 (4 RONDA GRATIS)',
-            5: '📊 81-100 (5 RONDA GRATIS)'
-        };
+        const nombres = { 1: '📊 1-20 (1 RONDA GRATIS)', 2: '📊 21-40 (2 RONDA GRATIS)', 3: '📊 41-60 (3 RONDA GRATIS)', 4: '📊 61-80 (4 RONDA GRATIS)', 5: '📊 81-100 (5 RONDA GRATIS)' };
         label.textContent = nombres[tramo] || '📊 Seleccionar tramo';
-        
         mostrarPuntosTextarea(tramo);
     };
 
@@ -1163,65 +879,38 @@
         const display = document.getElementById("puntosDisplay");
         const data = tramo === 'total' ? getTotalPuntos() : getPuntosTramo(tramo);
         const sorted = Object.entries(data).sort((a,b) => b[1] - a[1]);
-        
-        let texto = "";
         if (sorted.length === 0) {
-            texto = `No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}`;
-            display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">${texto}</div>`;
+            display.innerHTML = `<div style="color:#888; text-align:center; padding:20px;">No hay puntos registrados en ${tramo === 'total' ? 'TOTAL' : getNombreTramo(tramo)}</div>`;
             return;
         }
-        
         let contenido = "";
         sorted.forEach(([nombre, puntos], index) => {
-            const puesto = index + 1;
-            contenido += `${puesto}. ${nombre}: ${puntos}\n`;
-            if (index === 11) {
-                contenido += `-------------\n`;
-                contenido += `🚫 AFUERA\n`;
-            }
+            contenido += `${index + 1}. ${nombre}: ${puntos}\n`;
+            if (index === 11) contenido += `-------------\n🚫 AFUERA\n`;
         });
-        
-        let html = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${contenido.trim()}</textarea>`;
-        display.innerHTML = html;
+        display.innerHTML = `<textarea id="puntosTextarea" rows="18" style="width:100%; background:#000; color:#fff; border:1px solid #444; border-radius:8px; padding:10px; font-family:monospace; font-size:14px; text-transform:uppercase; resize:vertical;">${contenido.trim()}</textarea>`;
     }
 
     window.guardarPuntosTramos = async () => {
         const textarea = document.getElementById("puntosTextarea");
-        if (!textarea) {
-            alert("No hay datos para guardar");
-            return;
+        if (!textarea) { alert("No hay datos para guardar"); return; }
+        if (tramoActualEditando === null || tramoActualEditando === 'afuera' || tramoActualEditando === 'total') {
+            alert("Selecciona un tramo específico para guardar"); return;
         }
-        
-        if (tramoActualEditando === null || tramoActualEditando === 'afuera') {
-            alert("No se puede guardar en AFUERA, selecciona un tramo específico");
-            return;
-        }
-        
         const lines = textarea.value.split('\n');
         const nuevosPuntos = {};
         const tramo = tramoActualEditando;
-        
-        if (tramo === 'total') {
-            alert("No se puede guardar en TOTAL, selecciona un tramo específico");
-            return;
-        }
-        
         lines.forEach(line => {
             line = line.trim();
             if (line.includes(':')) {
                 const partes = line.split(':');
-                let nombre = partes[0].trim().toUpperCase();
-                nombre = limpiarNombre(nombre);
+                let nombre = limpiarNombre(partes[0].trim().toUpperCase());
                 const valor = parseInt(partes[1].trim());
-                if (nombre && !isNaN(valor) && valor >= 0) {
-                    nuevosPuntos[nombre] = valor;
-                }
+                if (nombre && !isNaN(valor) && valor >= 0) nuevosPuntos[nombre] = valor;
             }
         });
-        
-        const clave = getClaveTramo(tramo);
-        puntosPorTramo[clave] = nuevosPuntos;
-        await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+        puntosPorTramo[getClaveTramo(tramo)] = nuevosPuntos;
+        await updateDoc(docRef, { puntosPorTramo });
         alert("Puntos guardados ✅");
         cerrarModalPuntos();
         actualizarStats();
@@ -1230,7 +919,7 @@
     window.reiniciarTodosLosPuntos = async () => {
         if (confirm("⚠️ ¿Estás seguro? Esto borrará TODOS los puntos de TODOS los tramos.")) {
             puntosPorTramo = {};
-            await updateDoc(docRef, { puntosPorTramo: puntosPorTramo });
+            await updateDoc(docRef, { puntosPorTramo });
             alert("✅ Todos los puntos han sido reiniciados");
             const tramoActual = getTramoActual();
             tramoActualEditando = tramoActual;
@@ -1239,84 +928,277 @@
         }
     };
 
-    // ============================================================
-    // FUNCIÓN PARA REINICIAR TODO EL JUEGO
-    // ============================================================
     window.reiniciarTodoElJuego = async () => {
-        if (!confirm("⚠️⚠️⚠️ ¿REINICIAR TODO EL JUEGO?\n\nEsto reiniciará:\n• Ronda a 1\n• Rondas por jugador a 0\n• Ranking de puntos (todos los tramos) a 0\n• Ganadores de rondas (vacío)\n• Números salidos (vacío)\n\n¿Estás seguro?")) {
-            return;
-        }
-        
-        if (!confirm("⚠️⚠️⚠️ ÚLTIMA ADVERTENCIA ⚠️⚠️⚠️\n\nSe borrarán TODOS los datos del juego mencionados anteriormente\n\n¿Confirmas el reinicio total?")) {
-            return;
-        }
-        
+        if (!confirm("⚠️⚠️⚠️ ¿REINICIAR TODO EL JUEGO?\n\nEsto reiniciará:\n• Ronda a 1\n• Rondas por jugador a 0\n• Ranking de puntos (todos los tramos) a 0\n• Ganadores de rondas (vacío)\n• Números salidos (vacío)\n\n¿Estás seguro?")) return;
+        if (!confirm("⚠️⚠️⚠️ ÚLTIMA ADVERTENCIA ⚠️⚠️⚠️\n\nSe borrarán TODOS los datos del juego mencionados anteriormente\n\n¿Confirmas el reinicio total?")) return;
         try {
-            numeroRonda = 1;
-            rondasPorJugador = {};
-            puntosPorTramo = {};
-            historialGanadores = [];
-            numerosSalidos = { bingos: [], ruletas: [] };
-            seleccionados = [];
+            numeroRonda = 1; rondasPorJugador = {}; puntosPorTramo = {};
+            historialGanadores = []; numerosSalidos = { bingos: [], figuras: [] }; seleccionados = [];
             document.getElementById("msgLineas").innerText = "";
-            
-            await updateDoc(docRef, {
-                numero_ronda: 1,
-                rondasPorJugador: rondasPorJugador,
-                puntosPorTramo: puntosPorTramo,
-                historialGanadores: historialGanadores,
-                numerosSalidos: numerosSalidos
-            });
-            
-            alert("✅ ¡Juego reiniciado completamente!\n\n" +
-                "• Ronda: 1\n" +
-                "• Rondas por jugador: 0\n" +
-                "• Ranking: 0 puntos\n" +
-                "• Ganadores: vacío\n" +
-                "• Números salidos: vacío");
-            
+            await updateDoc(docRef, { numero_ronda: 1, rondasPorJugador, puntosPorTramo, historialGanadores, numerosSalidos });
+            alert("✅ ¡Juego reiniciado completamente!");
             actualizarStats();
-        } catch (error) {
-            alert("❌ Error al reiniciar: " + error.message);
-            console.error(error);
-        }
+        } catch (error) { alert("❌ Error: " + error.message); }
     };
 
     // ============================================================
-    // FUNCIONES PARA GANADORES Y NÚMEROS
+    // MÚLTIPLES NÚMEROS DE GANADORES
     // ============================================================
-    async function guardarGanadoresEnHistorial(bingoNum, bingoNombre, ruletaNum, ruletaNombre) {
+window.agregarInputBingo = () => {
+    const container = document.getElementById('bingoInputsExtra');
+    const div = document.createElement('div');
+    div.className = 'bloque-input';
+    div.innerHTML = `
+        <label style="color: var(--oro);">BINGO #:</label>
+        <input type="number" class="bingo-num" min="1" placeholder="#">
+    `;
+    container.appendChild(div);
+};
+
+window.agregarInputFigura = () => {
+    const container = document.getElementById('figuraInputsExtra');
+    const div = document.createElement('div');
+    div.className = 'bloque-input';
+    div.innerHTML = `
+        <label style="color: var(--oro);">FIGURA #:</label>
+        <input type="number" class="figura-num" min="1" placeholder="#">
+    `;
+    container.appendChild(div);
+};
+
+    function obtenerNumerosBingo() {
+        const inputs = document.querySelectorAll('.bingo-num');
+        const nums = [];
+        inputs.forEach(inp => {
+            const v = parseInt(inp.value);
+            if (!isNaN(v) && v > 0) nums.push(v);
+        });
+        return nums;
+    }
+
+    function obtenerNumerosFigura() {
+        const inputs = document.querySelectorAll('.figura-num');
+        const nums = [];
+        inputs.forEach(inp => {
+            const v = parseInt(inp.value);
+            if (!isNaN(v) && v > 0) nums.push(v);
+        });
+        return nums;
+    }
+
+    async function guardarGanadoresEnHistorialMulti(numerosBingo, bingoData, numerosFigura, figuraData) {
         if (!historialGanadores) historialGanadores = [];
         historialGanadores.push({
             ronda: numeroRonda,
-            bingoNum: bingoNum,
-            bingoNombre: bingoNombre,
-            ruletaNum: ruletaNum,
-            ruletaNombre: ruletaNombre
+            bingos: numerosBingo.map((num, i) => ({ num, nombres: bingoData[i].nombres })),
+            figuras: numerosFigura.map((num, i) => ({ num, nombres: figuraData[i].nombres }))
         });
         if (!numerosSalidos.bingos) numerosSalidos.bingos = [];
-        if (!numerosSalidos.ruletas) numerosSalidos.ruletas = [];
-        numerosSalidos.bingos.push(bingoNum);
-        numerosSalidos.ruletas.push(ruletaNum);
-        if (historialGanadores.length > 100) {
-            historialGanadores = historialGanadores.slice(-100);
+        if (!numerosSalidos.figuras) numerosSalidos.figuras = [];
+        numerosBingo.forEach(n => numerosSalidos.bingos.push(n));
+        numerosFigura.forEach(n => numerosSalidos.figuras.push(n));
+        if (historialGanadores.length > 100) historialGanadores = historialGanadores.slice(-100);
+        await updateDoc(docRef, { historialGanadores, numerosSalidos });
+    }
+
+    window.generarMensajeGanadorMulti = async () => {
+        const numerosBingo = obtenerNumerosBingo();
+        const numerosFigura = obtenerNumerosFigura();
+        if (numerosBingo.length === 0 || numerosFigura.length === 0) {
+            alert("Ingresa al menos un número de Bingo y uno de Figura"); return;
         }
-        await updateDoc(docRef, { historialGanadores: historialGanadores, numerosSalidos: numerosSalidos });
-    }
+        const bingoData = [];
+        for (const num of numerosBingo) {
+            const nombres = obtenerTodosLosNombresConRepeticiones(num);
+            if (nombres.length === 0) { alert(`Cartón de BINGO #${num} sin nombres`); return; }
+            bingoData.push({ num, nombres });
+        }
+        const figuraData = [];
+        for (const num of numerosFigura) {
+            const nombres = obtenerTodosLosNombresConRepeticiones(num);
+            if (nombres.length === 0) { alert(`Cartón de FIGURA #${num} sin nombres`); return; }
+            figuraData.push({ num, nombres });
+        }
+        const premioBingoTotal = 10000;
+        const premioFiguraTotal = 5000;
+        const premioBingoPorNumero = premioBingoTotal / numerosBingo.length;
+        const premioFiguraPorNumero = premioFiguraTotal / numerosFigura.length;
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+        const acumuladoPesos = getAcumuladoEnPesos();
+        const nombresBingoSet = new Set();
+        bingoData.forEach(d => d.nombres.forEach(n => nombresBingoSet.add(n)));
+        const nombresFiguraSet = new Set();
+        figuraData.forEach(d => d.nombres.forEach(n => nombresFiguraSet.add(n)));
+        const todosLosNombres = new Set([...nombresBingoSet, ...nombresFiguraSet]);
+        const esMismaPersona = todosLosNombres.size === 1;
+        const nombreUnico = esMismaPersona ? [...todosLosNombres][0] : "";
+        let mensaje = "";
+        if (esMismaPersona) {
+            mensaje += `🏆 *BINGO #${numerosBingo.join(' + #')}* 💰$${premioBingoTotal.toLocaleString()}\n`;
+        } else {
+            mensaje += `🏆 *BINGO #${numerosBingo.join(' + #')}*\n`;
+            for (const d of bingoData) {
+                const conteo = {};
+                d.nombres.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+                for (const [nombre, cant] of Object.entries(conteo)) {
+                    const total = premioBingoPorNumero * cant;
+                    mensaje += `👤 *${nombre}*${cant > 1 ? ` (${cant} líneas)` : ''} gana *$${total.toLocaleString()}💰*\n`;
+                }
+            }
+        }
 
-    function getHistorialGanadores() {
-        return historialGanadores || [];
-    }
+         mensaje += `\n`;   // ← ESTA LÍNEA LA AGREGAS
+         
+        if (esMismaPersona) {
+            mensaje += `🎰 *FIGURA #${numerosFigura.join(' + #')}* 💰$${premioFiguraTotal.toLocaleString()}\n`;
+        } else {
+            mensaje += `🎰 *FIGURA #${numerosFigura.join(' + #')}*\n`;
+            for (const d of figuraData) {
+                const conteo = {};
+                d.nombres.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+                for (const [nombre, cant] of Object.entries(conteo)) {
+                    const total = premioFiguraPorNumero * cant;
+                    mensaje += `👤 *${nombre}*${cant > 1 ? ` (${cant} líneas)` : ''} gana *$${total.toLocaleString()}💰*\n`;
+                }
+            }
+        }
+        const esMismoNumero = numerosBingo.length === numerosFigura.length && numerosBingo.every((n, i) => n === numerosFigura[i]);
+        if (esMismaPersona) {
+            let premioTotal = premioBingoTotal + premioFiguraTotal;
+            mensaje += `👤 *${nombreUnico}* gana 💰$${premioTotal.toLocaleString()}\n`;
+            if (esMismoNumero && entregarAcumulado && acumulado > 0) {
+                mensaje += `💰 *¡GANADOR DEL ACUMULADO!* 💰\n🏆 Lleva $${acumuladoPesos.toLocaleString()} EXTRA\n`;
+                mensaje += `✅ Felicidades *${nombreUnico}* 🎉\nGanaste (Bingo+Figura+Acumulado)`;
+            } else if (esMismoNumero && acumulado > 0) {
+                mensaje += `⚠️ *ACUMULADO NO ENTREGADO*\n📌 No cumple las condiciones.\n💰 El acumulado de $${acumuladoPesos.toLocaleString()} sigue en juego.\n`;
+                mensaje += `✅ Felicidades *${nombreUnico}* 🎉\nGanaste (Bingo+Figura)`;
+            } else {
+                mensaje += `✅ Felicidades *${nombreUnico}* 🎉\nGanaste (Bingo+Figura)`;
+            }
+        } else {
+            mensaje += `\n✅ Felicidades a los ganadores! 🎉`;
+        }
+        navigator.clipboard.writeText(mensaje.trim());
+        alert("Mensaje de ganadores copiado");
+        await guardarGanadoresEnHistorialMulti(numerosBingo, bingoData, numerosFigura, figuraData);
+    };
 
-    // ========== FUNCIONES PARA GANADORES DE RONDAS ==========
+    window.cargarPremiosACajaMulti = async () => {
+        const numerosBingo = obtenerNumerosBingo();
+        const numerosFigura = obtenerNumerosFigura();
+        if (numerosBingo.length === 0 || numerosFigura.length === 0) { alert("⚠️ Ingresa al menos un número de Bingo y uno de Figura"); return; }
+        const bingoData = [];
+        for (const num of numerosBingo) {
+            const nombres = obtenerTodosLosNombresConRepeticiones(num);
+            if (nombres.length === 0) { alert(`⚠️ El cartón de BINGO #${num} no tiene nombres`); return; }
+            bingoData.push({ num, nombres });
+        }
+        const figuraData = [];
+        for (const num of numerosFigura) {
+            const nombres = obtenerTodosLosNombresConRepeticiones(num);
+            if (nombres.length === 0) { alert(`⚠️ El cartón de FIGURA #${num} no tiene nombres`); return; }
+            figuraData.push({ num, nombres });
+        }
+        const premioBingoPorNumero = 10000 / numerosBingo.length;
+        const premioFiguraPorNumero = 5000 / numerosFigura.length;
+        const premioBingoPorNumeroMiles = premioBingoPorNumero / 1000;
+        const premioFiguraPorNumeroMiles = premioFiguraPorNumero / 1000;
+        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
+        const acumuladoPesos = getAcumuladoEnPesos();
+        const acumuladoEnMiles = acumuladoPesos / 1000;
+        const tramoActual = getTramoActual();
+        const clave = getClaveTramo(tramoActual);
+        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
+        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
+        let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
+        let resumenPremios = [];
+        let premiosAgregados = false;
+        let acumuladoEntregado = false;
+        function agregarSaldo(nombre, cantidadEnMiles, concepto) {
+            if (!nombre || cantidadEnMiles === 0) return;
+            let encontrado = false;
+            lineas = lineas.map(l => {
+                if (l.startsWith(nombre + ":")) {
+                    encontrado = true;
+                    let partes = l.split(':');
+                    let valorActual = parseFloat(partes[1].trim()) || 0;
+                    return `${nombre}: ${valorActual + cantidadEnMiles}`;
+                }
+                return l;
+            });
+            if (!encontrado) lineas.push(`${nombre}: ${cantidadEnMiles}`);
+            resumenPremios.push(`• ${nombre}: +$${(cantidadEnMiles * 1000).toLocaleString()} (${concepto})`);
+            premiosAgregados = true;
+        }
+        function agregarPuntos(nombre, puntos) {
+            if (!nombre || puntos === 0) return;
+            puntosPorTramo[clave][nombre] = (puntosPorTramo[clave][nombre] || 0) + puntos;
+        }
+        for (const d of bingoData) {
+            const conteo = {};
+            d.nombres.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+            for (const [nombre, cant] of Object.entries(conteo)) {
+                agregarSaldo(nombre, premioBingoPorNumeroMiles * cant, `Bingo #${d.num} x${cant}`);
+                agregarPuntos(nombre, 3 * cant);
+            }
+        }
+        for (const d of figuraData) {
+            const conteo = {};
+            d.nombres.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+            for (const [nombre, cant] of Object.entries(conteo)) {
+                agregarSaldo(nombre, premioFiguraPorNumeroMiles * cant, `Figura #${d.num} x${cant}`);
+                agregarPuntos(nombre, 2 * cant);
+            }
+        }
+        const esMismoNumero = numerosBingo.length === numerosFigura.length && numerosBingo.every((n, i) => n === numerosFigura[i]);
+        if (esMismoNumero && entregarAcumulado && acumulado > 0) {
+            const primerGanador = bingoData[0].nombres[0];
+            if (primerGanador) {
+                agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO 🏆`);
+                acumuladoEntregado = true;
+                acumulado = 0;
+                await updateDoc(docRef, { acumulado });
+                actualizarUIAcumulado();
+            }
+        }
+        if (premiosAgregados) {
+            let cajaFinal = lineas.join('\n');
+            document.getElementById("notas-caja").value = cajaFinal;
+            await updateDoc(docRef, { notas_caja: cajaFinal, puntosPorTramo });
+            let alertMsg = "✅ PREMIOS REGISTRADOS:\n\n💰 SALDOS EN CAJA:\n" + resumenPremios.join("\n");
+            if (acumuladoEntregado) alertMsg += `\n\n🏆 ACUMULADO ENTREGADO: $${acumuladoPesos.toLocaleString()}`;
+            else if (esMismoNumero && acumuladoPesos > 0 && !entregarAcumulado) alertMsg += `\n\n⚠️ ACUMULADO NO ENTREGADO\n💰 Disponible: $${acumuladoPesos.toLocaleString()}`;
+            alert(alertMsg);
+            document.querySelectorAll('.bingo-num, .figura-num').forEach(i => i.value = '');
+            document.getElementById("bingoInputsExtra").innerHTML = "";
+            document.getElementById("figuraInputsExtra").innerHTML = "";
+            document.getElementById("chkEntregarAcumulado").checked = false;
+            actualizarStats();
+        } else {
+            alert("⚠️ No se registraron premios.");
+        }
+    };
+
+    // ========== HISTORIAL / GANADORES ==========
     window.mostrarModalGanadores = () => {
         const textarea = document.getElementById("ganadoresTextarea");
         let texto = "";
         if (historialGanadores && historialGanadores.length > 0) {
             historialGanadores.forEach(item => {
                 texto += `RONDA ${item.ronda}\n`;
-                texto += `Bingo #${item.bingoNum} --- ${item.bingoNombre}\n`;
-                texto += `Ruleta #${item.ruletaNum} --- ${item.ruletaNombre}\n\n`;
+                if (item.bingos) {
+                    item.bingos.forEach(b => { texto += `Bingo #${b.num} --- ${b.nombres.join(', ')}\n`; });
+                } else if (item.bingoNum) {
+                    texto += `Bingo #${item.bingoNum} --- ${item.bingoNombre}\n`;
+                }
+                if (item.figuras) {
+                    item.figuras.forEach(r => { texto += `Figura #${r.num} --- ${r.nombres.join(', ')}\n`; });
+                } else if (item.ruletas) {
+                    item.ruletas.forEach(r => { texto += `Figura #${r.num} --- ${r.nombres.join(', ')}\n`; });
+                } else if (item.ruletaNum) {
+                    texto += `Figura #${item.ruletaNum} --- ${item.ruletaNombre}\n`;
+                }
+                texto += `\n`;
             });
         } else {
             texto = "No hay ganadores registrados aún.";
@@ -1325,140 +1207,101 @@
         document.getElementById("modalGanadores").style.display = "flex";
     };
 
-    window.cerrarModalGanadores = () => { 
-        document.getElementById("modalGanadores").style.display = "none"; 
-    };
+    window.cerrarModalGanadores = () => { document.getElementById("modalGanadores").style.display = "none"; };
 
     window.guardarGanadores = async () => {
         const texto = document.getElementById("ganadoresTextarea").value;
         const lines = texto.split('\n');
         const nuevosGanadores = [];
         let rondaActual = null;
-        let bingoNum = null, bingoNombre = null, ruletaNum = null, ruletaNombre = null;
-        
+        let bingos = [], figuras = [];
         for (let line of lines) {
             line = line.trim();
             if (line.startsWith('RONDA')) {
-                if (rondaActual !== null && bingoNum !== null && ruletaNum !== null) {
-                    nuevosGanadores.push({
-                        ronda: rondaActual,
-                        bingoNum: bingoNum,
-                        bingoNombre: bingoNombre,
-                        ruletaNum: ruletaNum,
-                        ruletaNombre: ruletaNombre
-                    });
+                if (rondaActual !== null && (bingos.length || figuras.length)) {
+                    nuevosGanadores.push({ ronda: rondaActual, bingos, figuras });
                 }
-                const partes = line.split(' ');
-                rondaActual = parseInt(partes[1]);
-                bingoNum = null; bingoNombre = null; ruletaNum = null; ruletaNombre = null;
+                rondaActual = parseInt(line.split(' ')[1]);
+                bingos = []; figuras = [];
             } else if (line.startsWith('Bingo')) {
                 const partes = line.split('---');
-                const numPart = partes[0].replace('Bingo #', '').trim();
-                bingoNum = parseInt(numPart);
-                bingoNombre = partes[1] ? partes[1].trim() : '';
-            } else if (line.startsWith('Ruleta')) {
+                const num = parseInt(partes[0].replace('Bingo #', '').trim());
+                const nombres = partes[1] ? partes[1].split(',').map(n => n.trim()) : [];
+                if (!isNaN(num)) bingos.push({ num, nombres });
+            } else if (line.startsWith('Figura')) {
                 const partes = line.split('---');
-                const numPart = partes[0].replace('Ruleta #', '').trim();
-                ruletaNum = parseInt(numPart);
-                ruletaNombre = partes[1] ? partes[1].trim() : '';
+                const num = parseInt(partes[0].replace('Figura #', '').trim());
+                const nombres = partes[1] ? partes[1].split(',').map(n => n.trim()) : [];
+                if (!isNaN(num)) figuras.push({ num, nombres });
             }
         }
-        
-        if (rondaActual !== null && bingoNum !== null && ruletaNum !== null) {
-            nuevosGanadores.push({
-                ronda: rondaActual,
-                bingoNum: bingoNum,
-                bingoNombre: bingoNombre,
-                ruletaNum: ruletaNum,
-                ruletaNombre: ruletaNombre
-            });
+        if (rondaActual !== null && (bingos.length || figuras.length)) {
+            nuevosGanadores.push({ ronda: rondaActual, bingos, figuras });
         }
-        
         if (nuevosGanadores.length > 0) {
             historialGanadores = nuevosGanadores;
-            await updateDoc(docRef, { historialGanadores: historialGanadores });
+            await updateDoc(docRef, { historialGanadores });
             alert("✅ Ganadores guardados");
-        } else {
-            alert("⚠️ No se pudo guardar. Verifica el formato.");
-        }
+        } else { alert("⚠️ No se pudo guardar. Verifica el formato."); }
     };
 
     window.limpiarGanadores = async () => {
         if (confirm("⚠️ ¿Estás seguro? Esto borrará TODO el historial de ganadores.")) {
             historialGanadores = [];
-            await updateDoc(docRef, { historialGanadores: historialGanadores });
+            await updateDoc(docRef, { historialGanadores });
             document.getElementById("ganadoresTextarea").value = "No hay ganadores registrados aún.";
             alert("✅ Historial de ganadores limpiado");
         }
     };
 
-    // ========== FUNCIONES PARA NÚMEROS SALIDOS ==========
     window.mostrarModalNumeros = () => {
         const textarea = document.getElementById("numerosTextarea");
         let texto = "";
-        if (numerosSalidos.bingos && numerosSalidos.bingos.length > 0) {
-            texto += `BINGOS: ${numerosSalidos.bingos.join(', ')}\n`;
-        } else {
-            texto += "BINGOS: Ninguno aún\n";
-        }
-        if (numerosSalidos.ruletas && numerosSalidos.ruletas.length > 0) {
-            texto += `RULETAS: ${numerosSalidos.ruletas.join(', ')}`;
-        } else {
-            texto += "RULETAS: Ninguna aún";
-        }
+        texto += (numerosSalidos.bingos && numerosSalidos.bingos.length > 0) ? `BINGOS: ${numerosSalidos.bingos.join(', ')}\n` : "BINGOS: Ninguno aún\n";
+        texto += (numerosSalidos.figuras && numerosSalidos.figuras.length > 0) ? `FIGURAS: ${numerosSalidos.figuras.join(', ')}` : "FIGURAS: Ninguna aún";
         textarea.value = texto;
         document.getElementById("modalNumeros").style.display = "flex";
     };
 
-    window.cerrarModalNumeros = () => { 
-        document.getElementById("modalNumeros").style.display = "none"; 
-    };
+    window.cerrarModalNumeros = () => { document.getElementById("modalNumeros").style.display = "none"; };
 
     window.guardarNumeros = async () => {
         const texto = document.getElementById("numerosTextarea").value;
         const lines = texto.split('\n');
-        const bingos = [];
-        const ruletas = [];
-        
+        const bingos = [], figuras = [];
         for (let line of lines) {
             line = line.trim();
             if (line.startsWith('BINGOS:')) {
-                const nums = line.replace('BINGOS:', '').trim();
-                nums.split(',').forEach(n => {
+                line.replace('BINGOS:', '').trim().split(',').forEach(n => {
                     const num = parseInt(n.trim());
                     if (!isNaN(num)) bingos.push(num);
                 });
-            } else if (line.startsWith('RULETAS:')) {
-                const nums = line.replace('RULETAS:', '').trim();
-                nums.split(',').forEach(n => {
+            } else if (line.startsWith('FIGURAS:')) {
+                line.replace('FIGURAS:', '').trim().split(',').forEach(n => {
                     const num = parseInt(n.trim());
-                    if (!isNaN(num)) ruletas.push(num);
+                    if (!isNaN(num)) figuras.push(num);
                 });
             }
         }
-        
         numerosSalidos.bingos = bingos;
-        numerosSalidos.ruletas = ruletas;
-        await updateDoc(docRef, { numerosSalidos: numerosSalidos });
+        numerosSalidos.figuras = figuras;
+        await updateDoc(docRef, { numerosSalidos });
         alert("✅ Números guardados");
     };
 
     window.limpiarNumeros = async () => {
         if (confirm("⚠️ ¿Estás seguro? Esto borrará TODOS los números salidos.")) {
             numerosSalidos.bingos = [];
-            numerosSalidos.ruletas = [];
-            await updateDoc(docRef, { numerosSalidos: numerosSalidos });
-            document.getElementById("numerosTextarea").value = "BINGOS: Ninguno aún\nRULETAS: Ninguna aún";
+            numerosSalidos.figuras = [];
+            await updateDoc(docRef, { numerosSalidos });
+            document.getElementById("numerosTextarea").value = "BINGOS: Ninguno aún\nFIGURAS: Ninguna aún";
             alert("✅ Números limpiados");
         }
     };
 
-    // ========== FUNCIONES PARA RONDAS ==========
     function rondasToText() {
         let texto = "";
-        for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) {
-            texto += `${nombre}: ${rondas}\n`;
-        }
+        for (let [nombre, rondas] of Object.entries(rondasPorJugador).sort((a,b)=>b[1]-a[1])) texto += `${nombre}: ${rondas}\n`;
         return texto.trim();
     }
 
@@ -1492,19 +1335,18 @@
     window.reiniciarRondas = async () => {
         if (confirm("⚠️ ¿Estás seguro? Esto borrará TODAS las rondas por jugador.")) {
             rondasPorJugador = {};
-            await updateDoc(docRef, { rondasPorJugador: rondasPorJugador });
+            await updateDoc(docRef, { rondasPorJugador });
             alert("✅ Rondas reiniciadas");
             document.getElementById("rondasTextarea").value = "";
             actualizarStats();
         }
     };
 
-    // ========== FUNCIONES PARA EL ACUMULADO ==========
     window.modificarAcumulado = async (cambio) => {
         let nuevo = acumulado + cambio;
         if (nuevo < 0) nuevo = 0;
         acumulado = nuevo;
-        await updateDoc(docRef, { acumulado: acumulado });
+        await updateDoc(docRef, { acumulado });
         actualizarUIAcumulado();
         actualizarStats();
     };
@@ -1519,30 +1361,21 @@
         }
     };
 
-    // ========== FUNCIONES PARA LA RESERVA ==========
     window.modificarReserva = async (cambio) => {
         let nuevo = acumuladoReserva + cambio;
         if (nuevo < 0) nuevo = 0;
         acumuladoReserva = nuevo;
-        await updateDoc(docRef, { acumuladoReserva: acumuladoReserva });
+        await updateDoc(docRef, { acumuladoReserva });
         actualizarUIAcumulado();
         actualizarStats();
     };
 
     window.activarReservaDirecto = async () => {
-        if (acumuladoReserva === 0) {
-            alert("⚠️ No hay dinero en reserva para activar");
-            return;
-        }
-        
+        if (acumuladoReserva === 0) { alert("⚠️ No hay dinero en reserva para activar"); return; }
         if (confirm(`¿Activar reserva de $${getAcumuladoReservaEnPesos().toLocaleString()}?\n\nSe sumará al acumulado principal y la reserva quedará en $0.`)) {
             acumulado = acumulado + acumuladoReserva;
             acumuladoReserva = 0;
-            await updateDoc(docRef, { 
-                acumulado: acumulado,
-                acumuladoReserva: acumuladoReserva 
-            });
-            document.getElementById('chkActivarReserva').checked = false;
+            await updateDoc(docRef, { acumulado, acumuladoReserva });
             actualizarUIAcumulado();
             actualizarStats();
             alert(`✅ Reserva activada. Nuevo acumulado: $${getAcumuladoEnPesos().toLocaleString()}`);
@@ -1586,9 +1419,7 @@
         const carton = datos[idx];
         let lista = [];
         for (let linea of carton.lineas) {
-            if (linea.nombre && linea.estado !== "libre" && linea.nombre.trim() !== "") {
-                lista.push(linea.nombre.trim());
-            }
+            if (linea.nombre && linea.estado !== "libre" && linea.nombre.trim() !== "") lista.push(linea.nombre.trim());
         }
         return lista;
     }
@@ -1626,19 +1457,10 @@
             else pag++; 
         }));
         document.getElementById("stats").innerHTML = `<span class="stats-libres">LIBRES: ${lib}</span> | <span class="stats-ocupados">RESERVADOS: ${res}</span> | <span class="stats-pagados">PAGADOS: ${pag}</span>`;
-        const btnLista = document.getElementById("btnCopiarLista");
-        if(btnLista) btnLista.innerText = "📋 COPIAR LISTA WHATSAPP";
-        const btnLink = document.getElementById("btnLinkPromocion");
-        if(btnLink) btnLink.innerText = "🔗 MANDAR LINK";
-        
         const rondaGrande = document.getElementById("rondaGrande");
         if (rondaGrande) {
-            if (config.admin) {
-                rondaGrande.classList.remove('oculta');
-                rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`;
-            } else {
-                rondaGrande.classList.add('oculta');
-            }
+            if (config.admin) { rondaGrande.classList.remove('oculta'); rondaGrande.innerHTML = `🎰 RONDA ${numeroRonda} 🎰`; }
+            else rondaGrande.classList.add('oculta');
         }
         actualizarUIAcumulado();
     }
@@ -1657,9 +1479,7 @@
                 if(seleccionados.some(s => s.c === cIdx && s.l === lIdx)) lDiv.classList.add("sel");
                 let displayText = (linea.nombre && linea.nombre !== "") ? linea.nombre : (cIdx + 1).toString();
                 lDiv.innerText = displayText;
-                if (linea.nombre && linea.nombre !== "") {
-                    ajustarTamanoTexto(lDiv, displayText);
-                }
+                if (linea.nombre && linea.nombre !== "") ajustarTamanoTexto(lDiv, displayText);
                 lDiv.onclick = (function(cartIdx, lineIdx) {
                     return function() { manejarClick(cartIdx, lineIdx); };
                 })(cIdx, lIdx);
@@ -1672,19 +1492,10 @@
         btnLupa.style.background = modoVerificacion ? "#38D400" : "#007bff";
     }
 
-    // ============================================================
-    // MANEJAR CLICK
-    // ============================================================
     async function manejarClick(c, l) {
-        if (cronometroActivo) {
-            return;
-        }
-        
-        if (pendingUpdate) return;
-        
+        if (cronometroActivo || pendingUpdate) return;
         const lineaActual = datos[c].lineas[l];
         const nombreClick = lineaActual.nombre;
-        
         if (modoVerificacion && nombreClick && nombreClick !== "") {
             seleccionados = [];
             let listaCartones = [];
@@ -1700,37 +1511,20 @@
             dibujar();
             return;
         }
-        
         if (config.admin) {
             const nombreInput = document.getElementById("nombreUser").value.trim().toUpperCase();
             if(lineaActual.estado === "libre" && nombreInput !== "") {
-                pendingUpdate = true;
-                guardarHistorial();
-                
+                pendingUpdate = true; guardarHistorial();
                 try {
                     const snap = await getDoc(docRef);
-                    if (!snap.exists()) {
-                        pendingUpdate = false;
-                        return;
-                    }
+                    if (!snap.exists()) { pendingUpdate = false; return; }
                     const data = snap.data();
                     let cartonesActuales = data.cartones || [];
-                    
-                    if (!cartonesActuales[c] || !cartonesActuales[c].lineas) {
-                        pendingUpdate = false;
-                        return;
-                    }
-                    
-                    if (cartonesActuales[c].lineas[l].estado !== "libre") {
-                        pendingUpdate = false;
-                        return;
-                    }
-                    
+                    if (!cartonesActuales[c] || !cartonesActuales[c].lineas) { pendingUpdate = false; return; }
+                    if (cartonesActuales[c].lineas[l].estado !== "libre") { pendingUpdate = false; return; }
                     cartonesActuales[c].lineas[l] = { nombre: nombreInput, estado: "reservado" };
                     await updateDoc(docRef, { cartones: cartonesActuales });
-                } catch (error) {
-                    console.error("Error al guardar:", error);
-                }
+                } catch (error) { console.error(error); }
                 pendingUpdate = false;
             } else {
                 const idx = seleccionados.findIndex(s => s.c === c && s.l === l);
@@ -1740,40 +1534,21 @@
             }
             return;
         }
-        
         if(config.bloqueado && !config.admin) return;
         const n = document.getElementById("nombreUser").value.trim().toUpperCase();
         if(!n) return;
-        
         if(lineaActual.estado === "libre") {
-            pendingUpdate = true;
-            guardarHistorial();
-            
+            pendingUpdate = true; guardarHistorial();
             try {
                 const snap = await getDoc(docRef);
-                if (!snap.exists()) {
-                    pendingUpdate = false;
-                    return;
-                }
+                if (!snap.exists()) { pendingUpdate = false; return; }
                 const data = snap.data();
                 let cartonesActuales = data.cartones || [];
-                
-                if (!cartonesActuales[c] || !cartonesActuales[c].lineas) {
-                    pendingUpdate = false;
-                    return;
-                }
-                
-                if (cartonesActuales[c].lineas[l].estado !== "libre") {
-                    alert("⚠️ Esta línea ya fue ocupada por otra persona.");
-                    pendingUpdate = false;
-                    return;
-                }
-                
+                if (!cartonesActuales[c] || !cartonesActuales[c].lineas) { pendingUpdate = false; return; }
+                if (cartonesActuales[c].lineas[l].estado !== "libre") { alert("⚠️ Esta línea ya fue ocupada por otra persona."); pendingUpdate = false; return; }
                 cartonesActuales[c].lineas[l] = { nombre: n, estado: "reservado" };
                 await updateDoc(docRef, { cartones: cartonesActuales });
-            } catch (error) {
-                console.error("Error al guardar:", error);
-            }
+            } catch (error) { console.error(error); }
             pendingUpdate = false;
         }
     }
@@ -1870,9 +1645,7 @@
         actualizarStats();
     };
     
-    window.cerrarModal = () => {
-        document.getElementById("modalModificar").style.display = "none";
-    };
+    window.cerrarModal = () => { document.getElementById("modalModificar").style.display = "none"; };
     
     window.marcarAccion = async (nuevoEstado) => {
         if (seleccionados.length === 0) return;
@@ -1880,7 +1653,6 @@
         let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
         let cartonesAActualizar = JSON.parse(JSON.stringify(datos));
         let cambiosRealizados = false;
-        
         if (nuevoEstado === 'pagado') {
             let lineasPorNombre = {};
             for (let sel of seleccionados) {
@@ -1891,12 +1663,10 @@
                     lineasPorNombre[nombre].push(sel);
                 }
             }
-            
             for (let nombre in lineasPorNombre) {
                 let indices = lineasPorNombre[nombre];
                 let cantidad = indices.length;
                 let costo = cantidad * 1.5;
-                
                 let lineasCaja = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
                 let saldoActual = 0, indexLinea = -1;
                 lineasCaja.forEach((l, i) => {
@@ -1906,56 +1676,40 @@
                         indexLinea = i;
                     }
                 });
-                
-                const formatPesos = (valorEnMiles) => {
-                    return Math.round(valorEnMiles * 1000).toLocaleString('es-CO');
-                };
-                
+                const formatPesos = (valorEnMiles) => Math.round(valorEnMiles * 1000).toLocaleString('es-CO');
                 if (indexLinea !== -1 && saldoActual >= costo) {
                     let saldoRestante = saldoActual - costo;
-                    let mensajeConfirmacion = `✅✅✅ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
-                    mensajeConfirmacion += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
-                    mensajeConfirmacion += `Le quedarán: $${formatPesos(saldoRestante)}\n\n`;
-                    mensajeConfirmacion += `¿Confirmar pago?`;
-                    if (confirm(mensajeConfirmacion)) {
+                    let msg = `✅✅✅ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    msg += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    msg += `Le quedarán: $${formatPesos(saldoRestante)}\n\n¿Confirmar pago?`;
+                    if (confirm(msg)) {
                         let nuevoSaldo = saldoActual - costo;
                         if (nuevoSaldo > 0) lineasCaja[indexLinea] = `${nombre}: ${nuevoSaldo}`;
                         else lineasCaja.splice(indexLinea, 1);
                         nuevaCaja = lineasCaja.join('\n');
-                        
-                        indices.forEach(sel => {
-                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                        });
+                        indices.forEach(sel => { cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado'; });
                         cambiosRealizados = true;
                     }
-                    
                 } else if (indexLinea !== -1 && saldoActual > 0 && saldoActual < costo) {
                     let saldoRestante = saldoActual - costo;
-                    let mensajeAdvertencia = `⚠️⚠️⚠️ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
-                    mensajeAdvertencia += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
-                    mensajeAdvertencia += `Le quedarían: $${formatPesos(saldoRestante)}\n\n`;
-                    mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
-                    if (confirm(mensajeAdvertencia)) {
+                    let msg = `⚠️⚠️⚠️ ${nombre} tiene $${formatPesos(saldoActual)} en caja\n`;
+                    msg += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n`;
+                    msg += `Le quedarían: $${formatPesos(saldoRestante)}\n\n¿Marcar VERDE igualmente?`;
+                    if (confirm(msg)) {
                         lineasCaja.splice(indexLinea, 1);
                         nuevaCaja = lineasCaja.join('\n');
-                        indices.forEach(sel => {
-                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                        });
+                        indices.forEach(sel => { cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado'; });
                         cambiosRealizados = true;
                     }
                 } else {
-                    let mensajeAdvertencia = `⚠️⚠️⚠️ ${nombre} NO tiene saldo en caja\n`;
-                    mensajeAdvertencia += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n\n`;
-                    mensajeAdvertencia += `¿Marcar VERDE igualmente?`;
-                    if (confirm(mensajeAdvertencia)) {
-                        indices.forEach(sel => {
-                            cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado';
-                        });
+                    let msg = `⚠️⚠️⚠️ ${nombre} NO tiene saldo en caja\n`;
+                    msg += `Va a jugar ${cantidad} línea(s) → costo: $${formatPesos(costo)}\n\n¿Marcar VERDE igualmente?`;
+                    if (confirm(msg)) {
+                        indices.forEach(sel => { cartonesAActualizar[sel.c].lineas[sel.l].estado = 'pagado'; });
                         cambiosRealizados = true;
                     }
                 }
             }
-            
         } else if (nuevoEstado === 'libre') {
             if (!confirm("⚠️⚠️⚠️ ¿Liberar y borrar nombres de las líneas seleccionadas?")) return;
             for (let sel of seleccionados) {
@@ -1964,7 +1718,6 @@
             }
             cambiosRealizados = true;
         }
-        
         if (cambiosRealizados) {
             datos = cartonesAActualizar;
             seleccionados = [];
@@ -1974,330 +1727,37 @@
             actualizarStats();
         }
     };
-    
-    // ============================================================
-    // FUNCIÓN GENERAR MENSAJE GANADOR (ACTUALIZADA)
-    // ============================================================
-    window.generarMensajeGanadorMulti = async () => {
-        const bInput = document.getElementById("numGanador").value;
-        const rInput = document.getElementById("numRuletaFisica").value;
-        if (!bInput || !rInput) { alert("Ingresa números de Bingo y Ruleta"); return; }
-        const numBingo = parseInt(bInput);
-        const numRuleta = parseInt(rInput);
-        const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
-        if (nombresBingo.length === 0) { alert("Cartón sin nombres"); return; }
-        const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
-        
-        const esMismoNumero = (numBingo === numRuleta);
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-        const acumuladoPesos = getAcumuladoEnPesos();
-        
-        function agruparNombres(lista) {
-            const conteo = {};
-            lista.forEach(n => {
-                conteo[n] = (conteo[n] || 0) + 1;
-            });
-            return conteo;
-        }
-        
-        const conteoBingo = agruparNombres(nombresBingo);
-        const conteoRuleta = agruparNombres(nombresRuleta);
-        
-        const nombresUnicosBingo = Object.keys(conteoBingo);
-        const nombresUnicosRuleta = Object.keys(conteoRuleta);
-        
-        const esMismaPersona = (nombresUnicosBingo.length === 1 && nombresUnicosRuleta.length === 1 && nombresUnicosBingo[0] === nombresUnicosRuleta[0]);
-        const nombreUnico = esMismaPersona ? nombresUnicosBingo[0] : "";
-        const cantidadBingo = nombreUnico ? conteoBingo[nombreUnico] || 0 : 0;
-        const cantidadRuleta = nombreUnico ? conteoRuleta[nombreUnico] || 0 : 0;
-        const esUnaSolaLinea = (cantidadBingo === 1 && cantidadRuleta === 1);
-        
-        const todosLosGanadoresSet = new Set([...nombresUnicosBingo, ...nombresUnicosRuleta]);
-        const cantidadGanadores = todosLosGanadoresSet.size;
-        
-        let mensaje = "";
-        let premioTotal = 0;
-        let nombreGanador = "";
-        
-        // ===== CASO 1: Misma persona =====
-        if (esMismaPersona) {
-            nombreGanador = nombreUnico;
-            premioTotal = (10000 * cantidadBingo) + (5000 * cantidadRuleta);
-            
-            mensaje += "🏆 *BINGO #" + numBingo + "* 💰$" + (10000 * cantidadBingo).toLocaleString();
-            if (cantidadBingo > 1) {
-                mensaje += " (" + cantidadBingo + " líneas)";
-            }
-            mensaje += "\n";
-            
-            mensaje += "🎰 *RULETA #" + numRuleta + "* 💰$" + (5000 * cantidadRuleta).toLocaleString();
-            if (cantidadRuleta > 1) {
-                mensaje += " (" + cantidadRuleta + " líneas)";
-            }
-            mensaje += "\n";
-            
-            mensaje += "👤 *" + nombreUnico + "* gana 💰$" + premioTotal.toLocaleString() + "\n";
-            mensaje += " \n";
-            
-            // ===== ACUMULADO: SOLO SI ES EL MISMO NÚMERO =====
-            if (esMismoNumero) {
-                if (entregarAcumulado && acumulado > 0) {
-                    mensaje += "💰 *¡GANADOR DEL ACUMULADO!* 💰\n";
-                    mensaje += "🏆 Lleva $" + acumuladoPesos.toLocaleString() + " EXTRA\n";
-                    mensaje += " \n";
-                    premioTotal += acumuladoPesos;
-                    mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-                    mensaje += "Ganaste (Bingo+Ruleta+Acumulado)";
-                } else if (acumulado > 0) {
-                    mensaje += "⚠️ *ACUMULADO NO ENTREGADO*\n";
-                    mensaje += "📌 No cumple las condiciones (4 rondas diferentes en el día).\n";
-                    mensaje += "💰 El acumulado de $" + acumuladoPesos.toLocaleString() + " sigue en juego.\n";
-                    mensaje += " \n";
-                    mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-                    mensaje += "Ganaste (Bingo+Ruleta)";
-                } else {
-                    mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-                    mensaje += "Ganaste (Bingo+Ruleta)";
-                }
-            } else {
-                mensaje += "✅ Felicidades *" + nombreUnico + "* 🎉\n";
-                mensaje += "Ganaste (Bingo+Ruleta)";
-            }
-        
-        // ===== CASO 2: Múltiples ganadores =====
-        } else {
-            nombreGanador = Array.from(todosLosGanadoresSet).join(", ");
-            
-            mensaje += "🏆 *BINGO #" + numBingo + "*\n";
-            for (let [nombre, cantidad] of Object.entries(conteoBingo)) {
-                const total = 10000 * cantidad;
-                if (cantidad === 1) {
-                    mensaje += "👤 *" + nombre + "* gana *$" + total.toLocaleString() + "💰*\n";
-                } else {
-                    mensaje += "👤 *" + nombre + "* (" + cantidad + " líneas) gana *$" + total.toLocaleString() + "💰*\n";
-                }
-            }
-            mensaje += " \n";
-            
-            mensaje += "🎰 *RULETA #" + numRuleta + "*\n";
-            for (let [nombre, cantidad] of Object.entries(conteoRuleta)) {
-                const total = 5000 * cantidad;
-                if (cantidad === 1) {
-                    mensaje += "👤 *" + nombre + "* gana *$" + total.toLocaleString() + "💰*\n";
-                } else {
-                    mensaje += "👤 *" + nombre + "* (" + cantidad + " líneas) gana *$" + total.toLocaleString() + "💰*\n";
-                }
-            }
-            
-            mensaje += "\n✅ Felicidades a los ganadores! 🎉";
-        }
 
-        navigator.clipboard.writeText(mensaje.trim());
-        alert("Mensaje de ganadores copiado");
-        
-        if (nombresBingo.length > 0) {
-            const bingoNombre = nombresBingo.length === 1 ? nombresBingo[0] : nombresBingo.join(", ");
-            const ruletaNombre = nombresRuleta.length === 1 ? nombresRuleta[0] : nombresRuleta.join(", ");
-            await guardarGanadoresEnHistorial(numBingo, bingoNombre, numRuleta, ruletaNombre);
-        }
-    };
-    
-    // ========== FUNCIÓN CARGAR PREMIOS EN CAJA ==========
-    window.cargarPremiosACajaMulti = async () => {
-        const bInput = document.getElementById("numGanador").value;
-        const rInput = document.getElementById("numRuletaFisica").value;
-        
-        if (!bInput || !rInput) { 
-            alert("⚠️ Ingresa números de Bingo y Ruleta"); 
-            return; 
-        }
-        
-        const numBingo = parseInt(bInput);
-        const numRuleta = parseInt(rInput);
-        const nombresBingo = obtenerTodosLosNombresConRepeticiones(numBingo);
-        
-        if (nombresBingo.length === 0) { 
-            alert("⚠️ El cartón de BINGO #" + numBingo + " no tiene nombres asignados"); 
-            return; 
-        }
-        
-        const nombresRuleta = obtenerTodosLosNombresConRepeticiones(numRuleta);
-        
-        if (nombresRuleta.length === 0) {
-            alert("⚠️ El cartón de RULETA #" + numRuleta + " no tiene nombres asignados");
-            return;
-        }
-        
-        const esMismoNumero = (numBingo === numRuleta);
-        const entregarAcumulado = document.getElementById("chkEntregarAcumulado").checked;
-        const acumuladoPesos = getAcumuladoEnPesos();
-        const acumuladoEnMiles = acumuladoPesos / 1000;
-        const tramoActual = getTramoActual();
-        const clave = getClaveTramo(tramoActual);
-        
-        if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-        
-        let nuevaCaja = document.getElementById("notas-caja").value.toUpperCase();
-        let lineas = nuevaCaja.split('\n').map(l => l.trim()).filter(l => l !== "");
-        let resumenPremios = [];
-        let premiosAgregados = false;
-        let acumuladoEntregado = false;
-        
-        function agregarSaldo(nombre, cantidadEnMiles, concepto) {
-            if (!nombre || cantidadEnMiles === 0) return;
-            let encontrado = false;
-            lineas = lineas.map(l => {
-                if (l.startsWith(nombre + ":")) {
-                    encontrado = true;
-                    let partes = l.split(':');
-                    let valorActual = parseFloat(partes[1].trim()) || 0;
-                    let nuevoValor = valorActual + cantidadEnMiles;
-                    return `${nombre}: ${nuevoValor}`;
-                }
-                return l;
-            });
-            if (!encontrado) {
-                lineas.push(`${nombre}: ${cantidadEnMiles}`);
-            }
-            const valorFormateado = (cantidadEnMiles * 1000).toLocaleString();
-            resumenPremios.push(`• ${nombre}: +$${valorFormateado} (${concepto})`);
-            premiosAgregados = true;
-        }
-        
-        function agregarPuntos(nombre, puntos) {
-            if (!nombre || puntos === 0) return;
-            puntosPorTramo[clave][nombre] = (puntosPorTramo[clave][nombre] || 0) + puntos;
-        }
-        
-        const agruparPorNombre = (lista) => {
-            const conteo = {};
-            lista.forEach(n => { 
-                const nombreLimpio = n.trim();
-                if (nombreLimpio) {
-                    conteo[nombreLimpio] = (conteo[nombreLimpio] || 0) + 1; 
-                }
-            });
-            return conteo;
-        };
-        
-        if (esMismoNumero) {
-            const conteo = agruparPorNombre(nombresBingo);
-            for (let [nombre, cantidad] of Object.entries(conteo)) {
-                agregarSaldo(nombre, 15 * cantidad, `Bingo+Ruleta x${cantidad}`);
-                agregarPuntos(nombre, 5 * cantidad);
-            }
-        } else {
-            const conteoBingo = agruparPorNombre(nombresBingo);
-            const conteoRuleta = agruparPorNombre(nombresRuleta);
-            
-            for (let [nombre, cantidad] of Object.entries(conteoBingo)) {
-                agregarSaldo(nombre, 10 * cantidad, `Bingo x${cantidad}`);
-                agregarPuntos(nombre, 3 * cantidad);
-            }
-            
-            for (let [nombre, cantidad] of Object.entries(conteoRuleta)) {
-                agregarSaldo(nombre, 5 * cantidad, `Ruleta x${cantidad}`);
-                agregarPuntos(nombre, 2 * cantidad);
-            }
-        }
-        
-        if (esMismoNumero && entregarAcumulado && acumulado > 0) {
-            const conteo = agruparPorNombre(nombresBingo);
-            const primerGanador = Object.keys(conteo)[0];
-            if (primerGanador) {
-                agregarSaldo(primerGanador, acumuladoEnMiles, `ACUMULADO 🏆`);
-                acumuladoEntregado = true;
-                acumulado = 0;
-                await updateDoc(docRef, { acumulado: acumulado });
-                actualizarUIAcumulado();
-            }
-        }
-        
-        if (premiosAgregados) {
-            let cajaFinal = lineas.join('\n');
-            document.getElementById("notas-caja").value = cajaFinal;
-            
-            await updateDoc(docRef, { 
-                notas_caja: cajaFinal,
-                puntosPorTramo: puntosPorTramo
-            });
-            
-            let alertMsg = "✅ PREMIOS REGISTRADOS EXITOSAMENTE:\n\n";
-            alertMsg += "💰 SALDOS EN CAJA:\n";
-            alertMsg += resumenPremios.join("\n");
-            
-            if (acumuladoEntregado) {
-                alertMsg += `\n\n🏆 ACUMULADO ENTREGADO: $${acumuladoPesos.toLocaleString()}`;
-            } else if (esMismoNumero && acumuladoPesos > 0 && !entregarAcumulado) {
-                alertMsg += `\n\n⚠️ ACUMULADO NO ENTREGADO (marca la casilla para entregarlo)`;
-                alertMsg += `\n💰 Acumulado disponible: $${acumuladoPesos.toLocaleString()}`;
-            }
-            alertMsg += "\n\n✅ Todos los saldos fueron actualizados en la caja.";
-            alert(alertMsg);
-            
-            document.getElementById("numGanador").value = "";
-            document.getElementById("numRuletaFisica").value = "";
-            document.getElementById("chkEntregarAcumulado").checked = false;
-            
-            actualizarStats();
-            
-        } else {
-            alert("⚠️ No se registraron premios. Verifica que los cartones tengan nombres asignados.");
-        }
-    };
-    
     window.copiarLinkPromocion = () => {
-        let txt = "";
-        txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
-        txt += "https://bingo-locutando.online/\n\n";
+        let txt = "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\nhttps://bingo-locutando.online/\n\n";
         txt += "*💵 Valor:* $1.500\n───────\n";
-        txt += "🏆 *BINGO:* $10.000💰\n";
-        txt += "🎰 *RULETA:* $5.000💰\n";
+        txt += "🏆 *BINGO:* $10.000💰\n🎰 *FIGURA:* $5.000💰\n";
         if (acumulado > 0) txt += `💰 *Acumulado:* $${getAcumuladoEnPesos().toLocaleString()}💰\n`;
-        txt += "───────\n";
-        txt += "📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
-        txt += "✅ *Nequi: 3169461962*\n";
-        txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
-        
+        txt += "───────\n📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
+        txt += "✅ *Nequi: 3169461962*\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
         navigator.clipboard.writeText(txt);
-        alert("✅ Mensaje promocional con LINK copiado");
+        alert("✅ Mensaje promocional copiado");
     };
     
     window.copiarListaBingo = () => {
-        let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += "*💵 Valor:* $1.500\n───────\n";
-        txt += "🏆 *BINGO:* $10.000💰\n";
-        txt += "🎰 *RULETA:* $5.000💰\n";
+        let txt = "*🎰 LISTADO BINGO 75*\n*💵 Valor:* $1.500\n───────\n🏆 *BINGO:* $10.000💰\n🎰 *FIGURA:* $5.000💰\n";
         if (acumulado > 0) txt += `💰 *Acumulado:* $${getAcumuladoEnPesos().toLocaleString()}💰\n`;
-        txt += "───────\n";
-        txt += "📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
-        
+        txt += "───────\n📌 *Nota:* Para ganarse el acumulado tienes que haber participado en 4 rondas diferentes en el día.\n\n";
         datos.forEach((c, idx) => {
             const primera = c.lineas[0];
-            let displayName = primera.nombre || "";
-            txt += `${idx+1} 🍀 ${displayName}${primera.estado === "pagado" ? " ✅" : ""}\n`;
+            txt += `${idx+1} 🍀 ${primera.nombre || ""}${primera.estado === "pagado" ? " ✅" : ""}\n`;
         });
-        txt += "\n✅ *Nequi: 3169461962*\n";
-        txt += "✅ *Juega con responsabilidad y disfruta la dinámica.*";
+        txt += "\n✅ *Nequi: 3169461962*\n✅ *Juega con responsabilidad y disfruta la dinámica.*";
         navigator.clipboard.writeText(txt);
         alert(`Lista de bingo copiada`);
     };
     
     window.copiarListaRondaGratis = () => {
-        let txt = "*🎰 LISTADO BINGO LINEAL*\n";
-        txt += "*Ronda GRATIS*\n";
-        txt += "───────\n";
-        txt += "🏆 *PREMIO BINGO:* $5.000💰\n";
-        txt += "───────\n";
-        
+        let txt = "*🎰 LISTADO BINGO 75*\n*Ronda GRATIS*\n───────\n🏆 *PREMIO BINGO:* $5.000💰\n───────\n";
         datos.forEach((c, idx) => {
             const primera = c.lineas[0];
-            let displayName = primera.nombre || "";
-            if (displayName) {
-                txt += `${idx+1} 🍀 ${displayName}\n`;
-            }
+            if (primera.nombre) txt += `${idx+1} 🍀 ${primera.nombre}\n`;
         });
-        
         txt += "\nGracias por seguir apoyándome se les quiere 😘";
         navigator.clipboard.writeText(txt);
         alert("✅ Mensaje de Ronda Gratis copiado");
@@ -2311,8 +1771,7 @@
             if(l.includes(':')) { 
                 let p = l.split(':'); 
                 let valor = parseFloat(p[1].trim());
-                let valorConPuntos = Math.round(valor * 1000).toLocaleString('es-CO');
-                txt += `- ${p[0].trim()}: ${valorConPuntos}\n`; 
+                txt += `- ${p[0].trim()}: ${Math.round(valor * 1000).toLocaleString('es-CO')}\n`; 
             }
             else if(l.trim()) txt += l + "\n";
         });
@@ -2322,38 +1781,21 @@
     
     window.deshacerAccion = async () => { if(historial.length) { datos = historial.pop(); await updateDoc(docRef, { cartones: datos }); seleccionados = []; dibujar(); actualizarStats(); } };
     
-    // ========== FUNCIÓN REINICIAR TABLERO ==========
     window.reiniciarBingo = async () => {
         if (cronometroActivo) return;
-    
         const guardarEnReserva = document.getElementById('chkGuardarEnReserva').checked;
         const acumuladoActual = getAcumuladoEnPesos();
         const nuevaRondaPreview = numeroRonda + 1;
-    
-        let mensaje = "";
-        if (guardarEnReserva) {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | +$2.500 guardado en RESERVA\n\n`;
-        } else {
-            mensaje = `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | Acumulado +$2.500 = $${(acumuladoActual + 2500).toLocaleString()}\n\n`;
-        }
-    
-        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n";
-        mensaje += "• +1 RONDA a cada jugador activo\n";
-        mensaje += "• +1 PUNTO por cada línea ocupada (se guarda en el tramo actual)\n";
-        mensaje += "• +3 PUNTOS al ganador de BINGO\n";
-        mensaje += "• +2 PUNTOS al ganador de RULETA";
-    
-        if (!confirm(mensaje)) {
-            return;
-        }
-    
+        let mensaje = guardarEnReserva
+            ? `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | +$2.500 guardado en RESERVA\n\n`
+            : `✅ Tablero reiniciado. Ronda ${nuevaRondaPreview} | Acumulado +$2.500 = $${(acumuladoActual + 2500).toLocaleString()}\n\n`;
+        mensaje += "⚠️ Se borrarán los nombres de esta ronda.\n\n• +1 RONDA a cada jugador activo\n• +1 PUNTO por cada línea ocupada\n• +3 PUNTOS al ganador de BINGO\n• +2 PUNTOS al ganador de FIGURA";
+        if (!confirm(mensaje)) return;
         try {
             guardarHistorial();
-            
             const tramoActual = getTramoActual();
             const clave = getClaveTramo(tramoActual);
             if (!puntosPorTramo[clave]) puntosPorTramo[clave] = {};
-            
             let lineasPorJugador = {};
             datos.forEach(c => {
                 c.lineas.forEach(linea => {
@@ -2363,60 +1805,35 @@
                     }
                 });
             });
-            
             Object.entries(lineasPorJugador).forEach(([nombre, cantidad]) => {
                 puntosPorTramo[clave][nombre] = (puntosPorTramo[clave][nombre] || 0) + cantidad;
             });
-            
             Object.keys(lineasPorJugador).forEach(nombre => {
                 rondasPorJugador[nombre] = (rondasPorJugador[nombre] || 0) + 1;
             });
-            
             const backup = JSON.parse(JSON.stringify(datos));
-            backup.forEach(c => {
-                c.lineas.forEach(l => {
-                    l.nombre = "";
-                    l.estado = "libre";
-                });
-            });
+            backup.forEach(c => c.lineas.forEach(l => { l.nombre = ""; l.estado = "libre"; }));
             datos = backup;
-            
             const nuevaRonda = numeroRonda + 1;
             let nuevoAcumulado = acumulado;
             let nuevaReserva = acumuladoReserva;
-            
-            if (guardarEnReserva) {
-                nuevaReserva = acumuladoReserva + 1;
-            } else {
-                nuevoAcumulado = acumulado + 1;
-            }
-            
+            if (guardarEnReserva) nuevaReserva = acumuladoReserva + 1;
+            else nuevoAcumulado = acumulado + 1;
             await updateDoc(docRef, { 
-                cartones: datos, 
-                numero_ronda: nuevaRonda,
-                acumulado: nuevoAcumulado,
-                acumuladoReserva: nuevaReserva,
-                puntosPorTramo: puntosPorTramo,
-                rondasPorJugador: rondasPorJugador
+                cartones: datos, numero_ronda: nuevaRonda,
+                acumulado: nuevoAcumulado, acumuladoReserva: nuevaReserva,
+                puntosPorTramo, rondasPorJugador
             });
-            
             numeroRonda = nuevaRonda;
             acumulado = nuevoAcumulado;
             acumuladoReserva = nuevaReserva;
             seleccionados = [];
-            
             dibujar();
             actualizarStats();
             actualizarUIAcumulado();
             document.getElementById('chkGuardarEnReserva').checked = false;
-            
-            // Iniciar cronómetro con los segundos configurados
             iniciarCronometroOptimizado();
-            
-        } catch (error) {
-            alert("❌ Error al reiniciar: " + error.message);
-            console.error(error);
-        }
+        } catch (error) { alert("❌ Error: " + error.message); }
     };
     
     window.toggleBloqueo = async () => { 
@@ -2443,38 +1860,16 @@
         dibujar();
     };
     window.guardarCaja = async () => { await updateDoc(docRef, { notas_caja: document.getElementById("notas-caja").value.toUpperCase() }); alert("Caja guardada ✅"); };
-    window.filtrarSugerencias = (valor) => {
-        const input = valor.toUpperCase();
-        document.getElementById("nombreUser").value = input;
-        const datalist = document.getElementById("sugerenciasCaja");
-        datalist.innerHTML = "";
-        if (input.length === 0) return;
-        document.getElementById("notas-caja").value.split('\n').forEach(linea => {
-            const nombre = linea.split(':')[0].trim();
-            if (nombre && nombre.startsWith(input)) {
-                const opt = document.createElement("option");
-                opt.value = nombre;
-                datalist.appendChild(opt);
-            }
-        });
-    };
-    window.limpiarNombre = () => { document.getElementById("nombreUser").value = ""; document.getElementById("nombreUser").focus(); };
-
-    // ========== ASIGNAR RULETA AL AZAR ==========
+    
     function obtenerRankingPorTramo(tramo) {
-        const clave = `tramo_${tramo}`;
-        const datosTramo = puntosPorTramo[clave] || {};
-        
+        const datosTramo = puntosPorTramo[`tramo_${tramo}`] || {};
         const sorted = Object.entries(datosTramo).sort((a, b) => b[1] - a[1]);
-        
-        const ranking = sorted.map(([nombre, puntos], index) => {
+        return sorted.map(([nombre, puntos], index) => {
             let cantidad = 1;
             if (index === 0) cantidad = 3;
             else if (index === 1) cantidad = 2;
             return { nombre, puntos, cantidad };
         });
-        
-        return ranking;
     }
 
     function shuffleArray(arr) {
@@ -2487,31 +1882,20 @@
 
     function mostrarResultadoRuleta(resultados, tramo) {
         const container = document.getElementById('resultadoRuletaModal');
-        const tramoTexto = {
-            1: '1-20',
-            2: '21-40',
-            3: '41-60',
-            4: '61-80',
-            5: '81-100'
-        }[tramo] || tramo;
-        
+        const tramoTexto = { 1: '1-20', 2: '21-40', 3: '41-60', 4: '61-80', 5: '81-100' }[tramo] || tramo;
         if (resultados.length === 0) {
             container.innerHTML = `<p style="color: #ff6b6b; text-align: center;">⚠️ No hay puntos registrados en el tramo ${tramoTexto}</p>`;
             return;
         }
-        
         let html = `<div style="color: var(--oro); font-weight: bold; margin-bottom: 8px;">🎯 Ronda ${tramoTexto}</div>`;
-        
         for (const r of resultados) {
             const numsStr = r.numeros.length > 0 ? r.numeros.join(', ') : '⚠️ Sin número';
             const bgColor = r.cantidad >= 3 ? '#ffcc00' : (r.cantidad >= 2 ? '#ff8800' : '#444');
             const textColor = r.cantidad >= 2 ? '#000' : '#fff';
-            html += `
-                <div class="resultado-ruleta-item" style="background: ${bgColor}; color: ${textColor};">
-                    <span><strong>${limpiarNombre(r.nombre)}</strong> (${r.puntos} pts) → ${r.cantidad} número${r.cantidad > 1 ? 's' : ''}</span>
-                    <span class="nums">${numsStr}</span>
-                </div>
-            `;
+            html += `<div class="resultado-ruleta-item" style="background: ${bgColor}; color: ${textColor};">
+                <span><strong>${limpiarNombre(r.nombre)}</strong> (${r.puntos} pts) → ${r.cantidad} número${r.cantidad > 1 ? 's' : ''}</span>
+                <span class="nums">${numsStr}</span>
+            </div>`;
         }
         container.innerHTML = html;
     }
@@ -2519,76 +1903,45 @@
     window.mostrarModalRuleta = () => {
         document.getElementById("modalRuleta").style.display = "flex";
         const tramo = parseInt(document.getElementById('selectTramoRuletaModal').value);
-        const resultados = asignarNumerosRuleta(tramo);
-        mostrarResultadoRuleta(resultados, tramo);
+        mostrarResultadoRuleta(asignarNumerosRuleta(tramo), tramo);
     };
 
-    window.cerrarModalRuleta = () => {
-        document.getElementById("modalRuleta").style.display = "none";
-    };
+    window.cerrarModalRuleta = () => { document.getElementById("modalRuleta").style.display = "none"; };
 
     function asignarNumerosRuleta(tramo) {
         const numerosDisponibles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
         let numeros = shuffleArray([...numerosDisponibles]);
-        
         const ranking = obtenerRankingPorTramo(tramo);
         const participantes = ranking.slice(0, 12);
-        
         const resultado = [];
         let idx = 0;
-
         for (const jug of participantes) {
             const asignados = [];
             for (let i = 0; i < jug.cantidad; i++) {
-                if (idx < numeros.length) {
-                    asignados.push(numeros[idx]);
-                    idx++;
-                }
+                if (idx < numeros.length) { asignados.push(numeros[idx]); idx++; }
             }
-            resultado.push({
-                nombre: limpiarNombre(jug.nombre),
-                puntos: jug.puntos,
-                cantidad: jug.cantidad,
-                numeros: asignados
-            });
+            resultado.push({ nombre: limpiarNombre(jug.nombre), puntos: jug.puntos, cantidad: jug.cantidad, numeros: asignados });
         }
         return resultado;
     }
 
     async function asignarRuletaYGuardarModal(tramo) {
-        const numerosDisponibles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        
         let nombresAnotados = new Set();
         let cartonesOcupados = new Set();
-        
         datos.forEach((c, idx) => {
             c.lineas.forEach(linea => {
                 if (linea.nombre && linea.nombre !== "") {
-                    const nombreLimpio = limpiarNombre(linea.nombre);
-                    nombresAnotados.add(nombreLimpio);
+                    nombresAnotados.add(limpiarNombre(linea.nombre));
                     cartonesOcupados.add(idx + 1);
                 }
             });
         });
-        
         const ranking = obtenerRankingPorTramo(tramo);
-        const participantesPendientes = ranking.filter(jug => {
-            const nombreLimpio = limpiarNombre(jug.nombre);
-            return !nombresAnotados.has(nombreLimpio);
-        });
-        
+        const participantesPendientes = ranking.filter(jug => !nombresAnotados.has(limpiarNombre(jug.nombre)));
         let cartonesLibres = [];
-        for (let i = 1; i <= 15; i++) {
-            if (!cartonesOcupados.has(i)) {
-                cartonesLibres.push(i);
-            }
-        }
-        
+        for (let i = 1; i <= 15; i++) if (!cartonesOcupados.has(i)) cartonesLibres.push(i);
         cartonesLibres = shuffleArray(cartonesLibres);
-        
-        let idx = 0;
-        let asignaciones = [];
-        
+        let idx = 0, asignaciones = [];
         for (const jug of participantesPendientes) {
             const nombreLimpio = limpiarNombre(jug.nombre);
             const asignados = [];
@@ -2596,7 +1949,6 @@
                 if (idx < cartonesLibres.length) {
                     const numCarton = cartonesLibres[idx];
                     asignados.push(numCarton);
-                    
                     const cartonIdx = numCarton - 1;
                     if (cartonIdx >= 0 && cartonIdx < datos.length) {
                         let lineaAsignada = false;
@@ -2608,36 +1960,18 @@
                                 break;
                             }
                         }
-                        if (!lineaAsignada) {
-                            datos[cartonIdx].lineas.push({
-                                nombre: nombreLimpio,
-                                estado: "reservado"
-                            });
-                        }
+                        if (!lineaAsignada) datos[cartonIdx].lineas.push({ nombre: nombreLimpio, estado: "reservado" });
                     }
                     idx++;
                 }
             }
-            if (asignados.length > 0) {
-                asignaciones.push({
-                    nombre: nombreLimpio,
-                    puntos: jug.puntos,
-                    cantidad: jug.cantidad,
-                    numeros: asignados
-                });
-            }
+            if (asignados.length > 0) asignaciones.push({ nombre: nombreLimpio, puntos: jug.puntos, cantidad: jug.cantidad, numeros: asignados });
         }
-        
         await updateDoc(docRef, { cartones: datos });
         mostrarResultadoRuleta(asignaciones, tramo);
         dibujar();
         actualizarStats();
-        
-        let mensaje = `✅ Asignación completada para el tramo ${getNombreTramo(tramo)}\n\n`;
-        mensaje += `📌 Jugadores ya anotados: ${nombresAnotados.size}\n`;
-        mensaje += `📌 Nuevos asignados: ${asignaciones.length}\n`;
-        mensaje += `📌 Cartones libres restantes: ${cartonesLibres.length - idx}`;
-        alert(mensaje);
+        alert(`✅ Asignación completada para el tramo ${getNombreTramo(tramo)}\n\n📌 Ya anotados: ${nombresAnotados.size}\n📌 Nuevos asignados: ${asignaciones.length}\n📌 Cartones libres restantes: ${cartonesLibres.length - idx}`);
     }
 
     document.getElementById('btnAsignarRuletaModal').addEventListener('click', async function() {
@@ -2647,9 +1981,6 @@
         }
     });
 
-    // =========================================
-    // ONSNAPSHOT
-    // =========================================
     onSnapshot(docRef, (snap) => {
         if (snap.exists()) {
             const d = snap.data();
@@ -2665,17 +1996,12 @@
             rondasPorJugador = d.rondasPorJugador || {};
             puntosPorTramo = d.puntosPorTramo || {};
             historialGanadores = d.historialGanadores || [];
-            numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
-            
-            // ===== CARGAR SEGUNDOS GUARDADOS =====
+            numerosSalidos = d.numerosSalidos || { bingos: [], figuras: [] };
             if (d.segundosCronometro !== undefined) {
                 segundosCronometro = d.segundosCronometro;
                 document.getElementById("cronometroSegundos").value = segundosCronometro;
             }
-            
-            // ===== RESTAURAR CRONÓMETRO =====
             restaurarCronometro(d);
-            
             actualizarCampoNombre();
             actualizarUIAcumulado();
             dibujar();
