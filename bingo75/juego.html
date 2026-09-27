@@ -601,13 +601,31 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             aplicarBloqueoScroll();
         }
 
+        // ============================================================
+        // CAMBIO PRINCIPAL: usar margin-top en el .bingo-app
+        // El margin empuja el contenedor hacia abajo SIN comprimir su contenido interno.
+        // El padding-top, en cambio, le quita espacio interno y comprime los cartones.
+        // ============================================================
         function aplicarEspacioNotch() {
+            const body = document.body;
             const app = document.querySelector('.bingo-app');
-            if (!app) return;
+            if (!body || !app) return;
+
+            // Limpiar restos previos
+            app.style.paddingTop = '';
+            body.style.paddingTop = '';
+
+            if (ESPACIO_NOTCH === 0) {
+                app.style.marginTop = '0px';
+                return;
+            }
+
             const ALTO_RENGLON = 8;
             const RENGLONES_REALES = ESPACIO_NOTCH * 2;
-            const padding = RENGLONES_REALES * ALTO_RENGLON;
-            app.style.paddingTop = padding + 'px';
+            const espacio = RENGLONES_REALES * ALTO_RENGLON;
+
+            // margin-top empuja desde fuera, no comprime
+            app.style.marginTop = espacio + 'px';
         }
 
         function aplicarBloqueoScroll() {
