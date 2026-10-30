@@ -178,6 +178,19 @@
             return !isNaN(guardado) ? guardado : porDefecto;
         }
 
+        function obtenerTipoSonido(clave, porDefecto) {
+            const directo = localStorage.getItem(clave);
+            if (directo) return directo;
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                if (raw) {
+                    const cfg = JSON.parse(raw);
+                    if (cfg && cfg[clave]) return cfg[clave];
+                }
+            } catch (e) {}
+            return porDefecto;
+        }
+
         function inicializarAudios() {
             try {
                 audioMusica = new Audio(RUTA_AUDIOS + 'Musica.mp3');
@@ -241,100 +254,295 @@
             }, intervaloMs);
         }
 
+
+/* ============================================
+   🔊 MOTOR SINTETIZADOR DE SONIDOS (10 CAMPANAS + 10 TACTAC)
+   ============================================ */
+let _bingoAudioCtx = null;
+let _previewTactacInterval = null;
+let _previewTactacTimeout = null;
+
+function obtenerBingoAudioCtx() {
+    if (!_bingoAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) _bingoAudioCtx = new Ctx();
+    }
+    if (_bingoAudioCtx && _bingoAudioCtx.state === 'suspended') {
+        _bingoAudioCtx.resume().catch(() => {});
+    }
+    return _bingoAudioCtx;
+}
+
+function ejecutarSonidoCampana(ctx, tipo, vol) {
+    if (!ctx || vol <= 0) return;
+    const now = ctx.currentTime;
+
+    const tocarNota = (freq, startOffset, dur, waveType, peakGain, endFreq) => {
+        const t0 = now + startOffset;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        if (endFreq) {
+            osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), t0 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+    };
+
+    switch (tipo) {
+        case 'campana_1': // 1. Campana Clásica de Recepción
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            tocarNota(3135.96, 0, 0.35, 'sine', 0.25);
+            tocarNota(4186.01, 0, 0.15, 'triangle', 0.18);
+            break;
+
+        case 'campana_2': // 2. Doble Timbre de Hotel (Ding-Dong)
+            tocarNota(783.99, 0,    0.55, 'sine', 0.65);
+            tocarNota(1567.98, 0,   0.25, 'sine', 0.20);
+            tocarNota(659.25, 0.24, 0.75, 'sine', 0.65);
+            tocarNota(1318.51, 0.24, 0.35, 'sine', 0.20);
+            break;
+
+        case 'campana_3': // 3. Moneda de Casino (Ching!)
+            tocarNota(987.77, 0,    0.30, 'sine', 0.55);
+            tocarNota(1318.51, 0.07, 0.75, 'sine', 0.65);
+            tocarNota(2637.02, 0.07, 0.40, 'triangle', 0.25);
+            break;
+
+        case 'campana_4': // 4. Alerta Concurso TV (Triple Beep)
+            tocarNota(880,    0,    0.11, 'triangle', 0.55);
+            tocarNota(880,    0.14, 0.11, 'triangle', 0.55);
+            tocarNota(1318.51, 0.28, 0.45, 'triangle', 0.70);
+            break;
+
+        case 'campana_5': // 5. Moneda Retro 8-Bit (Arcade)
+            tocarNota(987.77, 0,    0.09, 'square', 0.35);
+            tocarNota(1318.51, 0.09, 0.42, 'square', 0.38);
+            break;
+
+        case 'campana_6': // 6. Sirena Corta de Alerta
+            tocarNota(550, 0,    0.22, 'sawtooth', 0.35, 1150);
+            tocarNota(550, 0.24, 0.28, 'sawtooth', 0.38, 1250);
+            break;
+
+        case 'campana_7': // 7. Arpa / Cristal Mágico
+            [1046.50, 1318.51, 1567.98, 2093.00].forEach((f, idx) => {
+                tocarNota(f, idx * 0.065, 0.55, 'sine', 0.50);
+                tocarNota(f * 2, idx * 0.065, 0.25, 'triangle', 0.15);
+            });
+            break;
+
+        case 'campana_8': // 8. Sonar / Radar Submarino
+            tocarNota(1174.66, 0,    0.45, 'sine', 0.65);
+            tocarNota(1174.66, 0.30, 0.55, 'sine', 0.28);
+            break;
+
+        case 'campana_9': // 9. Trompeta de Aviso (Ta-Dá)
+            tocarNota(523.25, 0,    0.15, 'sawtooth', 0.32);
+            tocarNota(1046.50, 0,   0.15, 'triangle', 0.25);
+            tocarNota(783.99, 0.17, 0.55, 'sawtooth', 0.38);
+            tocarNota(1567.98, 0.17, 0.55, 'triangle', 0.28);
+            break;
+
+        case 'campana_10': // 10. Láser / Sci-Fi Energético
+            tocarNota(1900, 0,    0.16, 'sawtooth', 0.40, 320);
+            tocarNota(420,  0.17, 0.28, 'sine',     0.55, 1480);
+            break;
+
+        default:
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            break;
+    }
+}
+
+function obtenerIntervaloTactacPorTipo(tipo, duracionCasilla) {
+    const base = Math.max(70, Math.min(140, Math.round((duracionCasilla || 260) / 2)));
+    switch (tipo) {
+        case 'tactac_3': return 65;  // Redoble rápido
+        case 'tactac_4': return 85;  // Cascada jackpot
+        case 'tactac_8': return 135; // Palmas rítmicas
+        case 'tactac_9': return 140; // Fanfarria
+        case 'tactac_10': return 150; // Sirena
+        default: return base;
+    }
+}
+
+function dispararPasoTactacPorTipo(ctx, tipo, vol, paso) {
+    if (!ctx || vol <= 0) return;
+    const t0 = ctx.currentTime;
+
+    const pulsoTono = (freqIni, freqFin, dur, waveType, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freqIni, start);
+        if (freqFin && freqFin !== freqIni) {
+            osc.frequency.exponentialRampToValueAtTime(freqFin, start + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), start + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur + 0.01);
+    };
+
+    const pulsoRuido = (dur, filterFreq, qVal, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const bufferSize = Math.max(64, Math.floor(ctx.sampleRate * dur));
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(filterFreq, start);
+        filter.Q.setValueAtTime(qVal, start);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(Math.max(0.001, vol * peakGain), start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(start);
+    };
+
+    switch (tipo) {
+        case 'tactac_1': { // 1. Tac-Tac de Madera Clásico (Seco y limpio)
+            const f1 = (paso % 2 === 0) ? 820 : 660;
+            const f2 = (paso % 2 === 0) ? 460 : 370;
+            pulsoTono(f1, f2, 0.042, 'sine', 0.75);
+            pulsoTono(f1 * 1.5, f2 * 1.4, 0.022, 'triangle', 0.25);
+            break;
+        }
+        case 'tactac_2': { // 2. Ruleta de Casino (Click Mecánico)
+            const f = (paso % 2 === 0) ? 1650 : 1420;
+            pulsoTono(f, 320, 0.025, 'triangle', 0.70);
+            pulsoRuido(0.014, 3200, 3.5, 0.45);
+            break;
+        }
+        case 'tactac_3': { // 3. Redoble de Tambor (Caja Militar)
+            pulsoTono(195, 95, 0.045, 'triangle', 0.55);
+            pulsoRuido(0.048, 1800, 1.2, 0.50);
+            break;
+        }
+        case 'tactac_4': { // 4. Jackpot Tragamonedas (Cascada de Monedas)
+            const notas = [1567.98, 1975.53, 2349.32, 2637.02];
+            const nota = notas[paso % notas.length];
+            pulsoTono(nota, nota, 0.09, 'sine', 0.60);
+            pulsoTono(nota * 2, nota * 2, 0.045, 'triangle', 0.22);
+            break;
+        }
+        case 'tactac_5': { // 5. Xilófono / Marimba Festiva
+            const escala = [1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 2093.00];
+            const n = escala[paso % escala.length];
+            pulsoTono(n, n * 0.99, 0.085, 'sine', 0.68);
+            pulsoTono(n * 3, n * 3, 0.025, 'sine', 0.18);
+            break;
+        }
+        case 'tactac_6': { // 6. Victoria Arcade 8-Bit
+            const arp = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+            const f = arp[paso % arp.length];
+            pulsoTono(f, f, 0.075, 'square', 0.35);
+            break;
+        }
+        case 'tactac_7': { // 7. Repique de Campanas de Fiesta
+            const campanas = [1318.51, 1567.98, 2093.00, 1567.98];
+            const c = campanas[paso % campanas.length];
+            pulsoTono(c, c, 0.11, 'sine', 0.60);
+            pulsoTono(c * 2.75, c * 2.75, 0.05, 'triangle', 0.22);
+            break;
+        }
+        case 'tactac_8': { // 8. Palmas / Aplausos Rítmicos
+            pulsoRuido(0.035, 1300, 1.8, 0.55, 0);
+            pulsoRuido(0.038, 1450, 2.0, 0.50, 0.012);
+            pulsoRuido(0.055, 1150, 1.5, 0.60, 0.024);
+            break;
+        }
+        case 'tactac_9': { // 9. Fanfarria Triunfal de Bronces
+            const fanf = [523.25, 659.25, 783.99, 1046.50];
+            const bf = fanf[paso % fanf.length];
+            pulsoTono(bf, bf, 0.11, 'sawtooth', 0.32);
+            pulsoTono(bf * 1.5, bf * 1.5, 0.10, 'triangle', 0.28);
+            break;
+        }
+        case 'tactac_10': { // 10. Sirena Ganadora de Concurso
+            const sube = (paso % 2 === 0);
+            pulsoTono(sube ? 580 : 1160, sube ? 1160 : 580, 0.135, 'triangle', 0.55);
+            pulsoTono(sube ? 1160 : 1740, sube ? 1740 : 1160, 0.12, 'sine', 0.25);
+            break;
+        }
+        default: {
+            const f1 = (paso % 2 === 0) ? 820 : 660;
+            pulsoTono(f1, 420, 0.042, 'sine', 0.75);
+            break;
+        }
+    }
+}
+
+function detenerPreviewTactacConfig() {
+    if (_previewTactacInterval) {
+        clearInterval(_previewTactacInterval);
+        _previewTactacInterval = null;
+    }
+    if (_previewTactacTimeout) {
+        clearTimeout(_previewTactacTimeout);
+        _previewTactacTimeout = null;
+    }
+}
+
+function probarSonidoCampanaConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoCampanaTipo');
+    const rango = document.getElementById('sonidoCampanaVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoCampanaTipo') || 'campana_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.85;
+    const ctx = obtenerBingoAudioCtx();
+    ejecutarSonidoCampana(ctx, tipo, vol);
+}
+
+function probarSonidoTactacConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoTactacTipo');
+    const rango = document.getElementById('sonidoTactacVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoTactacTipo') || 'tactac_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.95;
+    if (vol <= 0) return;
+    const ctx = obtenerBingoAudioCtx();
+    if (!ctx) return;
+
+    let paso = 0;
+    dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    const intervalo = obtenerIntervaloTactacPorTipo(tipo, 240);
+    _previewTactacInterval = setInterval(() => {
+        dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    }, intervalo);
+
+    _previewTactacTimeout = setTimeout(() => {
+        detenerPreviewTactacConfig();
+    }, 1500);
+}
+
         function reproducirCampana() {
             try {
                 const vol = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
                 if (vol <= 0) return;
+                const tipo = obtenerTipoSonido('sonidoCampanaTipo', 'campana_1');
                 const ctx = obtenerAudioCtx();
                 if (!ctx) return;
-
-                // Doble campana cristalina de alerta ("¡Ding-Ding!" estilo casino/arcade)
-                const notas = [
-                    { freq: 1046.50, delay: 0,    dur: 0.55 }, // Do6 (C6)
-                    { freq: 1318.51, delay: 0.14, dur: 0.85 }  // Mi6 (E6)
-                ];
-
-                notas.forEach(({ freq, delay, dur }) => {
-                    const t0 = ctx.currentTime + delay;
-
-                    // Tono principal de campana
-                    const osc1 = ctx.createOscillator();
-                    const gain1 = ctx.createGain();
-                    osc1.type = 'sine';
-                    osc1.frequency.setValueAtTime(freq, t0);
-
-                    gain1.gain.setValueAtTime(0.0001, t0);
-                    gain1.gain.linearRampToValueAtTime(vol * 0.55, t0 + 0.012);
-                    gain1.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-                    osc1.connect(gain1);
-                    gain1.connect(ctx.destination);
-                    osc1.start(t0);
-                    osc1.stop(t0 + dur + 0.02);
-
-                    // Armónico brillante metálico
-                    const osc2 = ctx.createOscillator();
-                    const gain2 = ctx.createGain();
-                    osc2.type = 'triangle';
-                    osc2.frequency.setValueAtTime(freq * 2.756, t0);
-
-                    gain2.gain.setValueAtTime(0.0001, t0);
-                    gain2.gain.linearRampToValueAtTime(vol * 0.22, t0 + 0.008);
-                    gain2.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.45);
-
-                    osc2.connect(gain2);
-                    gain2.connect(ctx.destination);
-                    osc2.start(t0);
-                    osc2.stop(t0 + dur * 0.45 + 0.02);
-                });
+                ejecutarSonidoCampana(ctx, tipo, vol);
             } catch (e) {}
-        }
-
-        function dispararGolpeTactac(ctx, vol, paso) {
-            const t0 = ctx.currentTime;
-            // Alterna sutilmente entre "tac" y "tic" como una ruleta / matraca de premio
-            const freqBase = (paso % 2 === 0) ? 920 : 1180;
-
-            // Cuerpo percusivo de madera/ruleta
-            const osc = ctx.createOscillator();
-            const gainOsc = ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freqBase, t0);
-            osc.frequency.exponentialRampToValueAtTime(240, t0 + 0.045);
-
-            gainOsc.gain.setValueAtTime(0.0001, t0);
-            gainOsc.gain.linearRampToValueAtTime(vol * 0.65, t0 + 0.003);
-            gainOsc.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
-
-            osc.connect(gainOsc);
-            gainOsc.connect(ctx.destination);
-            osc.start(t0);
-            osc.stop(t0 + 0.06);
-
-            // Chasquido seco ("click") para darle definición al tac-tac
-            const bufferSize = Math.floor(ctx.sampleRate * 0.018);
-            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-            const data = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
-            }
-
-            const noise = ctx.createBufferSource();
-            noise.buffer = noiseBuffer;
-
-            const filter = ctx.createBiquadFilter();
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(2400, t0);
-            filter.Q.setValueAtTime(2.5, t0);
-
-            const gainNoise = ctx.createGain();
-            gainNoise.gain.setValueAtTime(vol * 0.45, t0);
-            gainNoise.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.018);
-
-            noise.connect(filter);
-            filter.connect(gainNoise);
-            gainNoise.connect(ctx.destination);
-            noise.start(t0);
         }
 
         function reproducirTactac() {
@@ -342,17 +550,19 @@
                 detenerTactac();
                 const vol = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
                 if (vol <= 0) return;
+                const tipo = obtenerTipoSonido('sonidoTactacTipo', 'tactac_1');
                 const ctx = obtenerAudioCtx();
                 if (!ctx) return;
 
                 tactacPaso = 0;
-                dispararGolpeTactac(ctx, vol, tactacPaso++);
+                dispararPasoTactacPorTipo(ctx, tipo, vol, tactacPaso++);
 
-                const intervalo = Math.max(70, Math.min(130, Math.round(DURACION_POR_CASILLA / 2)));
+                const intervalo = obtenerIntervaloTactacPorTipo(tipo, DURACION_POR_CASILLA);
                 tactacIntervalId = setInterval(() => {
                     const v = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
                     if (v <= 0) return;
-                    dispararGolpeTactac(ctx, v, tactacPaso++);
+                    const t = obtenerTipoSonido('sonidoTactacTipo', 'tactac_1');
+                    dispararPasoTactacPorTipo(ctx, t, v, tactacPaso++);
                 }, intervalo);
             } catch (e) {}
         }

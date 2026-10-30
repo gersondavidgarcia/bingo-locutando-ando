@@ -508,7 +508,7 @@
         </div>
 
         <div class="logo-box">
-            <h1><span class="bingo-text">BINGO</span><span class="ninety-text">85</span></h1>
+            <h1><span class="bingo-text">BINGO</span><span class="ninety-text">75</span></h1>
             <p class="subtitle">Múltiples Modalidades</p>
         </div>
 
@@ -1151,7 +1151,7 @@
                 <div class="config-pantalla" id="pantallaSonidos">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
-                    <p class="config-hint">Ajusta el volumen de cada sonido por separado.</p>
+                    <p class="config-hint">Elige el tipo de sonido y ajusta el volumen de cada uno por separado.</p>
 
                     <div class="form-group">
                         <label for="sonidoMusicaVolumen">
@@ -1162,16 +1162,54 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="sonidoCampanaTipo">🔔 Sonido de Alerta (falta 1 bola):</label>
+                        <div class="cc-agregar-fila">
+                            <select id="sonidoCampanaTipo">
+                                <option value="campana_1">1. 🔔 Campana Clásica de Recepción</option>
+                                <option value="campana_2">2. 🛎️ Doble Timbre de Hotel (Ding-Dong)</option>
+                                <option value="campana_3">3. 🎰 Moneda de Casino (Ching!)</option>
+                                <option value="campana_4">4. 📣 Alerta Concurso TV (Triple Beep)</option>
+                                <option value="campana_5">5. 🪙 Moneda Retro 8-Bit (Arcade)</option>
+                                <option value="campana_6">6. 🚨 Sirena Corta de Alerta</option>
+                                <option value="campana_7">7. ✨ Arpa / Cristal Mágico</option>
+                                <option value="campana_8">8. 📡 Sonar / Radar Submarino</option>
+                                <option value="campana_9">9. 🎺 Trompeta de Aviso (Ta-Dá)</option>
+                                <option value="campana_10">10. ⚡ Láser / Sci-Fi Energético</option>
+                            </select>
+                            <button type="button" class="cc-btn-agregar" onclick="probarSonidoCampanaConfig()" onfocus="this.blur()">🔊 Probar</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="sonidoCampanaVolumen">
-                            🔔 Campana (falta 1 bola): 
+                            🔊 Volumen de Alerta (falta 1 bola): 
                             <span id="valSonidoCampanaVolumen">85%</span>
                         </label>
                         <input type="range" id="sonidoCampanaVolumen" min="0" max="100" value="85" step="5">
                     </div>
 
                     <div class="form-group">
+                        <label for="sonidoTactacTipo">🥁 Sonido de Ganador (figura / bingo):</label>
+                        <div class="cc-agregar-fila">
+                            <select id="sonidoTactacTipo">
+                                <option value="tactac_1">1. 🪵 Tac-Tac de Madera Clásico (Seco)</option>
+                                <option value="tactac_2">2. 🎡 Ruleta de Casino (Click Mecánico)</option>
+                                <option value="tactac_3">3. 🥁 Redoble de Tambor (Caja Militar)</option>
+                                <option value="tactac_4">4. 🎰 Jackpot Tragamonedas (Cascada)</option>
+                                <option value="tactac_5">5. 🎼 Xilófono / Marimba Festiva</option>
+                                <option value="tactac_6">6. 🕹️ Victoria Arcade 8-Bit</option>
+                                <option value="tactac_7">7. 🔔 Repique de Campanas de Fiesta</option>
+                                <option value="tactac_8">8. 👏 Palmas / Aplausos Rítmicos</option>
+                                <option value="tactac_9">9. 🎺 Fanfarria Triunfal de Bronces</option>
+                                <option value="tactac_10">10. 🚨 Sirena Ganadora de Concurso</option>
+                            </select>
+                            <button type="button" class="cc-btn-agregar" onclick="probarSonidoTactacConfig()" onfocus="this.blur()">🔊 Probar</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label for="sonidoTactacVolumen">
-                            🥁 Tactac (figura / bingo): 
+                            🔊 Volumen de Ganador (figura / bingo): 
                             <span id="valSonidoTactacVolumen">95%</span>
                         </label>
                         <input type="range" id="sonidoTactacVolumen" min="0" max="100" value="95" step="5">
