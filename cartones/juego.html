@@ -154,12 +154,24 @@
         const RUTA_AUDIOS = 'Audios/Sonidos/';
 
         let audioMusica = null;
-        let audioCampana = null;
-        let audioTactac = null;
+        let audioCtx = null;
+        let tactacIntervalId = null;
+        let tactacPaso = 0;
         let musicaIniciada = false;
         let desbloqueoSonidoHecho = false;
         let fadeIntervalId = null;
         let saliendoDelJuego = false;
+
+        function obtenerAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
 
         function obtenerVolumenSonido(clave, porDefecto) {
             const guardado = parseFloat(localStorage.getItem(clave));
@@ -168,20 +180,10 @@
 
         function inicializarAudios() {
             try {
-                audioMusica  = new Audio(RUTA_AUDIOS + 'Musica.mp3');
-                audioCampana = new Audio(RUTA_AUDIOS + 'Campana.mp3');
-                audioTactac  = new Audio(RUTA_AUDIOS + 'tactac.mp3');
-
+                audioMusica = new Audio(RUTA_AUDIOS + 'Musica.mp3');
                 audioMusica.loop = true;
                 audioMusica.preload = 'auto';
                 audioMusica.volume = 0;
-
-                audioCampana.preload = 'auto';
-                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
-
-                audioTactac.preload = 'auto';
-                audioTactac.loop = true;
-                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
             } catch (e) {}
         }
 
@@ -240,31 +242,126 @@
         }
 
         function reproducirCampana() {
-            if (!audioCampana) return;
             try {
-                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
-                audioCampana.currentTime = 0;
-                const p = audioCampana.play();
-                if (p && p.catch) p.catch(() => {});
+                const vol = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
+                if (vol <= 0) return;
+                const ctx = obtenerAudioCtx();
+                if (!ctx) return;
+
+                // Doble campana cristalina de alerta ("¡Ding-Ding!" estilo casino/arcade)
+                const notas = [
+                    { freq: 1046.50, delay: 0,    dur: 0.55 }, // Do6 (C6)
+                    { freq: 1318.51, delay: 0.14, dur: 0.85 }  // Mi6 (E6)
+                ];
+
+                notas.forEach(({ freq, delay, dur }) => {
+                    const t0 = ctx.currentTime + delay;
+
+                    // Tono principal de campana
+                    const osc1 = ctx.createOscillator();
+                    const gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(freq, t0);
+
+                    gain1.gain.setValueAtTime(0.0001, t0);
+                    gain1.gain.linearRampToValueAtTime(vol * 0.55, t0 + 0.012);
+                    gain1.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start(t0);
+                    osc1.stop(t0 + dur + 0.02);
+
+                    // Armónico brillante metálico
+                    const osc2 = ctx.createOscillator();
+                    const gain2 = ctx.createGain();
+                    osc2.type = 'triangle';
+                    osc2.frequency.setValueAtTime(freq * 2.756, t0);
+
+                    gain2.gain.setValueAtTime(0.0001, t0);
+                    gain2.gain.linearRampToValueAtTime(vol * 0.22, t0 + 0.008);
+                    gain2.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.45);
+
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(t0);
+                    osc2.stop(t0 + dur * 0.45 + 0.02);
+                });
             } catch (e) {}
         }
 
+        function dispararGolpeTactac(ctx, vol, paso) {
+            const t0 = ctx.currentTime;
+            // Alterna sutilmente entre "tac" y "tic" como una ruleta / matraca de premio
+            const freqBase = (paso % 2 === 0) ? 920 : 1180;
+
+            // Cuerpo percusivo de madera/ruleta
+            const osc = ctx.createOscillator();
+            const gainOsc = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freqBase, t0);
+            osc.frequency.exponentialRampToValueAtTime(240, t0 + 0.045);
+
+            gainOsc.gain.setValueAtTime(0.0001, t0);
+            gainOsc.gain.linearRampToValueAtTime(vol * 0.65, t0 + 0.003);
+            gainOsc.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
+
+            osc.connect(gainOsc);
+            gainOsc.connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + 0.06);
+
+            // Chasquido seco ("click") para darle definición al tac-tac
+            const bufferSize = Math.floor(ctx.sampleRate * 0.018);
+            const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+            }
+
+            const noise = ctx.createBufferSource();
+            noise.buffer = noiseBuffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2400, t0);
+            filter.Q.setValueAtTime(2.5, t0);
+
+            const gainNoise = ctx.createGain();
+            gainNoise.gain.setValueAtTime(vol * 0.45, t0);
+            gainNoise.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.018);
+
+            noise.connect(filter);
+            filter.connect(gainNoise);
+            gainNoise.connect(ctx.destination);
+            noise.start(t0);
+        }
+
         function reproducirTactac() {
-            if (!audioTactac) return;
             try {
-                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
-                audioTactac.currentTime = 0;
-                const p = audioTactac.play();
-                if (p && p.catch) p.catch(() => {});
+                detenerTactac();
+                const vol = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+                if (vol <= 0) return;
+                const ctx = obtenerAudioCtx();
+                if (!ctx) return;
+
+                tactacPaso = 0;
+                dispararGolpeTactac(ctx, vol, tactacPaso++);
+
+                const intervalo = Math.max(70, Math.min(130, Math.round(DURACION_POR_CASILLA / 2)));
+                tactacIntervalId = setInterval(() => {
+                    const v = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+                    if (v <= 0) return;
+                    dispararGolpeTactac(ctx, v, tactacPaso++);
+                }, intervalo);
             } catch (e) {}
         }
 
         function detenerTactac() {
-            if (!audioTactac) return;
-            try {
-                audioTactac.pause();
-                audioTactac.currentTime = 0;
-            } catch (e) {}
+            if (tactacIntervalId) {
+                clearInterval(tactacIntervalId);
+                tactacIntervalId = null;
+            }
         }
 
         function iniciarMusicaFondo() {
@@ -290,9 +387,7 @@
             if (desbloqueoSonidoHecho) return;
             desbloqueoSonidoHecho = true;
             try {
-                const u = new Audio(RUTA_AUDIOS + 'tactac.mp3');
-                u.volume = 0;
-                u.play().catch(() => {});
+                obtenerAudioCtx();
             } catch (e) {}
             iniciarMusicaFondo();
         }
@@ -524,25 +619,35 @@
             // ayudar al cartón elegido sin garantizarle la siguiente bola.
             let probabilidadForzar;
             if (esMetaFigura) {
-                if (necesarios.length >= 4) probabilidadForzar = 0.12;
-                else if (necesarios.length === 3) probabilidadForzar = 0.17;
-                else if (necesarios.length === 2) probabilidadForzar = 0.25;
-                else probabilidadForzar = 0.38;
-            } else {
-                if (necesarios.length > 16) probabilidadForzar = 0.08;
-                else if (necesarios.length > 10) probabilidadForzar = 0.11;
-                else if (necesarios.length > 6) probabilidadForzar = 0.16;
-                else if (necesarios.length > 3) probabilidadForzar = 0.23;
-                else if (necesarios.length > 1) probabilidadForzar = 0.34;
-                else probabilidadForzar = 0.46;
-            }
+                // La figura necesita menos casillas, por eso su ayuda es
+                // deliberadamente más baja para que no se complete tan pronto.
+                if (necesarios.length >= 4) probabilidadForzar = 0.03;
+                else if (necesarios.length === 3) probabilidadForzar = 0.05;
+                else if (necesarios.length === 2) probabilidadForzar = 0.08;
+                else probabilidadForzar = 0.13;
 
-            // Evita que el objetivo se estanque cuando quedan pocas bolas,
-            // pero sin convertir el resultado en algo automático.
-            if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.10;
-            if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.12;
-            if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.14;
-            probabilidadForzar = Math.min(0.76, probabilidadForzar);
+                // Refuerzo moderado solo cuando el bombo ya está avanzado.
+                if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.04;
+                if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.06;
+                if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.08;
+                probabilidadForzar = Math.min(0.42, probabilidadForzar);
+            } else {
+                // El bingo tiene 15 casillas: se conserva una ayuda gradual,
+                // ligeramente menor que antes para darle algo más de recorrido.
+                if (necesarios.length > 16) probabilidadForzar = 0.06;
+                else if (necesarios.length > 10) probabilidadForzar = 0.09;
+                else if (necesarios.length > 6) probabilidadForzar = 0.13;
+                else if (necesarios.length > 3) probabilidadForzar = 0.19;
+                else if (necesarios.length > 1) probabilidadForzar = 0.27;
+                else probabilidadForzar = 0.36;
+
+                // El refuerzo final del bingo es un poco mayor que el de figura,
+                // pero sigue sin garantizar que la siguiente bola sea útil.
+                if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.06;
+                if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.08;
+                if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.10;
+                probabilidadForzar = Math.min(0.60, probabilidadForzar);
+            }
 
             const forzarAhora = necesariasSeguras.length > 0
                 && Math.random() < probabilidadForzar;
