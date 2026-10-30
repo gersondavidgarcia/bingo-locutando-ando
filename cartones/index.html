@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Bingo Tradicional - Menú</title>
+    <title>Bingo Tradicional 75 - Menú Principal</title>
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0d3c9b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Bingo">
+    <meta name="apple-mobile-web-app-title" content="Bingo 75">
 
     <link rel="apple-touch-icon" href="icono-192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icono-192.png">
@@ -18,22 +18,588 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Orbitron:wght@900&family=Press+Start+2P&family=Outfit:wght@900&family=Bebas+Neue&family=Creepster&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Orbitron:wght@900&family=Press+Start+2P&family=Outfit:wght@900&family=Bebas+Neue&family=Creepster&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        body.body-center {
+            background-color: #030406;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(30, 20, 55, 0.5) 0%, rgba(2, 3, 5, 0.98) 75%),
+                linear-gradient(135deg, #010204 0%, #06080d 50%, #010204 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+            position: fixed;
+            inset: 0;
+            padding: 20px 0;
+            -webkit-font-smoothing: antialiased;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        body.body-center::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.04) 0%, rgba(0, 0, 0, 0.85) 85%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        #canvasParticulas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            width: min(600px, 90vw); height: min(600px, 90vw);
+            background: radial-gradient(circle, rgba(245, 175, 25, 0.08) 0%, rgba(138, 43, 226, 0.04) 40%, transparent 70%);
+            border-radius: 50%;
+            z-index: 2;
+            pointer-events: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            will-change: opacity;
+        }
+
+        .menu-container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 95%;
+            max-width: 385px;
+            margin: auto;
+            background: linear-gradient(145deg, rgba(15, 18, 28, 0.9), rgba(7, 9, 14, 0.98));
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 28px;
+            padding: 32px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 255, 255, 0.2), 0 0 50px rgba(243, 185, 33, 0.1), 0 0 100px rgba(138, 43, 226, 0.06);
+            will-change: transform;
+        }
+
+        .dice-container { position: relative; margin-bottom: 6px; }
+
+        .dice {
+            width: 68px; height: 68px;
+            background: linear-gradient(135deg, #ffffff 0%, #d8d8d8 100%);
+            border-radius: 16px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 8px;
+            box-shadow: inset 0 3px 6px rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,0.4);
+            transform: rotate(-6deg);
+        }
+
+        .dot {
+            background-color: #222;
+            border-radius: 50%;
+            width: 9px;
+            height: 9px;
+            align-self: center;
+            justify-self: center;
+        }
+        .dot-top-left { grid-area: 1 / 1; }
+        .dot-top-right { grid-area: 1 / 3; }
+        .dot-center { grid-area: 2 / 2; background-color: #e53935; width: 11px; height: 11px; }
+        .dot-bottom-left { grid-area: 3 / 1; }
+        .dot-bottom-right { grid-area: 3 / 3; }
+
+        .dice-container::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            background: #ffea79;
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.9;
+            filter: blur(18px);
+        }
+
+        .logo-box {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 4px;
+            box-shadow: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo-box h1 {
+            font-size: 2.3rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .logo-box h1 span.bingo-text {
+            color: #ffffff;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+        }
+
+        .logo-box h1 span.ninety-text {
+            background: linear-gradient(135deg, #fff5b8 0%, #ffea79 40%, #f5af19 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 25px rgba(245, 175, 25, 0.7);
+        }
+
+        .logo-box .subtitle {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+        }
+
+        .btn-jugar {
+            width: 100%;
+            background: linear-gradient(180deg, #ffe556 0%, #f39c12 100%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #120d02;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.45), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -4px 4px rgba(160, 80, 0, 0.4);
+            transition: transform 0.15s ease, box-shadow 0.15s;
+            margin-bottom: 20px;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-jugar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.7), inset 0 2px 6px rgba(255, 255, 255, 1);
+        }
+
+        .btn-jugar:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        .btn-jugar::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            transform: rotate(30deg) translateX(-100%);
+            animation: destelloBoton 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes destelloBoton {
+            0% { transform: rotate(30deg) translateX(-100%); }
+            40% { transform: rotate(30deg) translateX(100%); }
+            100% { transform: rotate(30deg) translateX(100%); }
+        }
+
+        .menu-options-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .btn-secundario {
+            width: 100%;
+            background: rgba(20, 24, 36, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 13px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #f1f5f9;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-secundario:hover {
+            background: rgba(32, 38, 56, 0.9);
+            border-color: rgba(245, 175, 25, 0.4);
+            transform: translateX(3px);
+            box-shadow: 0 0 18px rgba(245, 175, 25, 0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .btn-secundario:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secundario .btn-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-secundario .btn-chevron {
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .btn-secundario.btn-salir {
+            background: rgba(45, 20, 25, 0.4);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-secundario.btn-salir .btn-content {
+            color: #f87171;
+        }
+
+        .btn-secundario.btn-salir .btn-chevron {
+            color: #f87171;
+        }
+
+        .footer-menu {
+            font-size: 0.65rem;
+            color: #64748b;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .footer-menu span.online-text {
+            color: #10b981;
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+        }
+
+        .audio-wave {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 10px;
+        }
+
+        .audio-wave span {
+            width: 2px;
+            background-color: #4a5568;
+            border-radius: 2px;
+            animation: wave 1.2s infinite ease-in-out;
+        }
+        .audio-wave span:nth-child(1) { height: 5px; animation-delay: 0.1s; }
+        .audio-wave span:nth-child(2) { height: 10px; animation-delay: 0.3s; }
+        .audio-wave span:nth-child(3) { height: 7px; animation-delay: 0.2s; }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; background-color: #10b981; }
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+            animation: parpadeoPunto 2s infinite;
+        }
+
+        @keyframes parpadeoPunto {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .modal-reglas-box {
+            background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
+            border: 1px solid rgba(245,200,66,0.35);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 380px;
+            width: 92%;
+            text-align: left;
+            color: #e2e8f0;
+            box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-reglas-box h2 {
+            color: #f5c842;
+            text-align: center;
+            font-size: 1.35rem;
+            margin-bottom: 16px;
+            text-shadow: 0 0 12px rgba(245,200,66,0.3);
+        }
+
+        .modal-reglas-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .modal-reglas-box ul li {
+            margin-bottom: 6px;
+        }
+
+        .btn-cerrar-modal {
+            margin-top: 18px;
+            padding: 12px;
+            background: linear-gradient(135deg, #f5c842, #d4a020);
+            color: #0a0a12;
+            border: none;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-cerrar-modal:active {
+            transform: scale(0.96);
+        }
+
+        .modo-revancha-box {
+            background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
+            border: 1px solid rgba(245,200,66,0.35);
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 340px;
+            width: 92%;
+            color: #e2e8f0;
+            box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
+            text-align: center;
+        }
+
+        .modo-revancha-box h2 {
+            color: #f5c842;
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-bottom: 18px;
+            text-shadow: 0 0 12px rgba(245,200,66,0.3);
+        }
+
+        .modo-revancha-opcion {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .modo-revancha-opcion:active {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .modo-revancha-opcion input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: #f5c842;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .modo-revancha-opcion .emoji-opcion {
+            font-size: 1.3rem;
+        }
+
+        .btn-empezar-revancha {
+            width: 100%;
+            margin-top: 14px;
+            padding: 14px;
+            background: linear-gradient(135deg, #f5c842, #d4a020);
+            color: #0a0a12;
+            border: none;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+            font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: 1px;
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        .btn-empezar-revancha:active {
+            transform: scale(0.96);
+        }
+
+        .btn-cancelar-revancha {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-cancelar-revancha:active {
+            transform: scale(0.97);
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
 </head>
 <body class="body-center" ontouchstart="">
 
-    <div class="menu-container">
-        <h1 class="app-title">🎱 BINGO TRADICIONAL</h1>
+    <div class="ambient-glow"></div>
+    <canvas id="canvasParticulas"></canvas>
 
-        <div class="menu-card">
-            <button class="btn-principal" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">▶ JUGAR AHORA</button>
-            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">⚙️ CONFIGURACIÓN</button>
+    <div class="menu-container">
+        <div class="dice-container">
+            <div class="dice">
+                <div class="dot dot-top-left"></div>
+                <div class="dot dot-top-right"></div>
+                <div class="dot dot-center"></div>
+                <div class="dot dot-bottom-left"></div>
+                <div class="dot dot-bottom-right"></div>
+            </div>
+        </div>
+
+        <div class="logo-box">
+            <h1><span class="bingo-text">BINGO</span><span class="ninety-text">75</span></h1>
+            <p class="subtitle">Múltiples Modalidades</p>
+        </div>
+
+        <button class="btn-jugar" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">
+            <i class="fa-solid fa-play"></i> JUGAR
+        </button>
+
+        <div class="menu-options-wrapper">
+            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">
+                <span class="btn-content">
+                    <i class="fa-solid fa-gear" style="color: #a78bfa; font-size: 1.05rem; width: 18px; text-align: center;"></i>
+                    CONFIGURACIÓN
+                </span>
+                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            </button>
+
+            <button class="btn-secundario" onclick="iniciarRevanchaDesdeMenu()" onfocus="this.blur()">
+                <span class="btn-content">
+                    <i class="fa-solid fa-rotate-right" style="color: #60a5fa; font-size: 1.05rem; width: 18px; text-align: center;"></i>
+                    REVANCHA
+                </span>
+                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            </button>
+
+            <button class="btn-secundario" id="btnCargarMenu" onclick="cargarPartidaDesdeMenu()" onfocus="this.blur()">
+                <span class="btn-content">
+                    <i class="fa-solid fa-folder-open" style="color: #34d399; font-size: 1.05rem; width: 18px; text-align: center;"></i>
+                    CARGAR PARTIDA
+                </span>
+                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            </button>
+
+            <button class="btn-secundario" onclick="abrirReglas()" onfocus="this.blur()">
+                <span class="btn-content">
+                    <i class="fa-solid fa-book-open" style="color: #fbbf24; font-size: 1.05rem; width: 18px; text-align: center;"></i>
+                    REGLAS
+                </span>
+                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            </button>
+
+            <button class="btn-secundario btn-salir" onclick="salirApp()" onfocus="this.blur()">
+                <span class="btn-content">
+                    <i class="fa-solid fa-door-open" style="color: #f87171; font-size: 1.05rem; width: 18px; text-align: center;"></i>
+                    SALIR
+                </span>
+                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            </button>
+        </div>
+
+        <div class="footer-menu">
+            <div class="audio-wave"><span></span><span></span><span></span></div>
+            <div class="status-dot"></div>
+            Bingo 75 <span class="online-text">Online</span>
+            <div class="audio-wave"><span></span><span></span><span></span></div>
         </div>
     </div>
 
-    <!-- MODAL DE CONFIGURACIÓN -->
+    <div class="modal-overlay" id="modalReglas">
+        <div class="modal-reglas-box">
+            <h2>📖 Reglas del Bingo 75</h2>
+            <ul>
+                <li>🎯 Completa una <b>Línea</b> horizontal, vertical o diagonal.</li>
+                <li>🏆 Completa todo el <b>Cartón</b> (25 números) para cantar Bingo.</li>
+                <li>🥇 El premio es único: la primera figura y el primer bingo ganan.</li>
+                <li>🖐️ Puedes marcar números manualmente desde la tabla inferior.</li>
+            </ul>
+            <button class="btn-cerrar-modal" onclick="cerrarModal('modalReglas')" onfocus="this.blur()">Entendido</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalModoRevancha">
+        <div class="modo-revancha-box">
+            <h2>🎯 ¿Qué se juega?</h2>
+
+            <label class="modo-revancha-opcion">
+                <input type="checkbox" id="chkRevanchaFigura" checked>
+                <span class="emoji-opcion">🎯</span>
+                <span>Figura</span>
+            </label>
+
+            <label class="modo-revancha-opcion">
+                <input type="checkbox" id="chkRevanchaBingo" checked>
+                <span class="emoji-opcion">🏆</span>
+                <span>Bingo</span>
+            </label>
+
+            <button class="btn-empezar-revancha" id="btnEmpezarRevancha">▶ EMPEZAR</button>
+            <button class="btn-cancelar-revancha" onclick="cerrarModalModoRevancha()">Cancelar</button>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modalConfig">
         <div class="modal-box">
             <div class="modal-header">
@@ -43,17 +609,14 @@
 
             <div class="modal-body">
 
-                <!-- ============================================
-                     PANTALLA: MENÚ PRINCIPAL DE CONFIGURACIÓN
-                     ============================================ -->
                 <div class="config-pantalla visible" id="pantallaMenu">
                     <p class="config-hint">Elige qué quieres configurar:</p>
 
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('general')" onfocus="this.blur()">
                         <span class="seccion-icono">⚙️</span>
                         <span class="seccion-texto">
-                            <strong>General</strong>
-                            <small>Cartones · Firebase · Formato control</small>
+                          <strong>General</strong>
+                            <small>Cartones · Firebase · Formato control · Velocidad revancha</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -67,6 +630,24 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎨</span>
+                        <span class="seccion-texto">
+                            <strong>Modo de temas</strong>
+                            <small>Elige cómo se aplican: simple o combinado</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('combinados')" onfocus="this.blur()">
+                        <span class="seccion-icono">🧩</span>
+                        <span class="seccion-texto">
+                            <strong>Cartones Combinados</strong>
+                            <small>Mezcla temas por bloques de 3 cartones</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
                         <span class="seccion-icono">🎯</span>
                         <span class="seccion-texto">
@@ -76,11 +657,38 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltado')" onfocus="this.blur()">
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltados')" onfocus="this.blur()">
                         <span class="seccion-icono">✨</span>
                         <span class="seccion-texto">
-                            <strong>Resaltado de figura</strong>
-                            <small>Brillo · Halo suave · Velocidad</small>
+                            <strong>Resaltados</strong>
+                            <small>Figura · Número que falta</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('velocidad')" onfocus="this.blur()">
+                        <span class="seccion-icono">⚡</span>
+                        <span class="seccion-texto">
+                            <strong>Velocidad de bola</strong>
+                            <small>Tiempo que tarda en salir la bola grande</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('voz')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎙️</span>
+                        <span class="seccion-texto">
+                            <strong>Voz</strong>
+                            <small>Cantar bolas (B7, I22...) · Volumen · Voz en español</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('sonidos')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎵</span>
+                        <span class="seccion-texto">
+                            <strong>Sonidos</strong>
+                            <small>Música · Campana · Tactac</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -89,15 +697,12 @@
                         <span class="seccion-icono">📐</span>
                         <span class="seccion-texto">
                             <strong>Apariencia</strong>
-                            <small>Ancho del control · Tamaño mini-cartones</small>
+                            <small>Ancho del control · Tamaño mini-cartones · Espacio notch · Bloqueo de scroll</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: GENERAL
-                     ============================================ -->
                 <div class="config-pantalla" id="pantallaGeneral">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -141,13 +746,34 @@
                             <option value="3">3 - Lleno + Figura + Extra</option>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="velocidadRevancha">
+                            🏁 Velocidad de revancha: 
+                            <span id="valVelocidadRevancha">1.0x</span>
+                        </label>
+                        <input type="range" id="velocidadRevancha" min="1" max="2" value="1" step="0.05">
+                        <p class="config-hint" style="margin-top: 4px;">
+                            1.0x = igual que siempre · 2.0x = al doble de rápido (bola y voz).
+                            Solo aplica en partidas de revancha.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="cc-activo-label" for="clickInvisible">
+                            <input type="checkbox" id="clickInvisible">
+                            <span>Click invisible</span>
+                        </label>
+                    </div>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: TEMAS
-                     ============================================ -->
                 <div class="config-pantalla" id="pantallaTemas">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint" id="temasModoIndicador">
+                        Modo actual: <strong>—</strong>
+                        <button class="btn-link-inline" onclick="mostrarPantallaConfig('pantallaModoTemas')" onfocus="this.blur()">cambiar</button>
+                    </p>
 
                     <div class="form-group">
                         <label>Temas activos:</label>
@@ -261,9 +887,90 @@
                     </div>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: FIGURAS
-                     ============================================ -->
+                <div class="config-pantalla" id="pantallaModoTemas">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Elige cómo quieres aplicar los temas en la partida.</p>
+
+                    <button class="modo-tema-btn" id="modoSimpleBtn" onclick="seleccionarModoTemas('simple')" onfocus="this.blur()">
+                        <span class="modo-tema-icono">🎨</span>
+                        <span class="modo-tema-texto">
+                            <strong>Tema simple</strong>
+                            <small>Un tema a la vez. El botón CAMBIAR rota entre los temas activos.</small>
+                        </span>
+                        <span class="modo-tema-check" id="modoSimpleCheck">✓</span>
+                    </button>
+
+                    <button class="modo-tema-btn" id="modoCombinadoBtn" onclick="seleccionarModoTemas('combinado')" onfocus="this.blur()">
+                        <span class="modo-tema-icono">🧩</span>
+                        <span class="modo-tema-texto">
+                            <strong>Temas combinados</strong>
+                            <small>Mezcla varios temas en bloques de 3 cartones usando una secuencia.</small>
+                        </span>
+                        <span class="modo-tema-check" id="modoCombinadoCheck">✓</span>
+                    </button>
+
+                    <p class="config-hint" id="modoTemasAviso"></p>
+
+                    <button class="btn-secundario" id="btnIrASecuencias" onclick="abrirSeccionConfig('combinados')" onfocus="this.blur()">
+                        ➕ Crear o editar secuencias
+                    </button>
+                </div>
+
+                <div class="config-pantalla" id="pantallaCombinados">
+                    <button class="btn-volver" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">
+                        Mezcla varios temas en una misma partida. Cada tema cubre <strong>3 cartones seguidos</strong> y la secuencia se repite si hay más cartones.
+                    </p>
+
+                    <p class="config-hint" id="ccAvisoModo"></p>
+
+                    <p class="config-hint" id="ccAvisoTemas" style="display:none;"></p>
+
+                    <div class="form-group">
+                        <label>Mis secuencias:</label>
+                        <div class="cc-lista-secuencias" id="ccListaSecuencias"></div>
+                    </div>
+
+                    <button class="btn-figura-nueva" onclick="abrirEditorSecuenciaCC(null)" onfocus="this.blur()">
+                        ➕ Crear secuencia nueva
+                    </button>
+
+                    <div class="form-group" id="ccWrapSecuenciaEnUso">
+                        <label for="ccSecuenciaEnUso">Secuencia en uso:</label>
+                        <select id="ccSecuenciaEnUso"></select>
+                    </div>
+                </div>
+
+                <div class="config-pantalla" id="pantallaEditorSecuencia">
+                    <button class="btn-volver" onclick="cerrarEditorSecuenciaCC()" onfocus="this.blur()">‹ Volver</button>
+
+                    <h3 class="editor-titulo">✏️ Editar secuencia</h3>
+
+                    <div class="form-group">
+                        <label for="ccNombreSecuencia">Nombre de la secuencia:</label>
+                        <input type="text" id="ccNombreSecuencia" class="input-texto" placeholder="Ej: Sala A, Cumpleaños..." maxlength="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Temas de la secuencia (bloques de 3 cartones cada uno):</label>
+                        <div class="cc-chips-editor" id="ccChipsEditor"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ccAgregarTema">Añadir tema:</label>
+                        <div class="cc-agregar-fila">
+                            <select id="ccAgregarTema"></select>
+                            <button class="cc-btn-agregar" onclick="agregarTemaEditorCC()" onfocus="this.blur()">➕ Añadir</button>
+                        </div>
+                    </div>
+
+                    <button class="btn-figura-guardar" onclick="guardarSecuenciaCC()" onfocus="this.blur()">
+                        💾 Guardar secuencia
+                    </button>
+                </div>
+
                 <div class="config-pantalla" id="pantallaFiguras">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -276,9 +983,6 @@
                     </button>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: EDITOR DE FIGURA
-                     ============================================ -->
                 <div class="config-pantalla" id="pantallaEditorFigura">
                     <button class="btn-volver" onclick="cerrarEditorFigura()" onfocus="this.blur()">‹ Volver</button>
 
@@ -299,11 +1003,32 @@
                     </button>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: RESALTADO DE FIGURA
-                     ============================================ -->
-                <div class="config-pantalla" id="pantallaResaltado">
+                <div class="config-pantalla" id="pantallaResaltados">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Elige qué resaltado quieres ajustar:</p>
+
+                    <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoFigura')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎯</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de figura</strong>
+                            <small>Brillo · Halo suave · Velocidad</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoNumero')" onfocus="this.blur()">
+                        <span class="seccion-icono">🟡</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de número</strong>
+                            <small>Brillo · Expansión del halo (falta 1)</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+                </div>
+
+                <div class="config-pantalla" id="pantallaResaltadoFigura">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
 
                     <div class="form-group">
                         <label for="intensidadGlow">
@@ -330,9 +1055,129 @@
                     </div>
                 </div>
 
-                <!-- ============================================
-                     PANTALLA: APARIENCIA
-                     ============================================ -->
+                <div class="config-pantalla" id="pantallaResaltadoNumero">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="intensidadGlowNumero">
+                            ✨ Intensidad del brillo del número: 
+                            <span id="valIntensidadGlowNumero">95%</span>
+                        </label>
+                        <input type="range" id="intensidadGlowNumero" min="0" max="100" value="95" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intensidadHaloNumero">
+                            🌫️ Expansión del halo suave del número: 
+                            <span id="valIntensidadHaloNumero">55%</span>
+                        </label>
+                        <input type="range" id="intensidadHaloNumero" min="0" max="100" value="55" step="5">
+                    </div>
+                </div>
+
+                <div class="config-pantalla" id="pantallaVelocidad">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="velocidadBola">
+                            ⚡ Tiempo de entrada de la bola: 
+                            <span id="valVelocidadBola">650 ms</span>
+                        </label>
+                        <input type="range" id="velocidadBola" min="200" max="1500" value="650" step="50">
+                    </div>
+
+                    <p class="config-hint">
+                        Más bajo = más rápido. Afecta el tiempo que tarda la bola grande en rodar y mostrar el número.
+                    </p>
+                </div>
+
+                <div class="config-pantalla" id="pantallaVoz">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Canta las bolas con voz: "B7", "I22", "N45", "G60", "O75".</p>
+
+                    <div class="form-group">
+                        <label for="vozActivada">🔊 Voz al cantar bolas:</label>
+                        <select id="vozActivada">
+                            <option value="no" selected>NO - Sin voz</option>
+                            <option value="si">SÍ - Cantar bola (ej: "B7")</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vozSeleccionada">🎤 Voz en español:</label>
+                        <select id="vozSeleccionada">
+                            <option value="">-- Automática (recomendada) --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vozVolumen">
+                            🔊 Volumen de la voz: 
+                            <span id="valVozVolumen">100%</span>
+                        </label>
+                        <input type="range" id="vozVolumen" min="0" max="100" value="100" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vozVelocidad">
+                            ⏩ Velocidad de la voz: 
+                            <span id="valVozVelocidad">100%</span>
+                        </label>
+                        <input type="range" id="vozVelocidad" min="50" max="150" value="100" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vozTono">
+                            🎵 Tono de la voz: 
+                            <span id="valVozTono">100%</span>
+                        </label>
+                        <input type="range" id="vozTono" min="50" max="150" value="100" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vozRepetir">🔁 Repetir el canto:</label>
+                        <select id="vozRepetir">
+                            <option value="1" selected>1 vez</option>
+                            <option value="2">2 veces (ej: "B7... B7")</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-figura-nueva" onclick="probarVozConfig()" onfocus="this.blur()">
+                        🔊 Probar voz ("B7")
+                    </button>
+                </div>
+
+                <div class="config-pantalla" id="pantallaSonidos">
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+
+                    <p class="config-hint">Ajusta el volumen de cada sonido por separado.</p>
+
+                    <div class="form-group">
+                        <label for="sonidoMusicaVolumen">
+                            🎵 Música de fondo: 
+                            <span id="valSonidoMusicaVolumen">35%</span>
+                        </label>
+                        <input type="range" id="sonidoMusicaVolumen" min="0" max="100" value="35" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sonidoCampanaVolumen">
+                            🔔 Campana (falta 1 bola): 
+                            <span id="valSonidoCampanaVolumen">85%</span>
+                        </label>
+                        <input type="range" id="sonidoCampanaVolumen" min="0" max="100" value="85" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sonidoTactacVolumen">
+                            🥁 Tactac (figura / bingo): 
+                            <span id="valSonidoTactacVolumen">95%</span>
+                        </label>
+                        <input type="range" id="sonidoTactacVolumen" min="0" max="100" value="95" step="5">
+                    </div>
+                </div>
+
                 <div class="config-pantalla" id="pantallaApariencia">
                     <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
 
@@ -351,6 +1196,23 @@
                         </label>
                         <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
                     </div>
+
+                    <div class="form-group">
+                        <label for="espacioNotch">📱 Espacio superior (notch / barra de estado):</label>
+                        <select id="espacioNotch">
+                            <option value="0">0 - Sin espacio (pegado arriba)</option>
+                            <option value="1" selected>2 - Dos renglones</option>
+                            <option value="2">4 - Cuatro renglones</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bloquearScroll">🔒 Bloquear scroll en el juego:</label>
+                        <select id="bloquearScroll">
+                            <option value="no">NO - Permitir scroll</option>
+                            <option value="si" selected>SÍ - Sin scroll (fijo)</option>
+                        </select>
+                    </div>
                 </div>
 
             </div>
@@ -363,7 +1225,121 @@
     </div>
 
     <script src="script.js"></script>
+
     <script>
+        function abrirReglas() {
+            document.getElementById('modalReglas').classList.add('visible');
+        }
+
+        function cerrarModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('visible');
+        }
+
+        function salirApp() {
+            if (confirm('¿Estás seguro de que quieres salir?')) {
+                if (navigator.app && navigator.app.exitApp) {
+                    navigator.app.exitApp();
+                } else {
+                    window.close();
+                }
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.id === 'modalReglas') {
+                cerrarModal('modalReglas');
+            }
+            if (e.target && e.target.id === 'modalModoRevancha') {
+                cerrarModalModoRevancha();
+            }
+        });
+
+        (function() {
+            const canvas = document.getElementById('canvasParticulas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d', { alpha: true });
+
+            let ancho = canvas.width = window.innerWidth;
+            let alto = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                ancho = canvas.width = window.innerWidth;
+                alto = canvas.height = window.innerHeight;
+            });
+
+            const paletaColores = [
+                { r: 255, g: 215, b: 0 },
+                { r: 255, g: 45,  b: 138 },
+                { r: 0,   g: 242, b: 154 },
+                { r: 0,   g: 212, b: 255 },
+                { r: 180, g: 90,  b: 255 }
+            ];
+
+            class DestelloMagico {
+                constructor() { this.reiniciar(); }
+                reiniciar() {
+                    this.x = Math.random() * ancho;
+                    this.y = Math.random() * alto;
+                    this.radio = Math.random() * 3 + 1;
+                    this.velocidadX = (Math.random() - 0.5) * 0.5;
+                    this.velocidadY = (Math.random() - 0.5) * 0.5;
+                    this.color = paletaColores[Math.floor(Math.random() * paletaColores.length)];
+                    this.opacidadMax = Math.random() * 0.7 + 0.3;
+                    this.opacidad = this.opacidadMax;
+                    this.pulso = Math.random() * 0.025 + 0.008;
+                    this.angulo = Math.random() * Math.PI * 2;
+                }
+                actualizar() {
+                    this.x += this.velocidadX;
+                    this.y += this.velocidadY;
+                    this.angulo += this.pulso;
+                    this.opacidad = this.opacidadMax * (0.3 + 0.7 * Math.abs(Math.sin(this.angulo)));
+                    if (this.x < 0) this.x = ancho;
+                    if (this.x > ancho) this.x = 0;
+                    if (this.y < 0) this.y = alto;
+                    if (this.y > alto) this.y = 0;
+                }
+                dibujar() {
+                    ctx.save();
+                    ctx.globalAlpha = this.opacidad;
+                    ctx.fillStyle = `rgb(${this.color.r}, ${this.color.g}, ${this.color.b})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radio, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            const totalDestellos = window.innerWidth > 768 ? 70 : 35;
+            const destellos = [];
+            for (let i = 0; i < totalDestellos; i++) {
+                destellos.push(new DestelloMagico());
+            }
+
+            function animar() {
+                ctx.clearRect(0, 0, ancho, alto);
+                for (let i = 0; i < destellos.length; i++) {
+                    destellos[i].actualizar();
+                    destellos[i].dibujar();
+                }
+                requestAnimationFrame(animar);
+            }
+
+            animar();
+        })();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnCargar = document.getElementById('btnCargarMenu');
+            if (btnCargar) {
+                const hayPartida = !!localStorage.getItem('bingo_partida_guardada');
+                if (!hayPartida) {
+                    btnCargar.style.opacity = '0.5';
+                }
+            }
+        });
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')

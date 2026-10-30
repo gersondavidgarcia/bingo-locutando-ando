@@ -30,13 +30,14 @@
             <div class="bolillero-top-row">
 
                 <div class="bolillero-stage">
-                    <div class="bolillero-sphere" id="bolilleroSphere">
+                    <div class="bolillero-sphere" id="bolilleroSphere" onclick="toggleAuto(event)" onfocus="this.blur()">
                         <span class="bolillero-numero" id="numeroDisplay">--</span>
                     </div>
                 </div>
 
-                <button class="btn-sacar-bola" id="btnSacarBola" onclick="sacarBola(event)" onfocus="this.blur()">
-                    <span class="onda"></span>
+                <button class="btn-sacar-bola" id="btnSacarBola"
+                        onclick="sacarBola(event)"
+                        onfocus="this.blur()">
                     <span class="particula"></span><span class="particula"></span>
                     <span class="particula"></span><span class="particula"></span>
                     <span class="particula"></span><span class="particula"></span>
@@ -52,6 +53,10 @@
                 </div>
 
             </div>
+
+            <button id="btnGuardarPartida" class="btn-guardar-partida" onclick="guardarPartida()" onfocus="this.blur()">
+                💾 GUARDAR
+            </button>
 
             <div class="recientes-container">
                 <div class="recientes-lista" id="recientesLista"></div>
@@ -77,7 +82,7 @@
                 🔄 CAMBIAR
                 </button>
 
-                <button onclick="window.location.href='index.html'" class="btn-atras" onfocus="this.blur()">
+                <button id="btnAtrasJuego" class="btn-atras" onfocus="this.blur()">
                 ⬅ ATRÁS
                 </button>
 
@@ -85,12 +90,13 @@
 
         </div>
 
+        <button id="btnConfirmarRevancha" class="btn-confirmar-revancha" onclick="confirmarRevancha()" onfocus="this.blur()">
+            ✅
+        </button>
+
     </div>
 
     <script type="module">
-        /* ============================================
-           IMPORTACIONES DE FIREBASE
-           ============================================ */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -113,9 +119,184 @@
             console.warn("⚠️ Firebase no inicializado:", e);
         }
 
-        /* ============================================
-           FIGURA DIAGONAL BASE
-           ============================================ */
+        (function optimizacionAnimaciones() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    document.body.classList.add('animaciones-pausadas');
+                } else {
+                    document.body.classList.remove('animaciones-pausadas');
+                }
+            });
+
+            let timeoutInactividad = null;
+            const reiniciarTimer = () => {
+                document.body.classList.remove('animaciones-pausadas');
+                if (timeoutInactividad) clearTimeout(timeoutInactividad);
+                timeoutInactividad = setTimeout(() => {
+                    document.body.classList.add('animaciones-pausadas');
+                }, 15000);
+            };
+
+            ['touchstart', 'click', 'keydown'].forEach(ev => {
+                document.addEventListener(ev, reiniciarTimer, { passive: true });
+            });
+            reiniciarTimer();
+
+            const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const nucleos = navigator.hardwareConcurrency || 4;
+            const gamaBaja = esMovil && nucleos <= 4;
+            if (gamaBaja) {
+                document.body.classList.add('modo-lite');
+                console.log('⚡ Modo lite activado');
+            }
+        })();
+
+        const RUTA_AUDIOS = 'Audios/Sonidos/';
+
+        let audioMusica = null;
+        let audioCampana = null;
+        let audioTactac = null;
+        let musicaIniciada = false;
+        let desbloqueoSonidoHecho = false;
+        let fadeIntervalId = null;
+        let saliendoDelJuego = false;
+
+        function obtenerVolumenSonido(clave, porDefecto) {
+            const guardado = parseFloat(localStorage.getItem(clave));
+            return !isNaN(guardado) ? guardado : porDefecto;
+        }
+
+        function inicializarAudios() {
+            try {
+                audioMusica  = new Audio(RUTA_AUDIOS + 'Musica.mp3');
+                audioCampana = new Audio(RUTA_AUDIOS + 'Campana.mp3');
+                audioTactac  = new Audio(RUTA_AUDIOS + 'tactac.mp3');
+
+                audioMusica.loop = true;
+                audioMusica.preload = 'auto';
+                audioMusica.volume = 0;
+
+                audioCampana.preload = 'auto';
+                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
+
+                audioTactac.preload = 'auto';
+                audioTactac.loop = true;
+                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+            } catch (e) {}
+        }
+
+        function cancelarFade() {
+            if (fadeIntervalId) {
+                clearInterval(fadeIntervalId);
+                fadeIntervalId = null;
+            }
+        }
+
+        function hacerFadeInMusica(duracionMs) {
+            if (!audioMusica) return;
+            cancelarFade();
+            const volumenObjetivo = obtenerVolumenSonido('sonidoMusicaVolumen', 0.35);
+            if (volumenObjetivo <= 0) { audioMusica.volume = 0; return; }
+
+            const pasos = 40;
+            const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
+            const incremento = volumenObjetivo / pasos;
+            let actual = 0;
+            audioMusica.volume = 0;
+
+            fadeIntervalId = setInterval(() => {
+                actual += incremento;
+                if (actual >= volumenObjetivo) {
+                    audioMusica.volume = volumenObjetivo;
+                    cancelarFade();
+                    return;
+                }
+                audioMusica.volume = actual;
+            }, intervaloMs);
+        }
+
+        function hacerFadeOutMusica(duracionMs, callback) {
+            if (!audioMusica) { if (callback) callback(); return; }
+            cancelarFade();
+
+            const volumenInicial = audioMusica.volume;
+            if (volumenInicial <= 0) { if (callback) callback(); return; }
+
+            const pasos = 40;
+            const intervaloMs = Math.max(20, Math.floor(duracionMs / pasos));
+            const decremento = volumenInicial / pasos;
+            let actual = volumenInicial;
+
+            fadeIntervalId = setInterval(() => {
+                actual -= decremento;
+                if (actual <= 0) {
+                    audioMusica.volume = 0;
+                    cancelarFade();
+                    if (callback) callback();
+                    return;
+                }
+                audioMusica.volume = actual;
+            }, intervaloMs);
+        }
+
+        function reproducirCampana() {
+            if (!audioCampana) return;
+            try {
+                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
+                audioCampana.currentTime = 0;
+                const p = audioCampana.play();
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+
+        function reproducirTactac() {
+            if (!audioTactac) return;
+            try {
+                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+                audioTactac.currentTime = 0;
+                const p = audioTactac.play();
+                if (p && p.catch) p.catch(() => {});
+            } catch (e) {}
+        }
+
+        function detenerTactac() {
+            if (!audioTactac) return;
+            try {
+                audioTactac.pause();
+                audioTactac.currentTime = 0;
+            } catch (e) {}
+        }
+
+        function iniciarMusicaFondo() {
+            if (!audioMusica) return;
+            if (musicaIniciada) return;
+            musicaIniciada = true;
+            try {
+                audioMusica.volume = 0;
+                audioMusica.currentTime = 0;
+                const p = audioMusica.play();
+                if (p && p.then) {
+                    p.then(() => hacerFadeInMusica(1500))
+                     .catch(() => { musicaIniciada = false; });
+                } else {
+                    hacerFadeInMusica(1500);
+                }
+            } catch (e) {
+                musicaIniciada = false;
+            }
+        }
+
+        function desbloquearSonidos() {
+            if (desbloqueoSonidoHecho) return;
+            desbloqueoSonidoHecho = true;
+            try {
+                const u = new Audio(RUTA_AUDIOS + 'tactac.mp3');
+                u.volume = 0;
+                u.play().catch(() => {});
+            } catch (e) {}
+            iniciarMusicaFondo();
+        }
+
         const FIGURA_DIAGONAL = {
             id: 'diagonal',
             nombre: 'Diagonal',
@@ -130,20 +311,10 @@
             fija: true
         };
 
-        /* ============================================
-           FIGURAS (se reconstruye al arrancar)
-           ============================================ */
-        let FIGURAS = {
-            'diagonal': FIGURA_DIAGONAL.patron
-        };
-
-        // Orden de figuras por id (activas)
+        let FIGURAS = { 'diagonal': FIGURA_DIAGONAL.patron };
         let ORDEN_FIGURAS = ['diagonal'];
         let figuraActual = 'diagonal';
 
-        /* ============================================
-           PALETAS DE COLOR (21 temas)
-           ============================================ */
         const PALETAS = [
             { nombre: 'Verde',       colores: ['#1b5e20', '#2e7d32', '#388e3c', '#43a047', '#4caf50'], tema: '#2e7d32' },
             { nombre: 'Azul',        colores: ['#0d47a1', '#1565c0', '#1976d2', '#1e88e5', '#2196f3'], tema: '#1565c0' },
@@ -171,9 +342,15 @@
         let paletaActual = 0;
         let indiceRotacionActual = 0;
 
-        /* ============================================
-           CONFIGURACIÓN GLOBAL
-           ============================================ */
+        const COLORES_EXTERIOR_BOLA = [
+            '#1f77b4', '#2ca02c', '#d62728', '#9467bd',
+            '#17becf', '#e377c2', '#393b79', '#6b6ecf'
+        ];
+        function colorBolaParaNumero(num) {
+            const idx = Math.min(Math.floor((num - 1) / 10), COLORES_EXTERIOR_BOLA.length - 1);
+            return COLORES_EXTERIOR_BOLA[idx];
+        }
+
         let TOTAL_CARTONES = 15;
         const MAX_BALOTAS = 75;
         let USAR_BASE_DATOS = true;
@@ -183,9 +360,34 @@
         let TAMANO_FIGURAS = 42;
         let TEMAS_ACTIVOS = ['Verde'];
 
+        let ESPACIO_NOTCH = 1;
+        let BLOQUEAR_SCROLL = 'si';
+
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
+
+        let INTENSIDAD_GLOW_NUMERO = 95;
+        let INTENSIDAD_HALO_NUMERO = 55;
+
+        let VELOCIDAD_BOLA = 650;
+        let VELOCIDAD_REVANCHA = 1;
+        let CLICK_INVISIBLE = false;
+        let cartonForzadoIdx = -1;
+
+        let MODO_TEMAS = 'simple';
+        let CC_SECUENCIAS = [];
+        let CC_SECUENCIA_EN_USO = '';
+
+        let MODO_JUEGO = 'ambos';
+
+        let VOZ_ACTIVADA = false;
+        let VOZ_VOLUMEN = 1.0;
+        let VOZ_VELOCIDAD = 1.0;
+        let VOZ_TONO = 1.0;
+        let VOZ_SELECCIONADA = '';
+        let VOZ_REPETIR = 1;
+        let vocesDisponibles = [];
 
         let nombresDeFirebase = [];
         let bombo = [];
@@ -193,6 +395,7 @@
         let unsubscribeSnapshot = null;
 
         let bloqueadoPorAnimacion = false;
+        let isAnimating = false;
         let timeoutAnimacion = null;
         let timeoutRotulos = null;
         let timeoutApagado = null;
@@ -204,20 +407,240 @@
 
         let celdasCentroPendientes = 0;
 
-        let primeraBolaNumero = null;
-        let primeraBolaYaSalio = false;
+        let modoAsignacionActivo = false;
+        let cartonesAsignadosBingo = new Set();
+        let cartonesAsignadosFigura = new Set();
+        let listenerAsignacionCartones = null;
+
+        let timeoutBloqueoDestello = null;
+
+        let autoActivo = false;
+        let timeoutAuto = null;
+
+        function celdaEstaMarcada(celda) {
+            return celda.classList.contains('marcada') || celda.classList.contains('vacia');
+        }
+
+        function numerosFaltantesCarton(carton, patron) {
+            const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+            const faltan = [];
+            for (let f = 0; f < 5; f++) {
+                for (let c = 0; c < 5; c++) {
+                    if (patron && patron[f][c] !== 1) continue;
+                    const celda = celdas[f * 5 + c];
+                    if (!celda || celdaEstaMarcada(celda)) continue;
+                    const v = parseInt(celda.dataset.valor, 10);
+                    if (v) faltan.push(v);
+                }
+            }
+            return faltan;
+        }
+
+        function obtenerBolaInteligente() {
+            const alAzar = (lista) => {
+                if (!lista || lista.length === 0) return undefined;
+                return lista[Math.floor(Math.random() * lista.length)];
+            };
+
+            if (bombo.length === 0) return undefined;
+            if (bombo.length === 1) return bombo[0];
+
+            const cartones = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+            const hayCartonElegido = CLICK_INVISIBLE
+                && cartonForzadoIdx >= 0
+                && cartonForzadoIdx < cartones.length
+                && !cartones[cartonForzadoIdx].classList.contains('fuera-de-juego');
+
+            // Sin un cartón seleccionado, se conserva exactamente el sorteo
+            // aleatorio protegido que ya tenía el juego.
+            if (!hayCartonElegido) {
+                const peligrosas = new Set();
+                cartones.forEach((carton) => {
+                    if (carton.classList.contains('fuera-de-juego')) return;
+                    const fBingo = numerosFaltantesCarton(carton, null);
+                    if (figuraYaGanada && carton.classList.contains('ganador-figura-1') && fBingo.length === 1) {
+                        peligrosas.add(fBingo[0]);
+                    }
+                    if (!figuraYaGanada && fBingo.length === 1) {
+                        const fFig = numerosFaltantesCarton(carton, patronFigura);
+                        if (fFig.length === 1) peligrosas.add(fBingo[0]);
+                    }
+                });
+                const seguras = bombo.filter(n => !peligrosas.has(n));
+                return alAzar(seguras.length > 0 ? seguras : bombo);
+            }
+
+            const idxObjetivo = cartonForzadoIdx;
+            const objetivo = cartones[idxObjetivo];
+
+            const quiereFigura = MODO_JUEGO !== 'bingo' && CANTIDAD_FIGURAS >= 1 && !figuraYaGanada
+                && (MODO_JUEGO !== 'mixto' || cartonesAsignadosFigura.has(idxObjetivo));
+            const quiereBingo = MODO_JUEGO !== 'figura' && !llenoYaGanado
+                && (MODO_JUEGO !== 'mixto' || cartonesAsignadosBingo.has(idxObjetivo));
+            if (!quiereFigura && !quiereBingo) return alAzar(bombo);
+
+            // Se trabaja una meta a la vez: primero la figura y, cuando ya
+            // se ganó, el bingo. Así el avance del bingo no se acelera junto
+            // con el de la figura.
+            const esMetaFigura = quiereFigura;
+            const necesarios = (esMetaFigura
+                ? numerosFaltantesCarton(objetivo, patronFigura)
+                : numerosFaltantesCarton(objetivo, null)).filter(n => bombo.includes(n));
+            if (necesarios.length === 0) return alAzar(bombo);
+
+            const peligrosas = new Set();
+            const compartidasUrgentes = [];
+
+            cartones.forEach((carton, idx) => {
+                if (idx === idxObjetivo) return;
+                if (carton.classList.contains('fuera-de-juego')) return;
+
+                if (esMetaFigura && !carton.classList.contains('ganador-figura-1')
+                    && (MODO_JUEGO !== 'mixto' || cartonesAsignadosFigura.has(idx))) {
+                    const f = numerosFaltantesCarton(carton, patronFigura);
+                    if (f.length === 1) peligrosas.add(f[0]);
+                    else if (f.length === 2) {
+                        f.forEach(n => { if (necesarios.includes(n)) compartidasUrgentes.push(n); });
+                    }
+                }
+
+                if (quiereBingo && !carton.classList.contains('ganador-bingo')
+                    && (MODO_JUEGO !== 'mixto' || cartonesAsignadosBingo.has(idx))) {
+                    const f = numerosFaltantesCarton(carton, null);
+                    if (f.length === 1) peligrosas.add(f[0]);
+                    else if (f.length === 2) {
+                        f.forEach(n => { if (necesarios.includes(n)) compartidasUrgentes.push(n); });
+                    }
+                }
+            });
+
+            const seguras = bombo.filter(n => !peligrosas.has(n));
+            const necesariasSeguras = necesarios.filter(n => !peligrosas.has(n) || necesarios.length === 1);
+            const urgentesSeguras = compartidasUrgentes.filter(n => !peligrosas.has(n) && bombo.includes(n));
+
+            // Probabilidad gradual: al principio predominan las bolas neutrales.
+            // A medida que faltan menos números, aumenta la posibilidad de
+            // ayudar al cartón elegido sin garantizarle la siguiente bola.
+            let probabilidadForzar;
+            if (esMetaFigura) {
+                if (necesarios.length >= 4) probabilidadForzar = 0.12;
+                else if (necesarios.length === 3) probabilidadForzar = 0.17;
+                else if (necesarios.length === 2) probabilidadForzar = 0.25;
+                else probabilidadForzar = 0.38;
+            } else {
+                if (necesarios.length > 16) probabilidadForzar = 0.08;
+                else if (necesarios.length > 10) probabilidadForzar = 0.11;
+                else if (necesarios.length > 6) probabilidadForzar = 0.16;
+                else if (necesarios.length > 3) probabilidadForzar = 0.23;
+                else if (necesarios.length > 1) probabilidadForzar = 0.34;
+                else probabilidadForzar = 0.46;
+            }
+
+            // Evita que el objetivo se estanque cuando quedan pocas bolas,
+            // pero sin convertir el resultado en algo automático.
+            if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.10;
+            if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.12;
+            if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.14;
+            probabilidadForzar = Math.min(0.76, probabilidadForzar);
+
+            const forzarAhora = necesariasSeguras.length > 0
+                && Math.random() < probabilidadForzar;
+
+            if (forzarAhora) {
+                // Si hay números que también acercan a un rival a su aviso,
+                // se conservan como prioridad ocasional, sin forzarlos siempre.
+                if (urgentesSeguras.length > 0 && Math.random() < 0.35) {
+                    return alAzar(urgentesSeguras);
+                }
+                return alAzar(necesariasSeguras);
+            }
+
+            // En los demás turnos sale una bola neutral/segura. Si no queda
+            // ninguna alternativa, se usa el bombo completo para no bloquear.
+            const poolNeutral = seguras.length > 0 ? seguras : bombo;
+            return alAzar(poolNeutral);
+        }
+
+        function toggleAuto(e) {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            if (autoActivo) detenerAuto();
+            else iniciarAuto();
+        }
+
+        function iniciarAuto() {
+            if (autoActivo) return;
+            if (partidaTerminada) return;
+            if (modoRevanchaActivo) return;
+            if (modoAsignacionActivo) return;
+            if (bombo.length === 0) return;
+            autoActivo = true;
+            programarSiguienteAuto(0);
+        }
+
+        function detenerAuto() {
+            autoActivo = false;
+            if (timeoutAuto) {
+                clearTimeout(timeoutAuto);
+                timeoutAuto = null;
+            }
+        }
+
+        function programarSiguienteAuto(delayMs) {
+            if (timeoutAuto) clearTimeout(timeoutAuto);
+            if (!autoActivo) return;
+            const delay = (typeof delayMs === 'number') ? delayMs : 0;
+
+            timeoutAuto = setTimeout(() => {
+                if (!autoActivo) return;
+                if (partidaTerminada) { detenerAuto(); return; }
+                if (modoRevanchaActivo) { detenerAuto(); return; }
+                if (modoAsignacionActivo) { detenerAuto(); return; }
+                if (bombo.length === 0) { detenerAuto(); return; }
+                if (isAnimating || bloqueadoPorAnimacion) {
+                    programarSiguienteAuto(120);
+                    return;
+                }
+                sacarBolaAuto();
+            }, delay);
+        }
+
+        function sacarBolaAuto() {
+            if (!autoActivo) return;
+            if (isAnimating || bloqueadoPorAnimacion) {
+                programarSiguienteAuto(120);
+                return;
+            }
+            if (bombo.length === 0) { detenerAuto(); return; }
+
+            desbloquearSonidos();
+
+            const btn = document.getElementById('btnSacarBola');
+            if (btn) {
+                btn.classList.add('bloqueado');
+                btn.classList.remove('presionado');
+                void btn.offsetWidth;
+                btn.classList.add('presionado');
+            }
+            isAnimating = true;
+            ejecutarSaqueDeBola(obtenerBolaInteligente());
+
+            const variacion = Math.floor(Math.random() * 250);
+            const proximoDelay = VELOCIDAD_BOLA + 480 + variacion + 20;
+            programarSiguienteAuto(proximoDelay);
+        }
+
+        window.toggleAuto = toggleAuto;
+
+        let modoRevanchaActivo = false;
+        let cartonesSeleccionadosRevancha = new Set();
+        let cartonesFueraDeJuego = new Set();
+        let listenerRevanchaCartones = null;
 
         const RANGOS_BINGO = {
-            B: [1, 15],
-            I: [16, 30],
-            N: [31, 45],
-            G: [46, 60],
-            O: [61, 75]
+            B: [1, 15], I: [16, 30], N: [31, 45], G: [46, 60], O: [61, 75]
         };
 
-        /* ============================================
-           CARGAR CONFIGURACIÓN Y FIGURAS
-           ============================================ */
         function cargarConfiguracion() {
             let figurasPersonalizadas = [];
             try {
@@ -230,6 +653,10 @@
                     TAMANO_CONTROL = config.tamanoControl !== undefined ? parseInt(config.tamanoControl) : 58;
                     FORMATO_CONTROL = config.formatoControl || '15x5';
                     TAMANO_FIGURAS = config.tamanoFiguras !== undefined ? parseInt(config.tamanoFiguras) : 42;
+
+                    ESPACIO_NOTCH = config.espacioNotch !== undefined ? parseInt(config.espacioNotch) : 1;
+                    BLOQUEAR_SCROLL = config.bloquearScroll !== undefined ? config.bloquearScroll : 'si';
+
                     TEMAS_ACTIVOS = Array.isArray(config.temasActivos) && config.temasActivos.length > 0
                         ? config.temasActivos : ['Verde'];
 
@@ -237,41 +664,148 @@
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
 
+                    INTENSIDAD_GLOW_NUMERO = config.intensidadGlowNumero !== undefined ? parseInt(config.intensidadGlowNumero) : 95;
+                    INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
+
+                    VELOCIDAD_BOLA = config.velocidadBola !== undefined ? parseInt(config.velocidadBola) : 650;
+                    VELOCIDAD_REVANCHA = config.velocidadRevancha !== undefined ? parseFloat(config.velocidadRevancha) : 1;
+                    CLICK_INVISIBLE = config.clickInvisible === true;
+
+                    VOZ_ACTIVADA = config.vozActivada === true;
+                    VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
+                    VOZ_VELOCIDAD = (config.vozVelocidad !== undefined ? config.vozVelocidad : 100) / 100;
+                    VOZ_TONO = (config.vozTono !== undefined ? config.vozTono : 100) / 100;
+                    VOZ_SELECCIONADA = config.vozSeleccionada || '';
+                    VOZ_REPETIR = config.vozRepetir !== undefined ? parseInt(config.vozRepetir) : 1;
+
+                    const cc = config.cartonesCombinados || {};
+                    CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
+                    CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
+
+                    if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
+                        MODO_TEMAS = config.modoTemas;
+                    } else if (cc.activo === true) {
+                        MODO_TEMAS = 'combinado';
+                    } else {
+                        MODO_TEMAS = 'simple';
+                    }
+
                     if (Array.isArray(config.figurasPersonalizadas)) {
                         figurasPersonalizadas = config.figurasPersonalizadas;
                     }
                 }
             } catch (e) {}
 
-            // Reconstruir FIGURAS y ORDEN_FIGURAS
-            FIGURAS = {};
-            FIGURAS['diagonal'] = FIGURA_DIAGONAL.patron;
-            ORDEN_FIGURAS = ['diagonal'];
+            MODO_JUEGO = localStorage.getItem('bingo_modo_juego') || 'ambos';
 
-            figurasPersonalizadas.forEach(fig => {
-                if (!fig || !fig.id || !Array.isArray(fig.patron)) return;
-                FIGURAS[fig.id] = fig.patron;
-                if (fig.activa !== false) {
-                    ORDEN_FIGURAS.push(fig.id);
-                }
-            });
+            const esRevancha = localStorage.getItem('bingo_modo_revancha') === '1' 
+                || MODO_JUEGO === 'figura' 
+                || MODO_JUEGO === 'bingo' 
+                || MODO_JUEGO === 'mixto';
 
-            // Si no hay ninguna activa además de la diagonal, la diagonal se queda sola
-            if (ORDEN_FIGURAS.length === 0) {
-                ORDEN_FIGURAS = ['diagonal'];
+            if (esRevancha && VELOCIDAD_REVANCHA > 1) {
+                VELOCIDAD_BOLA = Math.max(150, Math.round(VELOCIDAD_BOLA / VELOCIDAD_REVANCHA));
+                VOZ_VELOCIDAD = VOZ_VELOCIDAD * VELOCIDAD_REVANCHA;
+                DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
             }
 
-            figuraActual = ORDEN_FIGURAS[0];
+            FIGURAS = {};
+            ORDEN_FIGURAS = [];
+
+            FIGURAS['diagonal'] = FIGURA_DIAGONAL.patron;
+
+            let diagonalActiva = true;
+            let idxDiagonal = -1;
+
+            figurasPersonalizadas.forEach((fig, idx) => {
+                if (!fig || !fig.id || !Array.isArray(fig.patron)) return;
+                if (fig.id === 'diagonal') {
+                    diagonalActiva = fig.activa !== false;
+                    idxDiagonal = idx;
+                    return;
+                }
+                FIGURAS[fig.id] = fig.patron;
+                if (fig.activa !== false) ORDEN_FIGURAS.push(fig.id);
+            });
+
+            if (diagonalActiva) {
+                if (idxDiagonal === -1) {
+                    ORDEN_FIGURAS.unshift('diagonal');
+                } else {
+                    ORDEN_FIGURAS.splice(idxDiagonal, 0, 'diagonal');
+                }
+            }
+
+            if (ORDEN_FIGURAS.length === 0) ORDEN_FIGURAS = ['diagonal'];
+            figuraActual = ORDEN_FIGURAS[Math.floor(Math.random() * ORDEN_FIGURAS.length)];
 
             const grid = document.getElementById('cartonesGrid');
             if (grid) grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
             const titulo = document.querySelector('.titulo-tabla');
             if (titulo) titulo.textContent = `CONTROL (1 - ${MAX_BALOTAS})`;
+
+            aplicarEspacioNotch();
+            aplicarBloqueoScroll();
         }
 
-        /* ============================================
-           AJUSTAR TAMAÑO DEL CONTROL
-           ============================================ */
+        function aplicarEspacioNotch() {
+            const body = document.body;
+            const app = document.querySelector('.bingo-app');
+            if (!body || !app) return;
+
+            app.style.paddingTop = '';
+            body.style.paddingTop = '';
+
+            if (ESPACIO_NOTCH === 0) {
+                app.style.marginTop = '0px';
+                return;
+            }
+
+            const ALTO_RENGLON = 8;
+            const RENGLONES_REALES = ESPACIO_NOTCH * 2;
+            const espacio = RENGLONES_REALES * ALTO_RENGLON;
+
+            app.style.marginTop = espacio + 'px';
+        }
+
+        function aplicarBloqueoScroll() {
+            const body = document.body;
+            if (!body) return;
+            if (BLOQUEAR_SCROLL === 'si') {
+                body.style.overflow = 'hidden';
+                body.style.height = '100vh';
+                body.style.height = '100dvh';
+                body.style.position = 'fixed';
+                body.style.inset = '0';
+                body.style.overscrollBehavior = 'none';
+                document.documentElement.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+                body.style.height = '';
+                body.style.position = '';
+                body.style.inset = '';
+                body.style.overscrollBehavior = '';
+                document.documentElement.style.overflow = '';
+            }
+        }
+
+        function obtenerPaletaParaCarton(indiceCarton) {
+            if (MODO_TEMAS !== 'combinado') return PALETAS[paletaActual];
+            const secuencia = CC_SECUENCIAS.find(s => s.id === CC_SECUENCIA_EN_USO);
+            if (!secuencia || !Array.isArray(secuencia.temas) || secuencia.temas.length === 0) {
+                return PALETAS[paletaActual];
+            }
+            const bloque = Math.floor(indiceCarton / 3);
+            const temaNombre = secuencia.temas[bloque % secuencia.temas.length];
+            const idxTema = PALETAS.findIndex(p => p.nombre === temaNombre);
+            if (idxTema !== -1) return PALETAS[idxTema];
+            return PALETAS[paletaActual];
+        }
+
+        function obtenerNombreTemaPorCarton(indiceCarton) {
+            return obtenerPaletaParaCarton(indiceCarton).nombre;
+        }
+
         function aplicarTamanoControl() {
             requestAnimationFrame(() => {
                 const panelControl = document.getElementById('panelControl');
@@ -294,9 +828,6 @@
             });
         }
 
-        /* ============================================
-           APLICAR CONFIGURACIÓN DE MINI-CARTONES
-           ============================================ */
         function aplicarConfigFiguras() {
             requestAnimationFrame(() => {
                 const panelFiguras = document.getElementById('panelFiguras');
@@ -331,9 +862,6 @@
             });
         }
 
-        /* ============================================
-           EXTRAER NOMBRES DE FIREBASE
-           ============================================ */
         function extraerNombresDeData(data) {
             const cartones = data.cartones || [];
             const nombres = [];
@@ -351,9 +879,6 @@
             return nombres;
         }
 
-        /* ============================================
-           SUSCRIBIR A FIREBASE
-           ============================================ */
         function suscribirNombresFirebase() {
             if (!docRef || !USAR_BASE_DATOS) return;
             if (unsubscribeSnapshot) {
@@ -375,15 +900,12 @@
             );
         }
 
-        /* ============================================
-           ACTUALIZAR TEXTOS DE LOS CARTONES
-           ============================================ */
         function actualizarTextosDeCartones() {
             const cartones = document.querySelectorAll('.cartones-grid .carton');
             cartones.forEach((carton, i) => {
                 let textoCabecera = `CARTÓN ${i + 1}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i] && nombresDeFirebase[i].trim() !== "") {
-                    textoCabecera = nombresDeFirebase[i];
+                    textoCabecera = `${i + 1} - ${nombresDeFirebase[i]}`;
                 }
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan) {
@@ -393,9 +915,6 @@
             });
         }
 
-        /* ============================================
-           GENERAR CARTÓN DE 75
-           ============================================ */
         function generarCarton75() {
             const columnas = { B: [], I: [], N: [], G: [], O: [] };
             Object.keys(RANGOS_BINGO).forEach(letra => {
@@ -408,9 +927,6 @@
             return columnas;
         }
 
-        /* ============================================
-           OBTENER LETRA DE UN NÚMERO
-           ============================================ */
         function obtenerLetra(num) {
             if (num <= 15) return 'B';
             if (num <= 30) return 'I';
@@ -419,18 +935,69 @@
             return 'O';
         }
 
-        /* ============================================
-           OBTENER TONO DEL CARTÓN
-           ============================================ */
+        function cargarVocesDisponibles() {
+            if (!('speechSynthesis' in window)) return;
+            const todas = window.speechSynthesis.getVoices();
+            vocesDisponibles = todas.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+        }
+
+        function initVoces() {
+            if (!('speechSynthesis' in window)) return;
+            cargarVocesDisponibles();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = cargarVocesDisponibles;
+            }
+        }
+
+        function cantarBola(numero) {
+            if (!VOZ_ACTIVADA) return;
+            if (!('speechSynthesis' in window)) return;
+            if (vocesDisponibles.length === 0) return;
+
+            const letra = obtenerLetra(numero);
+            const texto = `${letra} ${numero}`;
+
+            try { window.speechSynthesis.cancel(); } catch (e) {}
+
+            const hablar = () => {
+                const utter = new SpeechSynthesisUtterance(texto);
+                utter.volume = VOZ_VOLUMEN;
+                utter.rate = VOZ_VELOCIDAD;
+                utter.pitch = VOZ_TONO;
+                utter.lang = 'es-ES';
+
+                if (VOZ_SELECCIONADA) {
+                    const voz = vocesDisponibles.find(v => v.name === VOZ_SELECCIONADA);
+                    if (voz) { utter.voice = voz; utter.lang = voz.lang; }
+                    else { utter.voice = vocesDisponibles[0]; utter.lang = vocesDisponibles[0].lang; }
+                } else {
+                    utter.voice = vocesDisponibles[0];
+                    utter.lang = vocesDisponibles[0].lang;
+                }
+                window.speechSynthesis.speak(utter);
+            };
+
+            for (let i = 0; i < VOZ_REPETIR; i++) {
+                if (i === 0) hablar();
+                else setTimeout(hablar, 1200 * i);
+            }
+        }
+
+        function desbloquearVoz() {
+            if (!('speechSynthesis' in window)) return;
+            try {
+                const u = new SpeechSynthesisUtterance('');
+                u.volume = 0;
+                window.speechSynthesis.speak(u);
+            } catch (e) {}
+        }
+
         function obtenerIndiceTonoPorCarton(idx) {
             const bloque = Math.floor(idx / 3);
             const par = bloque % 2;
             return par === 0 ? 0 : 2;
         }
 
-        /* ============================================
-           APLICAR TEMA AL BODY
-           ============================================ */
         function aplicarTemaEnBody() {
             document.body.classList.remove(
                 'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
@@ -446,9 +1013,6 @@
             document.body.classList.add('tema-' + nombre);
         }
 
-        /* ============================================
-           APLICAR PARÁMETROS DEL RESALTADO DE FIGURA
-           ============================================ */
         function aplicarParametrosResaltado() {
             const estiloComputado = getComputedStyle(document.body);
             const colorTema = estiloComputado.getPropertyValue('--color-figura').trim() || '#ffd700';
@@ -467,30 +1031,38 @@
                 }
             }
 
-            const glowAlpha = INTENSIDAD_GLOW / 100;
-            const suaveAlpha = INTENSIDAD_SUAVE / 100;
-
-            document.body.style.setProperty('--color-figura-glow', `rgba(${r}, ${g}, ${b}, ${glowAlpha})`);
-            document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${suaveAlpha})`);
+            document.body.style.setProperty('--color-figura-glow', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_GLOW / 100})`);
+            document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE / 100})`);
+            document.body.style.setProperty('--amarillo-glow', INTENSIDAD_GLOW_NUMERO / 100);
+            document.body.style.setProperty('--amarillo-halo', INTENSIDAD_HALO_NUMERO / 100);
         }
 
-        /* ============================================
-           APLICAR PALETA
-           ============================================ */
         function aplicarPaleta() {
-            const paleta = PALETAS[paletaActual];
+            let idxParaFondo = paletaActual;
+            if (MODO_TEMAS === 'combinado') {
+                const paletaPrimerBloque = obtenerPaletaParaCarton(0);
+                const idx = PALETAS.findIndex(p => p.nombre === paletaPrimerBloque.nombre);
+                if (idx !== -1) idxParaFondo = idx;
+            }
+
+            const paleta = PALETAS[idxParaFondo];
             document.documentElement.style.setProperty('--tema-color', paleta.tema);
-            const btnSacar = document.querySelector('.btn-sacar-bola');
-            if (btnSacar) btnSacar.style.background = paleta.tema;
-            const sphere = document.querySelector('.bolillero-sphere');
-            if (sphere) sphere.style.background = `radial-gradient(circle at 30% 30%, ${paleta.colores[4]}, ${paleta.colores[0]})`;
-            aplicarTemaEnBody();
+
+            document.body.classList.remove(
+                'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
+                'tema-naranja', 'tema-morado', 'tema-clasico',
+                'tema-dorado', 'tema-madera',
+                'tema-kate', 'tema-cyberpunk', 'tema-volcano', 'tema-pixel',
+                'tema-esmeralda', 'tema-candy', 'tema-oro', 'tema-pacifico',
+                'tema-halloween', 'tema-sport', 'tema-titan', 'tema-bronce'
+            );
+            const nombre = paleta.nombre.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            document.body.classList.add('tema-' + nombre);
+
             aplicarParametrosResaltado();
         }
 
-        /* ============================================
-           AJUSTAR TAMAÑO DEL NOMBRE
-           ============================================ */
         function ajustarTamanoNombre(elemento) {
             if (!elemento) return;
             let size = 0.5;
@@ -502,9 +1074,6 @@
             }
         }
 
-        /* ============================================
-           DIBUJAR MINI-CARTÓN
-           ============================================ */
         function dibujarMiniCarton(containerId, patron, colorTema) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -522,56 +1091,70 @@
             }
         }
 
-        /* ============================================
-           ACTUALIZAR MINI-CARTONES
-           ============================================ */
         function actualizarMiniCartones() {
             if (CANTIDAD_FIGURAS === 0) return;
-            const paleta = PALETAS[paletaActual];
-            const colorTema = paleta.tema;
-            if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', FIGURAS['diagonal'] ? Array.from({length:5},()=>Array(5).fill(1)) : [], colorTema);
+            let paletaParaMini = PALETAS[paletaActual];
+            if (MODO_TEMAS === 'combinado') {
+                paletaParaMini = obtenerPaletaParaCarton(0);
+            }
+            const colorTema = paletaParaMini.tema;
+            if (CANTIDAD_FIGURAS >= 2) dibujarMiniCarton('miniCartonLleno', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
             if (CANTIDAD_FIGURAS >= 1) dibujarMiniCarton('miniCartonFigura', FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron, colorTema);
             if (CANTIDAD_FIGURAS >= 3) dibujarMiniCarton('miniCartonExtra', Array.from({length:5},()=>Array(5).fill(1)), colorTema);
         }
 
-        /* ============================================
-           RENDERIZAR ESTRUCTURA DE CARTONES
-           ============================================ */
         function renderizarEstructura() {
             const grid = document.getElementById('cartonesGrid');
             if (!grid) return;
             grid.innerHTML = '';
-            const paleta = PALETAS[paletaActual];
-            const colores = paleta.colores;
+
             for (let i = 1; i <= TOTAL_CARTONES; i++) {
                 const datos = generarCarton75();
                 const carton = document.createElement('div');
                 carton.className = 'carton';
+
+                const paletaCarton = obtenerPaletaParaCarton(i - 1);
+                const colores = paletaCarton.colores;
+
                 const idxTono = obtenerIndiceTonoPorCarton(i - 1);
                 const colorHex = colores[idxTono];
-                const colorDark = paleta.colores[0];
+                const colorDark = paletaCarton.colores[0];
+
                 carton.style.setProperty('--carton-color', colorHex);
                 carton.style.setProperty('--carton-color-dark', colorDark);
+                carton.dataset.enAlerta = '0';
+                carton.dataset.pausadoPorSacar = '0';
+                carton.dataset.yaAvisoFigura = '0';
+                carton.dataset.yaAvisoBingo = '0';
                 let textoCabecera = `CARTÓN ${i}`;
                 if (USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
-                    textoCabecera = nombresDeFirebase[i - 1];
+                    textoCabecera = `${i} - ${nombresDeFirebase[i - 1]}`;
                 }
+
                 carton.innerHTML = `
-                    <span class="emoji-primera-bola">🎱</span>
                     <span class="emoji-figura">🎯</span>
                     <span class="emoji-carton-lleno">👑</span>
                     <span class="rotulo-bingo">BINGO</span>
                     <span class="rotulo-figura">FIGURA</span>
                     <span class="rotulo-gana">GANA</span>
                     <span class="rotulo-todo">TODO</span>
+                    <span class="etiqueta-fuera">FUERA</span>
+                    <span class="x-fuera"></span>
                     <div class="carton-header">
                         <span class="carton-title">${textoCabecera}</span>
+                        <span class="punto-alerta"></span>
                     </div>
                     <div class="bingo-header-row">
                         <span>B</span><span>I</span><span>N</span><span>G</span><span>O</span>
                     </div>
                     <div class="carton-grid-inner" style="grid-template-columns: repeat(5, 1fr);"></div>
                 `;
+                carton.addEventListener('click', () => {
+                    if (!CLICK_INVISIBLE || modoRevanchaActivo || modoAsignacionActivo || partidaTerminada) return;
+                    const idxCarton = i - 1;
+                    if (cartonesFueraDeJuego.has(idxCarton)) return;
+                    cartonForzadoIdx = (cartonForzadoIdx === idxCarton) ? -1 : idxCarton;
+                });
                 grid.appendChild(carton);
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan && USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
@@ -599,41 +1182,37 @@
             renderizarTablaControl();
             aplicarTamanoControl();
             aplicarConfigFiguras();
-            document.querySelectorAll('.cartones-grid.modo-15 .carton')
-                .forEach(c => {
-                    c.classList.remove(
-                        'ganador-figura-1',
-                        'ganador-bingo',
-                        'resaltando',
-                        'animando',
-                        'secuencia-completa',
-                        'tiene-primera-bola',
-                        'tiene-lleno',
-                        'mostrar-rotulo-bingo',
-                        'mostrar-rotulo-figura',
-                        'mostrar-rotulo-gana',
-                        'mostrar-rotulo-todo',
-                        'apagando-resaltado'
-                    );
-                    c.querySelectorAll('.celda.en-figura')
-                        .forEach(celda => {
-                            celda.classList.remove('en-figura');
-                            celda.style.removeProperty('--delay-figura');
-                        });
+            aplicarEspacioNotch();
+            aplicarBloqueoScroll();
+
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
+                c.classList.remove(
+                    'ganador-figura-1', 'ganador-bingo', 'resaltando',
+                    'animando', 'secuencia-completa',
+                    'tiene-lleno', 'mostrar-rotulo-bingo', 'mostrar-rotulo-figura',
+                    'mostrar-rotulo-gana', 'mostrar-rotulo-todo',
+                    'apagando-resaltado', 'alerta-header',
+                    'asignado-bingo', 'asignado-figura',
+                    'tiene-asignacion-bingo', 'tiene-asignacion-figura'
+                );
+                c.dataset.enAlerta = '0';
+                c.dataset.pausadoPorSacar = '0';
+                c.dataset.yaAvisoFigura = '0';
+                c.dataset.yaAvisoBingo = '0';
+                c.querySelectorAll('.celda.en-figura').forEach(celda => {
+                    celda.classList.remove('en-figura');
+                    celda.style.removeProperty('--delay-figura');
                 });
+            });
 
             requestAnimationFrame(() => {
-                const celdasCentro = document.querySelectorAll(
-                    '.cartones-grid.modo-15 .celda.vacia'
-                );
-
+                const celdasCentro = document.querySelectorAll('.cartones-grid.modo-15 .celda.vacia');
                 if (celdasCentro.length === 0) {
                     celdasCentroPendientes = 0;
+                    aplicarCartonesFueraDeJuego();
                     return;
                 }
-
                 const btn = document.getElementById('btnSacarBola');
-
                 if (btn) btn.classList.add('bloqueado');
                 bloqueadoPorAnimacion = true;
                 celdasCentroPendientes = celdasCentro.length;
@@ -650,21 +1229,18 @@
                         celda.classList.remove('animando-centro');
                         if (carton) carton.classList.remove('animando-centro-carton');
                         celda.removeEventListener('animationend', handler);
-
                         celdasCentroPendientes--;
                         if (celdasCentroPendientes <= 0) {
                             celdasCentroPendientes = 0;
                             bloqueadoPorAnimacion = false;
                             if (btn) btn.classList.remove('bloqueado');
+                            aplicarCartonesFueraDeJuego();
                         }
                     });
                 });
             });
         }
 
-        /* ============================================
-           RENDERIZAR TABLA DE CONTROL
-           ============================================ */
         function renderizarTablaControl() {
             const tabla = document.getElementById('tablaNumeros');
             if (!tabla) return;
@@ -685,14 +1261,21 @@
             grid.className = 'control-grid';
             grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
             const totalCeldas = cols * fils;
-            const totalNumeros = MAX_BALOTAS;
             for (let i = 0; i < totalCeldas; i++) {
                 const bolita = document.createElement('div');
                 bolita.className = 'bolita';
-                if (i < totalNumeros) {
+                if (i < MAX_BALOTAS) {
                     const num = i + 1;
                     bolita.id = `ctrl-${num}`;
                     bolita.textContent = num;
+                    bolita.dataset.num = num;
+                    bolita.addEventListener('click', function() { sacarBolaEspecifica(num); });
+                    if (historialSacadas.some(h => h.numero === num)) {
+                        bolita.classList.add('marcada');
+                        bolita.style.pointerEvents = 'none';
+                    } else {
+                        bolita.classList.add('clickeable');
+                    }
                 } else {
                     bolita.classList.add('vacia');
                 }
@@ -701,10 +1284,9 @@
             tabla.appendChild(grid);
         }
 
-        /* ============================================
-           COMPROBAR FIGURA
-           ============================================ */
         function comprobarFiguraEnCartones() {
+            if (MODO_JUEGO === 'bingo') return { hayGanador: false, infoGanadores: [] };
+            if (MODO_JUEGO === 'mixto' && cartonesAsignadosFigura.size === 0) return { hayGanador: false, infoGanadores: [] };
             if (CANTIDAD_FIGURAS < 1) return { hayGanador: false, infoGanadores: [] };
             if (figuraYaGanada) return { hayGanador: false, infoGanadores: [] };
 
@@ -714,8 +1296,10 @@
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             const infoGanadores = [];
 
-            cartones.forEach((carton) => {
+            cartones.forEach((carton, idx) => {
+                if (carton.classList.contains('fuera-de-juego')) return;
                 if (carton.classList.contains('ganador-figura-1')) return;
+                if (MODO_JUEGO === 'mixto' && !cartonesAsignadosFigura.has(idx)) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
                 let completa = true;
@@ -723,46 +1307,32 @@
 
                 for (let f = 0; f < 5 && completa; f++) {
                     for (let c = 0; c < 5; c++) {
-                        const idx = f * 5 + c;
-                        const celda = celdas[idx];
+                        const idxCelda = f * 5 + c;
+                        const celda = celdas[idxCelda];
                         if (!celda) { completa = false; break; }
-
-                        const esParteDeFigura = patronFigura[f][c] === 1;
-                        if (!esParteDeFigura) continue;
-
+                        if (patronFigura[f][c] !== 1) continue;
                         celdasDeLaFigura.push(celda);
-
-                        const estaMarcada = celda.classList.contains('marcada') ||
-                                            celda.classList.contains('vacia');
-                        if (!estaMarcada) {
-                            completa = false;
-                            break;
-                        }
+                        const estaMarcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                        if (!estaMarcada) { completa = false; break; }
                     }
                 }
-
-                if (completa) {
-                    infoGanadores.push({ carton, celdasDeLaFigura });
-                }
+                if (completa) infoGanadores.push({ carton, celdasDeLaFigura });
             });
 
-            return {
-                hayGanador: infoGanadores.length > 0,
-                infoGanadores: infoGanadores
-            };
+            return { hayGanador: infoGanadores.length > 0, infoGanadores };
         }
 
-        /* ============================================
-           COMPROBAR CARTÓN LLENO
-           ============================================ */
         function comprobarLlenoEnCartones() {
+            if (MODO_JUEGO === 'figura') return { hayGanador: false, infoGanadores: [] };
+            if (MODO_JUEGO === 'mixto' && cartonesAsignadosBingo.size === 0) return { hayGanador: false, infoGanadores: [] };
             if (llenoYaGanado) return { hayGanador: false, infoGanadores: [] };
-
             const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
             const infoGanadores = [];
 
-            cartones.forEach((carton) => {
+            cartones.forEach((carton, idx) => {
+                if (carton.classList.contains('fuera-de-juego')) return;
                 if (carton.classList.contains('ganador-bingo')) return;
+                if (MODO_JUEGO === 'mixto' && !cartonesAsignadosBingo.has(idx)) return;
 
                 const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
                 let todasMarcadas = true;
@@ -770,38 +1340,15 @@
 
                 celdas.forEach(celda => {
                     celdasLleno.push(celda);
-                    const estaMarcada = celda.classList.contains('marcada') ||
-                                        celda.classList.contains('vacia');
+                    const estaMarcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
                     if (!estaMarcada) todasMarcadas = false;
                 });
-
-                if (todasMarcadas) {
-                    infoGanadores.push({ carton, celdasDeLaFigura: celdasLleno });
-                }
+                if (todasMarcadas) infoGanadores.push({ carton, celdasDeLaFigura: celdasLleno });
             });
 
-            return {
-                hayGanador: infoGanadores.length > 0,
-                infoGanadores: infoGanadores
-            };
+            return { hayGanador: infoGanadores.length > 0, infoGanadores };
         }
 
-        /* ============================================
-           MARCAR CARTONES QUE CONTIENEN LA PRIMERA BOLA
-           ============================================ */
-        function marcarCartonesConPrimeraBola(numero) {
-            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
-            cartones.forEach(carton => {
-                const celdaCoincide = carton.querySelector(`.carton-grid-inner .celda[data-valor="${numero}"]`);
-                if (celdaCoincide) {
-                    carton.classList.add('tiene-primera-bola');
-                }
-            });
-        }
-
-        /* ============================================
-           APAGAR RESALTADO DE TODOS LOS CARTONES
-           ============================================ */
         function apagarResaltadoDeTodos() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
                 carton.classList.remove('resaltando', 'secuencia-completa', 'animando', 'apagando-resaltado');
@@ -812,18 +1359,10 @@
             });
         }
 
-        /* ============================================
-           APAGADO SUAVE DEL RESALTADO (0.5s)
-           ============================================ */
         function apagarResaltadoSuave() {
-            const cartonesConResaltado = document.querySelectorAll(
-                '.cartones-grid.modo-15 .carton.resaltando'
-            );
+            const cartonesConResaltado = document.querySelectorAll('.cartones-grid.modo-15 .carton.resaltando');
             if (cartonesConResaltado.length === 0) return;
-
-            cartonesConResaltado.forEach(carton => {
-                carton.classList.add('apagando-resaltado');
-            });
+            cartonesConResaltado.forEach(carton => carton.classList.add('apagando-resaltado'));
 
             if (timeoutApagado) clearTimeout(timeoutApagado);
             timeoutApagado = setTimeout(() => {
@@ -838,39 +1377,40 @@
             }, 500);
         }
 
-        /* ============================================
-           MOSTRAR RÓTULOS EN CARTONES GANADORES
-           ============================================ */
         function mostrarRotulosDeGanadores() {
             document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
-                const tienePrimera  = carton.classList.contains('tiene-primera-bola');
-                const ganoFigura    = carton.classList.contains('ganador-figura-1');
-                const ganoBingo     = carton.classList.contains('ganador-bingo');
-                const ganoTodo      = tienePrimera && ganoFigura && ganoBingo;
-
+                if (carton.classList.contains('fuera-de-juego')) return;
+                if (modoAsignacionActivo) return;
+                const ganoFigura = carton.classList.contains('ganador-figura-1');
+                const ganoBingo = carton.classList.contains('ganador-bingo');
+                const ganoTodo = ganoFigura && ganoBingo;
                 if (ganoTodo) {
                     carton.classList.add('mostrar-rotulo-gana', 'mostrar-rotulo-todo');
                 } else {
-                    if (ganoBingo)  carton.classList.add('mostrar-rotulo-bingo');
+                    if (ganoBingo) carton.classList.add('mostrar-rotulo-bingo');
                     if (ganoFigura) carton.classList.add('mostrar-rotulo-figura');
                 }
             });
-
             apagarResaltadoSuave();
         }
 
-        /* ============================================
-           EJECUTAR ANIMACIÓN DE RESALTADO
-           ============================================ */
         function ejecutarAnimacionResaltado(cartonesInfo) {
             if (!cartonesInfo || cartonesInfo.length === 0) return Promise.resolve();
-
             const btn = document.getElementById('btnSacarBola');
             if (btn) btn.classList.add('bloqueado');
             bloqueadoPorAnimacion = true;
 
-            const PAUSA_FINAL = 600;
+            let hayGanadorFigura = false;
+            let hayGanadorBingo = false;
+            cartonesInfo.forEach(({ ganoFigura, ganoBingo }) => {
+                if (ganoFigura) hayGanadorFigura = true;
+                if (ganoBingo) hayGanadorBingo = true;
+            });
+            if (hayGanadorFigura || hayGanadorBingo) {
+                reproducirTactac();
+            }
 
+            const PAUSA_FINAL = 600;
             cartonesInfo.forEach(({ carton, ganoFigura, ganoBingo }) => {
                 if (ganoFigura) carton.classList.add('ganador-figura-1');
                 if (ganoBingo) carton.classList.add('ganador-bingo');
@@ -882,28 +1422,26 @@
             timeoutsFase1 = [];
 
             let maxCeldas = 0;
-            cartonesInfo.forEach(({ carton, celdasDeLaFigura }) => {
+            cartonesInfo.forEach(({ celdasDeLaFigura }) => {
                 const lista = celdasDeLaFigura || [];
                 if (lista.length > maxCeldas) maxCeldas = lista.length;
                 lista.forEach((celda, i) => {
-                    const t = setTimeout(() => {
-                        celda.classList.add('en-figura');
-                    }, i * DURACION_POR_CASILLA);
+                    const t = setTimeout(() => celda.classList.add('en-figura'), i * DURACION_POR_CASILLA);
                     timeoutsFase1.push(t);
                 });
             });
 
-            const duracionFase1 = maxCeldas * DURACION_POR_CASILLA;
-            const duracionTotal = duracionFase1 + PAUSA_FINAL;
+            const duracionTotal = maxCeldas * DURACION_POR_CASILLA + PAUSA_FINAL;
 
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
                 timeoutAnimacion = setTimeout(() => {
+                    detenerTactac();
+
                     cartonesInfo.forEach(({ carton }) => {
                         carton.classList.remove('animando');
                         carton.classList.add('resaltando', 'secuencia-completa');
                     });
-
                     if (partidaTerminada) {
                         if (timeoutRotulos) clearTimeout(timeoutRotulos);
                         timeoutRotulos = setTimeout(() => {
@@ -911,7 +1449,6 @@
                             timeoutRotulos = null;
                         }, 1500);
                     }
-
                     if (btn) btn.classList.remove('bloqueado');
                     bloqueadoPorAnimacion = false;
                     timeoutAnimacion = null;
@@ -921,106 +1458,804 @@
             });
         }
 
-        /* ============================================
-           SACAR BOLA
-           ============================================ */
-        function sacarBola(e) {
-            if (bloqueadoPorAnimacion) return;
-            if (bombo.length === 0) return;
+        function estaAUno(carton, celdas, patronFigura) {
+            if (carton.classList.contains('fuera-de-juego')) return false;
 
-            apagarResaltadoDeTodos();
-            if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
-            if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
+            const todosCartones = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const idxCarton = todosCartones.indexOf(carton);
+            const enFigura = (MODO_JUEGO !== 'mixto') || cartonesAsignadosFigura.has(idxCarton);
+            const enBingo = (MODO_JUEGO !== 'mixto') || cartonesAsignadosBingo.has(idxCarton);
 
-            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
-                c.classList.remove(
-                    'mostrar-rotulo-bingo',
-                    'mostrar-rotulo-figura',
-                    'mostrar-rotulo-gana',
-                    'mostrar-rotulo-todo',
-                    'apagando-resaltado'
-                );
-            });
-
-            const idx = Math.floor(Math.random() * bombo.length);
-            const numero = bombo.splice(idx, 1)[0];
-            const letra = obtenerLetra(numero);
-            historialSacadas.unshift({ numero, letra });
-
-            if (!primeraBolaYaSalio) {
-                primeraBolaYaSalio = true;
-                primeraBolaNumero = numero;
-                marcarCartonesConPrimeraBola(numero);
+            if (enFigura && MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+                let faltantes = 0, total = 0;
+                for (let f = 0; f < 5; f++) {
+                    for (let c = 0; c < 5; c++) {
+                        if (patronFigura[f][c] !== 1) continue;
+                        total++;
+                        const celda = celdas[f * 5 + c];
+                        if (!celda) continue;
+                        const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                        if (!marcada) faltantes++;
+                    }
+                }
+                if (total > 0 && faltantes === 1) return true;
             }
 
+            if (enBingo && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+                let faltantes = 0;
+                celdas.forEach(celda => {
+                    const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                    if (!marcada) faltantes++;
+                });
+                if (faltantes === 1) return true;
+            }
+            return false;
+        }
+
+        function detectarFaltaParaFigura(carton, celdas, patronFigura) {
+            if (MODO_JUEGO === 'bingo') return false;
+            if (carton.classList.contains('fuera-de-juego')) return false;
+            if (CANTIDAD_FIGURAS < 1 || figuraYaGanada) return false;
+            if (carton.classList.contains('ganador-figura-1')) return false;
+            if (!patronFigura) return false;
+            if (MODO_JUEGO === 'mixto') {
+                const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                if (!cartonesAsignadosFigura.has(todos.indexOf(carton))) return false;
+            }
+
+            let faltantes = 0, total = 0;
+            for (let f = 0; f < 5; f++) {
+                for (let c = 0; c < 5; c++) {
+                    if (patronFigura[f][c] !== 1) continue;
+                    total++;
+                    const celda = celdas[f * 5 + c];
+                    if (!celda) continue;
+                    const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                    if (!marcada) faltantes++;
+                }
+            }
+            return total > 0 && faltantes === 1;
+        }
+
+        function detectarFaltaParaBingo(carton, celdas) {
+            if (MODO_JUEGO === 'figura') return false;
+            if (carton.classList.contains('fuera-de-juego')) return false;
+            if (llenoYaGanado || carton.classList.contains('ganador-bingo')) return false;
+            if (MODO_JUEGO === 'mixto') {
+                const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                if (!cartonesAsignadosBingo.has(todos.indexOf(carton))) return false;
+            }
+            let faltantes = 0;
+            celdas.forEach(celda => {
+                const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                if (!marcada) faltantes++;
+            });
+            return faltantes === 1;
+        }
+
+        function obtenerCeldasFaltantes(carton, celdas, patronFigura) {
+            const resultado = [];
+            if (carton.classList.contains('fuera-de-juego')) return resultado;
+
+            const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const idxCarton = todos.indexOf(carton);
+            const enFigura = (MODO_JUEGO !== 'mixto') || cartonesAsignadosFigura.has(idxCarton);
+            const enBingo = (MODO_JUEGO !== 'mixto') || cartonesAsignadosBingo.has(idxCarton);
+
+            if (enFigura && MODO_JUEGO !== 'bingo' && !figuraYaGanada && !carton.classList.contains('ganador-figura-1') && CANTIDAD_FIGURAS >= 1) {
+                let faltantes = 0, total = 0, candidata = null;
+                for (let f = 0; f < 5; f++) {
+                    for (let c = 0; c < 5; c++) {
+                        if (patronFigura[f][c] !== 1) continue;
+                        total++;
+                        const celda = celdas[f * 5 + c];
+                        if (!celda) continue;
+                        const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                        if (!marcada) { faltantes++; candidata = celda; }
+                    }
+                }
+                if (total > 0 && faltantes === 1 && candidata) resultado.push(candidata);
+            }
+
+            if (enBingo && MODO_JUEGO !== 'figura' && !llenoYaGanado && !carton.classList.contains('ganador-bingo')) {
+                let faltantes = 0, candidata = null;
+                celdas.forEach(celda => {
+                    const marcada = celda.classList.contains('marcada') || celda.classList.contains('vacia');
+                    if (!marcada) { faltantes++; candidata = celda; }
+                });
+                if (faltantes === 1 && candidata && !resultado.includes(candidata)) resultado.push(candidata);
+            }
+            return resultado;
+        }
+
+        function actualizarResaltadosAmarillos() {
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+
+            document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo')
+                .forEach(c => c.classList.remove('falta-amarillo'));
+
+            if (partidaTerminada || modoAsignacionActivo) {
+                document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
+                    .forEach(c => c.classList.remove('alerta-header'));
+                return;
+            }
+
+            let hayNuevoDestello = false;
+            cartones.forEach((carton) => {
+                if (carton.classList.contains('fuera-de-juego')) {
+                    carton.classList.remove('alerta-header');
+                    carton.dataset.enAlerta = '0';
+                    carton.dataset.pausadoPorSacar = '0';
+                    carton.dataset.yaAvisoFigura = '0';
+                    carton.dataset.yaAvisoBingo = '0';
+                    return;
+                }
+                if (carton.classList.contains('ganador-bingo')) {
+                    carton.classList.remove('alerta-header');
+                    carton.dataset.enAlerta = '0';
+                    carton.dataset.pausadoPorSacar = '0';
+                    return;
+                }
+
+                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                const faltaParaFigura = detectarFaltaParaFigura(carton, celdas, patronFigura);
+                const faltaParaBingo = detectarFaltaParaBingo(carton, celdas);
+                const celdasFaltantes = obtenerCeldasFaltantes(carton, celdas, patronFigura);
+                if (celdasFaltantes.length > 0) celdasFaltantes.forEach(c => c.classList.add('falta-amarillo'));
+
+                let debeParpadear = false;
+                if (faltaParaFigura && carton.dataset.yaAvisoFigura !== '1') {
+                    debeParpadear = true;
+                    carton.dataset.yaAvisoFigura = '1';
+                }
+                if (faltaParaBingo && carton.dataset.yaAvisoBingo !== '1') {
+                    debeParpadear = true;
+                    carton.dataset.yaAvisoBingo = '1';
+                }
+                if (!faltaParaFigura && !carton.classList.contains('ganador-figura-1')) carton.dataset.yaAvisoFigura = '0';
+                if (!faltaParaBingo) carton.dataset.yaAvisoBingo = '0';
+
+                if (debeParpadear) {
+                    carton.classList.add('alerta-header');
+                    carton.dataset.enAlerta = '1';
+                    hayNuevoDestello = true;
+                } else {
+                    carton.classList.remove('alerta-header');
+                    if (!faltaParaFigura && !faltaParaBingo) {
+                        carton.dataset.enAlerta = '0';
+                        carton.dataset.pausadoPorSacar = '0';
+                    }
+                }
+            });
+            if (hayNuevoDestello) {
+                reproducirCampana();
+                bloquearBotonPorDestello();
+            }
+        }
+
+        function bloquearBotonPorDestello() {
+            const btn = document.getElementById('btnSacarBola');
+            if (!btn) return;
+            btn.classList.add('bloqueado');
+            bloqueadoPorAnimacion = true;
+            if (timeoutBloqueoDestello) clearTimeout(timeoutBloqueoDestello);
+            timeoutBloqueoDestello = setTimeout(() => {
+                bloqueadoPorAnimacion = false;
+                btn.classList.remove('bloqueado');
+                timeoutBloqueoDestello = null;
+            }, 2000);
+        }
+
+        function actualizarPuntosAlerta() {
+            if (partidaTerminada) return;
+            const cartones = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+            let puntosAAnimar = [];
+
+            cartones.forEach((carton) => {
+                const punto = carton.querySelector('.punto-alerta');
+                if (!punto) return;
+                if (carton.classList.contains('fuera-de-juego')) {
+                    punto.classList.remove('activo', 'titilar');
+                    return;
+                }
+                const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+                const aUno = estaAUno(carton, celdas, patronFigura);
+                if (aUno) {
+                    if (!punto.classList.contains('activo')) {
+                        punto.classList.add('activo');
+                        punto.classList.remove('titilar');
+                        puntosAAnimar.push(punto);
+                    }
+                } else {
+                    punto.classList.remove('activo');
+                }
+            });
+
+            if (puntosAAnimar.length > 0) {
+                void document.body.offsetWidth;
+                puntosAAnimar.forEach(punto => {
+                    punto.classList.add('titilar');
+                    setTimeout(() => punto.classList.remove('titilar'), 800);
+                });
+            }
+        }
+
+        function activarModoRevancha() {
+            modoRevanchaActivo = true;
+            cartonesSeleccionadosRevancha.clear();
+            document.body.classList.add('modo-revancha');
+
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach((carton, idx) => {
+                if (cartonesFueraDeJuego.has(idx)) return;
+                carton.classList.remove('seleccionado-revancha');
+            });
+
+            listenerRevanchaCartones = function(e) {
+                const carton = e.target.closest('.cartones-grid.modo-15 .carton');
+                if (!carton) return;
+                if (!modoRevanchaActivo) return;
+
+                e.stopPropagation();
+                e.preventDefault();
+
+                const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                const idx = todos.indexOf(carton);
+                if (idx === -1) return;
+
+                if (cartonesSeleccionadosRevancha.has(idx)) {
+                    cartonesSeleccionadosRevancha.delete(idx);
+                    carton.classList.remove('seleccionado-revancha');
+                } else {
+                    cartonesSeleccionadosRevancha.add(idx);
+                    carton.classList.add('seleccionado-revancha');
+                }
+
+                actualizarBotonConfirmar();
+            };
+
+            document.addEventListener('click', listenerRevanchaCartones, true);
+            actualizarBotonConfirmar();
+        }
+
+        function desactivarModoRevancha() {
+            modoRevanchaActivo = false;
+            cartonesSeleccionadosRevancha.clear();
+            document.body.classList.remove('modo-revancha');
+
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
+                carton.classList.remove('seleccionado-revancha', 'no-seleccionado-revancha');
+            });
+
+            if (listenerRevanchaCartones) {
+                document.removeEventListener('click', listenerRevanchaCartones, true);
+                listenerRevanchaCartones = null;
+            }
+
+            const btn = document.getElementById('btnConfirmarRevancha');
+            if (btn) {
+                btn.classList.remove('sin-seleccion');
+                btn.style.background = '';
+            }
+        }
+
+        function activarModoAsignacion() {
+            modoAsignacionActivo = true;
+            cartonesAsignadosBingo.clear();
+            cartonesAsignadosFigura.clear();
+            document.body.classList.add('modo-asignacion');
+
+            const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            todos.forEach(c => {
+                c.classList.remove('asignado-bingo', 'asignado-figura');
+            });
+
+            listenerAsignacionCartones = function(e) {
+                if (!modoAsignacionActivo) return;
+                const carton = e.target.closest('.cartones-grid.modo-15 .carton');
+                if (!carton) return;
+
+                e.stopPropagation();
+                e.preventDefault();
+
+                const todosArr = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+                const idx = todosArr.indexOf(carton);
+                if (idx === -1) return;
+
+                if (cartonesAsignadosBingo.has(idx)) {
+                    cartonesAsignadosBingo.delete(idx);
+                    cartonesAsignadosFigura.add(idx);
+                    carton.classList.remove('asignado-bingo');
+                    carton.classList.add('asignado-figura');
+                } else if (cartonesAsignadosFigura.has(idx)) {
+                    cartonesAsignadosFigura.delete(idx);
+                    carton.classList.remove('asignado-figura');
+                } else {
+                    cartonesAsignadosBingo.add(idx);
+                    carton.classList.add('asignado-bingo');
+                }
+            };
+
+            document.addEventListener('click', listenerAsignacionCartones, true);
+            actualizarBotonConfirmarAsignacion();
+        }
+
+        function actualizarBotonConfirmarAsignacion() {
+            const btn = document.getElementById('btnConfirmarRevancha');
+            if (!btn) return;
+            if (cartonesAsignadosBingo.size + cartonesAsignadosFigura.size === 0) {
+                btn.classList.add('sin-seleccion');
+            } else {
+                btn.classList.remove('sin-seleccion');
+            }
+        }
+
+        function confirmarAsignacionMixta() {
+            if (cartonesAsignadosBingo.size + cartonesAsignadosFigura.size === 0) {
+                const btn = document.getElementById('btnConfirmarRevancha');
+                if (btn) {
+                    btn.style.background = '#ff1744';
+                    setTimeout(() => { btn.style.background = ''; }, 600);
+                }
+                return;
+            }
+
+            document.body.classList.add('modo-mixto-jugando');
+
+            modoAsignacionActivo = false;
+            document.body.classList.remove('modo-asignacion');
+
+            if (listenerAsignacionCartones) {
+                document.removeEventListener('click', listenerAsignacionCartones, true);
+                listenerAsignacionCartones = null;
+            }
+
+            const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            todos.forEach((carton, idx) => {
+                carton.classList.remove('asignado-bingo', 'asignado-figura', 'tiene-asignacion-bingo', 'tiene-asignacion-figura');
+
+                const enBingo = cartonesAsignadosBingo.has(idx);
+                const enFigura = cartonesAsignadosFigura.has(idx);
+
+                if (enBingo) {
+                    carton.classList.add('tiene-asignacion-bingo');
+                } else if (enFigura) {
+                    carton.classList.add('tiene-asignacion-figura');
+                }
+
+                if (!enBingo && !enFigura) {
+                    cartonesFueraDeJuego.add(idx);
+                } else {
+                    cartonesFueraDeJuego.delete(idx);
+                }
+            });
+
+            reiniciarJuego();
+        }
+
+        function confirmarRevancha() {
+            if (modoAsignacionActivo) {
+                confirmarAsignacionMixta();
+                return;
+            }
+            if (cartonesSeleccionadosRevancha.size === 0) {
+                const btn = document.getElementById('btnConfirmarRevancha');
+                if (btn) {
+                    btn.style.background = '#ff1744';
+                    setTimeout(() => { btn.style.background = ''; }, 600);
+                }
+                return;
+            }
+
+            const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            todos.forEach((carton, idx) => {
+                if (!cartonesSeleccionadosRevancha.has(idx)) cartonesFueraDeJuego.add(idx);
+                else cartonesFueraDeJuego.delete(idx);
+            });
+
+            desactivarModoRevancha();
+            reiniciarJuego();
+        }
+
+        function actualizarBotonConfirmar() {
+            const btn = document.getElementById('btnConfirmarRevancha');
+            if (!btn) return;
+            if (cartonesSeleccionadosRevancha.size === 0) btn.classList.add('sin-seleccion');
+            else btn.classList.remove('sin-seleccion');
+        }
+
+        function aplicarCartonesFueraDeJuego() {
+            const todos = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            todos.forEach((carton, idx) => {
+                if (cartonesFueraDeJuego.has(idx)) carton.classList.add('fuera-de-juego');
+                else carton.classList.remove('fuera-de-juego');
+            });
+        }
+
+        function limpiarEstadoRevancha() {
+            desactivarModoRevancha();
+            cartonesFueraDeJuego.clear();
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(carton => {
+                carton.classList.remove('fuera-de-juego');
+            });
+        }
+
+        function guardarPartida() {
+            try {
+                const cartones = [];
+                document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach((carton, idx) => {
+                    const celdas = [];
+                    carton.querySelectorAll('.carton-grid-inner .celda').forEach(celda => {
+                        celdas.push({
+                            valor: celda.dataset.valor || null,
+                            marcada: celda.classList.contains('marcada'),
+                            vacia: celda.classList.contains('vacia')
+                        });
+                    });
+                    cartones.push({
+                        index: idx,
+                        titulo: carton.querySelector('.carton-title')?.textContent || '',
+                        color: carton.style.getPropertyValue('--carton-color'),
+                        colorDark: carton.style.getPropertyValue('--carton-color-dark'),
+                        celdas: celdas,
+                        ganoFigura: carton.classList.contains('ganador-figura-1'),
+                        ganoBingo: carton.classList.contains('ganador-bingo'),
+                        fueraDeJuego: carton.classList.contains('fuera-de-juego')
+                    });
+                });
+
+                const partida = {
+                    version: 1,
+                    fecha: Date.now(),
+                    totalCartones: TOTAL_CARTONES,
+                    historialSacadas: historialSacadas.slice(),
+                    bombo: bombo.slice(),
+                    figuraYaGanada: figuraYaGanada,
+                    llenoYaGanado: llenoYaGanado,
+                    partidaTerminada: partidaTerminada,
+                    paletaActual: paletaActual,
+                    indiceRotacionActual: indiceRotacionActual,
+                    figuraActual: figuraActual,
+                    modoTemas: MODO_TEMAS,
+                    modoJuego: MODO_JUEGO,
+                    ccSecuenciaEnUso: CC_SECUENCIA_EN_USO,
+                    cartonesFueraDeJuego: Array.from(cartonesFueraDeJuego),
+                    cartonesAsignadosBingo: Array.from(cartonesAsignadosBingo),
+                    cartonesAsignadosFigura: Array.from(cartonesAsignadosFigura),
+                    cartones: cartones
+                };
+
+                localStorage.setItem('bingo_partida_guardada', JSON.stringify(partida));
+
+                const btn = document.getElementById('btnGuardarPartida');
+                if (btn) {
+                    btn.classList.add('guardado');
+                    btn.textContent = '✅ GUARDADO';
+                    setTimeout(() => {
+                        btn.classList.remove('guardado');
+                        btn.textContent = '💾 GUARDAR';
+                    }, 1200);
+                }
+            } catch (e) {
+                console.error('Error guardando partida:', e);
+                alert('No se pudo guardar la partida.');
+            }
+        }
+
+        function cargarPartidaGuardada() {
+            let partida = null;
+            try {
+                const raw = localStorage.getItem('bingo_partida_guardada');
+                if (!raw) return false;
+                partida = JSON.parse(raw);
+                if (!partida || !Array.isArray(partida.cartones)) return false;
+            } catch (e) { return false; }
+
+            TOTAL_CARTONES = partida.totalCartones || TOTAL_CARTONES;
+            historialSacadas = Array.isArray(partida.historialSacadas) ? partida.historialSacadas.slice() : [];
+            bombo = Array.isArray(partida.bombo) ? partida.bombo.slice() : Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
+            figuraYaGanada = partida.figuraYaGanada === true;
+            llenoYaGanado = partida.llenoYaGanado === true;
+            partidaTerminada = partida.partidaTerminada === true;
+            paletaActual = typeof partida.paletaActual === 'number' ? partida.paletaActual : 0;
+            indiceRotacionActual = typeof partida.indiceRotacionActual === 'number' ? partida.indiceRotacionActual : 0;
+            if (partida.figuraActual && FIGURAS[partida.figuraActual]) figuraActual = partida.figuraActual;
+            if (partida.modoTemas === 'simple' || partida.modoTemas === 'combinado') MODO_TEMAS = partida.modoTemas;
+            if (partida.modoJuego === 'figura' || partida.modoJuego === 'bingo' || partida.modoJuego === 'ambos' || partida.modoJuego === 'mixto') {
+                MODO_JUEGO = partida.modoJuego;
+            }
+            if (partida.ccSecuenciaEnUso) CC_SECUENCIA_EN_USO = partida.ccSecuenciaEnUso;
+            cartonesFueraDeJuego = new Set(Array.isArray(partida.cartonesFueraDeJuego) ? partida.cartonesFueraDeJuego : []);
+            cartonesAsignadosBingo = new Set(Array.isArray(partida.cartonesAsignadosBingo) ? partida.cartonesAsignadosBingo : []);
+            cartonesAsignadosFigura = new Set(Array.isArray(partida.cartonesAsignadosFigura) ? partida.cartonesAsignadosFigura : []);
+
+            renderizarEstructura();
+
+            if (MODO_JUEGO === 'mixto' && (cartonesAsignadosBingo.size > 0 || cartonesAsignadosFigura.size > 0)) {
+                document.body.classList.add('modo-mixto-jugando');
+                const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+                todos.forEach((carton, idx) => {
+                    const enBingo = cartonesAsignadosBingo.has(idx);
+                    const enFigura = cartonesAsignadosFigura.has(idx);
+                    if (enBingo) carton.classList.add('tiene-asignacion-bingo');
+                    else if (enFigura) carton.classList.add('tiene-asignacion-figura');
+                });
+            }
+
+            const cartonesDOM = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+            partida.cartones.forEach((dataCarton, idx) => {
+                const carton = cartonesDOM[idx];
+                if (!carton) return;
+
+                if (dataCarton.color) carton.style.setProperty('--carton-color', dataCarton.color);
+                if (dataCarton.colorDark) carton.style.setProperty('--carton-color-dark', dataCarton.colorDark);
+
+                const titleEl = carton.querySelector('.carton-title');
+                if (titleEl && dataCarton.titulo) titleEl.textContent = dataCarton.titulo;
+
+                const celdasDOM = carton.querySelectorAll('.carton-grid-inner .celda');
+                dataCarton.celdas.forEach((celdaData, iCelda) => {
+                    const celda = celdasDOM[iCelda];
+                    if (!celda) return;
+                    if (celdaData.vacia) {
+                        celda.classList.add('vacia');
+                    } else if (celdaData.valor !== null && celdaData.valor !== undefined) {
+                        celda.dataset.valor = celdaData.valor;
+                        const numVal = celda.querySelector('.num-val');
+                        if (numVal) numVal.textContent = celdaData.valor;
+                    }
+                    if (celdaData.marcada) {
+                        celda.classList.add('marcada');
+                        celda.classList.remove('animar-marca');
+                    } else {
+                        celda.classList.remove('marcada');
+                    }
+                });
+
+                if (dataCarton.ganoFigura) carton.classList.add('ganador-figura-1');
+                if (dataCarton.ganoBingo) carton.classList.add('ganador-bingo');
+            });
+
+            aplicarCartonesFueraDeJuego();
+
             const display = document.getElementById('numeroDisplay');
-            if (display) display.innerHTML = `<span style="font-size: 0.75rem; display: block; line-height: 1;">${letra}</span>${numero}`;
+            if (display) {
+                if (historialSacadas.length > 0) {
+                    display.textContent = historialSacadas[0].numero;
+                    const sphere = document.getElementById('bolilleroSphere');
+                    if (sphere) sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(historialSacadas[0].numero));
+                } else {
+                    display.textContent = '--';
+                }
+            }
 
             const stats = document.getElementById('statsDisplay');
             if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
 
-            document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
-                el.classList.add('marcada');
-                el.classList.add('animar-marca');
-            });
-
-            const ctrlEl = document.getElementById(`ctrl-${numero}`);
-            if (ctrlEl) ctrlEl.classList.add('marcada');
-
             const recientesLista = document.getElementById('recientesLista');
             if (recientesLista) {
                 recientesLista.innerHTML = '';
-                historialSacadas.slice(0, 6).forEach(item => {
+                historialSacadas.slice(1, 7).forEach(item => {
                     const bola = document.createElement('div');
-                    bola.className = 'mini-bola entrando';
+                    bola.className = 'mini-bola';
+                    bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
                     bola.innerHTML = `<span>${item.numero}</span>`;
                     recientesLista.appendChild(bola);
                 });
             }
 
-            const resultadoFigura = comprobarFiguraEnCartones();
-            const resultadoLleno = comprobarLlenoEnCartones();
+            historialSacadas.forEach(item => {
+                const ctrlEl = document.getElementById(`ctrl-${item.numero}`);
+                if (ctrlEl) {
+                    ctrlEl.classList.add('marcada');
+                    ctrlEl.classList.remove('clickeable');
+                    ctrlEl.style.pointerEvents = 'none';
+                }
+            });
 
-            const cartonesGanadores = new Map();
+            aplicarPaleta();
+            aplicarTamanoControl();
+            aplicarConfigFiguras();
+            aplicarEspacioNotch();
+            aplicarBloqueoScroll();
 
-            if (resultadoFigura.hayGanador) {
-                figuraYaGanada = true;
-                resultadoFigura.infoGanadores.forEach(info => {
-                    cartonesGanadores.set(info.carton, {
-                        carton: info.carton,
-                        celdasDeLaFigura: info.celdasDeLaFigura || [],
-                        ganoFigura: true,
-                        ganoBingo: false
-                    });
+            setTimeout(() => {
+                actualizarPuntosAlerta();
+                actualizarResaltadosAmarillos();
+            }, 300);
+
+            return true;
+        }
+
+        function ejecutarSaqueDeBola(numero) {
+            const sphere = document.getElementById('bolilleroSphere');
+
+            document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header')
+                .forEach(c => c.classList.remove('alerta-header'));
+
+            actualizarPuntosAlerta();
+            apagarResaltadoDeTodos();
+
+            if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
+            if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
+
+            const ejecutarEntradaNuevaBola = () => {
+                const idx = bombo.indexOf(numero);
+                if (idx === -1) return;
+                bombo.splice(idx, 1);
+
+                const letra = obtenerLetra(numero);
+                historialSacadas.unshift({ numero, letra });
+
+                const display = document.getElementById('numeroDisplay');
+                if (display) display.textContent = numero;
+
+                cantarBola(numero);
+
+                if (sphere) {
+                    sphere.style.setProperty('--bola-exterior', colorBolaParaNumero(numero));
+                    sphere.classList.remove('rodar-salida', 'rodar-entrada');
+                    void sphere.offsetWidth;
+                    sphere.classList.add('rodar-entrada');
+                }
+
+                const stats = document.getElementById('statsDisplay');
+                if (stats) stats.textContent = `${historialSacadas.length}/${MAX_BALOTAS}`;
+
+                document.querySelectorAll(`.celda[data-valor="${numero}"]`).forEach(el => {
+                    el.classList.add('marcada');
+                    el.classList.add('animar-marca');
+                    setTimeout(() => el.classList.remove('animar-marca'), 1200);
                 });
-            }
 
-            if (resultadoLleno.hayGanador) {
-                llenoYaGanado = true;
-                partidaTerminada = true;
-                resultadoLleno.infoGanadores.forEach(info => {
-                    if (cartonesGanadores.has(info.carton)) {
-                        cartonesGanadores.get(info.carton).ganoBingo = true;
-                    } else {
-                        cartonesGanadores.set(info.carton, {
-                            carton: info.carton,
-                            celdasDeLaFigura: info.celdasDeLaFigura || [],
-                            ganoFigura: false,
-                            ganoBingo: true
+                const ctrlEl = document.getElementById(`ctrl-${numero}`);
+                if (ctrlEl) {
+                    ctrlEl.classList.add('marcada');
+                    ctrlEl.classList.remove('clickeable');
+                    ctrlEl.style.pointerEvents = 'none';
+                }
+
+                const recientesLista = document.getElementById('recientesLista');
+                if (recientesLista) {
+                    recientesLista.innerHTML = '';
+                    historialSacadas.slice(1, 7).forEach(item => {
+                        const bola = document.createElement('div');
+                        bola.className = 'mini-bola entrando';
+                        bola.style.setProperty('--bola-bg', colorBolaParaNumero(item.numero));
+                        bola.innerHTML = `<span>${item.numero}</span>`;
+                        recientesLista.appendChild(bola);
+                    });
+                }
+
+                setTimeout(() => {
+                    if (sphere) sphere.classList.remove('rodar-entrada');
+
+                    const resultadoFigura = comprobarFiguraEnCartones();
+                    const resultadoLleno = comprobarLlenoEnCartones();
+                    const cartonesGanadores = new Map();
+
+                    if (resultadoFigura.hayGanador) {
+                        figuraYaGanada = true;
+                        resultadoFigura.infoGanadores.forEach(info => {
+                            cartonesGanadores.set(info.carton, {
+                                carton: info.carton,
+                                celdasDeLaFigura: info.celdasDeLaFigura || [],
+                                ganoFigura: true,
+                                ganoBingo: false
+                            });
                         });
                     }
-                });
-            }
 
-            if (cartonesGanadores.size > 0) {
-                ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values()));
+                    if (resultadoLleno.hayGanador) {
+                        llenoYaGanado = true;
+                        partidaTerminada = true;
+                        resultadoLleno.infoGanadores.forEach(info => {
+                            if (cartonesGanadores.has(info.carton)) {
+                                cartonesGanadores.get(info.carton).ganoBingo = true;
+                            } else {
+                                cartonesGanadores.set(info.carton, {
+                                    carton: info.carton,
+                                    celdasDeLaFigura: info.celdasDeLaFigura || [],
+                                    ganoFigura: false,
+                                    ganoBingo: true
+                                });
+                            }
+                        });
+                    }
+
+                    if (MODO_JUEGO === 'figura' && figuraYaGanada) {
+                        partidaTerminada = true;
+                    }
+
+                    if (MODO_JUEGO === 'mixto') {
+                        const figuraOk = (cartonesAsignadosFigura.size === 0) || figuraYaGanada;
+                        const bingoOk = (cartonesAsignadosBingo.size === 0) || llenoYaGanado;
+                        if (figuraOk && bingoOk) {
+                            partidaTerminada = true;
+                        }
+                    }
+
+                    if (cartonesGanadores.size > 0) {
+                        detenerAuto();
+                        ejecutarAnimacionResaltado(Array.from(cartonesGanadores.values())).then(() => {
+                            actualizarResaltadosAmarillos();
+                            liberarBloqueo();
+                        });
+                    } else {
+                        actualizarResaltadosAmarillos();
+                        liberarBloqueo();
+                    }
+                }, VELOCIDAD_BOLA);
+            };
+
+            const liberarBloqueo = () => {
+                isAnimating = false;
+                const b = document.getElementById('btnSacarBola');
+                if (b) { b.classList.remove('presionado'); b.classList.remove('bloqueado'); }
+            };
+
+            if (historialSacadas.length === 0) {
+                ejecutarEntradaNuevaBola();
+            } else {
+                if (sphere) {
+                    sphere.classList.remove('rodar-entrada', 'rodar-salida');
+                    void sphere.offsetWidth;
+                    sphere.classList.add('rodar-salida');
+                    setTimeout(ejecutarEntradaNuevaBola, 480);
+                } else {
+                    ejecutarEntradaNuevaBola();
+                }
             }
         }
 
-        /* ============================================
-           REINICIAR JUEGO
-           ============================================ */
+        function sacarBola(e) {
+            if (modoAsignacionActivo) return;
+            if (isAnimating || bloqueadoPorAnimacion) return;
+            if (bombo.length === 0) return;
+            if (modoRevanchaActivo) return;
+
+            if (autoActivo) detenerAuto();
+
+            desbloquearSonidos();
+
+            const btn = document.getElementById('btnSacarBola');
+            if (btn) {
+                btn.classList.add('bloqueado');
+                btn.classList.remove('presionado');
+                void btn.offsetWidth;
+                btn.classList.add('presionado');
+            }
+            isAnimating = true;
+            ejecutarSaqueDeBola(obtenerBolaInteligente());
+        }
+
+        function sacarBolaEspecifica(numero) {
+            if (modoAsignacionActivo) return;
+            if (isAnimating || bloqueadoPorAnimacion) return;
+            if (partidaTerminada) return;
+            if (modoRevanchaActivo) return;
+            if (historialSacadas.some(h => h.numero === numero)) return;
+            if (bombo.indexOf(numero) === -1) return;
+
+            if (autoActivo) detenerAuto();
+
+            desbloquearSonidos();
+
+            const btn = document.getElementById('btnSacarBola');
+            if (btn) {
+                btn.classList.add('bloqueado');
+                btn.classList.remove('presionado');
+                void btn.offsetWidth;
+                btn.classList.add('presionado');
+            }
+            isAnimating = true;
+            ejecutarSaqueDeBola(numero);
+        }
+
         function reiniciarJuego() {
+            detenerAuto();
+            cartonForzadoIdx = -1;
             bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
             historialSacadas = [];
             const display = document.getElementById('numeroDisplay');
@@ -1032,25 +2267,46 @@
             if (timeoutAnimacion) { clearTimeout(timeoutAnimacion); timeoutAnimacion = null; }
             if (timeoutRotulos) { clearTimeout(timeoutRotulos); timeoutRotulos = null; }
             if (timeoutApagado) { clearTimeout(timeoutApagado); timeoutApagado = null; }
+            if (timeoutBloqueoDestello) { clearTimeout(timeoutBloqueoDestello); timeoutBloqueoDestello = null; }
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
+            detenerTactac();
             bloqueadoPorAnimacion = false;
+            isAnimating = false;
             figuraYaGanada = false;
             llenoYaGanado = false;
             partidaTerminada = false;
             celdasCentroPendientes = 0;
-            primeraBolaNumero = null;
-            primeraBolaYaSalio = false;
             const btn = document.getElementById('btnSacarBola');
-            if (btn) btn.classList.remove('bloqueado');
+            if (btn) btn.classList.remove('bloqueado', 'presionado');
+            document.querySelectorAll('.cartones-grid.modo-15 .celda.falta-amarillo').forEach(c => c.classList.remove('falta-amarillo'));
+            document.querySelectorAll('.cartones-grid.modo-15 .carton.alerta-header').forEach(c => c.classList.remove('alerta-header'));
+            document.querySelectorAll('.cartones-grid.modo-15 .carton .punto-alerta').forEach(p => p.classList.remove('activo', 'titilar'));
+            document.querySelectorAll('.cartones-grid.modo-15 .carton').forEach(c => {
+                c.dataset.enAlerta = '0';
+                c.dataset.pausadoPorSacar = '0';
+                c.dataset.yaAvisoFigura = '0';
+                c.dataset.yaAvisoBingo = '0';
+            });
             renderizarEstructura();
+
+            if (MODO_JUEGO === 'mixto' && (cartonesAsignadosBingo.size > 0 || cartonesAsignadosFigura.size > 0)) {
+                const todos = document.querySelectorAll('.cartones-grid.modo-15 .carton');
+                todos.forEach((carton, idx) => {
+                    const enBingo = cartonesAsignadosBingo.has(idx);
+                    const enFigura = cartonesAsignadosFigura.has(idx);
+                    if (enBingo) carton.classList.add('tiene-asignacion-bingo');
+                    else if (enFigura) carton.classList.add('tiene-asignacion-figura');
+                });
+            }
         }
 
-        /* ============================================
-           CAMBIAR CARTONES Y PALETA
-           ============================================ */
         function cambiarCartonesYPaleta() {
-            // Rota paleta
+            if (modoAsignacionActivo) return;
+            detenerAuto();
+            cartonesFueraDeJuego.clear();
+            desactivarModoRevancha();
+
             try {
                 const raw = localStorage.getItem('bingo_config');
                 if (raw) {
@@ -1058,43 +2314,121 @@
                     if (Array.isArray(config.temasActivos) && config.temasActivos.length > 0) {
                         TEMAS_ACTIVOS = config.temasActivos;
                     }
+                    const cc = config.cartonesCombinados || {};
+                    CC_SECUENCIAS = Array.isArray(cc.secuencias) ? cc.secuencias.slice() : [];
+                    CC_SECUENCIA_EN_USO = cc.secuenciaEnUsoId || (CC_SECUENCIAS[0] ? CC_SECUENCIAS[0].id : '');
+                    if (config.modoTemas === 'combinado' || config.modoTemas === 'simple') {
+                        MODO_TEMAS = config.modoTemas;
+                    } else if (cc.activo === true) {
+                        MODO_TEMAS = 'combinado';
+                    } else {
+                        MODO_TEMAS = 'simple';
+                    }
                 }
             } catch (e) {}
 
-            const indicesActivos = PALETAS
-                .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
-                .filter(i => i !== -1);
-
-            if (indicesActivos.length > 0) {
-                indiceRotacionActual = (indiceRotacionActual + 1) % indicesActivos.length;
-                paletaActual = indicesActivos[indiceRotacionActual];
+            if (MODO_TEMAS === 'combinado') {
+                if (CC_SECUENCIAS.length > 1) {
+                    const idxActual = CC_SECUENCIAS.findIndex(s => s.id === CC_SECUENCIA_EN_USO);
+                    const idxNuevo = (idxActual + 1) % CC_SECUENCIAS.length;
+                    CC_SECUENCIA_EN_USO = CC_SECUENCIAS[idxNuevo].id;
+                }
             } else {
-                indiceRotacionActual = (indiceRotacionActual + 1) % PALETAS.length;
-                paletaActual = indiceRotacionActual;
+                const indicesActivos = PALETAS
+                    .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
+                    .filter(i => i !== -1);
+
+                if (indicesActivos.length > 0) {
+                    indiceRotacionActual = (indiceRotacionActual + 1) % indicesActivos.length;
+                    paletaActual = indicesActivos[indiceRotacionActual];
+                } else {
+                    indiceRotacionActual = (indiceRotacionActual + 1) % PALETAS.length;
+                    paletaActual = indiceRotacionActual;
+                }
             }
 
-            // Rota figura
             if (CANTIDAD_FIGURAS >= 1 && ORDEN_FIGURAS.length > 0) {
-                const idxFigura = ORDEN_FIGURAS.indexOf(figuraActual);
-                const nuevoIdx = (idxFigura + 1) % ORDEN_FIGURAS.length;
-                figuraActual = ORDEN_FIGURAS[nuevoIdx];
+                if (ORDEN_FIGURAS.length === 1) {
+                    figuraActual = ORDEN_FIGURAS[0];
+                } else {
+                    let nuevaFigura = figuraActual;
+                    while (nuevaFigura === figuraActual) {
+                        nuevaFigura = ORDEN_FIGURAS[Math.floor(Math.random() * ORDEN_FIGURAS.length)];
+                    }
+                    figuraActual = nuevaFigura;
+                }
             }
 
             reiniciarJuego();
             aplicarTamanoControl();
             aplicarConfigFiguras();
+            aplicarEspacioNotch();
+            aplicarBloqueoScroll();
+        }
+
+        function salirAlMenu() {
+            if (saliendoDelJuego) return;
+            saliendoDelJuego = true;
+
+            detenerAuto();
+
+            const body = document.body;
+            body.style.overflow = '';
+            body.style.height = '';
+            body.style.position = '';
+            body.style.inset = '';
+            body.style.overscrollBehavior = '';
+            body.style.paddingTop = '';
+            body.style.paddingBottom = '';
+            document.documentElement.style.overflow = '';
+
+            body.classList.remove(
+                'modo-revancha',
+                'modo-asignacion',
+                'modo-mixto-jugando',
+                'animaciones-pausadas',
+                'modo-lite',
+                'tema-verde', 'tema-azul', 'tema-rojo', 'tema-negro',
+                'tema-naranja', 'tema-morado', 'tema-clasico',
+                'tema-dorado', 'tema-madera', 'tema-kate', 'tema-cyberpunk',
+                'tema-volcano', 'tema-pixel', 'tema-esmeralda', 'tema-candy',
+                'tema-oro', 'tema-pacifico', 'tema-halloween', 'tema-sport',
+                'tema-titan', 'tema-bronce'
+            );
+
+            hacerFadeOutMusica(1500, () => {
+                window.location.replace('index.html?t=' + Date.now());
+            });
         }
 
         window.sacarBola = sacarBola;
+        window.sacarBolaEspecifica = sacarBolaEspecifica;
         window.reiniciarJuego = reiniciarJuego;
         window.cambiarCartonesYPaleta = cambiarCartonesYPaleta;
+        window.confirmarRevancha = confirmarRevancha;
+        window.guardarPartida = guardarPartida;
 
-        /* ============================================
-           INICIALIZACIÓN
-           ============================================ */
         document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('cartonesGrid')) {
+                inicializarAudios();
                 cargarConfiguracion();
+                aplicarEspacioNotch();
+                aplicarBloqueoScroll();
+                initVoces();
+
+                const btnAtras = document.getElementById('btnAtrasJuego');
+                if (btnAtras) btnAtras.addEventListener('click', salirAlMenu);
+
+                iniciarMusicaFondo();
+
+                const desbloquear = () => {
+                    desbloquearVoz();
+                    desbloquearSonidos();
+                    document.removeEventListener('touchstart', desbloquear);
+                    document.removeEventListener('click', desbloquear);
+                };
+                document.addEventListener('touchstart', desbloquear, { once: true });
+                document.addEventListener('click', desbloquear, { once: true });
 
                 const indicesActivos = PALETAS
                     .map((p, i) => TEMAS_ACTIVOS.includes(p.nombre) ? i : -1)
@@ -1106,17 +2440,49 @@
                 aplicarTemaEnBody();
                 aplicarParametrosResaltado();
 
-                if (USAR_BASE_DATOS) {
-                    suscribirNombresFirebase();
+                if (USAR_BASE_DATOS) suscribirNombresFirebase();
+
+                const modoCargarPartida = localStorage.getItem('bingo_modo_cargar');
+                if (modoCargarPartida === '1') {
+                    localStorage.removeItem('bingo_modo_cargar');
                 }
 
-                reiniciarJuego();
+                const modoRevanchaDesdeIndex = localStorage.getItem('bingo_modo_revancha');
+                if (modoRevanchaDesdeIndex === '1') {
+                    localStorage.removeItem('bingo_modo_revancha');
+                }
+
+                let partidaCargada = false;
+                if (modoCargarPartida === '1') {
+                    partidaCargada = cargarPartidaGuardada();
+                }
+
+                if (!partidaCargada) {
+                    reiniciarJuego();
+                }
+
+                if (MODO_JUEGO === 'mixto' && !partidaCargada) {
+                    setTimeout(() => activarModoAsignacion(), 600);
+                } else if (modoRevanchaDesdeIndex === '1') {
+                    setTimeout(() => activarModoRevancha(), 900);
+                }
 
                 const btnCambiar = document.querySelector('.btn-cambiar');
-                if (btnCambiar) {
-                    btnCambiar.onclick = cambiarCartonesYPaleta;
-                }
+                if (btnCambiar) btnCambiar.onclick = cambiarCartonesYPaleta;
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && autoActivo) {
+                        detenerAuto();
+                    }
+                });
             }
+        });
+
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            if (!esMovil) return;
+            e.preventDefault();
         });
     </script>
 </body>

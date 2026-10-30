@@ -6,6 +6,39 @@
     --color-figura: #ffd700;
     --color-figura-glow: rgba(255, 215, 0, 0.9);
     --color-figura-suave: rgba(255, 215, 0, 0.55);
+    --amarillo-glow: 0.95;
+    --amarillo-halo: 0.55;
+}
+
+/* ============================================
+   📱 PANTALLA COMPLETA CON RESPETO AL NOTCH
+   ============================================ */
+html {
+    height: 100%;
+    background: #000; /* pinta detrás del notch y de la barra inferior */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100%;
+    min-height: 100dvh;
+    background: #000; /* el negro se ve detrás del notch */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
+/* Excepción: los inputs y textareas SÍ se pueden seleccionar/escribir */
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 * {
@@ -20,19 +53,6 @@
     touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-}
-
-html {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    min-height: 100%;
-    overflow-x: hidden;
-}
-
-body {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    -webkit-overflow-scrolling: touch;
 }
 
 *:focus, *:active, *:focus-visible {
@@ -61,6 +81,8 @@ button, button:focus, button:active, select, select:focus, select:active {
     padding-top: max(20px, env(safe-area-inset-top));
     padding-bottom: max(20px, env(safe-area-inset-bottom));
     width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 .menu-container {
@@ -494,7 +516,7 @@ button, button:focus, button:active, select, select:focus, select:active {
 /* ============================================
    ESTILOS DEL JUEGO
    ============================================ */
-body {
+body:not(.body-center) {
     background-color: #12121c;
     color: #fff;
     display: flex;
@@ -561,6 +583,10 @@ body {
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
     position: relative;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 .carton-title { display: block; line-height: 1.3; }
@@ -642,6 +668,10 @@ body {
     box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
 }
 
+/* ============================================
+   LA BOLITA GRIS — aparece a los 1.2s (después del zoom)
+   Con z-index 20 queda por ENCIMA del número (que tiene z-index 10)
+   ============================================ */
 .cartones-grid.modo-15 .celda.marcada::after {
     content: '';
     position: absolute;
@@ -653,9 +683,35 @@ body {
         rgba(0, 0, 0, 0.15) 100%);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
     pointer-events: none;
+    opacity: 0;
+    z-index: 20;
+    animation: aparecerBolita 0.5s ease-out 1.0s forwards;
+    
 }
 
-.cartones-grid.modo-15 .celda.marcada .num-val { opacity: 0; }
+@keyframes aparecerBolita {
+    0%   { opacity: 0; transform: scale(0.4); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================
+   EL NÚMERO — visible durante el zoom y la aparición de la bolita.
+   Se desvanece al final (a los 1.7s).
+   FORZADO en color negro y z-index 10 para que se vea SIEMPRE
+   durante el zoom aunque el tema ponga color:transparent.
+   ============================================ */
+.cartones-grid.modo-15 .celda.marcada .num-val {
+    color: #000000 !important;
+    opacity: 1;
+    z-index: 10;
+    position: relative;
+    animation: ocultarNumero 0.5s ease-out 1.0s forwards;
+}
+
+@keyframes ocultarNumero {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
+}
 
 /* ============================================
    FREE CENTRAL
@@ -687,64 +743,358 @@ body {
     z-index: 1;
 }
 
-.animar-marca { animation: marcarCelda 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* ============================================
+   🎯 ZOOM + DESTELLO ARCOÍRIS (ÚNICO)
+   Duración total: 1.2s
+   El número se ve todo el tiempo porque está forzado arriba.
+   ============================================ */
+.cartones-grid.modo-15 .celda.animar-marca {
+    animation: zoomConArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both;
+    z-index: 5;
+    position: relative;
+}
 
-@keyframes marcarCelda {
-    0%   { transform: scale(1); }
-    45%  { transform: scale(1.2); }
-    100% { transform: scale(1); }
+@keyframes zoomConArcoiris {
+    0% {
+        transform: scale(1);
+        background-color: var(--carton-color, #2e7d32);
+    }
+    10% {
+        transform: scale(1.25);
+        background-color: #ffee00;
+        box-shadow: 0 0 14px 3px rgba(255, 238, 0, 0.9);
+    }
+    22% {
+        transform: scale(1.5);
+        background-color: #ff9100;
+        box-shadow: 0 0 22px 6px rgba(255, 145, 0, 0.9);
+    }
+    35% {
+        transform: scale(1.55);
+        background-color: #ff4081;
+        box-shadow: 0 0 24px 8px rgba(255, 64, 129, 0.9);
+    }
+    48% {
+        transform: scale(1.5);
+        background-color: #00e5ff;
+        box-shadow: 0 0 22px 6px rgba(0, 229, 255, 0.9);
+    }
+    60% {
+        transform: scale(1.35);
+        background-color: #b2ff59;
+        box-shadow: 0 0 18px 5px rgba(178, 255, 89, 0.9);
+    }
+    72% {
+        transform: scale(1.18);
+        background-color: #ffee00;
+        box-shadow: 0 0 14px 3px rgba(255, 234, 0, 0.85);
+    }
+    85% {
+        transform: scale(1.08);
+        background-color: var(--carton-color, #2e7d32);
+        box-shadow: 0 0 8px 2px var(--carton-color, #2e7d32);
+    }
+    100% {
+        transform: scale(1);
+        background-color: var(--carton-color, #2e7d32);
+        box-shadow: none;
+    }
 }
 
 /* ============================================
    BOLILLERO
    ============================================ */
 .bolillero-container {
-    background: #1e1e2d;
-    border-radius: 8px;
-    padding: 8px;
+    width: 442px;
+    height: 106px;
+    max-width: 100%;
+
+    background: linear-gradient(135deg,
+        var(--tema-color, #2e7d32) 0%,
+        var(--tema-color-bg, #4caf50) 25%,
+        var(--tema-color, #2e7d32) 50%,
+        var(--tema-color-bg, #4caf50) 75%,
+        var(--tema-color, #2e7d32) 100%
+    );
+    background-size: 400% 400%;
+    border: none;
+    border-radius: 12px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+    position: relative;
+    outline: 3px solid #ffffff;
+    outline-offset: -2px;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.2),
+        inset 0 0 12px var(--tema-color, #2e7d32);
+    animation: ondasColoridas 12s ease-in-out infinite;
+}
+
+.bolillero-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 35%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes ondasColoridas {
+    0% {
+        background-position: 0% 50%;
+        box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.2),
+            inset 0 0 12px var(--tema-color, #2e7d32);
+    }
+    50% {
+        background-position: 100% 50%;
+        box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.2),
+            inset 0 0 20px var(--tema-color, #2e7d32);
+    }
+    100% {
+        background-position: 0% 50%;
+        box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.2),
+            inset 0 0 12px var(--tema-color, #2e7d32);
+    }
 }
 
 .bolillero-top-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 6px;
 }
 
-.bolillero-sphere {
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle at 30% 30%, #4caf50, #1b5e20);
-    border-radius: 50%;
+.bolillero-stage {
+    width: 66px;
+    height: 66px;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    color: #fff;
-    box-shadow: inset -2px -2px 6px rgba(0,0,0,0.4);
+    overflow: visible;
+    flex-shrink: 0;
 }
 
-.btn-sacar-bola {
-    background: #4caf50;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-weight: 900;
-    cursor: pointer;
-    text-align: center;
+.bolillero-sphere {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: var(--bola-exterior, #2196f3);
     position: relative;
-    overflow: hidden;
-    touch-action: manipulation;
+    cursor: pointer;
     user-select: none;
-    -webkit-user-select: none;
-    transition: filter 0.15s ease, opacity 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.4s ease;
+    overflow: hidden;
+    box-shadow:
+        0 5px 10px rgba(0, 0, 0, 0.25),
+        inset -4px -4px 8px rgba(0, 0, 0, 0.45),
+        inset 4px 4px 8px rgba(255, 255, 255, 0.75);
+    animation: sombra-3d-infinita-lenta 6s linear infinite;
 }
 
-.btn-sacar-bola:active { background: #3d8b40; }
+.bolillero-sphere::before {
+    content: '';
+    position: absolute;
+    width: 66%;
+    height: 66%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #ffffff 0%, #ebebeb 70%, #d2d2d2 100%);
+    box-shadow:
+        inset 2px 3px 6px rgba(0, 0, 0, 0.45),
+        0 2px 5px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+.bolillero-sphere::after {
+    content: '';
+    position: absolute;
+    top: 8%;     /* Se mantienen fijos */
+    left: 15%;   /* Se mantienen fijos */
+    width: 28%;
+    height: 18%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 60%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+    z-index: 4;
+    animation: orbita-3d-infinita-lenta 6s linear infinite;
+    will-change: transform, opacity; /* GPU Aceleración */
+}
+
+.bolillero-numero {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #000000 !important;
+    z-index: 5 !important;
+    text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.8);
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    text-align: center;
+}
+
+.bolillero-numero .letra-display {
+    font-size: 0.5rem;
+    display: block;
+    line-height: 1;
+    margin-bottom: -1px;
+    font-weight: 900;
+}
+
+.rodar-entrada {
+    animation: rodar-desde-izquierda 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards, sombra-3d-infinita-lenta 6s linear infinite;
+}
+
+.rodar-salida {
+    animation: rodar-hacia-derecha 0.55s cubic-bezier(0.5, 0, 0.75, 0) forwards, sombra-3d-infinita-lenta 6s linear infinite;
+}
+
+@keyframes rodar-desde-izquierda {
+    0% { transform: translateX(-90px) rotate(-360deg) scale(0.6); opacity: 0; }
+    70% { transform: translateX(6px) rotate(15deg) scale(1.05); opacity: 1; }
+    100% { transform: translateX(0px) rotate(0deg) scale(1); opacity: 1; }
+}
+@keyframes rodar-hacia-derecha {
+    0% { transform: translateX(0px) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateX(100px) rotate(420deg) scale(0.6); opacity: 0; }
+}
+
+@keyframes orbita-3d-infinita-lenta {
+    0% { transform: translate(0, 0) rotate(-30deg); opacity: 0.9; }
+    25% { transform: translate(25px, 5px) rotate(30deg); opacity: 0.5; }
+    50% { transform: translate(20px, 30px) rotate(120deg); opacity: 0.15; }
+    75% { transform: translate(-5px, 25px) rotate(210deg); opacity: 0.5; }
+    100% { transform: translate(0, 0) rotate(-30deg); opacity: 0.9; }
+}
+
+@keyframes sombra-3d-infinita-lenta {
+    0% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset -6px -6px 12px rgba(0, 0, 0, 0.45), inset 5px 5px 10px rgba(255, 255, 255, 0.75); }
+    25% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset 6px -6px 12px rgba(0, 0, 0, 0.45), inset -5px 5px 10px rgba(255, 255, 255, 0.75); }
+    50% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset 6px 6px 12px rgba(0, 0, 0, 0.45), inset -5px -5px 10px rgba(255, 255, 255, 0.75); }
+    75% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset -6px 6px 12px rgba(0, 0, 0, 0.45), inset 5px -5px 10px rgba(255, 255, 255, 0.75); }
+    100% { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25), inset -6px -6px 12px rgba(0, 0, 0, 0.45), inset 5px 5px 10px rgba(255, 255, 255, 0.75); }
+}
+
+/* =========================================================
+   🎰 BOTÓN SACAR BOLA
+   ========================================================= */
+.btn-sacar-bola {
+    background: #0a0a12;
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    color: #ffd700;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 6px 10px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.15s ease;
+    min-height: 46px;
+    min-width: 70px;
+    width: auto;
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.15);
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    flex-shrink: 0;
+}
+
+.btn-sacar-bola:active {
+    transform: scale(0.80) !important;
+    border-width: 5px !important;
+    border-color: #ffffff !important;
+    box-shadow:
+        0 0 40px rgba(255, 215, 0, 0.5),
+        0 0 60px rgba(255, 215, 0, 0.2),
+        inset 0 0 24px rgba(255, 215, 0, 0.1);
+    transition: all 0.05s ease;
+}
+
+.btn-sacar-bola .particula {
+    position: absolute;
+    width: 2.5px;
+    height: 2.5px;
+    border-radius: 50%;
+    background: #ffd700;
+    box-shadow: 0 0 5px #ffd700;
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.btn-sacar-bola .particula:nth-child(1) { top: 15%; left: 10%; animation: particulaFloat 4s ease-in-out 0s infinite; }
+.btn-sacar-bola .particula:nth-child(2) { top: 70%; right: 12%; animation: particulaFloat 4.5s ease-in-out 1.2s infinite; }
+.btn-sacar-bola .particula:nth-child(3) { bottom: 20%; left: 25%; animation: particulaFloat 3.8s ease-in-out 2.5s infinite; }
+.btn-sacar-bola .particula:nth-child(4) { top: 10%; right: 22%; animation: particulaFloat 5s ease-in-out 0.8s infinite; }
+.btn-sacar-bola .particula:nth-child(5) { bottom: 30%; right: 28%; animation: particulaFloat 4.2s ease-in-out 3s infinite; }
+.btn-sacar-bola .particula:nth-child(6) { top: 45%; left: 5%; animation: particulaFloat 3.5s ease-in-out 1.5s infinite; }
+.btn-sacar-bola .particula:nth-child(7) { top: 5%; left: 45%; animation: particulaFloat 4.8s ease-in-out 0.3s infinite; }
+.btn-sacar-bola .particula:nth-child(8) { bottom: 10%; left: 40%; animation: particulaFloat 4.1s ease-in-out 2.2s infinite; }
+.btn-sacar-bola .particula:nth-child(9) { top: 50%; right: 5%; animation: particulaFloat 3.9s ease-in-out 1.8s infinite; }
+.btn-sacar-bola .particula:nth-child(10) { top: 25%; right: 35%; animation: particulaFloat 4.3s ease-in-out 0.6s infinite; }
+.btn-sacar-bola .particula:nth-child(11) { bottom: 35%; left: 8%; animation: particulaFloat 3.6s ease-in-out 2.8s infinite; }
+.btn-sacar-bola .particula:nth-child(12) { top: 8%; left: 75%; animation: particulaFloat 4.7s ease-in-out 1.1s infinite; }
+
+@keyframes particulaFloat {
+    0% { opacity: 0; transform: scale(0) translateY(0px); }
+    20% { opacity: 1; transform: scale(1.5) translateY(-4px); }
+    40% { opacity: 0.8; transform: scale(0.8) translateY(-8px); }
+    60% { opacity: 1; transform: scale(1.2) translateY(-2px); }
+    80% { opacity: 0.6; transform: scale(0.9) translateY(-5px); }
+    100% { opacity: 0; transform: scale(0) translateY(0px); }
+}
+
+.btn-sacar-bola .text-glow {
+    position: relative;
+    z-index: 3;
+    color: #ffd700;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    line-height: 1.1;
+    text-shadow: 0 0 16px rgba(255, 215, 0, 0.1);
+}
+
+.btn-sacar-bola.presionado {
+    animation: botonFlash 0.3s ease-out !important;
+}
+
+@keyframes botonFlash {
+    0% {
+        transform: scale(0.75);
+        border-width: 6px;
+        border-color: #ffffff;
+        box-shadow: 0 0 50px rgba(255,255,255,0.4);
+    }
+    50% {
+        transform: scale(0.85);
+        border-width: 5px;
+        border-color: #ff6b6b;
+        box-shadow: 0 0 40px rgba(255,107,107,0.3);
+    }
+    100% {
+        transform: scale(1);
+        border-width: 2px;
+        border-color: #ffd700;
+        box-shadow: 0 0 16px rgba(255,215,0,0.15);
+    }
+}
 
 .btn-sacar-bola.bloqueado {
     opacity: 0.45;
@@ -752,104 +1102,115 @@ body {
     filter: grayscale(0.4);
 }
 
-.btn-sacar-bola .text-glow {
-    position: relative;
-    z-index: 2;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-}
-
-.btn-sacar-bola .onda {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.btn-sacar-bola:active .onda {
-    width: 200px;
-    height: 200px;
-    opacity: 1;
-    transition: 0s;
-}
-
-.particula {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.btn-sacar-bola:active .particula {
-    animation: particulaAnim 0.5s ease-out forwards;
-}
-
-@keyframes particulaAnim {
-    0% { opacity: 1; transform: translate(0, 0) scale(1); }
-    100% { opacity: 0; transform: translate(var(--tx, 20px), var(--ty, -20px)) scale(0); }
-}
-
+/* ============================================
+   STATS BOX
+   ============================================ */
 .stats-box {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    font-size: 0.75rem;
+    gap: 4px;
+    font-size: 0.65rem;
     font-weight: 700;
     color: #555;
     background: #fff;
-    padding: 6px 12px;
+    padding: 4px 8px;
     border-radius: 5px;
     border: 1px solid #ddd;
+    flex-shrink: 0;
 }
 
 .stats-box span {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 900;
     color: var(--tema-color, #2e7d32);
 }
 
 /* ============================================
-   BOLAS RECIENTES
+   RECIENTES
    ============================================ */
 .recientes-container {
+    width: 100%;
+    max-width: 200px;
+    height: 28px;
+    margin-left: 0;
+    margin-right: auto;
+    background: #7a0000;
+    border-radius: 5px;
+    padding: 0 5px;
     display: flex;
-    gap: 5px;
-    overflow-x: auto;
-    min-height: 28px;
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    gap: 3px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
-.recientes-lista { display: flex; gap: 4px; }
+.recientes-lista {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding-left: 2px;
+}
 
 .mini-bola {
-    background: #fff;
-    color: #000;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    background: var(--bola-bg, #ffeb3b);
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
-    font-weight: bold;
+    font-size: 0.5rem;
+    font-weight: 900;
+    color: #000000 !important;
+    box-shadow:
+        0 1.5px 2px rgba(0,0,0,0.3),
+        inset -1px -1px 2px rgba(0,0,0,0.3),
+        inset 1px 1px 1.5px rgba(255,255,255,0.6);
     flex-shrink: 0;
 }
 
-.mini-bola.entrando { animation: entrarBola 0.3s ease-out; }
+.mini-bola::before {
+    content: '';
+    position: absolute;
+    width: 65%;
+    height: 65%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e6e6e6 100%);
+    box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+    z-index: 1;
+}
 
-@keyframes entrarBola {
-    from { transform: scale(0); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+.mini-bola span {
+    position: relative;
+    z-index: 5 !important;
+    color: #000000 !important;
+    line-height: 1;
+}
+
+@keyframes entradaTuberia {
+    0% { transform: translateX(-20px); }
+    100% { transform: translateX(0); }
+}
+
+@keyframes salidaTuberia {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(20px); }
+}
+
+.mini-bola.entrando {
+    animation: entradaTuberia 0.4s ease-out forwards;
+}
+.mini-bola.saliendo {
+    animation: salidaTuberia 0.4s ease-in forwards;
 }
 
 /* ============================================
@@ -1029,46 +1390,8 @@ body {
 
 /* ============================================
    EMOJIS CON CÍRCULO BLANCO
-   🎱 Primera bola       → esquina superior derecha
-   🎯 Figura             → esquina superior derecha (se corre si hay 🎱)
-   👑 Cartón lleno       → esquina superior izquierda
    ============================================ */
 
-/* ---------- 🎱 Primera bola ---------- */
-.cartones-grid.modo-15 .carton .emoji-primera-bola {
-    display: none;
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    z-index: 31;
-    pointer-events: none;
-    line-height: 1;
-
-    width: clamp(1.1rem, 3.8vw, 1.6rem);
-    height: clamp(1.1rem, 3.8vw, 1.6rem);
-    border-radius: 50%;
-    background: #ffffff;
-    border: 1.5px solid #000000;
-    box-sizing: border-box;
-
-    align-items: center;
-    justify-content: center;
-
-    font-size: clamp(0.6rem, 2.2vw, 0.9rem);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    transition: right 0.25s ease;
-}
-
-.cartones-grid.modo-15 .carton.tiene-primera-bola .emoji-primera-bola {
-    display: flex;
-    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.cartones-grid.modo-15 .carton.tiene-primera-bola.ganador-figura-1 .emoji-primera-bola {
-    right: calc(clamp(1.2rem, 4.2vw, 1.8rem) + 6px);
-}
-
-/* ---------- 🎯 Figura ---------- */
 .cartones-grid.modo-15 .carton .emoji-figura {
     display: none;
     position: absolute;
@@ -1098,7 +1421,6 @@ body {
                trofeoLatido 1s ease-in-out infinite alternate 0.4s;
 }
 
-/* ---------- 👑 Cartón lleno ---------- */
 .cartones-grid.modo-15 .carton .emoji-carton-lleno {
     display: none;
     position: absolute;
@@ -1127,7 +1449,6 @@ body {
     animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ---------- Keyframes ---------- */
 @keyframes emojiEntrada {
     0%   { transform: scale(0) rotate(-25deg); opacity: 0; }
     60%  { transform: scale(1.25) rotate(5deg); opacity: 1; }
@@ -1141,7 +1462,6 @@ body {
 
 /* ============================================
    BORDE DORADO PERMANENTE
-   Solo para el ganador de figura 1
    ============================================ */
 .cartones-grid.modo-15 .carton.ganador-figura-1 {
     outline: 2px solid var(--color-figura);
@@ -1153,10 +1473,8 @@ body {
 }
 
 /* ============================================
-   ANIMACIÓN DE RESALTADO (figura o bingo)
+   ANIMACIÓN DE RESALTADO
    ============================================ */
-
-/* FASE 1: encendido celda por celda */
 .cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
 .cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura {
     background: var(--color-figura) !important;
@@ -1175,7 +1493,6 @@ body {
     text-shadow: none !important;
 }
 
-/* FASE 2: pulso final */
 .cartones-grid.modo-15 .carton.ganador-figura-1.resaltando.secuencia-completa .celda.en-figura,
 .cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa .celda.en-figura {
     background: var(--color-figura) !important;
@@ -1240,6 +1557,12 @@ body .cartones-grid.modo-15 .carton.ganador-bingo.resaltando.secuencia-completa 
    COLOR DE RESALTE DE FIGURA POR TEMA
    ============================================ */
 body.tema-verde      { --color-figura: #ffd700; --color-figura-glow: rgba(255, 215, 0, 0.95);  --color-figura-suave: rgba(255, 215, 0, 0.55); }
+body.tema-verde .cartones-grid.modo-15 .carton .bingo-header-row {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: #ffffff !important;
+}
+
 body.tema-azul       { --color-figura: #ffb300; --color-figura-glow: rgba(255, 179, 0, 0.95);  --color-figura-suave: rgba(255, 179, 0, 0.55); }
 body.tema-rojo       { --color-figura: #00e5ff; --color-figura-glow: rgba(0, 229, 255, 0.95);  --color-figura-suave: rgba(0, 229, 255, 0.55); }
 body.tema-negro      { --color-figura: #ffea00; --color-figura-glow: rgba(255, 234, 0, 0.95);  --color-figura-suave: rgba(255, 234, 0, 0.55); }
@@ -1273,9 +1596,7 @@ body.tema-clasico .bingo-header-row { background: linear-gradient(180deg, #e8d9a
 body.tema-clasico .cartones-grid.modo-15 .carton-grid-inner { background: #1a1a1a; border: 1px solid #1a1a1a; }
 body.tema-clasico .cartones-grid.modo-15 .celda { background: #fdf9ec; color: #1a1a1a; border: 1px solid #1a1a1a !important; }
 body.tema-clasico .cartones-grid.modo-15 .celda.marcada { background: #d4af37 !important; color: #1a1a1a !important; }
-body.tema-clasico .bolillero-container, body.tema-clasico .panel-numeros-inferior { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); border: 2px solid #8b6914; }
-body.tema-clasico .bolillero-sphere { background: radial-gradient(circle at 35% 30%, #6b1414, #2b0808); border: 2px solid #8b6914; }
-body.tema-clasico .btn-sacar-bola { background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%) !important; color: #1a1a1a; border: 2px solid #5c4508; }
+body.tema-clasico .panel-numeros-inferior { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); border: 2px solid #8b6914; }
 body.tema-clasico .stats-box { background: linear-gradient(180deg, #2a2418 0%, #1a1508 100%); border: 2px solid #8b6914; color: #d4af37; }
 body.tema-clasico .stats-box span { color: #d4af37; }
 body.tema-clasico .titulo-tabla { color: #d4af37; }
@@ -1291,9 +1612,7 @@ body.tema-dorado .cartones-grid.modo-15 .carton-header { background: var(--heade
 body.tema-dorado .bingo-header-row { background: linear-gradient(145deg, #1f1a0e, #080705); color: #f3e5ab; }
 body.tema-dorado .cartones-grid.modo-15 .celda { background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%); color: #1a1a1a; }
 body.tema-dorado .cartones-grid.modo-15 .celda.marcada { background: radial-gradient(circle, #e63946, #9b2226) !important; color: #fff !important; }
-body.tema-dorado .bolillero-container, body.tema-dorado .panel-numeros-inferior { background: linear-gradient(145deg, #1f1a0e, #080705); border: 2px solid #d4af37; }
-body.tema-dorado .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #ffe58f, #8b6914); }
-body.tema-dorado .btn-sacar-bola { background: linear-gradient(180deg, #ffe58f 0%, #b8860b 100%) !important; color: #1a1100; }
+body.tema-dorado .panel-numeros-inferior { background: linear-gradient(145deg, #1f1a0e, #080705); border: 2px solid #d4af37; }
 body.tema-dorado .stats-box { background: #080705; border: 2px solid #d4af37; color: #f3e5ab; }
 body.tema-dorado .stats-box span { color: #d4af37; }
 body.tema-dorado .titulo-tabla { color: #d4af37; }
@@ -1309,9 +1628,7 @@ body.tema-madera .cartones-grid.modo-15 .carton-header { background: var(--heade
 body.tema-madera .bingo-header-row { background: #23130a; color: #f59e0b; }
 body.tema-madera .cartones-grid.modo-15 .celda { background: #fef3c7; color: #451a03; }
 body.tema-madera .cartones-grid.modo-15 .celda.marcada { background: #dc2626 !important; color: #fff !important; }
-body.tema-madera .bolillero-container, body.tema-madera .panel-numeros-inferior { background: linear-gradient(180deg, #3d2314 0%, #23130a 100%); border: 3px solid #8d5b41; }
-body.tema-madera .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #d97706, #78350f); }
-body.tema-madera .btn-sacar-bola { background: #8d5b41 !important; color: #fef3c7; }
+body.tema-madera .panel-numeros-inferior { background: linear-gradient(180deg, #3d2314 0%, #23130a 100%); border: 3px solid #8d5b41; }
 body.tema-madera .stats-box { background: #23130a; border: 2px solid #8d5b41; color: #fef3c7; }
 body.tema-madera .stats-box span { color: #f59e0b; }
 body.tema-madera .titulo-tabla { color: #f59e0b; }
@@ -1329,9 +1646,7 @@ body.tema-kate .bingo-header-row span { background: linear-gradient(180deg, #e2a
 body.tema-kate .cartones-grid.modo-15 .carton-grid-inner { background: #5c3b1e; }
 body.tema-kate .cartones-grid.modo-15 .celda { background: #fff9ee; color: #111; }
 body.tema-kate .cartones-grid.modo-15 .celda.marcada { background: #d4a359 !important; color: #1a0a03 !important; }
-body.tema-kate .bolillero-container, body.tema-kate .panel-numeros-inferior { background: #261106; border: 2px solid #d4a359; }
-body.tema-kate .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #e2a07d, #8a5a22); }
-body.tema-kate .btn-sacar-bola { background: linear-gradient(180deg, #e2a07d, #a66042) !important; color: #1a0a03; }
+body.tema-kate .panel-numeros-inferior { background: #261106; border: 2px solid #d4a359; }
 body.tema-kate .stats-box { background: #fff9ee; border: 2px solid #d4a359; color: #261106; }
 body.tema-kate .stats-box span { color: #a66042; }
 body.tema-kate .titulo-tabla { color: #fce3b8; }
@@ -1349,9 +1664,7 @@ body.tema-cyberpunk .bingo-header-row span { background: #f43f5e; color: #fff; c
 body.tema-cyberpunk .cartones-grid.modo-15 .carton-grid-inner { background: #0c4a6e; }
 body.tema-cyberpunk .cartones-grid.modo-15 .celda { background: #cff4fc; color: #032b36; }
 body.tema-cyberpunk .cartones-grid.modo-15 .celda.marcada { background: #facc15 !important; color: #000 !important; }
-body.tema-cyberpunk .bolillero-container, body.tema-cyberpunk .panel-numeros-inferior { background: #02131e; border: 2px solid #22d3ee; }
-body.tema-cyberpunk .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #22d3ee, #083344); }
-body.tema-cyberpunk .btn-sacar-bola { background: #f43f5e !important; color: #fff; }
+body.tema-cyberpunk .panel-numeros-inferior { background: #02131e; border: 2px solid #22d3ee; }
 body.tema-cyberpunk .stats-box { background: #cff4fc; border: 2px solid #22d3ee; color: #02131e; }
 body.tema-cyberpunk .stats-box span { color: #f43f5e; }
 body.tema-cyberpunk .titulo-tabla { color: #22d3ee; }
@@ -1369,9 +1682,7 @@ body.tema-volcano .bingo-header-row span { background: #f97316; color: #fff; cli
 body.tema-volcano .cartones-grid.modo-15 .carton-grid-inner { background: #450a0a; }
 body.tema-volcano .cartones-grid.modo-15 .celda { background: #ffe4e6; color: #450a0a; }
 body.tema-volcano .cartones-grid.modo-15 .celda.marcada { background: #38bdf8 !important; color: #fff !important; }
-body.tema-volcano .bolillero-container, body.tema-volcano .panel-numeros-inferior { background: #2a0404; border: 2px solid #f97316; }
-body.tema-volcano .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #f97316, #7f1d1d); }
-body.tema-volcano .btn-sacar-bola { background: #f97316 !important; color: #fff; }
+body.tema-volcano .panel-numeros-inferior { background: #2a0404; border: 2px solid #f97316; }
 body.tema-volcano .stats-box { background: #ffe4e6; border: 2px solid #f97316; color: #2a0404; }
 body.tema-volcano .stats-box span { color: #7f1d1d; }
 body.tema-volcano .titulo-tabla { color: #fde047; }
@@ -1389,9 +1700,7 @@ body.tema-pixel .bingo-header-row span { background: #f97316; color: #fff; borde
 body.tema-pixel .cartones-grid.modo-15 .carton-grid-inner { background: #000; border-radius: 0; }
 body.tema-pixel .cartones-grid.modo-15 .celda { background: #fff; color: #000; border-radius: 0; font-family: 'Press Start 2P', cursive; }
 body.tema-pixel .cartones-grid.modo-15 .celda.marcada { background: #22c55e !important; color: #fff !important; border-radius: 0; }
-body.tema-pixel .bolillero-container, body.tema-pixel .panel-numeros-inferior { background: #450a0a; border: 2px solid #fff; border-radius: 0; }
-body.tema-pixel .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #f97316, #b91c1c); border-radius: 0; }
-body.tema-pixel .btn-sacar-bola { background: #f97316 !important; color: #fff; border-radius: 0; }
+body.tema-pixel .panel-numeros-inferior { background: #450a0a; border: 2px solid #fff; border-radius: 0; }
 body.tema-pixel .stats-box { background: #fff; border: 2px solid #000; border-radius: 0; color: #000; }
 body.tema-pixel .stats-box span { color: #b91c1c; }
 body.tema-pixel .titulo-tabla { color: #fde047; }
@@ -1409,9 +1718,7 @@ body.tema-esmeralda .bingo-header-row span { background: #fbbf24; color: #000; c
 body.tema-esmeralda .cartones-grid.modo-15 .carton-grid-inner { background: #065f46; }
 body.tema-esmeralda .cartones-grid.modo-15 .celda { background: #d1fae5; color: #064e3b; }
 body.tema-esmeralda .cartones-grid.modo-15 .celda.marcada { background: #ec4899 !important; color: #fff !important; }
-body.tema-esmeralda .bolillero-container, body.tema-esmeralda .panel-numeros-inferior { background: #022c22; border: 2px solid #10b981; }
-body.tema-esmeralda .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #34d399, #064e3b); }
-body.tema-esmeralda .btn-sacar-bola { background: #10b981 !important; color: #022c22; }
+body.tema-esmeralda .panel-numeros-inferior { background: #022c22; border: 2px solid #10b981; }
 body.tema-esmeralda .stats-box { background: #d1fae5; border: 2px solid #10b981; color: #022c22; }
 body.tema-esmeralda .stats-box span { color: #064e3b; }
 body.tema-esmeralda .titulo-tabla { color: #a7f3d0; }
@@ -1429,9 +1736,7 @@ body.tema-candy .bingo-header-row span { background: #34d399; color: #064e3b; bo
 body.tema-candy .cartones-grid.modo-15 .carton-grid-inner { background: #881337; border-radius: 4px; }
 body.tema-candy .cartones-grid.modo-15 .celda { background: #ffe4e6; color: #881337; border-radius: 3px; }
 body.tema-candy .cartones-grid.modo-15 .celda.marcada { background: #f97316 !important; color: #fff !important; }
-body.tema-candy .bolillero-container, body.tema-candy .panel-numeros-inferior { background: #4c0519; border: 2px solid #fecdd3; border-radius: 8px; }
-body.tema-candy .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #fda4af, #be123c); }
-body.tema-candy .btn-sacar-bola { background: #be123c !important; color: #fff; }
+body.tema-candy .panel-numeros-inferior { background: #4c0519; border: 2px solid #fecdd3; border-radius: 8px; }
 body.tema-candy .stats-box { background: #ffe4e6; border: 2px solid #be123c; color: #4c0519; }
 body.tema-candy .stats-box span { color: #be123c; }
 body.tema-candy .titulo-tabla { color: #fecdd3; }
@@ -1449,9 +1754,7 @@ body.tema-oro .bingo-header-row span { background: #ef4444; color: #fff; border-
 body.tema-oro .cartones-grid.modo-15 .carton-grid-inner { background: #854d0e; }
 body.tema-oro .cartones-grid.modo-15 .celda { background: #fef9c3; color: #713f12; }
 body.tema-oro .cartones-grid.modo-15 .celda.marcada { background: #2563eb !important; color: #fff !important; }
-body.tema-oro .bolillero-container, body.tema-oro .panel-numeros-inferior { background: #1c1917; border: 2px solid #facc15; }
-body.tema-oro .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #fde047, #ca8a04); }
-body.tema-oro .btn-sacar-bola { background: #ef4444 !important; color: #fff; }
+body.tema-oro .panel-numeros-inferior { background: #1c1917; border: 2px solid #facc15; }
 body.tema-oro .stats-box { background: #fef9c3; border: 2px solid #ca8a04; color: #1c1917; }
 body.tema-oro .stats-box span { color: #854d0e; }
 body.tema-oro .titulo-tabla { color: #fde047; }
@@ -1469,9 +1772,7 @@ body.tema-pacifico .bingo-header-row span { background: #f97316; color: #fff; bo
 body.tema-pacifico .cartones-grid.modo-15 .carton-grid-inner { background: #115e59; }
 body.tema-pacifico .cartones-grid.modo-15 .celda { background: #ccfbf1; color: #115e59; }
 body.tema-pacifico .cartones-grid.modo-15 .celda.marcada { background: #eab308 !important; color: #000 !important; }
-body.tema-pacifico .bolillero-container, body.tema-pacifico .panel-numeros-inferior { background: #042f2e; border: 2px solid #14b8a6; }
-body.tema-pacifico .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #5eead4, #0f766e); }
-body.tema-pacifico .btn-sacar-bola { background: #f97316 !important; color: #fff; }
+body.tema-pacifico .panel-numeros-inferior { background: #042f2e; border: 2px solid #14b8a6; }
 body.tema-pacifico .stats-box { background: #ccfbf1; border: 2px solid #0f766e; color: #042f2e; }
 body.tema-pacifico .stats-box span { color: #0f766e; }
 body.tema-pacifico .titulo-tabla { color: #99f6e4; }
@@ -1489,9 +1790,7 @@ body.tema-halloween .bingo-header-row span { background: #f97316; color: #000; c
 body.tema-halloween .cartones-grid.modo-15 .carton-grid-inner { background: #2e1065; }
 body.tema-halloween .cartones-grid.modo-15 .celda { background: #f3e8ff; color: #3b0764; font-weight: 700; }
 body.tema-halloween .cartones-grid.modo-15 .celda.marcada { background: #22c55e !important; color: #000 !important; }
-body.tema-halloween .bolillero-container, body.tema-halloween .panel-numeros-inferior { background: #1e1b4b; border: 2px solid #a855f7; }
-body.tema-halloween .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #c084fc, #3b0764); }
-body.tema-halloween .btn-sacar-bola { background: #f97316 !important; color: #000; }
+body.tema-halloween .panel-numeros-inferior { background: #1e1b4b; border: 2px solid #a855f7; }
 body.tema-halloween .stats-box { background: #f3e8ff; border: 2px solid #a855f7; color: #3b0764; }
 body.tema-halloween .stats-box span { color: #a855f7; }
 body.tema-halloween .titulo-tabla { color: #22c55e; }
@@ -1509,9 +1808,7 @@ body.tema-sport .bingo-header-row span { background: #facc15; color: #000; borde
 body.tema-sport .cartones-grid.modo-15 .carton-grid-inner { background: #1d4ed8; }
 body.tema-sport .cartones-grid.modo-15 .celda { background: #ffffff; color: #1e3a8a; font-family: 'Bebas Neue', sans-serif; font-weight: 900; }
 body.tema-sport .cartones-grid.modo-15 .celda.marcada { background: #dc2626 !important; color: #fff !important; }
-body.tema-sport .bolillero-container, body.tema-sport .panel-numeros-inferior { background: #0f172a; border: 2px solid #2563eb; }
-body.tema-sport .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #60a5fa, #1e3a8a); }
-body.tema-sport .btn-sacar-bola { background: #dc2626 !important; color: #fff; }
+body.tema-sport .panel-numeros-inferior { background: #0f172a; border: 2px solid #2563eb; }
 body.tema-sport .stats-box { background: #fff; border: 2px solid #2563eb; color: #0f172a; }
 body.tema-sport .stats-box span { color: #dc2626; }
 body.tema-sport .titulo-tabla { color: #facc15; }
@@ -1529,9 +1826,7 @@ body.tema-titan .bingo-header-row span { background: #ec4899; color: #fff; clip-
 body.tema-titan .cartones-grid.modo-15 .carton-grid-inner { background: #1e293b; }
 body.tema-titan .cartones-grid.modo-15 .celda { background: #f1f5f9; color: #0f172a; }
 body.tema-titan .cartones-grid.modo-15 .celda.marcada { background: #84cc16 !important; color: #000 !important; }
-body.tema-titan .bolillero-container, body.tema-titan .panel-numeros-inferior { background: #0f172a; border: 2px solid #38bdf8; }
-body.tema-titan .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #94a3b8, #334155); }
-body.tema-titan .btn-sacar-bola { background: #ec4899 !important; color: #fff; }
+body.tema-titan .panel-numeros-inferior { background: #0f172a; border: 2px solid #38bdf8; }
 body.tema-titan .stats-box { background: #f1f5f9; border: 2px solid #38bdf8; color: #0f172a; }
 body.tema-titan .stats-box span { color: #ec4899; }
 body.tema-titan .titulo-tabla { color: #38bdf8; }
@@ -1549,9 +1844,7 @@ body.tema-bronce .bingo-header-row span { background: #10b981; color: #fff; bord
 body.tema-bronce .cartones-grid.modo-15 .carton-grid-inner { background: #92400e; }
 body.tema-bronce .cartones-grid.modo-15 .celda { background: #fef3c7; color: #451a03; }
 body.tema-bronce .cartones-grid.modo-15 .celda.marcada { background: #3b82f6 !important; color: #fff !important; }
-body.tema-bronce .bolillero-container, body.tema-bronce .panel-numeros-inferior { background: #451a03; border: 2px solid #d97706; }
-body.tema-bronce .bolillero-sphere { background: radial-gradient(circle at 30% 30%, #d97706, #78350f); }
-body.tema-bronce .btn-sacar-bola { background: #10b981 !important; color: #fff; }
+body.tema-bronce .panel-numeros-inferior { background: #451a03; border: 2px solid #d97706; }
 body.tema-bronce .stats-box { background: #fef3c7; border: 2px solid #d97706; color: #451a03; }
 body.tema-bronce .stats-box span { color: #92400e; }
 body.tema-bronce .titulo-tabla { color: #fef3c7; }
@@ -1562,14 +1855,7 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 
 /* ============================================
    RÓTULOS DE GANADOR FLOTANTES
-   BINGO  → entre fila 1 y 2 de la cuadrícula (arriba del FREE)
-   FIGURA → entre fila 4 y 5 de la cuadrícula (abajo del FREE)
-   GANA   → misma posición que BINGO, pero solo cuando gana los 3 premios
-   TODO   → misma posición que FIGURA, pero solo cuando gana los 3 premios
-   Aparecen 1.5s después de la animación de resaltado.
    ============================================ */
-
-/* El cartón deja salir el rótulo sin recortarlo */
 .cartones-grid.modo-15 .carton.mostrar-rotulo-bingo,
 .cartones-grid.modo-15 .carton.mostrar-rotulo-figura,
 .cartones-grid.modo-15 .carton.mostrar-rotulo-gana,
@@ -1578,7 +1864,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     z-index: 6;
 }
 
-/* Base común a los 4 rótulos */
 .cartones-grid.modo-15 .carton .rotulo-bingo,
 .cartones-grid.modo-15 .carton .rotulo-figura,
 .cartones-grid.modo-15 .carton .rotulo-gana,
@@ -1596,7 +1881,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     pointer-events: none;
     opacity: 0;
     display: none;
-    /* Letra un 20% más grande */
     font-size: clamp(0.85rem, 3.6vw, 1.2rem);
     line-height: 1.1;
     border-radius: 3px;
@@ -1604,8 +1888,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     transform: translateY(-50%);
 }
 
-/* ---------- BINGO ---------- */
-/* Fondo amarillo, letra blanca, contorno negro fuerte */
 .cartones-grid.modo-15 .carton .rotulo-bingo {
     background: #ffcc00;
     color: #ffffff;
@@ -1622,8 +1904,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
          0     1.5px 0 #000;
 }
 
-/* ---------- FIGURA ---------- */
-/* Fondo blanco, letra negra */
 .cartones-grid.modo-15 .carton .rotulo-figura {
     background: #ffffff;
     color: #000000;
@@ -1631,8 +1911,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     top: 82%;
 }
 
-/* ---------- GANA ---------- */
-/* Fondo rojo, letra blanca, contorno negro suave, misma posición que BINGO */
 .cartones-grid.modo-15 .carton .rotulo-gana {
     background: #d32f2f;
     color: #ffffff;
@@ -1645,8 +1923,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
          1px  1px 0 #000;
 }
 
-/* ---------- TODO ---------- */
-/* Fondo rojo, letra blanca, contorno negro suave, misma posición que FIGURA */
 .cartones-grid.modo-15 .carton .rotulo-todo {
     background: #d32f2f;
     color: #ffffff;
@@ -1659,7 +1935,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
          1px  1px 0 #000;
 }
 
-/* ---------- Mostrar según las clases del cartón ---------- */
 .cartones-grid.modo-15 .carton.mostrar-rotulo-bingo .rotulo-bingo {
     display: block;
     animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
@@ -1687,10 +1962,7 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 }
 
 /* ============================================
-   APAGADO SUAVE DEL RESALTADO AL TERMINAR LA PARTIDA
-   Se aplica a los cartones que tenían .resaltando cuando
-   aparecen los rótulos de ganador. Dura 0.5s y luego se
-   quitan las clases de resaltado por completo.
+   APAGADO SUAVE DEL RESALTADO
    ============================================ */
 .cartones-grid.modo-15 .carton.apagando-resaltado .celda.en-figura {
     background: var(--carton-color, #2e7d32) !important;
@@ -1705,20 +1977,7 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 
 .cartones-grid.modo-15 .carton.apagando-resaltado.ganador-bingo,
 .cartones-grid.modo-15 .carton.apagando-resaltado.ganador-figura-1 {
-    /* Mantener el borde dorado del ganador de figura, si lo tiene */
     outline-color: var(--color-figura);
-}
-
-
-/* Mostrar según las clases del cartón */
-.cartones-grid.modo-15 .carton.mostrar-rotulo-gana .rotulo-gana {
-    display: block;
-    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
-}
-
-.cartones-grid.modo-15 .carton.mostrar-rotulo-todo .rotulo-todo {
-    display: block;
-    animation: rotuloEntrada 0.5s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
 }
 
 /* ============================================
@@ -1729,9 +1988,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     flex-direction: column;
     gap: 8px;
     margin-top: 4px;
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
 }
 
 .figura-item {
@@ -1745,21 +2001,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     color: #ccc;
     font-weight: 600;
     font-size: 0.85rem;
-    cursor: grab;
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
-    transition: box-shadow 0.15s ease, transform 0.15s ease, background 0.15s ease;
-}
-
-.figura-item.arrastrando {
-    cursor: grabbing;
-    background: #2e313b;
-    border-color: #2196f3;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(33, 150, 243, 0.35);
-    transform: scale(1.02);
-    opacity: 0.98;
-    touch-action: none;
 }
 
 .figura-item .figura-check {
@@ -1802,6 +2043,37 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
     white-space: nowrap;
 }
 
+.figura-flechas {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.figura-flecha {
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ccc;
+    font-size: 0.9rem;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+}
+
+.figura-flecha:disabled {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.figura-flecha:active {
+    background: #333;
+}
+
 .figura-borrar {
     background: transparent;
     border: 1px solid #444;
@@ -1826,13 +2098,6 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 
 .figura-borrar:active {
     background: #333;
-}
-
-.figura-placeholder {
-    border: 1px dashed #2196f3;
-    border-radius: 8px;
-    background: rgba(33, 150, 243, 0.08);
-    flex-shrink: 0;
 }
 
 .btn-figura-nueva {
@@ -1926,4 +2191,894 @@ body.tema-bronce .mini-carton { background: #451a03; border: 2px solid #d97706; 
 
 .btn-figura-guardar:active {
     filter: brightness(0.85);
+}
+
+/* ============================================
+   MEJORAS DE LA LISTA DE FIGURAS
+   ============================================ */
+.figura-item.destacado {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.5), 0 6px 18px rgba(33, 150, 243, 0.35);
+    animation: destacarFigura 0.7s ease;
+}
+
+@keyframes destacarFigura {
+    0%   { transform: scale(1); background: #262a33; }
+    30%  { transform: scale(1.03); background: #2c3140; }
+    100% { transform: scale(1); background: #262a33; }
+}
+
+/* ============================================
+   🔵 PUNTO DE ALERTA EN EL HEADER
+   ============================================ */
+.cartones-grid.modo-15 .carton .punto-alerta {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: var(--header-color, #fff);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    transition: width 0.35s ease, height 0.35s ease, opacity 0.35s ease;
+    opacity: 0;
+    flex-shrink: 0;
+}
+
+.cartones-grid.modo-15 .carton .punto-alerta.activo {
+    width: 8px;
+    height: 8px;
+    opacity: 1;
+}
+
+.cartones-grid.modo-15 .carton .punto-alerta.titilar {
+    animation: puntoTitila 0.8s ease-in-out;
+}
+
+@keyframes puntoTitila {
+    0%   { transform: scale(0.4); opacity: 0.4; }
+    35%  { transform: scale(1.6); opacity: 1; }
+    65%  { transform: scale(0.9); opacity: 0.85; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ============================================
+   🟡 RESALTADO AMARILLO DEL NÚMERO QUE FALTA
+   ============================================ */
+.cartones-grid.modo-15 .celda.falta-amarillo {
+    background: #ffee00 !important;
+    box-shadow:
+        inset 0 0 0 2px #f9a825,
+        inset 0 0 calc(8px * var(--amarillo-glow)) rgba(255, 235, 59, var(--amarillo-glow)),
+        0 0 calc(8px * var(--amarillo-halo)) rgba(255, 235, 59, calc(var(--amarillo-halo) * 0.9));
+    z-index: 9;
+    will-change: box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO */
+}
+
+.cartones-grid.modo-15 .celda.falta-amarillo .num-val {
+    color: #000000 !important;
+    position: relative;
+    z-index: 3;
+    font-weight: 900 !important;
+}
+
+/* ============================================
+   🟡 PARPADEO DEL HEADER CUANDO FALTA 1 BOLA
+   ============================================ */
+@keyframes parpadeoHeaderBucle {
+    0% {
+        background-color: var(--header-bg, var(--carton-color, #2e7d32));
+        color: var(--header-color, #fff);
+        box-shadow: none;
+    }
+    50% {
+        background-color: #ffee00;
+        color: #000000;
+        box-shadow: 0 0 14px rgba(255, 235, 59, 0.95);
+    }
+    100% {
+        background-color: var(--header-bg, var(--carton-color, #2e7d32));
+        color: var(--header-color, #fff);
+        box-shadow: none;
+    }
+}
+
+body .cartones-grid.modo-15 .carton.alerta-header .carton-header {
+    animation: parpadeoHeaderBucle 1s ease-in-out infinite !important;
+    animation-fill-mode: both !important;
+    position: relative !important;
+    z-index: 10 !important;
+    will-change: background-color, box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO: Fuerza renderizado por GPU */
+}
+
+body .cartones-grid.modo-15 .carton.alerta-header {
+    animation: bordeAlerta 1s ease-in-out infinite !important;
+    will-change: box-shadow; /* NUEVO */
+    transform: translateZ(0); /* NUEVO: Fuerza renderizado por GPU */
+}
+
+@keyframes bordeAlerta {
+    0%, 100% {
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 16px 4px rgba(255, 235, 59, 0.95),
+                    0 3px 8px rgba(0, 0, 0, 0.45);
+    }
+}
+
+/* ============================================
+   CONTROL 1-75 CLICKEABLE
+   ============================================ */
+.control-grid .bolita.clickeable {
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.control-grid .bolita.clickeable:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 1px #ffffff, 0 0 8px rgba(255, 255, 255, 0.5);
+    z-index: 2;
+}
+
+.control-grid .bolita.clickeable:active {
+    transform: scale(0.92);
+}
+
+
+/* =========================================================
+   🌈 ARCOÍRIS REAL PARA CELDA ANIMADA
+   NO TOCA EL BACKGROUND DE LA CELDA
+   ========================================================= */
+
+.cartones-grid.modo-15 .celda.animar-marca {
+    position: relative !important;
+    z-index: 50 !important;
+    transform-origin: center center !important;
+    animation: zoomCeldaArcoiris 1.2s cubic-bezier(0.25, 1, 0.5, 1) both !important;
+}
+
+/* Capa de color por encima del verde del tema */
+.cartones-grid.modo-15 .celda.animar-marca::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    background: #ffee00;
+
+    pointer-events: none;
+
+    animation:
+        arcoirisCelda 1.2s linear both !important;
+}
+
+/* El número queda por encima del arcoíris */
+.cartones-grid.modo-15 .celda.animar-marca .num-val {
+    position: relative !important;
+    z-index: 10 !important;
+    color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   ZOOM
+   ========================================================= */
+
+@keyframes zoomCeldaArcoiris {
+
+    0% {transform: scale(1);}
+    10% {transform: scale(1.25); }
+    22% {transform: scale(1.5);}
+    35% {transform: scale(1.55);}
+    48% {transform: scale(1.5);}
+    60% {transform: scale(1.35);}
+    72% {transform: scale(1.18);}
+    85% {transform: scale(1.08);}
+    100% {transform: scale(1);}
+}
+
+/* =========================================================
+   🌈 ARCOÍRIS LIGERO + ZOOM
+   Optimizado para consumir menos recursos
+   ========================================================= */
+
+.cartones-grid.modo-15 .celda.animar-marca {
+    position: relative !important;
+    z-index: 50 !important;
+    transform-origin: center center !important;
+
+    animation: zoomCeldaLigero 1.3s ease-out both !important;
+
+    will-change: transform;
+}
+
+/* Capa del arcoíris */
+.cartones-grid.modo-15 .celda.animar-marca::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+
+    background: #ffee00;
+
+    pointer-events: none;
+
+    animation: arcoirisLigero 1.3s linear both !important;
+
+    will-change: background-color;
+}
+
+/* Número siempre arriba */
+.cartones-grid.modo-15 .celda.animar-marca .num-val {
+    position: relative !important;
+    z-index: 10 !important;
+
+    color: #000 !important;
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   🔍 ZOOM LIGERO
+   ========================================================= */
+
+@keyframes zoomCeldaLigero {
+
+    0% {
+        transform: scale(1);
+    }
+
+    20% {
+        transform: scale(1.30);
+    }
+
+    38% {
+        transform: scale(1.6);
+    }
+
+    55% {
+        transform: scale(1.30);
+    }
+
+    75% {
+        transform: scale(1.10);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* =========================================================
+   🌈 ARCOÍRIS LIGERO
+   Solo cambia background-color
+   Sin sombras ni efectos pesados
+   ========================================================= */
+
+@keyframes arcoirisLigero {
+
+    0% {
+        background-color: #ffee00;
+    }
+
+    18% {
+        background-color: #ff9100;
+    }
+
+    35% {
+        background-color: #ff1744;
+    }
+
+    52% {
+        background-color: #ff00ff;
+    }
+
+    68% {
+        background-color: #00e5ff;
+    }
+
+    80% {
+        background-color: #76ff03;
+    }
+
+    90% {
+        background-color: #76ff03;
+    }
+
+    100% {
+        background-color: var(--carton-color);
+    }
+}
+
+/* ============================================
+   🔄 BOTÓN REVANCHA DEL MENÚ (solo index)
+   ============================================ */
+.btn-revancha-menu {
+    background: #1a1a2e;
+    color: #ffd700;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: filter 0.15s ease, background 0.15s ease;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    letter-spacing: 0.5px;
+}
+
+.btn-revancha-menu:active {
+    filter: brightness(0.85);
+    background: #2a2a44;
+}
+
+/* ============================================
+   🔄 MODO SELECCIÓN DE REVANCHA (juego)
+   ============================================ */
+body.modo-revancha .cartones-grid.modo-15 .carton {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    opacity: 0.35;
+    filter: grayscale(0.7);
+}
+
+body.modo-revancha .cartones-grid.modo-15 .carton .rotulo-bingo,
+body.modo-revancha .cartones-grid.modo-15 .carton .rotulo-figura,
+body.modo-revancha .cartones-grid.modo-15 .carton .rotulo-gana,
+body.modo-revancha .cartones-grid.modo-15 .carton .rotulo-todo {
+    display: none !important;
+}
+
+body.modo-revancha .cartones-grid.modo-15 .carton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2.5px dashed rgba(255, 215, 0, 0.85);
+    border-radius: 5px;
+    pointer-events: none;
+    z-index: 40;
+}
+
+body.modo-revancha .cartones-grid.modo-15 .carton.seleccionado-revancha {
+    opacity: 1;
+    filter: none;
+    transform: scale(0.97);
+}
+
+body.modo-revancha .cartones-grid.modo-15 .carton.seleccionado-revancha::after {
+    border: 3px solid #00e676;
+    box-shadow: 0 0 12px 3px rgba(0, 230, 118, 0.8);
+    background: rgba(0, 230, 118, 0.08);
+}
+
+/* ============================================
+   🚫 CARTONES FUERA DE JUEGO
+   Palabra FUERA centrada + X que atraviesa todo
+   ============================================ */
+.cartones-grid.modo-15 .carton.fuera-de-juego {
+    position: relative;
+    opacity: 0.35;
+    filter: grayscale(1);
+    pointer-events: none;
+    box-shadow: none !important;
+}
+
+.cartones-grid.modo-15 .carton.fuera-de-juego .etiqueta-fuera,
+.cartones-grid.modo-15 .carton.fuera-de-juego .x-fuera {
+    display: flex;
+}
+
+.cartones-grid.modo-15 .carton .etiqueta-fuera,
+.cartones-grid.modo-15 .carton .x-fuera {
+    display: none;
+    pointer-events: none;
+}
+
+/* Palabra FUERA centrada */
+.cartones-grid.modo-15 .carton .etiqueta-fuera {
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    color: #ff1744;
+    font-weight: 900;
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    letter-spacing: 4px;
+    z-index: 62;
+    border-radius: 4px;
+    text-shadow:
+        -2px -2px 0 #fff,
+         2px -2px 0 #fff,
+        -2px  2px 0 #fff,
+         2px  2px 0 #fff,
+        -2px  0    0 #fff,
+         2px  0    0 #fff,
+         0   -2px  0 #fff,
+         0    2px  0 #fff,
+         0 0 14px rgba(255, 23, 68, 0.9);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+/* X que atraviesa todo el cartón */
+.cartones-grid.modo-15 .carton .x-fuera {
+    position: absolute;
+    inset: -10%;
+    align-items: center;
+    justify-content: center;
+    z-index: 61;
+    pointer-events: none;
+}
+
+.cartones-grid.modo-15 .carton .x-fuera::before,
+.cartones-grid.modo-15 .carton .x-fuera::after {
+    content: '';
+    position: absolute;
+    width: 140%;
+    height: 6px;
+    background: #ff1744;
+    border-radius: 3px;
+    box-shadow:
+        0 0 10px rgba(255, 23, 68, 0.9),
+        0 0 20px rgba(255, 23, 68, 0.6);
+}
+
+.cartones-grid.modo-15 .carton .x-fuera::before {
+    transform: rotate(45deg);
+}
+
+.cartones-grid.modo-15 .carton .x-fuera::after {
+    transform: rotate(-45deg);
+}
+
+/* ============================================
+   ✅ BOTÓN FLOTANTE DE CONFIRMAR REVANCHA
+   Solo aparece en modo revancha
+   ============================================ */
+.btn-confirmar-revancha {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+
+    width: clamp(3.4rem, 13vw, 4.4rem);
+    height: clamp(3.4rem, 13vw, 4.4rem);
+    border-radius: 50%;
+
+    background: #00e676;
+    color: #ffffff;
+    border: 3px solid #000000;
+    box-sizing: border-box;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: clamp(1.5rem, 6vw, 2.1rem);
+    line-height: 1;
+    font-weight: 900;
+
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent !important;
+
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.6),
+        0 0 24px 4px rgba(0, 230, 118, 0.75);
+
+    animation: pulsoConfirmar 1.1s ease-in-out infinite alternate,
+               entradaConfirmar 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-confirmar-revancha:active {
+    transform: scale(0.88);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.6),
+        0 0 30px 8px rgba(0, 230, 118, 1);
+}
+
+@keyframes pulsoConfirmar {
+    0% {
+        box-shadow:
+            0 4px 14px rgba(0, 0, 0, 0.6),
+            0 0 18px 3px rgba(0, 230, 118, 0.65);
+    }
+    100% {
+        box-shadow:
+            0 4px 14px rgba(0, 0, 0, 0.6),
+            0 0 30px 8px rgba(0, 230, 118, 1);
+    }
+}
+
+@keyframes entradaConfirmar {
+    0%   { transform: scale(0) rotate(-45deg); opacity: 0; }
+    60%  { transform: scale(1.15) rotate(8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Cuando el body está en modo-revancha → aparece */
+body.modo-revancha .btn-confirmar-revancha {
+    display: flex;
+}
+
+/* Cuando el body está en modo-revancha asignación → aparece */
+body.modo-asignacion .btn-confirmar-revancha {
+    display: flex;
+}
+
+/* Variante cuando NO hay cartones seleccionados: gris */
+body.modo-revancha .btn-confirmar-revancha.sin-seleccion {
+    background: #555;
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.6),
+        0 0 18px 3px rgba(120, 120, 120, 0.5);
+    animation: entradaConfirmar 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   💾 BOTÓN GUARDAR PARTIDA (dentro del bolillero)
+   ============================================ */
+.btn-guardar-partida {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    
+    /* Cambios clave para hacerlo flotante a la derecha */
+    position: absolute;
+    right: 8px;
+    bottom: 7px;
+    width: auto;
+    margin: 0;
+    z-index: 10;
+    
+    /* El resto de tus estilos se mantienen igual */
+    max-width: 200px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 6px;
+    background: #1976d2;
+    color: #ffffff;
+    border: 1.5px solid #0d47a1;
+    box-sizing: border-box;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent !important;
+    transition: transform 0.12s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+    }
+
+    /* Ocultarlo mientras estás en modo revancha para no estorbar */
+    body.modo-revancha .btn-guardar-partida {
+    display: none;
+}
+
+/* ============================================
+   BOTÓN CARGAR PARTIDA (Menú Index)
+   ============================================ */
+.btn-cargar-menu {
+    background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+    color: #ffffff;
+    border: 1px solid #42a5f5;
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 900;
+    font-size: 1.05rem;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.btn-cargar-menu:active {
+    transform: scale(0.96);
+    filter: brightness(0.9);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================
+   🧩 CARTONES COMBINADOS
+   ============================================ */
+.cc-activo-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.9rem;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.cc-activo-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #2e7d32;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.cc-lista-secuencias {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.cc-secuencia-item {
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cc-secuencia-item.en-uso {
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 1px rgba(46, 125, 50, 0.4);
+}
+
+.cc-secuencia-cab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.cc-secuencia-nombre {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cc-badge-en-uso {
+    background: #2e7d32;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+}
+
+.cc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.cc-chip {
+    background: #3a3f4b;
+    color: #e0e0e0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 9px;
+    border-radius: 14px;
+    border: 1px solid #4a4f5b;
+}
+
+.cc-chip-vacio {
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.cc-secuencia-acciones {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.cc-btn-accion {
+    background: #3a3f4b;
+    color: #e0e0e0;
+    border: 1px solid #4a4f5b;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.cc-btn-accion:active {
+    background: #4a4f5b;
+    filter: brightness(0.9);
+}
+
+.cc-btn-borrar {
+    color: #ff8a80;
+    border-color: #5c3232;
+}
+
+.cc-chips-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.cc-chip-editor {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #262a33;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 6px 8px;
+}
+
+.cc-chip-editor-texto {
+    flex: 1;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding-left: 4px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cc-chip-mini {
+    background: transparent;
+    border: 1px solid #444;
+    border-radius: 5px;
+    color: #ccc;
+    font-size: 0.8rem;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    flex-shrink: 0;
+}
+
+.cc-chip-mini:disabled {
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+.cc-chip-mini:active {
+    background: #333;
+}
+
+.cc-chip-x {
+    color: #e57373;
+    border-color: #5c3232;
+}
+
+.cc-agregar-fila {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.cc-agregar-fila select {
+    flex: 1;
+    min-width: 0;
+}
+
+.cc-btn-agregar {
+    background: #2e7d32;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-weight: 900;
+    font-size: 0.85rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cc-btn-agregar:active {
+    filter: brightness(0.85);
+}
+
+
+/* ============================================ */
+/* 🎯 MODO ASIGNACIÓN MIXTA (revancha)           */
+/* ============================================ */
+
+/* Por defecto: cartones OPACOS/OSCUROS */
+body.modo-asignacion .cartones-grid.modo-15 .carton {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+    opacity: 0.35;
+    filter: grayscale(0.7);
+}
+
+/* Cartón asignado a BINGO → se ILUMINA con borde dorado */
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-bingo {
+    opacity: 1;
+    filter: none;
+    outline: 3px solid #ffd700;
+    outline-offset: -3px;
+    box-shadow: 0 0 12px 2px rgba(255, 215, 0, 0.65);
+    z-index: 5;
+}
+
+/* Cartón asignado a FIGURA → se ILUMINA con borde cian */
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-figura {
+    opacity: 1;
+    filter: none;
+    outline: 3px solid #00e5ff;
+    outline-offset: -3px;
+    box-shadow: 0 0 12px 2px rgba(0, 229, 255, 0.65);
+    z-index: 5;
+}
+
+/* Rótulos visibles solo en cartones asignados */
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-bingo .rotulo-bingo,
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-figura .rotulo-figura {
+    display: block !important;
+    opacity: 1 !important;
+    animation: none !important;
+}
+
+/* Emojis visibles solo en cartones asignados */
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-bingo .emoji-carton-lleno,
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-figura .emoji-figura {
+    display: flex;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================ */
+/* 🎯 EMOJIS PERMANENTES EN MODO MIXTO           */
+/* ============================================ */
+
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-bingo .emoji-carton-lleno,
+body.modo-asignacion .cartones-grid.modo-15 .carton.asignado-figura .emoji-figura {
+    display: flex !important;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               trofeoLatido 1s ease-in-out infinite alternate 0.4s !important;
+}
+
+/* En partida mixta (después de confirmar), los emojis se quedan fijos en los cartones asignados */
+body.modo-mixto-jugando .cartones-grid.modo-15 .carton.tiene-asignacion-bingo .emoji-carton-lleno,
+body.modo-mixto-jugando .cartones-grid.modo-15 .carton.tiene-asignacion-figura .emoji-figura {
+    display: flex !important;
+    animation: emojiEntrada 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               trofeoLatido 1s ease-in-out infinite alternate 0.4s !important;
 }
