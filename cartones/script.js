@@ -68,6 +68,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaEditorFigura':     titulo.textContent = '✏️ Nueva figura'; break;
         case 'pantallaResaltados':       titulo.textContent = '✨ Resaltados'; break;
         case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
+        case 'pantallaResaltadoBingo':   titulo.textContent = '🏆 Resaltado de bingo'; break;
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
@@ -190,7 +191,10 @@ function cargarConfigEnModal() {
             setVal('bloquearScroll', config.bloquearScroll !== undefined ? config.bloquearScroll : 'si');
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
-            setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+                    setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+            setVal('intensidadGlowBingo', config.intensidadGlowBingo !== undefined ? config.intensidadGlowBingo : 95);
+            setVal('intensidadSuaveBingo', config.intensidadSuaveBingo !== undefined ? config.intensidadSuaveBingo : 55);
+            setVal('duracionPorCasillaBingo', config.duracionPorCasillaBingo !== undefined ? config.duracionPorCasillaBingo : 260);
             setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
             setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
 setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
@@ -284,8 +288,19 @@ function actualizarLabelsSliders() {
     const valDur = document.getElementById('valDuracionPorCasilla');
     if (rangoDur && valDur) {
         valDur.textContent = rangoDur.value + ' ms';
-        rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
+            rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
     }
+
+    [['intensidadGlowBingo', 'valIntensidadGlowBingo', '%'],
+     ['intensidadSuaveBingo', 'valIntensidadSuaveBingo', '%'],
+     ['duracionPorCasillaBingo', 'valDuracionPorCasillaBingo', ' ms']].forEach(([idR, idV, suf]) => {
+        const r = document.getElementById(idR);
+        const v = document.getElementById(idV);
+        if (r && v) {
+            v.textContent = r.value + suf;
+            r.oninput = () => { v.textContent = r.value + suf; };
+        }
+    });
 
     const rangoGlowNum = document.getElementById('intensidadGlowNumero');
     const valGlowNum = document.getElementById('valIntensidadGlowNumero');
@@ -493,11 +508,15 @@ function ejecutarSonidoCampana(ctx, tipo, vol) {
 function obtenerIntervaloTactacPorTipo(tipo, duracionCasilla) {
     const base = Math.max(70, Math.min(140, Math.round((duracionCasilla || 260) / 2)));
     switch (tipo) {
-        case 'tactac_3': return 65;  // Redoble rápido
-        case 'tactac_4': return 85;  // Cascada jackpot
-        case 'tactac_8': return 135; // Palmas rítmicas
-        case 'tactac_9': return 140; // Fanfarria
-        case 'tactac_10': return 150; // Sirena
+        case 'tactac_2': return 170;
+        case 'tactac_3': return 90;
+        case 'tactac_4': return 110;
+        case 'tactac_5': return 100;
+        case 'tactac_6': return 130;
+        case 'tactac_7': return 75;
+        case 'tactac_8': return 150;
+        case 'tactac_9': return 120;
+        case 'tactac_10': return 160;
         default: return base;
     }
 }
@@ -548,68 +567,65 @@ function dispararPasoTactacPorTipo(ctx, tipo, vol, paso) {
     };
 
     switch (tipo) {
-        case 'tactac_1': { // 1. Tac-Tac de Madera Clásico (Seco y limpio)
-            const f1 = (paso % 2 === 0) ? 820 : 660;
-            const f2 = (paso % 2 === 0) ? 460 : 370;
-            pulsoTono(f1, f2, 0.042, 'sine', 0.75);
-            pulsoTono(f1 * 1.5, f2 * 1.4, 0.022, 'triangle', 0.25);
+                case 'tactac_1': { // 💧 Gotas de agua
+            const b = [520, 640, 780, 960][paso % 4];
+            pulsoTono(b, b * 2.4, 0.07, 'sine', 0.75);
+            pulsoTono(b * 2, b * 3.2, 0.04, 'sine', 0.2, 0.012);
             break;
         }
-        case 'tactac_2': { // 2. Ruleta de Casino (Click Mecánico)
-            const f = (paso % 2 === 0) ? 1650 : 1420;
-            pulsoTono(f, 320, 0.025, 'triangle', 0.70);
-            pulsoRuido(0.014, 3200, 3.5, 0.45);
+        case 'tactac_2': { // ❤️ Latido de corazón
+            pulsoTono(150, 48, 0.11, 'sine', 0.95);
+            pulsoTono(120, 45, 0.10, 'sine', 0.7, 0.09);
             break;
         }
-        case 'tactac_3': { // 3. Redoble de Tambor (Caja Militar)
-            pulsoTono(195, 95, 0.045, 'triangle', 0.55);
-            pulsoRuido(0.048, 1800, 1.2, 0.50);
+        case 'tactac_3': { // 👾 Láser espacial
+            const ini = (paso % 2 === 0) ? 2400 : 1900;
+            pulsoTono(ini, 260, 0.07, 'sawtooth', 0.32);
+            pulsoTono(ini * 0.5, 130, 0.07, 'square', 0.12);
             break;
         }
-        case 'tactac_4': { // 4. Jackpot Tragamonedas (Cascada de Monedas)
-            const notas = [1567.98, 1975.53, 2349.32, 2637.02];
-            const nota = notas[paso % notas.length];
-            pulsoTono(nota, nota, 0.09, 'sine', 0.60);
-            pulsoTono(nota * 2, nota * 2, 0.045, 'triangle', 0.22);
+        case 'tactac_4': { // 🎹 Celesta mágica
+            const pent = [1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 1567.98, 1318.51, 1174.66];
+            const n = pent[paso % pent.length];
+            pulsoTono(n, n, 0.16, 'sine', 0.6);
+            pulsoTono(n * 4, n * 4, 0.06, 'sine', 0.14);
             break;
         }
-        case 'tactac_5': { // 5. Xilófono / Marimba Festiva
-            const escala = [1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 2093.00];
-            const n = escala[paso % escala.length];
-            pulsoTono(n, n * 0.99, 0.085, 'sine', 0.68);
-            pulsoTono(n * 3, n * 3, 0.025, 'sine', 0.18);
+        case 'tactac_5': { // 🎸 Guitarra pizzicato
+            const cu = [196, 246.94, 293.66, 392, 293.66, 246.94];
+            const n = cu[paso % cu.length];
+            pulsoTono(n * 2, n * 1.98, 0.12, 'triangle', 0.7);
+            pulsoTono(n * 4, n * 3.96, 0.05, 'sawtooth', 0.12);
+            pulsoRuido(0.01, 2500, 1.5, 0.2);
             break;
         }
-        case 'tactac_6': { // 6. Victoria Arcade 8-Bit
-            const arp = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
-            const f = arp[paso % arp.length];
-            pulsoTono(f, f, 0.075, 'square', 0.35);
+        case 'tactac_6': { // 🐄 Cencerro
+            const k = (paso % 2 === 0) ? 1 : 1.12;
+            pulsoTono(540 * k, 535 * k, 0.11, 'square', 0.28);
+            pulsoTono(810 * k, 800 * k, 0.09, 'square', 0.22);
             break;
         }
-        case 'tactac_7': { // 7. Repique de Campanas de Fiesta
-            const campanas = [1318.51, 1567.98, 2093.00, 1567.98];
-            const c = campanas[paso % campanas.length];
-            pulsoTono(c, c, 0.11, 'sine', 0.60);
-            pulsoTono(c * 2.75, c * 2.75, 0.05, 'triangle', 0.22);
+        case 'tactac_7': { // 🥢 Hi-hat de batería
+            pulsoRuido(0.035, 7500, 0.9, (paso % 2 === 0) ? 0.7 : 0.5);
+            pulsoTono(9000, 7000, 0.02, 'square', 0.06);
             break;
         }
-        case 'tactac_8': { // 8. Palmas / Aplausos Rítmicos
-            pulsoRuido(0.035, 1300, 1.8, 0.55, 0);
-            pulsoRuido(0.038, 1450, 2.0, 0.50, 0.012);
-            pulsoRuido(0.055, 1150, 1.5, 0.60, 0.024);
+        case 'tactac_8': { // 🛸 Theremin
+            const th = [660, 740, 880, 988, 880, 740][paso % 6];
+            pulsoTono(th, th * 1.06, 0.15, 'sine', 0.5);
+            pulsoTono(th * 2, th * 2.1, 0.12, 'sine', 0.12);
             break;
         }
-        case 'tactac_9': { // 9. Fanfarria Triunfal de Bronces
-            const fanf = [523.25, 659.25, 783.99, 1046.50];
-            const bf = fanf[paso % fanf.length];
-            pulsoTono(bf, bf, 0.11, 'sawtooth', 0.32);
-            pulsoTono(bf * 1.5, bf * 1.5, 0.10, 'triangle', 0.28);
+        case 'tactac_9': { // 🪘 Bongó
+            const alto = (paso % 2 === 0);
+            pulsoTono(alto ? 420 : 290, alto ? 260 : 180, 0.08, 'sine', 0.85);
+            pulsoRuido(0.015, 900, 1.2, 0.25);
             break;
         }
-        case 'tactac_10': { // 10. Sirena Ganadora de Concurso
-            const sube = (paso % 2 === 0);
-            pulsoTono(sube ? 580 : 1160, sube ? 1160 : 580, 0.135, 'triangle', 0.55);
-            pulsoTono(sube ? 1160 : 1740, sube ? 1740 : 1160, 0.12, 'sine', 0.25);
+        case 'tactac_10': { // 🔔 Triángulo de orquesta
+            pulsoTono(3000, 2990, 0.18, 'sine', 0.45);
+            pulsoTono(4500, 4490, 0.12, 'sine', 0.2);
+            pulsoTono(6300, 6290, 0.08, 'sine', 0.1);
             break;
         }
         default: {
@@ -702,7 +718,10 @@ function guardarConfiguracion() {
         bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
-        duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+       duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+intensidadGlowBingo: parseInt(document.getElementById('intensidadGlowBingo')?.value || '95'),
+intensidadSuaveBingo: parseInt(document.getElementById('intensidadSuaveBingo')?.value || '55'),
+duracionPorCasillaBingo: parseInt(document.getElementById('duracionPorCasillaBingo')?.value || '260'),
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
       velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),

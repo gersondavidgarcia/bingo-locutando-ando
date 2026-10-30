@@ -1475,11 +1475,15 @@ body:not(.body-center) {
 /* ============================================
    ANIMACIÓN DE RESALTADO
    ============================================ */
+.cartones-grid.modo-15 .carton.ganador-bingo {
+    --color-figura-glow: var(--color-bingo-glow);
+    --color-figura-suave: var(--color-bingo-suave);
+}
+
 .cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura,
 .cartones-grid.modo-15 .carton.ganador-bingo.animando .celda.en-figura {
     background: var(--color-figura) !important;
     animation: rellenarCelda 0.35s ease-out both;
-    animation-delay: var(--delay-figura, 0s);
 }
 
 .cartones-grid.modo-15 .carton.ganador-figura-1.animando .celda.en-figura::after,

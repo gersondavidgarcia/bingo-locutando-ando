@@ -489,6 +489,40 @@
             transform: scale(0.97);
             background: rgba(255,255,255,0.05);
         }
+
+         /* ===== Todo quieto en celular ===== */
+        html {
+            height: 100%;
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+
+        #canvasParticulas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .menu-container {
+            will-change: auto;
+        }
+
+        @media (hover: none), (pointer: coarse) {
+            .btn-jugar,
+            .btn-jugar:hover,
+            .btn-jugar:active,
+            .btn-secundario,
+            .btn-secundario:hover,
+            .btn-secundario:active,
+            .modo-revancha-opcion:active,
+            .btn-empezar-revancha:active,
+            .btn-cancelar-revancha:active {
+                transform: none !important;
+            }
+            .btn-jugar:active,
+            .btn-secundario:active {
+                filter: brightness(0.85);
+            }
+        }
     </style>
 </head>
 <body class="body-center" ontouchstart="">
@@ -1017,6 +1051,15 @@
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                                      <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoBingo')" onfocus="this.blur()">
+                        <span class="seccion-icono">🏆</span>
+                        <span class="seccion-texto">
+                            <strong>Resaltado de bingo</strong>
+                            <small>Brillo · Halo suave · Velocidad</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
                     <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoNumero')" onfocus="this.blur()">
                         <span class="seccion-icono">🟡</span>
                         <span class="seccion-texto">
@@ -1052,6 +1095,34 @@
                             <span id="valDuracionPorCasilla">260 ms</span>
                         </label>
                         <input type="range" id="duracionPorCasilla" min="60" max="600" value="260" step="20">
+                    </div>
+                </div>
+
+                   <div class="config-pantalla" id="pantallaResaltadoBingo">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="intensidadGlowBingo">
+                            ✨ Intensidad del brillo:
+                            <span id="valIntensidadGlowBingo">95%</span>
+                        </label>
+                        <input type="range" id="intensidadGlowBingo" min="0" max="100" value="95" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intensidadSuaveBingo">
+                            🌫️ Expansión del halo suave:
+                            <span id="valIntensidadSuaveBingo">55%</span>
+                        </label>
+                        <input type="range" id="intensidadSuaveBingo" min="0" max="100" value="55" step="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duracionPorCasillaBingo">
+                            ⏱️ Velocidad de encendido por casilla:
+                            <span id="valDuracionPorCasillaBingo">260 ms</span>
+                        </label>
+                        <input type="range" id="duracionPorCasillaBingo" min="60" max="600" value="260" step="20">
                     </div>
                 </div>
 
@@ -1192,16 +1263,16 @@
                         <label for="sonidoTactacTipo">🥁 Sonido de Ganador (figura / bingo):</label>
                         <div class="cc-agregar-fila">
                             <select id="sonidoTactacTipo">
-                                <option value="tactac_1">1. 🪵 Tac-Tac de Madera Clásico (Seco)</option>
-                                <option value="tactac_2">2. 🎡 Ruleta de Casino (Click Mecánico)</option>
-                                <option value="tactac_3">3. 🥁 Redoble de Tambor (Caja Militar)</option>
-                                <option value="tactac_4">4. 🎰 Jackpot Tragamonedas (Cascada)</option>
-                                <option value="tactac_5">5. 🎼 Xilófono / Marimba Festiva</option>
-                                <option value="tactac_6">6. 🕹️ Victoria Arcade 8-Bit</option>
-                                <option value="tactac_7">7. 🔔 Repique de Campanas de Fiesta</option>
-                                <option value="tactac_8">8. 👏 Palmas / Aplausos Rítmicos</option>
-                                <option value="tactac_9">9. 🎺 Fanfarria Triunfal de Bronces</option>
-                                <option value="tactac_10">10. 🚨 Sirena Ganadora de Concurso</option>
+                                <option value="tactac_1">1. 💧 Gotas de agua</option>
+<option value="tactac_2">2. ❤️ Latido de corazón</option>
+<option value="tactac_3">3. 👾 Láser espacial</option>
+<option value="tactac_4">4. 🎹 Celesta mágica</option>
+<option value="tactac_5">5. 🎸 Guitarra pizzicato</option>
+<option value="tactac_6">6. 🐄 Cencerro</option>
+<option value="tactac_7">7. 🥢 Hi-hat de batería</option>
+<option value="tactac_8">8. 🛸 Theremin</option>
+<option value="tactac_9">9. 🪘 Bongó</option>
+<option value="tactac_10">10. 🔔 Triángulo de orquesta</option>
                             </select>
                             <button type="button" class="cc-btn-agregar" onclick="probarSonidoTactacConfig()" onfocus="this.blur()">🔊 Probar</button>
                         </div>
@@ -1376,6 +1447,11 @@
                     btnCargar.style.opacity = '0.5';
                 }
             }
+        });
+
+           window.addEventListener('pageshow', () => {
+            window.scrollTo(0, 0);
+            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
         });
 
         if ('serviceWorker' in navigator) {

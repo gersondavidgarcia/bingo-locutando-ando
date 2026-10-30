@@ -545,7 +545,7 @@ function probarSonidoTactacConfig() {
             } catch (e) {}
         }
 
-        function reproducirTactac() {
+           function reproducirTactac(duracion) {
             try {
                 detenerTactac();
                 const vol = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
@@ -557,7 +557,7 @@ function probarSonidoTactacConfig() {
                 tactacPaso = 0;
                 dispararPasoTactacPorTipo(ctx, tipo, vol, tactacPaso++);
 
-                const intervalo = obtenerIntervaloTactacPorTipo(tipo, DURACION_POR_CASILLA);
+                const intervalo = obtenerIntervaloTactacPorTipo(tipo, duracion || DURACION_POR_CASILLA);
                 tactacIntervalId = setInterval(() => {
                     const v = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
                     if (v <= 0) return;
@@ -671,6 +671,9 @@ function probarSonidoTactacConfig() {
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
+        let INTENSIDAD_GLOW_BINGO = 95;
+        let INTENSIDAD_SUAVE_BINGO = 55;
+        let DURACION_POR_CASILLA_BINGO = 260;
 
         let INTENSIDAD_GLOW_NUMERO = 95;
         let INTENSIDAD_HALO_NUMERO = 55;
@@ -978,6 +981,9 @@ function probarSonidoTactacConfig() {
                     INTENSIDAD_GLOW = config.intensidadGlow !== undefined ? parseInt(config.intensidadGlow) : 95;
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
+                    INTENSIDAD_GLOW_BINGO = config.intensidadGlowBingo !== undefined ? parseInt(config.intensidadGlowBingo) : 95;
+                    INTENSIDAD_SUAVE_BINGO = config.intensidadSuaveBingo !== undefined ? parseInt(config.intensidadSuaveBingo) : 55;
+                    DURACION_POR_CASILLA_BINGO = config.duracionPorCasillaBingo !== undefined ? parseInt(config.duracionPorCasillaBingo) : 260;
 
                     INTENSIDAD_GLOW_NUMERO = config.intensidadGlowNumero !== undefined ? parseInt(config.intensidadGlowNumero) : 95;
                     INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
@@ -1021,7 +1027,8 @@ function probarSonidoTactacConfig() {
             if (esRevancha && VELOCIDAD_REVANCHA > 1) {
                 VELOCIDAD_BOLA = Math.max(150, Math.round(VELOCIDAD_BOLA / VELOCIDAD_REVANCHA));
                 VOZ_VELOCIDAD = VOZ_VELOCIDAD * VELOCIDAD_REVANCHA;
-                DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
+                  DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
+                DURACION_POR_CASILLA_BINGO = Math.max(60, Math.round(DURACION_POR_CASILLA_BINGO / VELOCIDAD_REVANCHA));
             }
 
             FIGURAS = {};
@@ -1347,7 +1354,9 @@ function probarSonidoTactacConfig() {
             }
 
             document.body.style.setProperty('--color-figura-glow', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_GLOW / 100})`);
-            document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE / 100})`);
+                  document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE / 100})`);
+            document.body.style.setProperty('--color-bingo-glow', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_GLOW_BINGO / 100})`);
+            document.body.style.setProperty('--color-bingo-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE_BINGO / 100})`);
             document.body.style.setProperty('--amarillo-glow', INTENSIDAD_GLOW_NUMERO / 100);
             document.body.style.setProperty('--amarillo-halo', INTENSIDAD_HALO_NUMERO / 100);
         }
@@ -1722,7 +1731,7 @@ function probarSonidoTactacConfig() {
                 if (ganoBingo) hayGanadorBingo = true;
             });
             if (hayGanadorFigura || hayGanadorBingo) {
-                reproducirTactac();
+                         reproducirTactac(hayGanadorBingo ? DURACION_POR_CASILLA_BINGO : DURACION_POR_CASILLA);
             }
 
             const PAUSA_FINAL = 600;
@@ -1736,17 +1745,18 @@ function probarSonidoTactacConfig() {
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
 
-            let maxCeldas = 0;
-            cartonesInfo.forEach(({ celdasDeLaFigura }) => {
+                      let duracionMaxima = 0;
+            cartonesInfo.forEach(({ ganoBingo, celdasDeLaFigura }) => {
+                const dur = ganoBingo ? DURACION_POR_CASILLA_BINGO : DURACION_POR_CASILLA;
                 const lista = celdasDeLaFigura || [];
-                if (lista.length > maxCeldas) maxCeldas = lista.length;
+                duracionMaxima = Math.max(duracionMaxima, lista.length * dur);
                 lista.forEach((celda, i) => {
-                    const t = setTimeout(() => celda.classList.add('en-figura'), i * DURACION_POR_CASILLA);
+                    const t = setTimeout(() => celda.classList.add('en-figura'), i * dur);
                     timeoutsFase1.push(t);
                 });
             });
 
-            const duracionTotal = maxCeldas * DURACION_POR_CASILLA + PAUSA_FINAL;
+            const duracionTotal = duracionMaxima + PAUSA_FINAL;
 
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
