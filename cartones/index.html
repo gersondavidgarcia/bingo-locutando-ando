@@ -25,10 +25,11 @@
 
     <style>
         body.body-center {
-            background-color: #030406;
+            background-color: #04060b;
             background-image:
-                radial-gradient(circle at 50% 50%, rgba(30, 20, 55, 0.5) 0%, rgba(2, 3, 5, 0.98) 75%),
-                linear-gradient(135deg, #010204 0%, #06080d 50%, #010204 100%);
+                radial-gradient(circle at 50% 25%, rgba(46, 125, 50, 0.16) 0%, transparent 55%),
+                radial-gradient(circle at 50% 85%, rgba(245, 175, 25, 0.12) 0%, transparent 60%),
+                linear-gradient(160deg, #030508 0%, #090d16 50%, #030508 100%);
             min-height: 100vh;
             min-height: 100dvh;
             width: 100%;
@@ -39,18 +40,9 @@
             overflow: hidden;
             position: fixed;
             inset: 0;
-            padding: 20px 0;
+            padding: 16px;
             -webkit-font-smoothing: antialiased;
             font-family: 'Montserrat', Arial, sans-serif;
-        }
-
-        body.body-center::after {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(138, 43, 226, 0.04) 0%, rgba(0, 0, 0, 0.85) 85%);
-            z-index: 1;
-            pointer-events: none;
         }
 
         #canvasParticulas {
@@ -59,108 +51,208 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 2;
+            z-index: 1;
             pointer-events: none;
         }
 
         .ambient-glow {
             position: fixed;
-            width: min(600px, 90vw); height: min(600px, 90vw);
-            background: radial-gradient(circle, rgba(245, 175, 25, 0.08) 0%, rgba(138, 43, 226, 0.04) 40%, transparent 70%);
+            width: min(550px, 92vw);
+            height: min(550px, 92vw);
+            background: radial-gradient(circle, rgba(245, 185, 35, 0.08) 0%, rgba(16, 185, 129, 0.05) 45%, transparent 70%);
             border-radius: 50%;
-            z-index: 2;
+            z-index: 1;
             pointer-events: none;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            will-change: opacity;
         }
 
+        /* ============================================
+           TARJETA PRINCIPAL DEL MENÚ
+           ============================================ */
         .menu-container {
             position: relative;
             z-index: 10;
             text-align: center;
-            width: 95%;
-            max-width: 385px;
+            width: 100%;
+            max-width: 395px;
             margin: auto;
-            background: linear-gradient(145deg, rgba(15, 18, 28, 0.9), rgba(7, 9, 14, 0.98));
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 215, 0, 0.25);
+            background: linear-gradient(165deg, rgba(19, 24, 38, 0.92), rgba(9, 12, 20, 0.98));
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 215, 0, 0.22);
             border-radius: 28px;
-            padding: 32px 22px;
+            padding: 26px 20px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), inset 0 1px 3px rgba(255, 255, 255, 0.2), 0 0 50px rgba(243, 185, 33, 0.1), 0 0 100px rgba(138, 43, 226, 0.06);
-            will-change: transform;
+            gap: 14px;
+            box-shadow:
+                0 28px 75px rgba(0, 0, 0, 0.9),
+                inset 0 1px 2px rgba(255, 255, 255, 0.15),
+                0 0 40px rgba(245, 175, 25, 0.08);
         }
 
-        .dice-container { position: relative; margin-bottom: 6px; }
-
-        .dice {
-            width: 68px; height: 68px;
-            background: linear-gradient(135deg, #ffffff 0%, #d8d8d8 100%);
-            border-radius: 16px;
-            display: grid;
-            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
-            padding: 8px;
-            box-shadow: inset 0 3px 6px rgba(255,255,255,0.9), 0 8px 20px rgba(0,0,0,0.4);
-            transform: rotate(-6deg);
+        /* ============================================
+           ESFERA DE BINGO 3D (HERO ICON)
+           ============================================ */
+        .bingo-hero-stage {
+            position: relative;
+            width: 120px;
+            height: 82px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: -4px;
         }
 
-        .dot {
-            background-color: #222;
+        .bola-principal {
+            width: 74px;
+            height: 74px;
             border-radius: 50%;
-            width: 9px;
-            height: 9px;
-            align-self: center;
-            justify-self: center;
+            background: radial-gradient(circle at 30% 25%, #ffeb3b 0%, #f59e0b 48%, #b45309 85%, #78350f 100%);
+            box-shadow:
+                0 10px 24px rgba(0, 0, 0, 0.65),
+                0 0 28px rgba(245, 158, 11, 0.45),
+                inset -4px -6px 12px rgba(0, 0, 0, 0.5),
+                inset 4px 4px 10px rgba(255, 255, 255, 0.65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+            animation: flotarBola 3.6s ease-in-out infinite;
         }
-        .dot-top-left { grid-area: 1 / 1; }
-        .dot-top-right { grid-area: 1 / 3; }
-        .dot-center { grid-area: 2 / 2; background-color: #e53935; width: 11px; height: 11px; }
-        .dot-bottom-left { grid-area: 3 / 1; }
-        .dot-bottom-right { grid-area: 3 / 3; }
 
-        .dice-container::after {
+        .bola-principal::before {
             content: '';
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px; height: 40px;
-            background: #ffea79;
+            width: 64%;
+            height: 64%;
             border-radius: 50%;
-            z-index: -1;
-            opacity: 0.9;
-            filter: blur(18px);
+            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 70%, #cbd5e1 100%);
+            box-shadow: inset 1px 2px 4px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.25);
+            z-index: 1;
         }
 
+        .bola-principal::after {
+            content: '';
+            position: absolute;
+            top: 9%;
+            left: 16%;
+            width: 30%;
+            height: 18%;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 75%);
+            transform: rotate(-28deg);
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .bola-principal-texto {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 0.9;
+            color: #0f172a;
+            font-weight: 900;
+        }
+
+        .bola-principal-texto small {
+            font-size: 0.55rem;
+            letter-spacing: 1px;
+            color: #b45309;
+            font-weight: 900;
+        }
+
+        .bola-principal-texto span {
+            font-size: 1.45rem;
+            letter-spacing: -0.5px;
+        }
+
+        .bola-satelite {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.72rem;
+            color: #0f172a;
+            z-index: 2;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55), inset 2px 2px 5px rgba(255, 255, 255, 0.55);
+        }
+
+        .bola-satelite::before {
+            content: '';
+            position: absolute;
+            width: 66%;
+            height: 66%;
+            border-radius: 50%;
+            background: #ffffff;
+            z-index: -1;
+        }
+
+        .bola-satelite.izq {
+            left: 2px;
+            bottom: 4px;
+            background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b);
+            transform: rotate(-16deg);
+            animation: flotarSateliteIzq 4.2s ease-in-out infinite;
+        }
+
+        .bola-satelite.der {
+            right: 2px;
+            bottom: 6px;
+            background: radial-gradient(circle at 30% 30%, #22c55e, #15803d);
+            transform: rotate(15deg);
+            animation: flotarSateliteDer 3.9s ease-in-out infinite;
+        }
+
+        @keyframes flotarBola {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-5px) rotate(3deg); }
+        }
+
+        @keyframes flotarSateliteIzq {
+            0%, 100% { transform: translateY(0px) rotate(-16deg); }
+            50% { transform: translateY(-3px) rotate(-10deg); }
+        }
+
+        @keyframes flotarSateliteDer {
+            0%, 100% { transform: translateY(0px) rotate(15deg); }
+            50% { transform: translateY(-4px) rotate(9deg); }
+        }
+
+        /* ============================================
+           TÍTULO Y PÍLDORA DE ESTADO ACTUAL
+           ============================================ */
         .logo-box {
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            padding: 0;
-            margin-bottom: 4px;
-            box-shadow: none;
             width: 100%;
             text-align: center;
+            margin-bottom: 2px;
         }
 
         .logo-box h1 {
-            font-size: 2.3rem;
+            font-size: 2.2rem;
             font-weight: 900;
             letter-spacing: 1.5px;
             line-height: 1;
             display: flex;
             justify-content: center;
+            align-items: baseline;
             gap: 8px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
 
         .logo-box h1 span.bingo-text {
             color: #ffffff;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+            text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7);
         }
 
         .logo-box h1 span.ninety-text {
@@ -168,36 +260,91 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 25px rgba(245, 175, 25, 0.7);
+            filter: drop-shadow(0 0 12px rgba(245, 175, 25, 0.45));
         }
 
         .logo-box .subtitle {
             color: #94a3b8;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 700;
             letter-spacing: 2.5px;
-            margin-bottom: 22px;
             text-transform: uppercase;
         }
 
+        /* Resumen interactivo de configuración */
+        .config-resumen-pill {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 14px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #cbd5e1;
+            font-size: 0.73rem;
+            font-weight: 700;
+        }
+
+        .config-resumen-pill:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(245, 175, 25, 0.35);
+        }
+
+        .config-resumen-pill:active {
+            transform: scale(0.98);
+        }
+
+        .resumen-items {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .resumen-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #e2e8f0;
+        }
+
+        .resumen-chip i {
+            color: #f5af19;
+            font-size: 0.75rem;
+        }
+
+        .resumen-editar {
+            color: #94a3b8;
+            font-size: 0.68rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        /* ============================================
+           BOTÓN PRINCIPAL: JUGAR
+           ============================================ */
         .btn-jugar {
             width: 100%;
-            background: linear-gradient(180deg, #ffe556 0%, #f39c12 100%);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 16px;
-            padding: 16px;
-            font-size: 1.25rem;
-            font-weight: 900;
+            background: linear-gradient(180deg, #ffe556 0%, #f59e0b 55%, #d97706 100%);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 18px;
+            padding: 15px 20px;
             color: #120d02;
             cursor: pointer;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.45), inset 0 2px 4px rgba(255, 255, 255, 0.9), inset 0 -4px 4px rgba(160, 80, 0, 0.4);
-            transition: transform 0.15s ease, box-shadow 0.15s;
-            margin-bottom: 20px;
-            letter-spacing: 1.5px;
+            box-shadow:
+                0 10px 28px rgba(245, 158, 11, 0.42),
+                inset 0 2px 3px rgba(255, 255, 255, 0.85),
+                inset 0 -3px 4px rgba(146, 64, 14, 0.45);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
             position: relative;
             overflow: hidden;
             font-family: 'Montserrat', Arial, sans-serif;
@@ -205,93 +352,248 @@
 
         .btn-jugar:hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 25px rgba(243, 156, 18, 0.7), inset 0 2px 6px rgba(255, 255, 255, 1);
+            box-shadow: 0 12px 30px rgba(245, 158, 11, 0.6), inset 0 2px 5px rgba(255, 255, 255, 1);
         }
 
         .btn-jugar:active {
-            transform: translateY(1px) scale(0.97);
+            transform: translateY(1px) scale(0.98);
         }
 
         .btn-jugar::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.55), transparent);
             transform: rotate(30deg) translateX(-100%);
-            animation: destelloBoton 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            animation: destelloBoton 3.2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
         }
 
         @keyframes destelloBoton {
             0% { transform: rotate(30deg) translateX(-100%); }
-            40% { transform: rotate(30deg) translateX(100%); }
+            38% { transform: rotate(30deg) translateX(100%); }
             100% { transform: rotate(30deg) translateX(100%); }
         }
 
-        .menu-options-wrapper {
-            width: 100%;
+        .btn-jugar-left {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 22px;
+            align-items: center;
+            gap: 14px;
+            text-align: left;
+            position: relative;
+            z-index: 2;
         }
 
-        .btn-secundario {
+        .btn-jugar-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(18, 13, 2, 0.14);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #120d02;
+        }
+
+        .btn-jugar-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .btn-jugar-text strong {
+            font-size: 1.22rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .btn-jugar-text small {
+            font-size: 0.68rem;
+            font-weight: 700;
+            opacity: 0.8;
+            letter-spacing: 0.4px;
+        }
+
+        .btn-jugar-arrow {
+            font-size: 1.1rem;
+            opacity: 0.75;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ============================================
+           TARJETAS RÁPIDAS (REVANCHA Y CARGAR)
+           ============================================ */
+        .quick-modes-grid {
             width: 100%;
-            background: rgba(20, 24, 36, 0.75);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 13px 18px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .btn-modo-card {
+            background: rgba(22, 28, 44, 0.82);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 16px;
+            padding: 13px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            color: #f1f5f9;
+            font-family: 'Montserrat', Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        }
+
+        .btn-modo-card:hover {
+            background: rgba(30, 38, 58, 0.95);
+            border-color: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }
+
+        .btn-modo-card:active {
+            transform: scale(0.97);
+        }
+
+        .modo-card-top {
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            color: #f1f5f9;
-            font-size: 0.92rem;
+        }
+
+        .modo-card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .modo-card-icon.revancha {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .modo-card-icon.cargar {
+            background: rgba(52, 211, 153, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .modo-badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .modo-badge.activo {
+            background: rgba(52, 211, 153, 0.18);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.35);
+        }
+
+        .modo-badge.vacio {
+            background: rgba(148, 163, 184, 0.12);
+            color: #94a3b8;
+        }
+
+        .modo-badge.info {
+            background: rgba(96, 165, 250, 0.15);
+            color: #93c5fd;
+        }
+
+        .modo-card-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+        }
+
+        .modo-card-sub {
+            font-size: 0.68rem;
+            color: #94a3b8;
             font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .btn-modo-card.sin-partida {
+            opacity: 0.55;
+        }
+
+        /* ============================================
+           DOCK INFERIOR DE HERRAMIENTAS (3 COLUMNAS)
+           ============================================ */
+        .utility-dock {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn-dock {
+            background: rgba(18, 22, 34, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 11px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: #cbd5e1;
+            font-size: 0.72rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08);
             font-family: 'Montserrat', Arial, sans-serif;
         }
 
-        .btn-secundario:hover {
-            background: rgba(32, 38, 56, 0.9);
-            border-color: rgba(245, 175, 25, 0.4);
-            transform: translateX(3px);
-            box-shadow: 0 0 18px rgba(245, 175, 25, 0.15), inset 0 1px 0 rgba(255,255,255,0.2);
+        .btn-dock i {
+            font-size: 1.05rem;
         }
 
-        .btn-secundario:active {
-            transform: scale(0.98);
+        .btn-dock:hover {
+            background: rgba(30, 36, 54, 0.92);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
         }
 
-        .btn-secundario .btn-content {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .btn-dock:active {
+            transform: scale(0.95);
         }
 
-        .btn-secundario .btn-chevron {
-            color: #64748b;
-            font-size: 0.75rem;
+        .btn-dock.salir {
+            background: rgba(45, 18, 24, 0.45);
+            border-color: rgba(248, 113, 113, 0.22);
+            color: #fca5a5;
         }
 
-        .btn-secundario.btn-salir {
-            background: rgba(45, 20, 25, 0.4);
-            border-color: rgba(239, 68, 68, 0.3);
+        .btn-dock.salir:hover {
+            background: rgba(65, 22, 30, 0.65);
+            border-color: rgba(248, 113, 113, 0.4);
         }
 
-        .btn-secundario.btn-salir .btn-content {
-            color: #f87171;
-        }
-
-        .btn-secundario.btn-salir .btn-chevron {
-            color: #f87171;
-        }
-
+        /* ============================================
+           PIE DEL MENÚ
+           ============================================ */
         .footer-menu {
-            font-size: 0.65rem;
+            font-size: 0.63rem;
             color: #64748b;
             letter-spacing: 1.5px;
             display: flex;
@@ -301,11 +603,12 @@
             width: 100%;
             text-transform: uppercase;
             font-weight: 700;
+            margin-top: 2px;
         }
 
         .footer-menu span.online-text {
             color: #10b981;
-            text-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
         }
 
         .audio-wave {
@@ -344,77 +647,173 @@
             50% { opacity: 0.3; }
         }
 
-        .modal-reglas-box {
-            background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
-            border: 1px solid rgba(245,200,66,0.35);
+        /* ============================================
+           MEJORAS VISUALES DEL MODAL DE CONFIGURACIÓN
+           ============================================ */
+        .config-cat-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #f5af19;
+            margin-top: 6px;
+            margin-bottom: -6px;
+            padding-left: 4px;
+        }
+
+        .modo-tema-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #262a33;
+            border: 1.5px solid #333;
+            border-radius: 12px;
+            padding: 14px;
+            color: #fff;
+            text-align: left;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .modo-tema-btn.seleccionado {
+            border-color: #4caf50;
+            background: rgba(46, 125, 50, 0.18);
+            box-shadow: 0 0 0 1px rgba(76, 175, 80, 0.35);
+        }
+
+        .modo-tema-icono {
+            font-size: 1.45rem;
+            flex-shrink: 0;
+        }
+
+        .modo-tema-texto {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .modo-tema-texto strong {
+            font-size: 0.92rem;
+            color: #fff;
+        }
+
+        .modo-tema-texto small {
+            font-size: 0.73rem;
+            color: #94a3b8;
+            line-height: 1.3;
+        }
+
+        .modo-tema-check {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2e7d32;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .btn-link-inline {
+            background: rgba(46, 125, 50, 0.25);
+            border: 1px solid #4caf50;
+            color: #81c784;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+
+        /* ============================================
+           MODALES DE REGLAS, REVANCHA Y SALIDA
+           ============================================ */
+        .modal-reglas-box,
+        .modo-revancha-box {
+            background: linear-gradient(155deg, rgba(20, 25, 40, 0.98), rgba(9, 12, 20, 0.99));
+            border: 1px solid rgba(245, 200, 66, 0.35);
             border-radius: 24px;
             padding: 24px;
-            max-width: 380px;
+            max-width: 375px;
             width: 92%;
-            text-align: left;
             color: #e2e8f0;
-            box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
+            box-shadow: 0 35px 90px rgba(0, 0, 0, 0.95), 0 0 25px rgba(245, 200, 66, 0.12);
+        }
+
+        .modal-reglas-box {
+            text-align: left;
             max-height: 90vh;
             overflow-y: auto;
         }
 
-        .modal-reglas-box h2 {
+        .modo-revancha-box {
+            text-align: center;
+            max-width: 345px;
+        }
+
+        .modal-reglas-box h2,
+        .modo-revancha-box h2 {
             color: #f5c842;
             text-align: center;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
+            font-weight: 900;
             margin-bottom: 16px;
-            text-shadow: 0 0 12px rgba(245,200,66,0.3);
+            text-shadow: 0 0 12px rgba(245, 200, 66, 0.3);
         }
 
-        .modal-reglas-box ul {
-            list-style: none;
-            padding: 0;
+        .reglas-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             margin: 12px 0;
-            font-size: 0.9rem;
-            line-height: 1.7;
         }
 
-        .modal-reglas-box ul li {
-            margin-bottom: 6px;
+        .regla-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.83rem;
+            line-height: 1.45;
         }
 
-        .btn-cerrar-modal {
-            margin-top: 18px;
-            padding: 12px;
+        .regla-card span.icono {
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .btn-cerrar-modal,
+        .btn-empezar-revancha {
+            width: 100%;
+            margin-top: 14px;
+            padding: 13px;
             background: linear-gradient(135deg, #f5c842, #d4a020);
             color: #0a0a12;
             border: none;
             border-radius: 12px;
             font-weight: 900;
-            font-size: 1rem;
+            font-size: 0.98rem;
             cursor: pointer;
-            width: 100%;
-            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
+            box-shadow: 0 6px 20px rgba(245, 200, 66, 0.35);
             font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: 0.8px;
+            transition: transform 0.15s ease;
         }
 
-        .btn-cerrar-modal:active {
+        .btn-cerrar-modal:active,
+        .btn-empezar-revancha:active {
             transform: scale(0.96);
-        }
-
-        .modo-revancha-box {
-            background: linear-gradient(145deg, rgba(18, 20, 32, 0.98), rgba(8, 10, 16, 0.98));
-            border: 1px solid rgba(245,200,66,0.35);
-            border-radius: 24px;
-            padding: 24px;
-            max-width: 340px;
-            width: 92%;
-            color: #e2e8f0;
-            box-shadow: 0 35px 90px rgba(0,0,0,0.95), 0 0 25px rgba(245,200,66,0.12);
-            text-align: center;
-        }
-
-        .modo-revancha-box h2 {
-            color: #f5c842;
-            font-size: 1.2rem;
-            font-weight: 900;
-            margin-bottom: 18px;
-            text-shadow: 0 0 12px rgba(245,200,66,0.3);
         }
 
         .modo-revancha-opcion {
@@ -422,20 +821,16 @@
             align-items: center;
             justify-content: flex-start;
             gap: 12px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.09);
             border-radius: 14px;
-            padding: 14px 16px;
+            padding: 13px 16px;
             margin-bottom: 10px;
             cursor: pointer;
             transition: border-color 0.2s ease, background 0.2s ease;
-            font-size: 1rem;
+            font-size: 0.96rem;
             font-weight: 700;
             color: #f1f5f9;
-        }
-
-        .modo-revancha-opcion:active {
-            background: rgba(255,255,255,0.08);
         }
 
         .modo-revancha-opcion input[type="checkbox"] {
@@ -450,34 +845,13 @@
             font-size: 1.3rem;
         }
 
-        .btn-empezar-revancha {
-            width: 100%;
-            margin-top: 14px;
-            padding: 14px;
-            background: linear-gradient(135deg, #f5c842, #d4a020);
-            color: #0a0a12;
-            border: none;
-            border-radius: 12px;
-            font-weight: 900;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(245,200,66,0.35);
-            font-family: 'Montserrat', Arial, sans-serif;
-            letter-spacing: 1px;
-            transition: transform 0.15s ease, filter 0.15s ease;
-        }
-
-        .btn-empezar-revancha:active {
-            transform: scale(0.96);
-        }
-
         .btn-cancelar-revancha {
             width: 100%;
             margin-top: 8px;
             padding: 10px;
             background: transparent;
             color: #94a3b8;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             font-weight: 700;
             font-size: 0.85rem;
@@ -485,43 +859,19 @@
             font-family: 'Montserrat', Arial, sans-serif;
         }
 
-        .btn-cancelar-revancha:active {
-            transform: scale(0.97);
-            background: rgba(255,255,255,0.05);
-        }
-
-         /* ===== Todo quieto en celular ===== */
-        html {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-        }
-
-        #canvasParticulas {
+        .btn-salir-confirmar {
             width: 100%;
-            height: 100%;
-        }
-
-        .menu-container {
-            will-change: auto;
-        }
-
-        @media (hover: none), (pointer: coarse) {
-            .btn-jugar,
-            .btn-jugar:hover,
-            .btn-jugar:active,
-            .btn-secundario,
-            .btn-secundario:hover,
-            .btn-secundario:active,
-            .modo-revancha-opcion:active,
-            .btn-empezar-revancha:active,
-            .btn-cancelar-revancha:active {
-                transform: none !important;
-            }
-            .btn-jugar:active,
-            .btn-secundario:active {
-                filter: brightness(0.85);
-            }
+            margin-top: 12px;
+            padding: 13px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: 'Montserrat', Arial, sans-serif;
+            letter-spacing: 0.8px;
         }
     </style>
 </head>
@@ -531,109 +881,177 @@
     <canvas id="canvasParticulas"></canvas>
 
     <div class="menu-container">
-        <div class="dice-container">
-            <div class="dice">
-                <div class="dot dot-top-left"></div>
-                <div class="dot dot-top-right"></div>
-                <div class="dot dot-center"></div>
-                <div class="dot dot-bottom-left"></div>
-                <div class="dot dot-bottom-right"></div>
+
+        <!-- Esfera 3D de Bingo -->
+        <div class="bingo-hero-stage">
+            <div class="bola-satelite izq">B12</div>
+            <div class="bola-principal">
+                <div class="bola-principal-texto">
+                    <small>BINGO</small>
+                    <span>75</span>
+                </div>
             </div>
+            <div class="bola-satelite der">O68</div>
         </div>
 
+        <!-- Título Principal -->
         <div class="logo-box">
             <h1><span class="bingo-text">BINGO</span><span class="ninety-text">75</span></h1>
-            <p class="subtitle">Múltiples Modalidades</p>
+            <p class="subtitle">Edición Proyector &amp; Control</p>
         </div>
 
+        <!-- Barra interactiva con el resumen de configuración actual -->
+        <div class="config-resumen-pill" onclick="abrirConfiguracion()" title="Toca para cambiar ajustes">
+            <div class="resumen-items">
+                <span class="resumen-chip">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    <span id="resumenCartones">15 Cartones</span>
+                </span>
+                <span class="resumen-chip">
+                    <i class="fa-solid fa-palette"></i>
+                    <span id="resumenTema">Verde</span>
+                </span>
+                <span class="resumen-chip">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span id="resumenVoz">Voz OFF</span>
+                </span>
+            </div>
+            <span class="resumen-editar">
+                <i class="fa-solid fa-sliders"></i>
+            </span>
+        </div>
+
+        <!-- Botón Principal: Jugar -->
         <button class="btn-jugar" onclick="iniciarJuegoDirecto()" onfocus="this.blur()">
-            <i class="fa-solid fa-play"></i> JUGAR
+            <div class="btn-jugar-left">
+                <div class="btn-jugar-icon">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+                <div class="btn-jugar-text">
+                    <strong>JUGAR AHORA</strong>
+                    <small>Iniciar partida nueva</small>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right btn-jugar-arrow"></i>
         </button>
 
-        <div class="menu-options-wrapper">
-            <button class="btn-secundario" onclick="abrirConfiguracion()" onfocus="this.blur()">
-                <span class="btn-content">
-                    <i class="fa-solid fa-gear" style="color: #a78bfa; font-size: 1.05rem; width: 18px; text-align: center;"></i>
-                    CONFIGURACIÓN
-                </span>
-                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+        <!-- Tarjetas Rápidas: Revancha y Cargar Partida -->
+        <div class="quick-modes-grid">
+            <button class="btn-modo-card" onclick="iniciarRevanchaDesdeMenu()" onfocus="this.blur()">
+                <div class="modo-card-top">
+                    <div class="modo-card-icon revancha">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </div>
+                    <span class="modo-badge info">Rápido</span>
+                </div>
+                <div>
+                    <div class="modo-card-title">REVANCHA</div>
+                    <div class="modo-card-sub">Elegir cartones activos</div>
+                </div>
             </button>
 
-            <button class="btn-secundario" onclick="iniciarRevanchaDesdeMenu()" onfocus="this.blur()">
-                <span class="btn-content">
-                    <i class="fa-solid fa-rotate-right" style="color: #60a5fa; font-size: 1.05rem; width: 18px; text-align: center;"></i>
-                    REVANCHA
-                </span>
-                <i class="fa-solid fa-chevron-right btn-chevron"></i>
-            </button>
-
-            <button class="btn-secundario" id="btnCargarMenu" onclick="cargarPartidaDesdeMenu()" onfocus="this.blur()">
-                <span class="btn-content">
-                    <i class="fa-solid fa-folder-open" style="color: #34d399; font-size: 1.05rem; width: 18px; text-align: center;"></i>
-                    CARGAR PARTIDA
-                </span>
-                <i class="fa-solid fa-chevron-right btn-chevron"></i>
-            </button>
-
-            <button class="btn-secundario" onclick="abrirReglas()" onfocus="this.blur()">
-                <span class="btn-content">
-                    <i class="fa-solid fa-book-open" style="color: #fbbf24; font-size: 1.05rem; width: 18px; text-align: center;"></i>
-                    REGLAS
-                </span>
-                <i class="fa-solid fa-chevron-right btn-chevron"></i>
-            </button>
-
-            <button class="btn-secundario btn-salir" onclick="salirApp()" onfocus="this.blur()">
-                <span class="btn-content">
-                    <i class="fa-solid fa-door-open" style="color: #f87171; font-size: 1.05rem; width: 18px; text-align: center;"></i>
-                    SALIR
-                </span>
-                <i class="fa-solid fa-chevron-right btn-chevron"></i>
+            <button class="btn-modo-card" id="btnCargarMenu" onclick="cargarPartidaDesdeMenu()" onfocus="this.blur()">
+                <div class="modo-card-top">
+                    <div class="modo-card-icon cargar">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <span class="modo-badge vacio" id="badgeEstadoPartida">Vacío</span>
+                </div>
+                <div>
+                    <div class="modo-card-title">CONTINUAR</div>
+                    <div class="modo-card-sub" id="subEstadoPartida">Sin partida guardada</div>
+                </div>
             </button>
         </div>
 
+        <!-- Barra Inferior de Utilidades -->
+        <div class="utility-dock">
+            <button class="btn-dock" onclick="abrirConfiguracion()" onfocus="this.blur()">
+                <i class="fa-solid fa-gear" style="color: #a78bfa;"></i>
+                <span>AJUSTES</span>
+            </button>
+
+            <button class="btn-dock" onclick="abrirReglas()" onfocus="this.blur()">
+                <i class="fa-solid fa-book-open" style="color: #fbbf24;"></i>
+                <span>REGLAS</span>
+            </button>
+
+            <button class="btn-dock salir" onclick="salirApp()" onfocus="this.blur()">
+                <i class="fa-solid fa-power-off" style="color: #f87171;"></i>
+                <span>SALIR</span>
+            </button>
+        </div>
+
+        <!-- Pie de estado -->
         <div class="footer-menu">
             <div class="audio-wave"><span></span><span></span><span></span></div>
             <div class="status-dot"></div>
-            Bingo 75 <span class="online-text">Online</span>
+            Bingo 75 <span class="online-text">Listo</span>
             <div class="audio-wave"><span></span><span></span><span></span></div>
         </div>
     </div>
 
+    <!-- MODAL: REGLAS -->
     <div class="modal-overlay" id="modalReglas">
         <div class="modal-reglas-box">
             <h2>📖 Reglas del Bingo 75</h2>
-            <ul>
-                <li>🎯 Completa una <b>Línea</b> horizontal, vertical o diagonal.</li>
-                <li>🏆 Completa todo el <b>Cartón</b> (25 números) para cantar Bingo.</li>
-                <li>🥇 El premio es único: la primera figura y el primer bingo ganan.</li>
-                <li>🖐️ Puedes marcar números manualmente desde la tabla inferior.</li>
-            </ul>
-            <button class="btn-cerrar-modal" onclick="cerrarModal('modalReglas')" onfocus="this.blur()">Entendido</button>
+            <div class="reglas-lista">
+                <div class="regla-card">
+                    <span class="icono">🎯</span>
+                    <div>Completa la <b>Figura</b> activa en cualquiera de los cartones en juego para ganar el primer premio.</div>
+                </div>
+                <div class="regla-card">
+                    <span class="icono">🏆</span>
+                    <div>Completa las <b>25 casillas</b> del cartón para cantar <b>Bingo Lleno</b> y finalizar la partida.</div>
+                </div>
+                <div class="regla-card">
+                    <span class="icono">⚡</span>
+                    <div>Toca la <b>esfera grande del bolillero</b> dentro del juego si deseas activar o pausar el saque automático.</div>
+                </div>
+                <div class="regla-card">
+                    <span class="icono">🖐️</span>
+                    <div>También puedes tocar cualquier número en el <b>Panel de Control (1-75)</b> para marcarlo manualmente.</div>
+                </div>
+            </div>
+            <button class="btn-cerrar-modal" onclick="cerrarModal('modalReglas')" onfocus="this.blur()">ENTENDIDO</button>
         </div>
     </div>
 
+    <!-- MODAL: MODO REVANCHA -->
     <div class="modal-overlay" id="modalModoRevancha">
         <div class="modo-revancha-box">
-            <h2>🎯 ¿Qué se juega?</h2>
+            <h2>🎯 ¿Qué se juega en la Revancha?</h2>
 
             <label class="modo-revancha-opcion">
                 <input type="checkbox" id="chkRevanchaFigura" checked>
                 <span class="emoji-opcion">🎯</span>
-                <span>Figura</span>
+                <span>Jugar Figura</span>
             </label>
 
             <label class="modo-revancha-opcion">
                 <input type="checkbox" id="chkRevanchaBingo" checked>
                 <span class="emoji-opcion">🏆</span>
-                <span>Bingo</span>
+                <span>Jugar Bingo Lleno</span>
             </label>
 
-            <button class="btn-empezar-revancha" id="btnEmpezarRevancha">▶ EMPEZAR</button>
+            <button class="btn-empezar-revancha" id="btnEmpezarRevancha">▶ SELECCIONAR CARTONES</button>
             <button class="btn-cancelar-revancha" onclick="cerrarModalModoRevancha()">Cancelar</button>
         </div>
     </div>
 
+    <!-- MODAL: CONFIRMAR SALIDA -->
+    <div class="modal-overlay" id="modalSalir">
+        <div class="modo-revancha-box">
+            <h2>🚪 ¿Salir del Bingo?</h2>
+            <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px;">
+                Se cerrará la ventana actual de la aplicación.
+            </p>
+            <button class="btn-salir-confirmar" onclick="confirmarSalidaApp()" onfocus="this.blur()">SÍ, SALIR</button>
+            <button class="btn-cancelar-revancha" onclick="cerrarModal('modalSalir')" onfocus="this.blur()">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURACIÓN COMPLETA -->
     <div class="modal-overlay" id="modalConfig">
         <div class="modal-box">
             <div class="modal-header">
@@ -644,31 +1062,42 @@
             <div class="modal-body">
 
                 <div class="config-pantalla visible" id="pantallaMenu">
-                    <p class="config-hint">Elige qué quieres configurar:</p>
+                    <span class="config-cat-label">🎲 Partida y Cartones</span>
 
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('general')" onfocus="this.blur()">
                         <span class="seccion-icono">⚙️</span>
                         <span class="seccion-texto">
-                          <strong>General</strong>
-                            <small>Cartones · Firebase · Formato control · Velocidad revancha</small>
+                            <strong>General</strong>
+                            <small>Cantidad de cartones · Firebase · Control · Revancha</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
 
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎯</span>
+                        <span class="seccion-texto">
+                            <strong>Figuras de premio</strong>
+                            <small>Crea, activa y ordena tus figuras 5×5</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <span class="config-cat-label">🎨 Personalización Visual</span>
+
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('temas')" onfocus="this.blur()">
                         <span class="seccion-icono">🎨</span>
                         <span class="seccion-texto">
-                            <strong>Temas</strong>
-                            <small>Activa o desactiva los 21 temas</small>
+                            <strong>Temas disponibles</strong>
+                            <small>Activa o desactiva los 21 estilos visuales</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
 
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('modoTemas')" onfocus="this.blur()">
-                        <span class="seccion-icono">🎨</span>
+                        <span class="seccion-icono">🔀</span>
                         <span class="seccion-texto">
                             <strong>Modo de temas</strong>
-                            <small>Elige cómo se aplican: simple o combinado</small>
+                            <small>Elige entre tema único o combinado por filas</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -677,16 +1106,7 @@
                         <span class="seccion-icono">🧩</span>
                         <span class="seccion-texto">
                             <strong>Cartones Combinados</strong>
-                            <small>Mezcla temas por bloques de 3 cartones</small>
-                        </span>
-                        <span class="seccion-flecha">›</span>
-                    </button>
-
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('figuras')" onfocus="this.blur()">
-                        <span class="seccion-icono">🎯</span>
-                        <span class="seccion-texto">
-                            <strong>Figuras</strong>
-                            <small>Crea, borra y ordena tus figuras</small>
+                            <small>Arma secuencias de colores cada 3 cartones</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -694,35 +1114,8 @@
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('resaltados')" onfocus="this.blur()">
                         <span class="seccion-icono">✨</span>
                         <span class="seccion-texto">
-                            <strong>Resaltados</strong>
-                            <small>Figura · Número que falta</small>
-                        </span>
-                        <span class="seccion-flecha">›</span>
-                    </button>
-
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('velocidad')" onfocus="this.blur()">
-                        <span class="seccion-icono">⚡</span>
-                        <span class="seccion-texto">
-                            <strong>Velocidad de bola</strong>
-                            <small>Tiempo que tarda en salir la bola grande</small>
-                        </span>
-                        <span class="seccion-flecha">›</span>
-                    </button>
-
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('voz')" onfocus="this.blur()">
-                        <span class="seccion-icono">🎙️</span>
-                        <span class="seccion-texto">
-                            <strong>Voz</strong>
-                            <small>Cantar bolas (B7, I22...) · Volumen · Voz en español</small>
-                        </span>
-                        <span class="seccion-flecha">›</span>
-                    </button>
-
-                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('sonidos')" onfocus="this.blur()">
-                        <span class="seccion-icono">🎵</span>
-                        <span class="seccion-texto">
-                            <strong>Sonidos</strong>
-                            <small>Música · Campana · Tactac</small>
+                            <strong>Brillos y Resaltados</strong>
+                            <small>Intensidad al ganar figura y aviso de 1 bola</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -730,15 +1123,44 @@
                     <button class="btn-config-seccion" onclick="abrirSeccionConfig('apariencia')" onfocus="this.blur()">
                         <span class="seccion-icono">📐</span>
                         <span class="seccion-texto">
-                            <strong>Apariencia</strong>
-                            <small>Ancho del control · Tamaño mini-cartones · Espacio notch · Bloqueo de scroll</small>
+                            <strong>Tamaño y Pantalla</strong>
+                            <small>Ancho del control · Mini-cartones · Notch · Scroll</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <span class="config-cat-label">🔊 Audio y Velocidad</span>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('voz')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎙️</span>
+                        <span class="seccion-texto">
+                            <strong>Locución por Voz</strong>
+                            <small>Cantar bolas (B7, I22...) · Tono y repetición</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('sonidos')" onfocus="this.blur()">
+                        <span class="seccion-icono">🎵</span>
+                        <span class="seccion-texto">
+                            <strong>Efectos de Sonido</strong>
+                            <small>Volumen de música, campana de alerta y celebración</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="abrirSeccionConfig('velocidad')" onfocus="this.blur()">
+                        <span class="seccion-icono">⚡</span>
+                        <span class="seccion-texto">
+                            <strong>Velocidad de Bola</strong>
+                            <small>Tiempo de giro y entrada en el bolillero</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
                 </div>
 
                 <div class="config-pantalla" id="pantallaGeneral">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <div class="form-group">
                         <label for="cantCartones">Cantidad de Cartones:</label>
@@ -783,26 +1205,18 @@
 
                     <div class="form-group">
                         <label for="velocidadRevancha">
-                            🏁 Velocidad de revancha: 
+                            🏁 Velocidad de revancha:
                             <span id="valVelocidadRevancha">1.0x</span>
                         </label>
                         <input type="range" id="velocidadRevancha" min="1" max="2" value="1" step="0.05">
                         <p class="config-hint" style="margin-top: 4px;">
-                            1.0x = igual que siempre · 2.0x = al doble de rápido (bola y voz).
-                            Solo aplica en partidas de revancha.
+                            1.0x = normal · 2.0x = doble de rápido (bola y voz). Solo aplica en modo revancha.
                         </p>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="cc-activo-label" for="clickInvisible">
-                            <input type="checkbox" id="clickInvisible">
-                            <span>Click invisible</span>
-                        </label>
                     </div>
                 </div>
 
                 <div class="config-pantalla" id="pantallaTemas">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <p class="config-hint" id="temasModoIndicador">
                         Modo actual: <strong>—</strong>
@@ -922,9 +1336,9 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaModoTemas">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
-                    <p class="config-hint">Elige cómo quieres aplicar los temas en la partida.</p>
+                    <p class="config-hint">Elige cómo quieres aplicar los temas en la partida:</p>
 
                     <button class="modo-tema-btn" id="modoSimpleBtn" onclick="seleccionarModoTemas('simple')" onfocus="this.blur()">
                         <span class="modo-tema-icono">🎨</span>
@@ -959,7 +1373,6 @@
                     </p>
 
                     <p class="config-hint" id="ccAvisoModo"></p>
-
                     <p class="config-hint" id="ccAvisoTemas" style="display:none;"></p>
 
                     <div class="form-group">
@@ -1006,7 +1419,7 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaFiguras">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <p class="config-hint">Marca las figuras que quieres jugar y ordénalas como prefieras. La diagonal siempre está disponible.</p>
 
@@ -1038,7 +1451,7 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaResaltados">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <p class="config-hint">Elige qué resaltado quieres ajustar:</p>
 
@@ -1046,15 +1459,6 @@
                         <span class="seccion-icono">🎯</span>
                         <span class="seccion-texto">
                             <strong>Resaltado de figura</strong>
-                            <small>Brillo · Halo suave · Velocidad</small>
-                        </span>
-                        <span class="seccion-flecha">›</span>
-                    </button>
-
-                                      <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaResaltadoBingo')" onfocus="this.blur()">
-                        <span class="seccion-icono">🏆</span>
-                        <span class="seccion-texto">
-                            <strong>Resaltado de bingo</strong>
                             <small>Brillo · Halo suave · Velocidad</small>
                         </span>
                         <span class="seccion-flecha">›</span>
@@ -1075,7 +1479,7 @@
 
                     <div class="form-group">
                         <label for="intensidadGlow">
-                            ✨ Intensidad del brillo: 
+                            ✨ Intensidad del brillo:
                             <span id="valIntensidadGlow">95%</span>
                         </label>
                         <input type="range" id="intensidadGlow" min="0" max="100" value="95" step="5">
@@ -1083,7 +1487,7 @@
 
                     <div class="form-group">
                         <label for="intensidadSuave">
-                            🌫️ Expansión del halo suave: 
+                            🌫️ Expansión del halo suave:
                             <span id="valIntensidadSuave">55%</span>
                         </label>
                         <input type="range" id="intensidadSuave" min="0" max="100" value="55" step="5">
@@ -1091,38 +1495,10 @@
 
                     <div class="form-group">
                         <label for="duracionPorCasilla">
-                            ⏱️ Velocidad de encendido por casilla: 
+                            ⏱️ Velocidad de encendido por casilla:
                             <span id="valDuracionPorCasilla">260 ms</span>
                         </label>
                         <input type="range" id="duracionPorCasilla" min="60" max="600" value="260" step="20">
-                    </div>
-                </div>
-
-                   <div class="config-pantalla" id="pantallaResaltadoBingo">
-                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
-
-                    <div class="form-group">
-                        <label for="intensidadGlowBingo">
-                            ✨ Intensidad del brillo:
-                            <span id="valIntensidadGlowBingo">95%</span>
-                        </label>
-                        <input type="range" id="intensidadGlowBingo" min="0" max="100" value="95" step="5">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="intensidadSuaveBingo">
-                            🌫️ Expansión del halo suave:
-                            <span id="valIntensidadSuaveBingo">55%</span>
-                        </label>
-                        <input type="range" id="intensidadSuaveBingo" min="0" max="100" value="55" step="5">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="duracionPorCasillaBingo">
-                            ⏱️ Velocidad de encendido por casilla:
-                            <span id="valDuracionPorCasillaBingo">260 ms</span>
-                        </label>
-                        <input type="range" id="duracionPorCasillaBingo" min="60" max="600" value="260" step="20">
                     </div>
                 </div>
 
@@ -1131,7 +1507,7 @@
 
                     <div class="form-group">
                         <label for="intensidadGlowNumero">
-                            ✨ Intensidad del brillo del número: 
+                            ✨ Intensidad del brillo del número:
                             <span id="valIntensidadGlowNumero">95%</span>
                         </label>
                         <input type="range" id="intensidadGlowNumero" min="0" max="100" value="95" step="5">
@@ -1139,7 +1515,7 @@
 
                     <div class="form-group">
                         <label for="intensidadHaloNumero">
-                            🌫️ Expansión del halo suave del número: 
+                            🌫️ Expansión del halo suave del número:
                             <span id="valIntensidadHaloNumero">55%</span>
                         </label>
                         <input type="range" id="intensidadHaloNumero" min="0" max="100" value="55" step="5">
@@ -1147,11 +1523,11 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaVelocidad">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <div class="form-group">
                         <label for="velocidadBola">
-                            ⚡ Tiempo de entrada de la bola: 
+                            ⚡ Tiempo de entrada de la bola:
                             <span id="valVelocidadBola">650 ms</span>
                         </label>
                         <input type="range" id="velocidadBola" min="200" max="1500" value="650" step="50">
@@ -1163,7 +1539,7 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaVoz">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <p class="config-hint">Canta las bolas con voz: "B7", "I22", "N45", "G60", "O75".</p>
 
@@ -1184,7 +1560,7 @@
 
                     <div class="form-group">
                         <label for="vozVolumen">
-                            🔊 Volumen de la voz: 
+                            🔊 Volumen de la voz:
                             <span id="valVozVolumen">100%</span>
                         </label>
                         <input type="range" id="vozVolumen" min="0" max="100" value="100" step="5">
@@ -1192,7 +1568,7 @@
 
                     <div class="form-group">
                         <label for="vozVelocidad">
-                            ⏩ Velocidad de la voz: 
+                            ⏩ Velocidad de la voz:
                             <span id="valVozVelocidad">100%</span>
                         </label>
                         <input type="range" id="vozVelocidad" min="50" max="150" value="100" step="5">
@@ -1200,7 +1576,7 @@
 
                     <div class="form-group">
                         <label for="vozTono">
-                            🎵 Tono de la voz: 
+                            🎵 Tono de la voz:
                             <span id="valVozTono">100%</span>
                         </label>
                         <input type="range" id="vozTono" min="50" max="150" value="100" step="5">
@@ -1220,67 +1596,29 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaSonidos">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
-                    <p class="config-hint">Elige el tipo de sonido y ajusta el volumen de cada uno por separado.</p>
+                    <p class="config-hint">Ajusta el volumen de cada sonido por separado.</p>
 
                     <div class="form-group">
                         <label for="sonidoMusicaVolumen">
-                            🎵 Música de fondo: 
+                            🎵 Música de fondo:
                             <span id="valSonidoMusicaVolumen">35%</span>
                         </label>
                         <input type="range" id="sonidoMusicaVolumen" min="0" max="100" value="35" step="5">
                     </div>
 
                     <div class="form-group">
-                        <label for="sonidoCampanaTipo">🔔 Sonido de Alerta (falta 1 bola):</label>
-                        <div class="cc-agregar-fila">
-                            <select id="sonidoCampanaTipo">
-                                <option value="campana_1">1. 🔔 Campana Clásica de Recepción</option>
-                                <option value="campana_2">2. 🛎️ Doble Timbre de Hotel (Ding-Dong)</option>
-                                <option value="campana_3">3. 🎰 Moneda de Casino (Ching!)</option>
-                                <option value="campana_4">4. 📣 Alerta Concurso TV (Triple Beep)</option>
-                                <option value="campana_5">5. 🪙 Moneda Retro 8-Bit (Arcade)</option>
-                                <option value="campana_6">6. 🚨 Sirena Corta de Alerta</option>
-                                <option value="campana_7">7. ✨ Arpa / Cristal Mágico</option>
-                                <option value="campana_8">8. 📡 Sonar / Radar Submarino</option>
-                                <option value="campana_9">9. 🎺 Trompeta de Aviso (Ta-Dá)</option>
-                                <option value="campana_10">10. ⚡ Láser / Sci-Fi Energético</option>
-                            </select>
-                            <button type="button" class="cc-btn-agregar" onclick="probarSonidoCampanaConfig()" onfocus="this.blur()">🔊 Probar</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="sonidoCampanaVolumen">
-                            🔊 Volumen de Alerta (falta 1 bola): 
+                            🔔 Campana (falta 1 bola):
                             <span id="valSonidoCampanaVolumen">85%</span>
                         </label>
                         <input type="range" id="sonidoCampanaVolumen" min="0" max="100" value="85" step="5">
                     </div>
 
                     <div class="form-group">
-                        <label for="sonidoTactacTipo">🥁 Sonido de Ganador (figura / bingo):</label>
-                        <div class="cc-agregar-fila">
-                            <select id="sonidoTactacTipo">
-                                <option value="tactac_1">1. 💧 Gotas de agua</option>
-<option value="tactac_2">2. ❤️ Latido de corazón</option>
-<option value="tactac_3">3. 👾 Láser espacial</option>
-<option value="tactac_4">4. 🎹 Celesta mágica</option>
-<option value="tactac_5">5. 🎸 Guitarra pizzicato</option>
-<option value="tactac_6">6. 🐄 Cencerro</option>
-<option value="tactac_7">7. 🥢 Hi-hat de batería</option>
-<option value="tactac_8">8. 🛸 Theremin</option>
-<option value="tactac_9">9. 🪘 Bongó</option>
-<option value="tactac_10">10. 🔔 Triángulo de orquesta</option>
-                            </select>
-                            <button type="button" class="cc-btn-agregar" onclick="probarSonidoTactacConfig()" onfocus="this.blur()">🔊 Probar</button>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="sonidoTactacVolumen">
-                            🔊 Volumen de Ganador (figura / bingo): 
+                            🥁 Tactac (figura / bingo):
                             <span id="valSonidoTactacVolumen">95%</span>
                         </label>
                         <input type="range" id="sonidoTactacVolumen" min="0" max="100" value="95" step="5">
@@ -1288,11 +1626,11 @@
                 </div>
 
                 <div class="config-pantalla" id="pantallaApariencia">
-                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver</button>
+                    <button class="btn-volver" onclick="volverAlMenuConfig()" onfocus="this.blur()">‹ Volver al menú</button>
 
                     <div class="form-group">
                         <label for="tamanoControl">
-                            Ancho del panel de control: 
+                            Ancho del panel de control:
                             <span id="valTamanoControl">58%</span>
                         </label>
                         <input type="range" id="tamanoControl" min="20" max="70" value="58" step="2">
@@ -1300,7 +1638,7 @@
 
                     <div class="form-group">
                         <label for="tamanoFiguras">
-                            Tamaño de mini-cartones: 
+                            Tamaño de mini-cartones:
                             <span id="valTamanoFiguras">42px</span>
                         </label>
                         <input type="range" id="tamanoFiguras" min="25" max="80" value="42" step="1">
@@ -1328,7 +1666,7 @@
 
             <div class="modal-footer">
                 <button class="btn-modal-cancelar" onclick="cerrarConfiguracion()" onfocus="this.blur()">Cancelar</button>
-                <button class="btn-modal-guardar" onclick="guardarConfiguracion()" onfocus="this.blur()">Guardar</button>
+                <button class="btn-modal-guardar" onclick="guardarConfiguracion(); actualizarResumenMenu();" onfocus="this.blur()">Guardar</button>
             </div>
         </div>
     </div>
@@ -1346,22 +1684,67 @@
         }
 
         function salirApp() {
-            if (confirm('¿Estás seguro de que quieres salir?')) {
-                if (navigator.app && navigator.app.exitApp) {
-                    navigator.app.exitApp();
-                } else {
-                    window.close();
-                }
+            document.getElementById('modalSalir').classList.add('visible');
+        }
+
+        function confirmarSalidaApp() {
+            cerrarModal('modalSalir');
+            if (navigator.app && navigator.app.exitApp) {
+                navigator.app.exitApp();
+            } else {
+                window.close();
             }
         }
 
+        function actualizarResumenMenu() {
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                const elCartones = document.getElementById('resumenCartones');
+                const elTema = document.getElementById('resumenTema');
+                const elVoz = document.getElementById('resumenVoz');
+
+                if (raw) {
+                    const cfg = JSON.parse(raw);
+                    if (elCartones) elCartones.textContent = `${cfg.cartones || 15} Cartones`;
+                    if (elTema) {
+                        if (cfg.modoTemas === 'combinado') {
+                            elTema.textContent = 'Combinado';
+                        } else {
+                            const lista = Array.isArray(cfg.temasActivos) && cfg.temasActivos.length > 0
+                                ? cfg.temasActivos : ['Verde'];
+                            elTema.textContent = lista.length > 1 ? `${lista[0]} +${lista.length - 1}` : lista[0];
+                        }
+                    }
+                    if (elVoz) elVoz.textContent = cfg.vozActivada ? 'Voz ON' : 'Voz OFF';
+                }
+
+                const hayPartida = !!localStorage.getItem('bingo_partida_guardada');
+                const badgePartida = document.getElementById('badgeEstadoPartida');
+                const subPartida = document.getElementById('subEstadoPartida');
+                const btnCargar = document.getElementById('btnCargarMenu');
+
+                if (hayPartida) {
+                    if (badgePartida) {
+                        badgePartida.textContent = 'Lista';
+                        badgePartida.className = 'modo-badge activo';
+                    }
+                    if (subPartida) subPartida.textContent = 'Reanudar partida';
+                    if (btnCargar) btnCargar.classList.remove('sin-partida');
+                } else {
+                    if (badgePartida) {
+                        badgePartida.textContent = 'Vacío';
+                        badgePartida.className = 'modo-badge vacio';
+                    }
+                    if (subPartida) subPartida.textContent = 'Sin partida guardada';
+                    if (btnCargar) btnCargar.classList.add('sin-partida');
+                }
+            } catch (e) {}
+        }
+
         document.addEventListener('click', function(e) {
-            if (e.target && e.target.id === 'modalReglas') {
-                cerrarModal('modalReglas');
-            }
-            if (e.target && e.target.id === 'modalModoRevancha') {
-                cerrarModalModoRevancha();
-            }
+            if (e.target && e.target.id === 'modalReglas') cerrarModal('modalReglas');
+            if (e.target && e.target.id === 'modalSalir') cerrarModal('modalSalir');
+            if (e.target && e.target.id === 'modalModoRevancha') cerrarModalModoRevancha();
         });
 
         (function() {
@@ -1369,7 +1752,6 @@
             if (!canvas) return;
 
             const ctx = canvas.getContext('2d', { alpha: true });
-
             let ancho = canvas.width = window.innerWidth;
             let alto = canvas.height = window.innerHeight;
 
@@ -1380,10 +1762,9 @@
 
             const paletaColores = [
                 { r: 255, g: 215, b: 0 },
-                { r: 255, g: 45,  b: 138 },
-                { r: 0,   g: 242, b: 154 },
-                { r: 0,   g: 212, b: 255 },
-                { r: 180, g: 90,  b: 255 }
+                { r: 52,  g: 211, b: 153 },
+                { r: 96,  g: 165, b: 250 },
+                { r: 245, g: 158, b: 11 }
             ];
 
             class DestelloMagico {
@@ -1391,13 +1772,13 @@
                 reiniciar() {
                     this.x = Math.random() * ancho;
                     this.y = Math.random() * alto;
-                    this.radio = Math.random() * 3 + 1;
-                    this.velocidadX = (Math.random() - 0.5) * 0.5;
-                    this.velocidadY = (Math.random() - 0.5) * 0.5;
+                    this.radio = Math.random() * 2.5 + 0.8;
+                    this.velocidadX = (Math.random() - 0.5) * 0.35;
+                    this.velocidadY = (Math.random() - 0.5) * 0.35;
                     this.color = paletaColores[Math.floor(Math.random() * paletaColores.length)];
-                    this.opacidadMax = Math.random() * 0.7 + 0.3;
+                    this.opacidadMax = Math.random() * 0.6 + 0.2;
                     this.opacidad = this.opacidadMax;
-                    this.pulso = Math.random() * 0.025 + 0.008;
+                    this.pulso = Math.random() * 0.02 + 0.006;
                     this.angulo = Math.random() * Math.PI * 2;
                 }
                 actualizar() {
@@ -1421,11 +1802,8 @@
                 }
             }
 
-            const totalDestellos = window.innerWidth > 768 ? 70 : 35;
-            const destellos = [];
-            for (let i = 0; i < totalDestellos; i++) {
-                destellos.push(new DestelloMagico());
-            }
+            const totalDestellos = window.innerWidth > 768 ? 55 : 28;
+            const destellos = Array.from({ length: totalDestellos }, () => new DestelloMagico());
 
             function animar() {
                 ctx.clearRect(0, 0, ancho, alto);
@@ -1439,20 +1817,7 @@
             animar();
         })();
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const btnCargar = document.getElementById('btnCargarMenu');
-            if (btnCargar) {
-                const hayPartida = !!localStorage.getItem('bingo_partida_guardada');
-                if (!hayPartida) {
-                    btnCargar.style.opacity = '0.5';
-                }
-            }
-        });
-
-           window.addEventListener('pageshow', () => {
-            window.scrollTo(0, 0);
-            if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-        });
+        document.addEventListener('DOMContentLoaded', actualizarResumenMenu);
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
