@@ -48,6 +48,7 @@ function abrirConfiguracion() {
 }
 
 function cerrarConfiguracion() {
+    if (typeof detenerPreviewTactacConfig === 'function') detenerPreviewTactacConfig();
     const modal = document.getElementById('modalConfig');
     if (modal) modal.classList.remove('visible');
 }
@@ -67,6 +68,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaEditorFigura':     titulo.textContent = '✏️ Nueva figura'; break;
         case 'pantallaResaltados':       titulo.textContent = '✨ Resaltados'; break;
         case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
+        case 'pantallaResaltadoBingo':   titulo.textContent = '🏆 Resaltado de bingo'; break;
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
@@ -102,6 +104,7 @@ function abrirSeccionConfig(nombre) {
 }
 
 function volverAlMenuConfig() {
+    if (typeof detenerPreviewTactacConfig === 'function') detenerPreviewTactacConfig();
     mostrarPantallaConfig('pantallaMenu');
 }
 
@@ -188,11 +191,16 @@ function cargarConfigEnModal() {
             setVal('bloquearScroll', config.bloquearScroll !== undefined ? config.bloquearScroll : 'si');
             setVal('intensidadGlow', config.intensidadGlow !== undefined ? config.intensidadGlow : 95);
             setVal('intensidadSuave', config.intensidadSuave !== undefined ? config.intensidadSuave : 55);
-            setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+                    setVal('duracionPorCasilla', config.duracionPorCasilla !== undefined ? config.duracionPorCasilla : 260);
+            setVal('intensidadGlowBingo', config.intensidadGlowBingo !== undefined ? config.intensidadGlowBingo : 95);
+            setVal('intensidadSuaveBingo', config.intensidadSuaveBingo !== undefined ? config.intensidadSuaveBingo : 55);
+            setVal('duracionPorCasillaBingo', config.duracionPorCasillaBingo !== undefined ? config.duracionPorCasillaBingo : 260);
             setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
             setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
-            setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
+setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
             setVal('velocidadRevancha', config.velocidadRevancha !== undefined ? config.velocidadRevancha : 1);
+           const chkInv = document.getElementById('clickInvisible');
+            if (chkInv) chkInv.checked = config.clickInvisible === true;
 
             VOZ_ACTIVADA = config.vozActivada === true;
             VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
@@ -280,8 +288,19 @@ function actualizarLabelsSliders() {
     const valDur = document.getElementById('valDuracionPorCasilla');
     if (rangoDur && valDur) {
         valDur.textContent = rangoDur.value + ' ms';
-        rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
+            rangoDur.oninput = () => { valDur.textContent = rangoDur.value + ' ms'; };
     }
+
+    [['intensidadGlowBingo', 'valIntensidadGlowBingo', '%'],
+     ['intensidadSuaveBingo', 'valIntensidadSuaveBingo', '%'],
+     ['duracionPorCasillaBingo', 'valDuracionPorCasillaBingo', ' ms']].forEach(([idR, idV, suf]) => {
+        const r = document.getElementById(idR);
+        const v = document.getElementById(idV);
+        if (r && v) {
+            v.textContent = r.value + suf;
+            r.oninput = () => { v.textContent = r.value + suf; };
+        }
+    });
 
     const rangoGlowNum = document.getElementById('intensidadGlowNumero');
     const valGlowNum = document.getElementById('valIntensidadGlowNumero');
@@ -358,7 +377,308 @@ function cargarControlesSonidos() {
     configSonido('sonidoMusicaVolumen',  'valSonidoMusicaVolumen',  'sonidoMusicaVolumen',  0.35);
     configSonido('sonidoCampanaVolumen', 'valSonidoCampanaVolumen', 'sonidoCampanaVolumen', 0.85);
     configSonido('sonidoTactacVolumen',  'valSonidoTactacVolumen',  'sonidoTactacVolumen',  0.95);
+
+    const selCampana = document.getElementById('sonidoCampanaTipo');
+    if (selCampana) {
+        const guardadoCampana = localStorage.getItem('sonidoCampanaTipo') || 'campana_1';
+        selCampana.value = guardadoCampana;
+        selCampana.onchange = () => {
+            localStorage.setItem('sonidoCampanaTipo', selCampana.value);
+            probarSonidoCampanaConfig();
+        };
+    }
+
+    const selTactac = document.getElementById('sonidoTactacTipo');
+    if (selTactac) {
+        const guardadoTactac = localStorage.getItem('sonidoTactacTipo') || 'tactac_1';
+        selTactac.value = guardadoTactac;
+        selTactac.onchange = () => {
+            localStorage.setItem('sonidoTactacTipo', selTactac.value);
+            probarSonidoTactacConfig();
+        };
+    }
 }
+
+/* ============================================
+   🔊 MOTOR SINTETIZADOR DE SONIDOS (10 CAMPANAS + 10 TACTAC)
+   ============================================ */
+let _bingoAudioCtx = null;
+let _previewTactacInterval = null;
+let _previewTactacTimeout = null;
+
+function obtenerBingoAudioCtx() {
+    if (!_bingoAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) _bingoAudioCtx = new Ctx();
+    }
+    if (_bingoAudioCtx && _bingoAudioCtx.state === 'suspended') {
+        _bingoAudioCtx.resume().catch(() => {});
+    }
+    return _bingoAudioCtx;
+}
+
+function ejecutarSonidoCampana(ctx, tipo, vol) {
+    if (!ctx || vol <= 0) return;
+    const now = ctx.currentTime;
+
+    const tocarNota = (freq, startOffset, dur, waveType, peakGain, endFreq) => {
+        const t0 = now + startOffset;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        if (endFreq) {
+            osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), t0 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+    };
+
+    switch (tipo) {
+        case 'campana_1': // 1. Campana Clásica de Recepción
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            tocarNota(3135.96, 0, 0.35, 'sine', 0.25);
+            tocarNota(4186.01, 0, 0.15, 'triangle', 0.18);
+            break;
+
+        case 'campana_2': // 2. Doble Timbre de Hotel (Ding-Dong)
+            tocarNota(783.99, 0,    0.55, 'sine', 0.65);
+            tocarNota(1567.98, 0,   0.25, 'sine', 0.20);
+            tocarNota(659.25, 0.24, 0.75, 'sine', 0.65);
+            tocarNota(1318.51, 0.24, 0.35, 'sine', 0.20);
+            break;
+
+        case 'campana_3': // 3. Moneda de Casino (Ching!)
+            tocarNota(987.77, 0,    0.30, 'sine', 0.55);
+            tocarNota(1318.51, 0.07, 0.75, 'sine', 0.65);
+            tocarNota(2637.02, 0.07, 0.40, 'triangle', 0.25);
+            break;
+
+        case 'campana_4': // 4. Alerta Concurso TV (Triple Beep)
+            tocarNota(880,    0,    0.11, 'triangle', 0.55);
+            tocarNota(880,    0.14, 0.11, 'triangle', 0.55);
+            tocarNota(1318.51, 0.28, 0.45, 'triangle', 0.70);
+            break;
+
+        case 'campana_5': // 5. Moneda Retro 8-Bit (Arcade)
+            tocarNota(987.77, 0,    0.09, 'square', 0.35);
+            tocarNota(1318.51, 0.09, 0.42, 'square', 0.38);
+            break;
+
+        case 'campana_6': // 6. Sirena Corta de Alerta
+            tocarNota(550, 0,    0.22, 'sawtooth', 0.35, 1150);
+            tocarNota(550, 0.24, 0.28, 'sawtooth', 0.38, 1250);
+            break;
+
+        case 'campana_7': // 7. Arpa / Cristal Mágico
+            [1046.50, 1318.51, 1567.98, 2093.00].forEach((f, idx) => {
+                tocarNota(f, idx * 0.065, 0.55, 'sine', 0.50);
+                tocarNota(f * 2, idx * 0.065, 0.25, 'triangle', 0.15);
+            });
+            break;
+
+        case 'campana_8': // 8. Sonar / Radar Submarino
+            tocarNota(1174.66, 0,    0.45, 'sine', 0.65);
+            tocarNota(1174.66, 0.30, 0.55, 'sine', 0.28);
+            break;
+
+        case 'campana_9': // 9. Trompeta de Aviso (Ta-Dá)
+            tocarNota(523.25, 0,    0.15, 'sawtooth', 0.32);
+            tocarNota(1046.50, 0,   0.15, 'triangle', 0.25);
+            tocarNota(783.99, 0.17, 0.55, 'sawtooth', 0.38);
+            tocarNota(1567.98, 0.17, 0.55, 'triangle', 0.28);
+            break;
+
+        case 'campana_10': // 10. Láser / Sci-Fi Energético
+            tocarNota(1900, 0,    0.16, 'sawtooth', 0.40, 320);
+            tocarNota(420,  0.17, 0.28, 'sine',     0.55, 1480);
+            break;
+
+        default:
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            break;
+    }
+}
+
+function obtenerIntervaloTactacPorTipo(tipo, duracionCasilla) {
+    const base = Math.max(70, Math.min(140, Math.round((duracionCasilla || 260) / 2)));
+    switch (tipo) {
+        case 'tactac_2': return 170;
+        case 'tactac_3': return 90;
+        case 'tactac_4': return 110;
+        case 'tactac_5': return 100;
+        case 'tactac_6': return 130;
+        case 'tactac_7': return 75;
+        case 'tactac_8': return 150;
+        case 'tactac_9': return 120;
+        case 'tactac_10': return 160;
+        default: return base;
+    }
+}
+
+function dispararPasoTactacPorTipo(ctx, tipo, vol, paso) {
+    if (!ctx || vol <= 0) return;
+    const t0 = ctx.currentTime;
+
+    const pulsoTono = (freqIni, freqFin, dur, waveType, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freqIni, start);
+        if (freqFin && freqFin !== freqIni) {
+            osc.frequency.exponentialRampToValueAtTime(freqFin, start + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), start + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur + 0.01);
+    };
+
+    const pulsoRuido = (dur, filterFreq, qVal, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const bufferSize = Math.max(64, Math.floor(ctx.sampleRate * dur));
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(filterFreq, start);
+        filter.Q.setValueAtTime(qVal, start);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(Math.max(0.001, vol * peakGain), start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(start);
+    };
+
+    switch (tipo) {
+                case 'tactac_1': { // 💧 Gotas de agua
+            const b = [520, 640, 780, 960][paso % 4];
+            pulsoTono(b, b * 2.4, 0.07, 'sine', 0.75);
+            pulsoTono(b * 2, b * 3.2, 0.04, 'sine', 0.2, 0.012);
+            break;
+        }
+        case 'tactac_2': { // ❤️ Latido de corazón
+            pulsoTono(150, 48, 0.11, 'sine', 0.95);
+            pulsoTono(120, 45, 0.10, 'sine', 0.7, 0.09);
+            break;
+        }
+        case 'tactac_3': { // 👾 Láser espacial
+            const ini = (paso % 2 === 0) ? 2400 : 1900;
+            pulsoTono(ini, 260, 0.07, 'sawtooth', 0.32);
+            pulsoTono(ini * 0.5, 130, 0.07, 'square', 0.12);
+            break;
+        }
+        case 'tactac_4': { // 🎹 Celesta mágica
+            const pent = [1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 1567.98, 1318.51, 1174.66];
+            const n = pent[paso % pent.length];
+            pulsoTono(n, n, 0.16, 'sine', 0.6);
+            pulsoTono(n * 4, n * 4, 0.06, 'sine', 0.14);
+            break;
+        }
+        case 'tactac_5': { // 🎸 Guitarra pizzicato
+            const cu = [196, 246.94, 293.66, 392, 293.66, 246.94];
+            const n = cu[paso % cu.length];
+            pulsoTono(n * 2, n * 1.98, 0.12, 'triangle', 0.7);
+            pulsoTono(n * 4, n * 3.96, 0.05, 'sawtooth', 0.12);
+            pulsoRuido(0.01, 2500, 1.5, 0.2);
+            break;
+        }
+        case 'tactac_6': { // 🐄 Cencerro
+            const k = (paso % 2 === 0) ? 1 : 1.12;
+            pulsoTono(540 * k, 535 * k, 0.11, 'square', 0.28);
+            pulsoTono(810 * k, 800 * k, 0.09, 'square', 0.22);
+            break;
+        }
+        case 'tactac_7': { // 🥢 Hi-hat de batería
+            pulsoRuido(0.035, 7500, 0.9, (paso % 2 === 0) ? 0.7 : 0.5);
+            pulsoTono(9000, 7000, 0.02, 'square', 0.06);
+            break;
+        }
+        case 'tactac_8': { // 🛸 Theremin
+            const th = [660, 740, 880, 988, 880, 740][paso % 6];
+            pulsoTono(th, th * 1.06, 0.15, 'sine', 0.5);
+            pulsoTono(th * 2, th * 2.1, 0.12, 'sine', 0.12);
+            break;
+        }
+        case 'tactac_9': { // 🪘 Bongó
+            const alto = (paso % 2 === 0);
+            pulsoTono(alto ? 420 : 290, alto ? 260 : 180, 0.08, 'sine', 0.85);
+            pulsoRuido(0.015, 900, 1.2, 0.25);
+            break;
+        }
+        case 'tactac_10': { // 🔔 Triángulo de orquesta
+            pulsoTono(3000, 2990, 0.18, 'sine', 0.45);
+            pulsoTono(4500, 4490, 0.12, 'sine', 0.2);
+            pulsoTono(6300, 6290, 0.08, 'sine', 0.1);
+            break;
+        }
+        default: {
+            const f1 = (paso % 2 === 0) ? 820 : 660;
+            pulsoTono(f1, 420, 0.042, 'sine', 0.75);
+            break;
+        }
+    }
+}
+
+function detenerPreviewTactacConfig() {
+    if (_previewTactacInterval) {
+        clearInterval(_previewTactacInterval);
+        _previewTactacInterval = null;
+    }
+    if (_previewTactacTimeout) {
+        clearTimeout(_previewTactacTimeout);
+        _previewTactacTimeout = null;
+    }
+}
+
+function probarSonidoCampanaConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoCampanaTipo');
+    const rango = document.getElementById('sonidoCampanaVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoCampanaTipo') || 'campana_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.85;
+    const ctx = obtenerBingoAudioCtx();
+    ejecutarSonidoCampana(ctx, tipo, vol);
+}
+
+function probarSonidoTactacConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoTactacTipo');
+    const rango = document.getElementById('sonidoTactacVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoTactacTipo') || 'tactac_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.95;
+    if (vol <= 0) return;
+    const ctx = obtenerBingoAudioCtx();
+    if (!ctx) return;
+
+    let paso = 0;
+    dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    const intervalo = obtenerIntervaloTactacPorTipo(tipo, 240);
+    _previewTactacInterval = setInterval(() => {
+        dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    }, intervalo);
+
+    _previewTactacTimeout = setTimeout(() => {
+        detenerPreviewTactacConfig();
+    }, 1500);
+}
+
 
 function abrirPantallaSonidos() {
     cargarControlesSonidos();
@@ -398,17 +718,23 @@ function guardarConfiguracion() {
         bloquearScroll: document.getElementById('bloquearScroll')?.value || 'si',
         intensidadGlow: parseInt(document.getElementById('intensidadGlow')?.value || '95'),
         intensidadSuave: parseInt(document.getElementById('intensidadSuave')?.value || '55'),
-        duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+       duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
+intensidadGlowBingo: parseInt(document.getElementById('intensidadGlowBingo')?.value || '95'),
+intensidadSuaveBingo: parseInt(document.getElementById('intensidadSuaveBingo')?.value || '55'),
+duracionPorCasillaBingo: parseInt(document.getElementById('duracionPorCasillaBingo')?.value || '260'),
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
-        velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+      velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
         velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
+       clickInvisible: document.getElementById('clickInvisible')?.checked === true,
         vozActivada: document.getElementById('vozActivada')?.value === 'si',
         vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
         vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
         vozTono: parseInt(document.getElementById('vozTono')?.value || '100'),
         vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
         vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
+        sonidoCampanaTipo: document.getElementById('sonidoCampanaTipo')?.value || localStorage.getItem('sonidoCampanaTipo') || 'campana_1',
+        sonidoTactacTipo: document.getElementById('sonidoTactacTipo')?.value || localStorage.getItem('sonidoTactacTipo') || 'tactac_1',
         temasActivos: temasActivos,
         figurasPersonalizadas: figurasPersonalizadas,
         modoTemas: MODO_TEMAS,
@@ -418,6 +744,8 @@ function guardarConfiguracion() {
             secuencias: CC_SECUENCIAS
         }
     };
+    if (config.sonidoCampanaTipo) localStorage.setItem('sonidoCampanaTipo', config.sonidoCampanaTipo);
+    if (config.sonidoTactacTipo) localStorage.setItem('sonidoTactacTipo', config.sonidoTactacTipo);
     localStorage.setItem('bingo_config', JSON.stringify(config));
     cerrarConfiguracion();
 }
@@ -445,14 +773,17 @@ function iniciarJuegoDirecto() {
             duracionPorCasilla: parseInt(document.getElementById('duracionPorCasilla')?.value || '260'),
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
-            velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+           velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
             velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
+            clickInvisible: document.getElementById('clickInvisible')?.checked === true,
             vozActivada: document.getElementById('vozActivada')?.value === 'si',
             vozVolumen: parseInt(document.getElementById('vozVolumen')?.value || '100'),
             vozVelocidad: parseInt(document.getElementById('vozVelocidad')?.value || '100'),
             vozTono: parseInt(document.getElementById('vozTono')?.value || '100'),
             vozSeleccionada: document.getElementById('vozSeleccionada')?.value || '',
             vozRepetir: parseInt(document.getElementById('vozRepetir')?.value || '1'),
+        sonidoCampanaTipo: document.getElementById('sonidoCampanaTipo')?.value || localStorage.getItem('sonidoCampanaTipo') || 'campana_1',
+        sonidoTactacTipo: document.getElementById('sonidoTactacTipo')?.value || localStorage.getItem('sonidoTactacTipo') || 'tactac_1',
             temasActivos: temasActivos,
             figurasPersonalizadas: [Object.assign({}, FIGURA_DIAGONAL)],
             modoTemas: 'simple',
@@ -1249,6 +1580,8 @@ window.probarVozConfig = probarVozConfig;
 
 window.seleccionarModoTemas = seleccionarModoTemas;
 window.abrirPantallaSonidos = abrirPantallaSonidos;
+window.probarSonidoCampanaConfig = probarSonidoCampanaConfig;
+window.probarSonidoTactacConfig = probarSonidoTactacConfig;
 
 document.addEventListener('contextmenu', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;

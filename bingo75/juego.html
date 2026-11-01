@@ -154,34 +154,49 @@
         const RUTA_AUDIOS = 'Audios/Sonidos/';
 
         let audioMusica = null;
-        let audioCampana = null;
-        let audioTactac = null;
+        let audioCtx = null;
+        let tactacIntervalId = null;
+        let tactacPaso = 0;
         let musicaIniciada = false;
         let desbloqueoSonidoHecho = false;
         let fadeIntervalId = null;
         let saliendoDelJuego = false;
+
+        function obtenerAudioCtx() {
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
 
         function obtenerVolumenSonido(clave, porDefecto) {
             const guardado = parseFloat(localStorage.getItem(clave));
             return !isNaN(guardado) ? guardado : porDefecto;
         }
 
+        function obtenerTipoSonido(clave, porDefecto) {
+            const directo = localStorage.getItem(clave);
+            if (directo) return directo;
+            try {
+                const raw = localStorage.getItem('bingo_config');
+                if (raw) {
+                    const cfg = JSON.parse(raw);
+                    if (cfg && cfg[clave]) return cfg[clave];
+                }
+            } catch (e) {}
+            return porDefecto;
+        }
+
         function inicializarAudios() {
             try {
-                audioMusica  = new Audio(RUTA_AUDIOS + 'Musica.mp3');
-                audioCampana = new Audio(RUTA_AUDIOS + 'Campana.mp3');
-                audioTactac  = new Audio(RUTA_AUDIOS + 'tactac.mp3');
-
+                audioMusica = new Audio(RUTA_AUDIOS + 'Musica.mp3');
                 audioMusica.loop = true;
                 audioMusica.preload = 'auto';
                 audioMusica.volume = 0;
-
-                audioCampana.preload = 'auto';
-                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
-
-                audioTactac.preload = 'auto';
-                audioTactac.loop = true;
-                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
             } catch (e) {}
         }
 
@@ -239,32 +254,324 @@
             }, intervaloMs);
         }
 
+
+/* ============================================
+   🔊 MOTOR SINTETIZADOR DE SONIDOS (10 CAMPANAS + 10 TACTAC)
+   ============================================ */
+let _bingoAudioCtx = null;
+let _previewTactacInterval = null;
+let _previewTactacTimeout = null;
+
+function obtenerBingoAudioCtx() {
+    if (!_bingoAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) _bingoAudioCtx = new Ctx();
+    }
+    if (_bingoAudioCtx && _bingoAudioCtx.state === 'suspended') {
+        _bingoAudioCtx.resume().catch(() => {});
+    }
+    return _bingoAudioCtx;
+}
+
+function ejecutarSonidoCampana(ctx, tipo, vol) {
+    if (!ctx || vol <= 0) return;
+    const now = ctx.currentTime;
+
+    const tocarNota = (freq, startOffset, dur, waveType, peakGain, endFreq) => {
+        const t0 = now + startOffset;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        if (endFreq) {
+            osc.frequency.exponentialRampToValueAtTime(endFreq, t0 + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), t0 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+    };
+
+    switch (tipo) {
+        case 'campana_1': // 1. Campana Clásica de Recepción
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            tocarNota(3135.96, 0, 0.35, 'sine', 0.25);
+            tocarNota(4186.01, 0, 0.15, 'triangle', 0.18);
+            break;
+
+        case 'campana_2': // 2. Doble Timbre de Hotel (Ding-Dong)
+            tocarNota(783.99, 0,    0.55, 'sine', 0.65);
+            tocarNota(1567.98, 0,   0.25, 'sine', 0.20);
+            tocarNota(659.25, 0.24, 0.75, 'sine', 0.65);
+            tocarNota(1318.51, 0.24, 0.35, 'sine', 0.20);
+            break;
+
+        case 'campana_3': // 3. Moneda de Casino (Ching!)
+            tocarNota(987.77, 0,    0.30, 'sine', 0.55);
+            tocarNota(1318.51, 0.07, 0.75, 'sine', 0.65);
+            tocarNota(2637.02, 0.07, 0.40, 'triangle', 0.25);
+            break;
+
+        case 'campana_4': // 4. Alerta Concurso TV (Triple Beep)
+            tocarNota(880,    0,    0.11, 'triangle', 0.55);
+            tocarNota(880,    0.14, 0.11, 'triangle', 0.55);
+            tocarNota(1318.51, 0.28, 0.45, 'triangle', 0.70);
+            break;
+
+        case 'campana_5': // 5. Moneda Retro 8-Bit (Arcade)
+            tocarNota(987.77, 0,    0.09, 'square', 0.35);
+            tocarNota(1318.51, 0.09, 0.42, 'square', 0.38);
+            break;
+
+        case 'campana_6': // 6. Sirena Corta de Alerta
+            tocarNota(550, 0,    0.22, 'sawtooth', 0.35, 1150);
+            tocarNota(550, 0.24, 0.28, 'sawtooth', 0.38, 1250);
+            break;
+
+        case 'campana_7': // 7. Arpa / Cristal Mágico
+            [1046.50, 1318.51, 1567.98, 2093.00].forEach((f, idx) => {
+                tocarNota(f, idx * 0.065, 0.55, 'sine', 0.50);
+                tocarNota(f * 2, idx * 0.065, 0.25, 'triangle', 0.15);
+            });
+            break;
+
+        case 'campana_8': // 8. Sonar / Radar Submarino
+            tocarNota(1174.66, 0,    0.45, 'sine', 0.65);
+            tocarNota(1174.66, 0.30, 0.55, 'sine', 0.28);
+            break;
+
+        case 'campana_9': // 9. Trompeta de Aviso (Ta-Dá)
+            tocarNota(523.25, 0,    0.15, 'sawtooth', 0.32);
+            tocarNota(1046.50, 0,   0.15, 'triangle', 0.25);
+            tocarNota(783.99, 0.17, 0.55, 'sawtooth', 0.38);
+            tocarNota(1567.98, 0.17, 0.55, 'triangle', 0.28);
+            break;
+
+        case 'campana_10': // 10. Láser / Sci-Fi Energético
+            tocarNota(1900, 0,    0.16, 'sawtooth', 0.40, 320);
+            tocarNota(420,  0.17, 0.28, 'sine',     0.55, 1480);
+            break;
+
+        default:
+            tocarNota(1567.98, 0, 0.85, 'sine', 0.65);
+            break;
+    }
+}
+
+function obtenerIntervaloTactacPorTipo(tipo, duracionCasilla) {
+    const base = Math.max(70, Math.min(140, Math.round((duracionCasilla || 260) / 2)));
+    switch (tipo) {
+        case 'tactac_3': return 65;  // Redoble rápido
+        case 'tactac_4': return 85;  // Cascada jackpot
+        case 'tactac_8': return 135; // Palmas rítmicas
+        case 'tactac_9': return 140; // Fanfarria
+        case 'tactac_10': return 150; // Sirena
+        default: return base;
+    }
+}
+
+function dispararPasoTactacPorTipo(ctx, tipo, vol, paso) {
+    if (!ctx || vol <= 0) return;
+    const t0 = ctx.currentTime;
+
+    const pulsoTono = (freqIni, freqFin, dur, waveType, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = waveType || 'sine';
+        osc.frequency.setValueAtTime(freqIni, start);
+        if (freqFin && freqFin !== freqIni) {
+            osc.frequency.exponentialRampToValueAtTime(freqFin, start + dur);
+        }
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(Math.max(0.001, vol * peakGain), start + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + dur + 0.01);
+    };
+
+    const pulsoRuido = (dur, filterFreq, qVal, peakGain, delay) => {
+        const start = t0 + (delay || 0);
+        const bufferSize = Math.max(64, Math.floor(ctx.sampleRate * dur));
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(filterFreq, start);
+        filter.Q.setValueAtTime(qVal, start);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(Math.max(0.001, vol * peakGain), start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(start);
+    };
+
+    switch (tipo) {
+        case 'tactac_1': { // 1. Tac-Tac de Madera Clásico (Seco y limpio)
+            const f1 = (paso % 2 === 0) ? 820 : 660;
+            const f2 = (paso % 2 === 0) ? 460 : 370;
+            pulsoTono(f1, f2, 0.042, 'sine', 0.75);
+            pulsoTono(f1 * 1.5, f2 * 1.4, 0.022, 'triangle', 0.25);
+            break;
+        }
+        case 'tactac_2': { // 2. Ruleta de Casino (Click Mecánico)
+            const f = (paso % 2 === 0) ? 1650 : 1420;
+            pulsoTono(f, 320, 0.025, 'triangle', 0.70);
+            pulsoRuido(0.014, 3200, 3.5, 0.45);
+            break;
+        }
+        case 'tactac_3': { // 3. Redoble de Tambor (Caja Militar)
+            pulsoTono(195, 95, 0.045, 'triangle', 0.55);
+            pulsoRuido(0.048, 1800, 1.2, 0.50);
+            break;
+        }
+        case 'tactac_4': { // 4. Jackpot Tragamonedas (Cascada de Monedas)
+            const notas = [1567.98, 1975.53, 2349.32, 2637.02];
+            const nota = notas[paso % notas.length];
+            pulsoTono(nota, nota, 0.09, 'sine', 0.60);
+            pulsoTono(nota * 2, nota * 2, 0.045, 'triangle', 0.22);
+            break;
+        }
+        case 'tactac_5': { // 5. Xilófono / Marimba Festiva
+            const escala = [1046.50, 1174.66, 1318.51, 1567.98, 1760.00, 2093.00];
+            const n = escala[paso % escala.length];
+            pulsoTono(n, n * 0.99, 0.085, 'sine', 0.68);
+            pulsoTono(n * 3, n * 3, 0.025, 'sine', 0.18);
+            break;
+        }
+        case 'tactac_6': { // 6. Victoria Arcade 8-Bit
+            const arp = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50];
+            const f = arp[paso % arp.length];
+            pulsoTono(f, f, 0.075, 'square', 0.35);
+            break;
+        }
+        case 'tactac_7': { // 7. Repique de Campanas de Fiesta
+            const campanas = [1318.51, 1567.98, 2093.00, 1567.98];
+            const c = campanas[paso % campanas.length];
+            pulsoTono(c, c, 0.11, 'sine', 0.60);
+            pulsoTono(c * 2.75, c * 2.75, 0.05, 'triangle', 0.22);
+            break;
+        }
+        case 'tactac_8': { // 8. Palmas / Aplausos Rítmicos
+            pulsoRuido(0.035, 1300, 1.8, 0.55, 0);
+            pulsoRuido(0.038, 1450, 2.0, 0.50, 0.012);
+            pulsoRuido(0.055, 1150, 1.5, 0.60, 0.024);
+            break;
+        }
+        case 'tactac_9': { // 9. Fanfarria Triunfal de Bronces
+            const fanf = [523.25, 659.25, 783.99, 1046.50];
+            const bf = fanf[paso % fanf.length];
+            pulsoTono(bf, bf, 0.11, 'sawtooth', 0.32);
+            pulsoTono(bf * 1.5, bf * 1.5, 0.10, 'triangle', 0.28);
+            break;
+        }
+        case 'tactac_10': { // 10. Sirena Ganadora de Concurso
+            const sube = (paso % 2 === 0);
+            pulsoTono(sube ? 580 : 1160, sube ? 1160 : 580, 0.135, 'triangle', 0.55);
+            pulsoTono(sube ? 1160 : 1740, sube ? 1740 : 1160, 0.12, 'sine', 0.25);
+            break;
+        }
+        default: {
+            const f1 = (paso % 2 === 0) ? 820 : 660;
+            pulsoTono(f1, 420, 0.042, 'sine', 0.75);
+            break;
+        }
+    }
+}
+
+function detenerPreviewTactacConfig() {
+    if (_previewTactacInterval) {
+        clearInterval(_previewTactacInterval);
+        _previewTactacInterval = null;
+    }
+    if (_previewTactacTimeout) {
+        clearTimeout(_previewTactacTimeout);
+        _previewTactacTimeout = null;
+    }
+}
+
+function probarSonidoCampanaConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoCampanaTipo');
+    const rango = document.getElementById('sonidoCampanaVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoCampanaTipo') || 'campana_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.85;
+    const ctx = obtenerBingoAudioCtx();
+    ejecutarSonidoCampana(ctx, tipo, vol);
+}
+
+function probarSonidoTactacConfig() {
+    detenerPreviewTactacConfig();
+    const sel = document.getElementById('sonidoTactacTipo');
+    const rango = document.getElementById('sonidoTactacVolumen');
+    const tipo = sel ? sel.value : (localStorage.getItem('sonidoTactacTipo') || 'tactac_1');
+    const vol = rango ? (parseFloat(rango.value) / 100) : 0.95;
+    if (vol <= 0) return;
+    const ctx = obtenerBingoAudioCtx();
+    if (!ctx) return;
+
+    let paso = 0;
+    dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    const intervalo = obtenerIntervaloTactacPorTipo(tipo, 240);
+    _previewTactacInterval = setInterval(() => {
+        dispararPasoTactacPorTipo(ctx, tipo, vol, paso++);
+    }, intervalo);
+
+    _previewTactacTimeout = setTimeout(() => {
+        detenerPreviewTactacConfig();
+    }, 1500);
+}
+
         function reproducirCampana() {
-            if (!audioCampana) return;
             try {
-                audioCampana.volume = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
-                audioCampana.currentTime = 0;
-                const p = audioCampana.play();
-                if (p && p.catch) p.catch(() => {});
+                const vol = obtenerVolumenSonido('sonidoCampanaVolumen', 0.85);
+                if (vol <= 0) return;
+                const tipo = obtenerTipoSonido('sonidoCampanaTipo', 'campana_1');
+                const ctx = obtenerAudioCtx();
+                if (!ctx) return;
+                ejecutarSonidoCampana(ctx, tipo, vol);
             } catch (e) {}
         }
 
-        function reproducirTactac() {
-            if (!audioTactac) return;
+           function reproducirTactac(duracion) {
             try {
-                audioTactac.volume = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
-                audioTactac.currentTime = 0;
-                const p = audioTactac.play();
-                if (p && p.catch) p.catch(() => {});
+                detenerTactac();
+                const vol = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+                if (vol <= 0) return;
+                const tipo = obtenerTipoSonido('sonidoTactacTipo', 'tactac_1');
+                const ctx = obtenerAudioCtx();
+                if (!ctx) return;
+
+                tactacPaso = 0;
+                dispararPasoTactacPorTipo(ctx, tipo, vol, tactacPaso++);
+
+                const intervalo = obtenerIntervaloTactacPorTipo(tipo, duracion || DURACION_POR_CASILLA);
+                tactacIntervalId = setInterval(() => {
+                    const v = obtenerVolumenSonido('sonidoTactacVolumen', 0.95);
+                    if (v <= 0) return;
+                    const t = obtenerTipoSonido('sonidoTactacTipo', 'tactac_1');
+                    dispararPasoTactacPorTipo(ctx, t, v, tactacPaso++);
+                }, intervalo);
             } catch (e) {}
         }
 
         function detenerTactac() {
-            if (!audioTactac) return;
-            try {
-                audioTactac.pause();
-                audioTactac.currentTime = 0;
-            } catch (e) {}
+            if (tactacIntervalId) {
+                clearInterval(tactacIntervalId);
+                tactacIntervalId = null;
+            }
         }
 
         function iniciarMusicaFondo() {
@@ -290,9 +597,7 @@
             if (desbloqueoSonidoHecho) return;
             desbloqueoSonidoHecho = true;
             try {
-                const u = new Audio(RUTA_AUDIOS + 'tactac.mp3');
-                u.volume = 0;
-                u.play().catch(() => {});
+                obtenerAudioCtx();
             } catch (e) {}
             iniciarMusicaFondo();
         }
@@ -366,12 +671,17 @@
         let INTENSIDAD_GLOW = 95;
         let INTENSIDAD_SUAVE = 55;
         let DURACION_POR_CASILLA = 260;
+        let INTENSIDAD_GLOW_BINGO = 95;
+        let INTENSIDAD_SUAVE_BINGO = 55;
+        let DURACION_POR_CASILLA_BINGO = 260;
 
         let INTENSIDAD_GLOW_NUMERO = 95;
         let INTENSIDAD_HALO_NUMERO = 55;
 
         let VELOCIDAD_BOLA = 650;
         let VELOCIDAD_REVANCHA = 1;
+        let CLICK_INVISIBLE = false;
+        let cartonForzadoIdx = -1;
 
         let MODO_TEMAS = 'simple';
         let CC_SECUENCIAS = [];
@@ -414,6 +724,161 @@
 
         let autoActivo = false;
         let timeoutAuto = null;
+
+        function celdaEstaMarcada(celda) {
+            return celda.classList.contains('marcada') || celda.classList.contains('vacia');
+        }
+
+        function numerosFaltantesCarton(carton, patron) {
+            const celdas = carton.querySelectorAll('.carton-grid-inner .celda');
+            const faltan = [];
+            for (let f = 0; f < 5; f++) {
+                for (let c = 0; c < 5; c++) {
+                    if (patron && patron[f][c] !== 1) continue;
+                    const celda = celdas[f * 5 + c];
+                    if (!celda || celdaEstaMarcada(celda)) continue;
+                    const v = parseInt(celda.dataset.valor, 10);
+                    if (v) faltan.push(v);
+                }
+            }
+            return faltan;
+        }
+
+        function obtenerBolaInteligente() {
+            const alAzar = (lista) => {
+                if (!lista || lista.length === 0) return undefined;
+                return lista[Math.floor(Math.random() * lista.length)];
+            };
+
+            if (bombo.length === 0) return undefined;
+            if (bombo.length === 1) return bombo[0];
+
+            const cartones = Array.from(document.querySelectorAll('.cartones-grid.modo-15 .carton'));
+            const patronFigura = FIGURAS[figuraActual] || FIGURA_DIAGONAL.patron;
+            const hayCartonElegido = CLICK_INVISIBLE
+                && cartonForzadoIdx >= 0
+                && cartonForzadoIdx < cartones.length
+                && !cartones[cartonForzadoIdx].classList.contains('fuera-de-juego');
+
+            // Sin un cartón seleccionado, se conserva exactamente el sorteo
+            // aleatorio protegido que ya tenía el juego.
+            if (!hayCartonElegido) {
+                const peligrosas = new Set();
+                cartones.forEach((carton) => {
+                    if (carton.classList.contains('fuera-de-juego')) return;
+                    const fBingo = numerosFaltantesCarton(carton, null);
+                    if (figuraYaGanada && carton.classList.contains('ganador-figura-1') && fBingo.length === 1) {
+                        peligrosas.add(fBingo[0]);
+                    }
+                    if (!figuraYaGanada && fBingo.length === 1) {
+                        const fFig = numerosFaltantesCarton(carton, patronFigura);
+                        if (fFig.length === 1) peligrosas.add(fBingo[0]);
+                    }
+                });
+                const seguras = bombo.filter(n => !peligrosas.has(n));
+                return alAzar(seguras.length > 0 ? seguras : bombo);
+            }
+
+            const idxObjetivo = cartonForzadoIdx;
+            const objetivo = cartones[idxObjetivo];
+
+            const quiereFigura = MODO_JUEGO !== 'bingo' && CANTIDAD_FIGURAS >= 1 && !figuraYaGanada
+                && (MODO_JUEGO !== 'mixto' || cartonesAsignadosFigura.has(idxObjetivo));
+            const quiereBingo = MODO_JUEGO !== 'figura' && !llenoYaGanado
+                && (MODO_JUEGO !== 'mixto' || cartonesAsignadosBingo.has(idxObjetivo));
+            if (!quiereFigura && !quiereBingo) return alAzar(bombo);
+
+            // Se trabaja una meta a la vez: primero la figura y, cuando ya
+            // se ganó, el bingo. Así el avance del bingo no se acelera junto
+            // con el de la figura.
+            const esMetaFigura = quiereFigura;
+            const necesarios = (esMetaFigura
+                ? numerosFaltantesCarton(objetivo, patronFigura)
+                : numerosFaltantesCarton(objetivo, null)).filter(n => bombo.includes(n));
+            if (necesarios.length === 0) return alAzar(bombo);
+
+            const peligrosas = new Set();
+            const compartidasUrgentes = [];
+
+            cartones.forEach((carton, idx) => {
+                if (idx === idxObjetivo) return;
+                if (carton.classList.contains('fuera-de-juego')) return;
+
+                if (esMetaFigura && !carton.classList.contains('ganador-figura-1')
+                    && (MODO_JUEGO !== 'mixto' || cartonesAsignadosFigura.has(idx))) {
+                    const f = numerosFaltantesCarton(carton, patronFigura);
+                    if (f.length === 1) peligrosas.add(f[0]);
+                    else if (f.length === 2) {
+                        f.forEach(n => { if (necesarios.includes(n)) compartidasUrgentes.push(n); });
+                    }
+                }
+
+                if (quiereBingo && !carton.classList.contains('ganador-bingo')
+                    && (MODO_JUEGO !== 'mixto' || cartonesAsignadosBingo.has(idx))) {
+                    const f = numerosFaltantesCarton(carton, null);
+                    if (f.length === 1) peligrosas.add(f[0]);
+                    else if (f.length === 2) {
+                        f.forEach(n => { if (necesarios.includes(n)) compartidasUrgentes.push(n); });
+                    }
+                }
+            });
+
+            const seguras = bombo.filter(n => !peligrosas.has(n));
+            const necesariasSeguras = necesarios.filter(n => !peligrosas.has(n) || necesarios.length === 1);
+            const urgentesSeguras = compartidasUrgentes.filter(n => !peligrosas.has(n) && bombo.includes(n));
+
+            // Probabilidad gradual: al principio predominan las bolas neutrales.
+            // A medida que faltan menos números, aumenta la posibilidad de
+            // ayudar al cartón elegido sin garantizarle la siguiente bola.
+            let probabilidadForzar;
+            if (esMetaFigura) {
+                // La figura necesita menos casillas, por eso su ayuda es
+                // deliberadamente más baja para que no se complete tan pronto.
+                if (necesarios.length >= 4) probabilidadForzar = 0.03;
+                else if (necesarios.length === 3) probabilidadForzar = 0.05;
+                else if (necesarios.length === 2) probabilidadForzar = 0.08;
+                else probabilidadForzar = 0.13;
+
+                // Refuerzo moderado solo cuando el bombo ya está avanzado.
+                if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.04;
+                if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.06;
+                if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.08;
+                probabilidadForzar = Math.min(0.42, probabilidadForzar);
+            } else {
+                // El bingo tiene 15 casillas: se conserva una ayuda gradual,
+                // ligeramente menor que antes para darle algo más de recorrido.
+                if (necesarios.length > 16) probabilidadForzar = 0.06;
+                else if (necesarios.length > 10) probabilidadForzar = 0.09;
+                else if (necesarios.length > 6) probabilidadForzar = 0.13;
+                else if (necesarios.length > 3) probabilidadForzar = 0.19;
+                else if (necesarios.length > 1) probabilidadForzar = 0.27;
+                else probabilidadForzar = 0.36;
+
+                // El refuerzo final del bingo es un poco mayor que el de figura,
+                // pero sigue sin garantizar que la siguiente bola sea útil.
+                if (bombo.length <= necesarios.length + 8) probabilidadForzar += 0.06;
+                if (bombo.length <= necesarios.length + 4) probabilidadForzar += 0.08;
+                if (bombo.length <= necesarios.length + 2) probabilidadForzar += 0.10;
+                probabilidadForzar = Math.min(0.60, probabilidadForzar);
+            }
+
+            const forzarAhora = necesariasSeguras.length > 0
+                && Math.random() < probabilidadForzar;
+
+            if (forzarAhora) {
+                // Si hay números que también acercan a un rival a su aviso,
+                // se conservan como prioridad ocasional, sin forzarlos siempre.
+                if (urgentesSeguras.length > 0 && Math.random() < 0.35) {
+                    return alAzar(urgentesSeguras);
+                }
+                return alAzar(necesariasSeguras);
+            }
+
+            // En los demás turnos sale una bola neutral/segura. Si no queda
+            // ninguna alternativa, se usa el bombo completo para no bloquear.
+            const poolNeutral = seguras.length > 0 ? seguras : bombo;
+            return alAzar(poolNeutral);
+        }
 
         function toggleAuto(e) {
             if (e) { e.stopPropagation(); e.preventDefault(); }
@@ -476,8 +941,7 @@
                 btn.classList.add('presionado');
             }
             isAnimating = true;
-            const idx = Math.floor(Math.random() * bombo.length);
-            ejecutarSaqueDeBola(bombo[idx]);
+            ejecutarSaqueDeBola(obtenerBolaInteligente());
 
             const variacion = Math.floor(Math.random() * 250);
             const proximoDelay = VELOCIDAD_BOLA + 480 + variacion + 20;
@@ -517,12 +981,16 @@
                     INTENSIDAD_GLOW = config.intensidadGlow !== undefined ? parseInt(config.intensidadGlow) : 95;
                     INTENSIDAD_SUAVE = config.intensidadSuave !== undefined ? parseInt(config.intensidadSuave) : 55;
                     DURACION_POR_CASILLA = config.duracionPorCasilla !== undefined ? parseInt(config.duracionPorCasilla) : 260;
+                    INTENSIDAD_GLOW_BINGO = config.intensidadGlowBingo !== undefined ? parseInt(config.intensidadGlowBingo) : 95;
+                    INTENSIDAD_SUAVE_BINGO = config.intensidadSuaveBingo !== undefined ? parseInt(config.intensidadSuaveBingo) : 55;
+                    DURACION_POR_CASILLA_BINGO = config.duracionPorCasillaBingo !== undefined ? parseInt(config.duracionPorCasillaBingo) : 260;
 
                     INTENSIDAD_GLOW_NUMERO = config.intensidadGlowNumero !== undefined ? parseInt(config.intensidadGlowNumero) : 95;
                     INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
 
                     VELOCIDAD_BOLA = config.velocidadBola !== undefined ? parseInt(config.velocidadBola) : 650;
                     VELOCIDAD_REVANCHA = config.velocidadRevancha !== undefined ? parseFloat(config.velocidadRevancha) : 1;
+                    CLICK_INVISIBLE = config.clickInvisible === true;
 
                     VOZ_ACTIVADA = config.vozActivada === true;
                     VOZ_VOLUMEN = (config.vozVolumen !== undefined ? config.vozVolumen : 100) / 100;
@@ -556,11 +1024,12 @@
                 || MODO_JUEGO === 'bingo' 
                 || MODO_JUEGO === 'mixto';
 
-if (esRevancha && VELOCIDAD_REVANCHA > 1) {
-    VELOCIDAD_BOLA = Math.max(150, Math.round(VELOCIDAD_BOLA / VELOCIDAD_REVANCHA));
-    VOZ_VELOCIDAD = VOZ_VELOCIDAD * VELOCIDAD_REVANCHA;
-    DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
-}
+            if (esRevancha && VELOCIDAD_REVANCHA > 1) {
+                VELOCIDAD_BOLA = Math.max(150, Math.round(VELOCIDAD_BOLA / VELOCIDAD_REVANCHA));
+                VOZ_VELOCIDAD = VOZ_VELOCIDAD * VELOCIDAD_REVANCHA;
+                  DURACION_POR_CASILLA = Math.max(60, Math.round(DURACION_POR_CASILLA / VELOCIDAD_REVANCHA));
+                DURACION_POR_CASILLA_BINGO = Math.max(60, Math.round(DURACION_POR_CASILLA_BINGO / VELOCIDAD_REVANCHA));
+            }
 
             FIGURAS = {};
             ORDEN_FIGURAS = [];
@@ -601,17 +1070,11 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             aplicarBloqueoScroll();
         }
 
-        // ============================================================
-        // CAMBIO PRINCIPAL: usar margin-top en el .bingo-app
-        // El margin empuja el contenedor hacia abajo SIN comprimir su contenido interno.
-        // El padding-top, en cambio, le quita espacio interno y comprime los cartones.
-        // ============================================================
         function aplicarEspacioNotch() {
             const body = document.body;
             const app = document.querySelector('.bingo-app');
             if (!body || !app) return;
 
-            // Limpiar restos previos
             app.style.paddingTop = '';
             body.style.paddingTop = '';
 
@@ -624,7 +1087,6 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             const RENGLONES_REALES = ESPACIO_NOTCH * 2;
             const espacio = RENGLONES_REALES * ALTO_RENGLON;
 
-            // margin-top empuja desde fuera, no comprime
             app.style.marginTop = espacio + 'px';
         }
 
@@ -892,7 +1354,9 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             }
 
             document.body.style.setProperty('--color-figura-glow', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_GLOW / 100})`);
-            document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE / 100})`);
+                  document.body.style.setProperty('--color-figura-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE / 100})`);
+            document.body.style.setProperty('--color-bingo-glow', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_GLOW_BINGO / 100})`);
+            document.body.style.setProperty('--color-bingo-suave', `rgba(${r}, ${g}, ${b}, ${INTENSIDAD_SUAVE_BINGO / 100})`);
             document.body.style.setProperty('--amarillo-glow', INTENSIDAD_GLOW_NUMERO / 100);
             document.body.style.setProperty('--amarillo-halo', INTENSIDAD_HALO_NUMERO / 100);
         }
@@ -1009,6 +1473,12 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
                     </div>
                     <div class="carton-grid-inner" style="grid-template-columns: repeat(5, 1fr);"></div>
                 `;
+                carton.addEventListener('click', () => {
+                    if (!CLICK_INVISIBLE || modoRevanchaActivo || modoAsignacionActivo || partidaTerminada) return;
+                    const idxCarton = i - 1;
+                    if (cartonesFueraDeJuego.has(idxCarton)) return;
+                    cartonForzadoIdx = (cartonForzadoIdx === idxCarton) ? -1 : idxCarton;
+                });
                 grid.appendChild(carton);
                 const headerSpan = carton.querySelector('.carton-title');
                 if (headerSpan && USAR_BASE_DATOS && nombresDeFirebase[i - 1] && nombresDeFirebase[i - 1].trim() !== "") {
@@ -1261,7 +1731,7 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
                 if (ganoBingo) hayGanadorBingo = true;
             });
             if (hayGanadorFigura || hayGanadorBingo) {
-                reproducirTactac();
+                         reproducirTactac(hayGanadorBingo ? DURACION_POR_CASILLA_BINGO : DURACION_POR_CASILLA);
             }
 
             const PAUSA_FINAL = 600;
@@ -1275,17 +1745,18 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             timeoutsFase1.forEach(t => clearTimeout(t));
             timeoutsFase1 = [];
 
-            let maxCeldas = 0;
-            cartonesInfo.forEach(({ celdasDeLaFigura }) => {
+                      let duracionMaxima = 0;
+            cartonesInfo.forEach(({ ganoBingo, celdasDeLaFigura }) => {
+                const dur = ganoBingo ? DURACION_POR_CASILLA_BINGO : DURACION_POR_CASILLA;
                 const lista = celdasDeLaFigura || [];
-                if (lista.length > maxCeldas) maxCeldas = lista.length;
+                duracionMaxima = Math.max(duracionMaxima, lista.length * dur);
                 lista.forEach((celda, i) => {
-                    const t = setTimeout(() => celda.classList.add('en-figura'), i * DURACION_POR_CASILLA);
+                    const t = setTimeout(() => celda.classList.add('en-figura'), i * dur);
                     timeoutsFase1.push(t);
                 });
             });
 
-            const duracionTotal = maxCeldas * DURACION_POR_CASILLA + PAUSA_FINAL;
+            const duracionTotal = duracionMaxima + PAUSA_FINAL;
 
             return new Promise((resolve) => {
                 if (timeoutAnimacion) clearTimeout(timeoutAnimacion);
@@ -2081,8 +2552,7 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
                 btn.classList.add('presionado');
             }
             isAnimating = true;
-            const idx = Math.floor(Math.random() * bombo.length);
-            ejecutarSaqueDeBola(bombo[idx]);
+            ejecutarSaqueDeBola(obtenerBolaInteligente());
         }
 
         function sacarBolaEspecifica(numero) {
@@ -2110,6 +2580,7 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
 
         function reiniciarJuego() {
             detenerAuto();
+            cartonForzadoIdx = -1;
             bombo = Array.from({ length: MAX_BALOTAS }, (_, i) => i + 1);
             historialSacadas = [];
             const display = document.getElementById('numeroDisplay');
@@ -2332,13 +2803,12 @@ if (esRevancha && VELOCIDAD_REVANCHA > 1) {
             }
         });
 
-document.addEventListener('contextmenu', function(e) {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    if (!esMovil) return;
-    e.preventDefault();
-});
-
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            if (!esMovil) return;
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
