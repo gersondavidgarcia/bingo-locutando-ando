@@ -1065,7 +1065,16 @@
                         <span class="seccion-icono">🟡</span>
                         <span class="seccion-texto">
                             <strong>Resaltado de número</strong>
-                            <small>Brillo · Expansión del halo (falta 1)</small>
+                                                       <small>Brillo · Expansión del halo (falta 1)</small>
+                        </span>
+                        <span class="seccion-flecha">›</span>
+                    </button>
+
+                    <button class="btn-config-seccion" onclick="mostrarPantallaConfig('pantallaVelocidadPausa')" onfocus="this.blur()">
+                        <span class="seccion-icono">⏸️</span>
+                        <span class="seccion-texto">
+                            <strong>Velocidad de pausa</strong>
+                            <small>Pausa cuando falta 1 número</small>
                         </span>
                         <span class="seccion-flecha">›</span>
                     </button>
@@ -1145,6 +1154,30 @@
                         </label>
                         <input type="range" id="intensidadHaloNumero" min="0" max="100" value="55" step="5">
                     </div>
+                </div>
+
+                                <div class="config-pantalla" id="pantallaVelocidadPausa">
+                    <button class="btn-volver" onclick="mostrarPantallaConfig('pantallaResaltados')" onfocus="this.blur()">‹ Volver</button>
+
+                    <div class="form-group">
+                        <label for="pausaUnCarton">
+                            ⏸️ Pausa cuando le falta a 1 cartón:
+                            <span id="valPausaUnCarton">2000 ms</span>
+                        </label>
+                        <input type="range" id="pausaUnCarton" min="0" max="5000" value="2000" step="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pausaVariosCartones">
+                            ⏸️ Pausa cuando le falta a 2 o más cartones:
+                            <span id="valPausaVariosCartones">2000 ms</span>
+                        </label>
+                        <input type="range" id="pausaVariosCartones" min="0" max="5000" value="2000" step="100">
+                    </div>
+
+                    <p class="config-hint">
+                        Es el tiempo que se detiene el juego cuando a un cartón le falta 1 número. 0 = sin pausa.
+                    </p>
                 </div>
 
                 <div class="config-pantalla" id="pantallaVelocidad">

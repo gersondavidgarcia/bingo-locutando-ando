@@ -679,6 +679,8 @@ function probarSonidoTactacConfig() {
         let INTENSIDAD_HALO_NUMERO = 55;
 
         let VELOCIDAD_BOLA = 650;
+        let PAUSA_UN_CARTON = 2000;
+        let PAUSA_VARIOS_CARTONES = 2000;
         let VELOCIDAD_REVANCHA = 1;
         let CLICK_INVISIBLE = false;
         let cartonForzadoIdx = -1;
@@ -989,6 +991,8 @@ function probarSonidoTactacConfig() {
                     INTENSIDAD_HALO_NUMERO = config.intensidadHaloNumero !== undefined ? parseInt(config.intensidadHaloNumero) : 55;
 
                     VELOCIDAD_BOLA = config.velocidadBola !== undefined ? parseInt(config.velocidadBola) : 650;
+                    PAUSA_UN_CARTON = config.pausaUnCarton !== undefined ? parseInt(config.pausaUnCarton) : 2000;
+                    PAUSA_VARIOS_CARTONES = config.pausaVariosCartones !== undefined ? parseInt(config.pausaVariosCartones) : 2000;
                     VELOCIDAD_REVANCHA = config.velocidadRevancha !== undefined ? parseFloat(config.velocidadRevancha) : 1;
                     CLICK_INVISIBLE = config.clickInvisible === true;
 
@@ -1906,7 +1910,7 @@ function probarSonidoTactacConfig() {
                 return;
             }
 
-            let hayNuevoDestello = false;
+            let cartonesNuevoDestello = 0;
             cartones.forEach((carton) => {
                 if (carton.classList.contains('fuera-de-juego')) {
                     carton.classList.remove('alerta-header');
@@ -1944,7 +1948,7 @@ function probarSonidoTactacConfig() {
                 if (debeParpadear) {
                     carton.classList.add('alerta-header');
                     carton.dataset.enAlerta = '1';
-                    hayNuevoDestello = true;
+                    cartonesNuevoDestello++;
                 } else {
                     carton.classList.remove('alerta-header');
                     if (!faltaParaFigura && !faltaParaBingo) {
@@ -1953,13 +1957,15 @@ function probarSonidoTactacConfig() {
                     }
                 }
             });
-            if (hayNuevoDestello) {
+            if (cartonesNuevoDestello > 0) {
                 reproducirCampana();
-                bloquearBotonPorDestello();
+                const pausa = cartonesNuevoDestello === 1 ? PAUSA_UN_CARTON : PAUSA_VARIOS_CARTONES;
+                bloquearBotonPorDestello(pausa);
             }
         }
 
-        function bloquearBotonPorDestello() {
+        function bloquearBotonPorDestello(pausaMs) {
+            if (pausaMs <= 0) return;
             const btn = document.getElementById('btnSacarBola');
             if (!btn) return;
             btn.classList.add('bloqueado');
@@ -1969,7 +1975,7 @@ function probarSonidoTactacConfig() {
                 bloqueadoPorAnimacion = false;
                 btn.classList.remove('bloqueado');
                 timeoutBloqueoDestello = null;
-            }, 2000);
+            }, pausaMs);
         }
 
         function actualizarPuntosAlerta() {

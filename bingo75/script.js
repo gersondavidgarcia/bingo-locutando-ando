@@ -70,6 +70,7 @@ function mostrarPantallaConfig(idPantalla) {
         case 'pantallaResaltadoFigura':  titulo.textContent = '🎯 Resaltado de figura'; break;
         case 'pantallaResaltadoBingo':   titulo.textContent = '🏆 Resaltado de bingo'; break;
         case 'pantallaResaltadoNumero':  titulo.textContent = '🟡 Resaltado de número'; break;
+        case 'pantallaVelocidadPausa':   titulo.textContent = '⏸️ Velocidad de pausa'; break;
         case 'pantallaVelocidad':        titulo.textContent = '⚡ Velocidad de bola'; break;
         case 'pantallaVoz':              titulo.textContent = '🎙️ Voz'; break;
         case 'pantallaSonidos':          titulo.textContent = '🎵 Sonidos'; break;
@@ -198,6 +199,8 @@ function cargarConfigEnModal() {
             setVal('intensidadGlowNumero', config.intensidadGlowNumero !== undefined ? config.intensidadGlowNumero : 95);
             setVal('intensidadHaloNumero', config.intensidadHaloNumero !== undefined ? config.intensidadHaloNumero : 55);
 setVal('velocidadBola', config.velocidadBola !== undefined ? config.velocidadBola : 650);
+            setVal('pausaUnCarton', config.pausaUnCarton !== undefined ? config.pausaUnCarton : 2000);
+            setVal('pausaVariosCartones', config.pausaVariosCartones !== undefined ? config.pausaVariosCartones : 2000);
             setVal('velocidadRevancha', config.velocidadRevancha !== undefined ? config.velocidadRevancha : 1);
            const chkInv = document.getElementById('clickInvisible');
             if (chkInv) chkInv.checked = config.clickInvisible === true;
@@ -322,6 +325,15 @@ function actualizarLabelsSliders() {
         valVel.textContent = rangoVel.value + ' ms';
         rangoVel.oninput = () => { valVel.textContent = rangoVel.value + ' ms'; };
     }
+
+    [['pausaUnCarton', 'valPausaUnCarton'], ['pausaVariosCartones', 'valPausaVariosCartones']].forEach(([idR, idV]) => {
+        const r = document.getElementById(idR);
+        const v = document.getElementById(idV);
+        if (r && v) {
+            v.textContent = r.value + ' ms';
+            r.oninput = () => { v.textContent = r.value + ' ms'; };
+        }
+    });
 
     const rangoVelRev = document.getElementById('velocidadRevancha');
     const valVelRev = document.getElementById('valVelocidadRevancha');
@@ -725,6 +737,8 @@ duracionPorCasillaBingo: parseInt(document.getElementById('duracionPorCasillaBin
         intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
         intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
       velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+      pausaUnCarton: parseInt(document.getElementById('pausaUnCarton')?.value || '2000'),
+      pausaVariosCartones: parseInt(document.getElementById('pausaVariosCartones')?.value || '2000'),
         velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
        clickInvisible: document.getElementById('clickInvisible')?.checked === true,
         vozActivada: document.getElementById('vozActivada')?.value === 'si',
@@ -774,6 +788,8 @@ function iniciarJuegoDirecto() {
             intensidadGlowNumero: parseInt(document.getElementById('intensidadGlowNumero')?.value || '95'),
             intensidadHaloNumero: parseInt(document.getElementById('intensidadHaloNumero')?.value || '55'),
            velocidadBola: parseInt(document.getElementById('velocidadBola')?.value || '650'),
+           pausaUnCarton: parseInt(document.getElementById('pausaUnCarton')?.value || '2000'),
+           pausaVariosCartones: parseInt(document.getElementById('pausaVariosCartones')?.value || '2000'),
             velocidadRevancha: parseFloat(document.getElementById('velocidadRevancha')?.value || '1'),
             clickInvisible: document.getElementById('clickInvisible')?.checked === true,
             vozActivada: document.getElementById('vozActivada')?.value === 'si',
