@@ -807,6 +807,8 @@ body:not(.body-center) {
 .bolillero-container {
     width: 442px;
     height: 106px;
+    min-height: 106px;
+    flex-shrink: 0;
     max-width: 100%;
 
     background: linear-gradient(135deg,
