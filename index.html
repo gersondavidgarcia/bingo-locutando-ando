@@ -962,7 +962,7 @@
         updateDoc(docRef, { segundosCronometro: segundosCronometro }).catch(err => console.error(err));
     };
 
-    function iniciarCronometroOptimizado() {
+    function iniciarCronometroOptimizado(inicioExistente) {
         if (segundosCronometro === 0) {
             console.log("⏱️ Cronómetro desactivado (0 segundos)");
             return;
@@ -974,7 +974,7 @@
         }
         
         cronometroActivo = true;
-        const inicio = ahoraServidor();
+        const inicio = inicioExistente || ahoraServidor();
         const duracion = segundosCronometro;
         
         const overlay = document.getElementById('cronometroOverlay');
@@ -983,11 +983,13 @@
         
         overlay.classList.add('visible');
         
-        updateDoc(docRef, {
-            cronometroActivo: true,
-            cronometroInicio: inicio,
-            cronometroDuracion: duracion
-        }).catch(err => console.error("Error al guardar cronómetro:", err));
+        if (!inicioExistente) {
+            updateDoc(docRef, {
+                cronometroActivo: true,
+                cronometroInicio: inicio,
+                cronometroDuracion: duracion
+            }).catch(err => console.error("Error al guardar cronómetro:", err));
+        }
         
         function actualizarCronometro() {
             const ahora = ahoraServidor();
@@ -1815,8 +1817,7 @@
         lineasEnProceso.add(clave);
         try {
             if (config.admin) guardarHistorial();
-            const ok = await anotarLineaTransaccion(c, l, nombre);
-            if (!ok && avisar) alert("⚠️ Esta línea ya fue ocupada por otra persona.");
+            await anotarLineaTransaccion(c, l, nombre);
         } catch (error) {
             console.error("Error al guardar:", error);
             alert("❌ No se pudo anotar. Revisa tu conexión e intenta de nuevo.");
@@ -2506,14 +2507,20 @@
                 nuevoAcumulado = acumulado + 1;
             }
             
-            await updateDoc(docRef, { 
+            const conCrono = segundosCronometro > 0;
+            const inicioCrono = conCrono ? ahoraServidor() : null;
+            if (conCrono) cronometroActivo = true; // bloquea los clics ya mismo
+            const datosCrono = conCrono
+                ? { cronometroActivo: true, cronometroInicio: inicioCrono, cronometroDuracion: segundosCronometro }
+                : {};
+            await updateDoc(docRef, Object.assign({ 
                 cartones: datos, 
                 numero_ronda: nuevaRonda,
                 acumulado: nuevoAcumulado,
                 acumuladoReserva: nuevaReserva,
                 puntosPorTramo: puntosPorTramo,
                 rondasPorJugador: rondasPorJugador
-            });
+            }, datosCrono));
             
             numeroRonda = nuevaRonda;
             acumulado = nuevoAcumulado;
@@ -2526,9 +2533,10 @@
             document.getElementById('chkGuardarEnReserva').checked = false;
             
             // Iniciar cronómetro con los segundos configurados
-            iniciarCronometroOptimizado();
+            iniciarCronometroOptimizado(inicioCrono || undefined);
             
         } catch (error) {
+            cronometroActivo = false;
             alert("❌ Error al reiniciar: " + error.message);
             console.error(error);
         }
