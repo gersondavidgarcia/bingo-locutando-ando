@@ -1810,8 +1810,7 @@
         lineasEnProceso.add(clave);
         try {
             if (config.admin) guardarHistorial();
-            const ok = await anotarLineaTransaccion(c, l, nombre);
-            if (!ok && avisar) alert("⚠️ Esta línea ya fue ocupada por otra persona.");
+           await anotarLineaTransaccion(c, l, nombre);
         } catch (error) {
             console.error("Error al guardar:", error);
             alert("❌ No se pudo anotar. Revisa tu conexión e intenta de nuevo.");
