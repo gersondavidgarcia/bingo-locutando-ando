@@ -98,11 +98,12 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
             authDomain: "bingo-locutando-ando.firebaseapp.com",
+            databaseURL: "https://bingo-locutando-ando-default-rtdb.firebaseio.com",
             projectId: "bingo-locutando-ando",
             storageBucket: "bingo-locutando-ando.firebasestorage.app",
             messagingSenderId: "547896039173",
@@ -113,8 +114,8 @@
         let docRef = null;
         try {
             const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            docRef = doc(db, "bingo", "tablero");
+            db = getDatabase(app);
+            docRef = ref(db, "bingo/tablero");
         } catch (e) {
             console.warn("⚠️ Firebase no inicializado:", e);
         }
@@ -1189,14 +1190,17 @@ function probarSonidoTactacConfig() {
         }
 
         function extraerNombresDeData(data) {
+            // Realtime Database puede devolver arreglos u objetos (y huecos); se leen por índice
             const cartones = data.cartones || [];
             const nombres = [];
-            for (let i = 0; i < cartones.length && i < 15; i++) {
-                const lineas = cartones[i].lineas || [];
+            for (let i = 0; i < 15; i++) {
+                const carton = cartones[i] || {};
+                const lineasRaw = carton.lineas || [];
+                const lineas = Array.isArray(lineasRaw) ? lineasRaw : Object.values(lineasRaw);
                 let nombreEncontrado = "";
                 for (const linea of lineas) {
-                    if (linea.nombre && linea.nombre.trim() !== "" && linea.estado !== "libre") {
-                        nombreEncontrado = linea.nombre.trim();
+                    if (linea && linea.nombre && String(linea.nombre).trim() !== "" && linea.estado !== "libre") {
+                        nombreEncontrado = String(linea.nombre).trim();
                         break;
                     }
                 }
@@ -1211,10 +1215,10 @@ function probarSonidoTactacConfig() {
                 try { unsubscribeSnapshot(); } catch (e) {}
                 unsubscribeSnapshot = null;
             }
-            unsubscribeSnapshot = onSnapshot(docRef,
+            unsubscribeSnapshot = onValue(docRef,
                 (snap) => {
                     if (!snap.exists()) return;
-                    const data = snap.data();
+                    const data = snap.val();
                     const nuevosNombres = extraerNombresDeData(data);
                     if (JSON.stringify(nuevosNombres) !== JSON.stringify(nombresDeFirebase)) {
                         nombresDeFirebase = nuevosNombres;
