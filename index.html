@@ -804,6 +804,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const tableroRef = dbRef(db, "bingo/tablero");
+
+    // Hora del servidor de Firebase: evita que el reloj de cada celular (adelantado o atrasado) cambie el cronómetro
+    let offsetServidor = 0;
+    onValue(dbRef(db, ".info/serverTimeOffset"), (s) => { offsetServidor = Number(s.val()) || 0; });
+    const ahoraServidor = () => Date.now() + offsetServidor;
     const docRef = tableroRef; // se mantiene el nombre para el resto del código
 
     // Sin autenticación (igual que Anotarse): no hay que esperar ninguna sesión
@@ -969,7 +974,7 @@
         }
         
         cronometroActivo = true;
-        const inicio = Date.now();
+        const inicio = ahoraServidor();
         const duracion = segundosCronometro;
         
         const overlay = document.getElementById('cronometroOverlay');
@@ -985,9 +990,9 @@
         }).catch(err => console.error("Error al guardar cronómetro:", err));
         
         function actualizarCronometro() {
-            const ahora = Date.now();
+            const ahora = ahoraServidor();
             const tiempoTranscurrido = Math.floor((ahora - inicio) / 1000);
-            const segundosRestantes = Math.max(0, duracion - tiempoTranscurrido);
+            const segundosRestantes = Math.min(duracion, Math.max(0, duracion - tiempoTranscurrido));
             
             numeroElem.textContent = segundosRestantes;
             barraElem.style.width = (segundosRestantes / duracion * 100) + '%';
@@ -1032,9 +1037,9 @@
         }
         
         if (data && data.cronometroActivo && data.cronometroInicio) {
-            const ahora = Date.now();
+            const ahora = ahoraServidor();
             const tiempoTranscurrido = Math.floor((ahora - data.cronometroInicio) / 1000);
-            const segundosRestantes = Math.max(0, segundosCronometro - tiempoTranscurrido);
+            const segundosRestantes = Math.min(segundosCronometro, Math.max(0, segundosCronometro - tiempoTranscurrido));
             
             if (segundosRestantes > 0) {
                 cronometroActivo = true;
@@ -1054,9 +1059,9 @@
                 
                 const inicio = data.cronometroInicio;
                 cronometroIntervalo = setInterval(() => {
-                    const ahora2 = Date.now();
+                    const ahora2 = ahoraServidor();
                     const tiempoTranscurrido2 = Math.floor((ahora2 - inicio) / 1000);
-                    const segundosRestantes2 = Math.max(0, segundosCronometro - tiempoTranscurrido2);
+                    const segundosRestantes2 = Math.min(segundosCronometro, Math.max(0, segundosCronometro - tiempoTranscurrido2));
                     
                     numeroElem.textContent = segundosRestantes2;
                     barraElem.style.width = (segundosRestantes2 / segundosCronometro * 100) + '%';
@@ -1810,7 +1815,8 @@
         lineasEnProceso.add(clave);
         try {
             if (config.admin) guardarHistorial();
-           await anotarLineaTransaccion(c, l, nombre);
+            const ok = await anotarLineaTransaccion(c, l, nombre);
+            if (!ok && avisar) alert("⚠️ Esta línea ya fue ocupada por otra persona.");
         } catch (error) {
             console.error("Error al guardar:", error);
             alert("❌ No se pudo anotar. Revisa tu conexión e intenta de nuevo.");
