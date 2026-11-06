@@ -790,19 +790,102 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, onSnapshot, updateDoc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getDatabase, ref as dbRef, onValue, get as dbGet, update as dbUpdate, runTransaction as dbTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB12qk_Iw_xAFWnSw8RU_211o9HnyTczAQ",
         authDomain: "bingo-locutando-ando.firebaseapp.com",
+        databaseURL: "https://bingo-locutando-ando-default-rtdb.firebaseio.com",
         projectId: "bingo-locutando-ando",
         storageBucket: "bingo-locutando-ando.firebasestorage.app",
         messagingSenderId: "547896039173",
         appId: "1:547896039173:web:e7f5389dde11af9078096c"
     };
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "bingo", "tablero");
+    const db = getDatabase(app);
+    const tableroRef = dbRef(db, "bingo/tablero");
+    const docRef = tableroRef; // se mantiene el nombre para el resto del código
+
+    // Sin autenticación (igual que Anotarse): no hay que esperar ninguna sesión
+    const authListo = Promise.resolve(null);
+
+    // ------------------------------------------------------------
+    // Compatibilidad con Realtime Database
+    // ------------------------------------------------------------
+    // Las claves de Realtime Database no pueden tener . $ # [ ] /  (por ejemplo un nombre como "J.P.")
+    function encKey(k) {
+        k = String(k);
+        if (k === "") return "_";
+        return k.replace(/%/g, "%25").replace(/\./g, "%2E").replace(/\$/g, "%24")
+                .replace(/#/g, "%23").replace(/\[/g, "%5B").replace(/\]/g, "%5D").replace(/\//g, "%2F");
+    }
+    function decKey(k) {
+        return String(k).replace(/%(2E|24|23|5B|5D|2F|25)/g, (m, h) => String.fromCharCode(parseInt(h, 16)));
+    }
+    function mapKeys(obj, fn) {
+        const out = {};
+        Object.keys(obj || {}).forEach(k => { out[fn(k)] = obj[k]; });
+        return out;
+    }
+    function codificarParaRTDB(obj) {
+        const o = JSON.parse(JSON.stringify(obj || {})); // quita undefined
+        if (o.rondasPorJugador && typeof o.rondasPorJugador === 'object') {
+            o.rondasPorJugador = mapKeys(o.rondasPorJugador, encKey);
+        }
+        if (o.puntosPorTramo && typeof o.puntosPorTramo === 'object') {
+            const p = {};
+            Object.keys(o.puntosPorTramo).forEach(t => { p[t] = mapKeys(o.puntosPorTramo[t], encKey); });
+            o.puntosPorTramo = p;
+        }
+        return o;
+    }
+    function decodificarDeRTDB(d) {
+        d = d || {};
+        d.rondasPorJugador = mapKeys(d.rondasPorJugador, decKey);
+        const p = {};
+        Object.keys(d.puntosPorTramo || {}).forEach(t => { p[t] = mapKeys(d.puntosPorTramo[t], decKey); });
+        d.puntosPorTramo = p;
+        return d;
+    }
+    // Realtime Database devuelve a veces objetos en lugar de arreglos
+    function aArray(x) {
+        if (Array.isArray(x)) return x.filter(v => v !== undefined && v !== null);
+        if (x && typeof x === 'object') {
+            return Object.keys(x).sort((a, b) => Number(a) - Number(b)).map(k => x[k]).filter(v => v !== undefined && v !== null);
+        }
+        return [];
+    }
+    function listaPorIndice(x) {
+        if (!x || typeof x !== 'object') return [];
+        if (Array.isArray(x)) return x;
+        const keys = Object.keys(x).map(Number).filter(n => !isNaN(n));
+        const max = keys.length ? Math.max(...keys) : -1;
+        const out = [];
+        for (let i = 0; i <= max; i++) out.push(x[i]);
+        return out;
+    }
+    function normalizarCartones(raw, cantidad) {
+        const total = cantidad || 15;
+        const base = (raw && raw[0] && raw[0].lineas) ? listaPorIndice(raw[0].lineas).length : 2;
+        const lineasCount = Math.max(1, base);
+        const resultado = [];
+        for (let i = 0; i < total; i++) {
+            const c = raw ? raw[i] : null;
+            const lineas = c && c.lineas ? listaPorIndice(c.lineas).map(l => ({
+                nombre: (l && l.nombre) ? String(l.nombre).toUpperCase().trim() : "",
+                estado: (l && l.estado) ? String(l.estado) : "libre"
+            })) : [];
+            while (lineas.length < lineasCount) lineas.push({ nombre: "", estado: "libre" });
+            resultado.push({ lineas });
+        }
+        return resultado;
+    }
+
+    // Todas las escrituras del admin pasan por aquí
+    async function updateDoc(_ref, obj) {
+        await authListo;
+        return dbUpdate(tableroRef, codificarParaRTDB(obj));
+    }
 
     let datos = []; let historial = []; let seleccionados = [];
     let config = { admin: false, bloqueado: false };
@@ -1686,23 +1769,21 @@
         ));
     }
 
+    // Transacción sobre la línea exacta: solo gana el primero que llegue.
     async function anotarLineaTransaccion(c, l, nombre) {
-        return await runTransaction(db, async (tx) => {
-            const snap = await tx.get(docRef);
-            if (!snap.exists()) return false;
-            const cartones = (snap.data().cartones || []).map(x => ({ lineas: (x.lineas || []).map(y => ({ nombre: y.nombre || "", estado: y.estado || "libre" })) }));
-            if (!cartones[c] || !cartones[c].lineas[l]) return false;
-            const cur = cartones[c].lineas[l];
-            if (cur.estado !== "libre" || (cur.nombre && String(cur.nombre).trim() !== "")) return false; // ya ocupada
-            cartones[c].lineas[l] = { nombre: nombre, estado: "reservado" };
-            tx.update(docRef, { cartones: cartones });
-            return true;
-        });
+        await authListo;
+        const lineRef = dbRef(db, 'bingo/tablero/cartones/' + c + '/lineas/' + l);
+        const res = await dbTransaction(lineRef, (cur) => {
+            if (cur && cur.nombre && String(cur.nombre).trim() !== "") return;       // ya ocupada -> cancelar
+            if (cur && cur.estado && cur.estado !== "libre") return;                  // reservada/pagada -> cancelar
+            return { nombre: nombre, estado: "reservado" };
+        }, { applyLocally: false });
+        return res.committed;
     }
 
-    // Guarda solo las diferencias entre `datos` (actual) y `nuevos`, sobre lo más reciente de Firebase.
+    // Guarda SOLO las líneas que cambiaron (una escritura atómica con rutas múltiples).
     async function guardarCartonesDiff(nuevos, extra) {
-        const cambios = [];
+        const updates = Object.assign({}, codificarParaRTDB(extra || {}));
         const maxC = Math.max(datos.length, nuevos.length);
         for (let c = 0; c < maxC; c++) {
             const vl = (datos[c] && datos[c].lineas) || [];
@@ -1710,32 +1791,17 @@
             const maxL = Math.max(vl.length, nl.length);
             for (let l = 0; l < maxL; l++) {
                 const v = vl[l], n = nl[l];
-                if (!n) { cambios.push({ c, l, borrar: true }); continue; }
+                if (!n) { updates['cartones/' + c + '/lineas/' + l] = null; continue; }
                 if (!v || v.nombre !== n.nombre || v.estado !== n.estado) {
-                    cambios.push({ c, l, linea: { nombre: n.nombre || "", estado: n.estado || "libre" } });
+                    updates['cartones/' + c + '/lineas/' + l] = { nombre: n.nombre || "", estado: n.estado || "libre" };
                 }
             }
         }
-        const nuevaLongitud = nuevos.map(x => (x.lineas || []).length);
         datos = nuevos;
-        await runTransaction(db, async (tx) => {
-            const snap = await tx.get(docRef);
-            const cartones = snap.exists() ? (snap.data().cartones || []) : [];
-            cambios.forEach(ch => {
-                if (!cartones[ch.c]) return;
-                if (!cartones[ch.c].lineas) cartones[ch.c].lineas = [];
-                if (ch.borrar) return; // el recorte de filas se hace abajo
-                cartones[ch.c].lineas[ch.l] = ch.linea;
-            });
-            cartones.forEach((carton, ci) => {
-                if (carton && carton.lineas && nuevaLongitud[ci] !== undefined && carton.lineas.length > nuevaLongitud[ci]) {
-                    carton.lineas.length = nuevaLongitud[ci];
-                }
-            });
-            const upd = Object.assign({}, extra || {});
-            if (cambios.length > 0) upd.cartones = cartones;
-            if (Object.keys(upd).length > 0) tx.update(docRef, upd);
-        });
+        if (Object.keys(updates).length > 0) {
+            await authListo;
+            await dbUpdate(tableroRef, updates);
+        }
     }
 
     async function intentarAnotar(c, l, nombre, avisar) {
@@ -1818,17 +1884,27 @@
         document.getElementById('volverArea').style.display = 'none';
     };
     
+    // La clave NO está en este archivo: se lee de Firebase (bingo/pass), igual que en Anotarse.
     window.toggleAdmin = async () => {
         if(!config.admin) {
             const pass = prompt("Clave admin:");
-            const snap = await getDoc(docRef);
-            if(pass === snap.data().pass) {
-                config.admin = true;
-                document.getElementById("adminPanel").style.display = "flex";
-                document.getElementById("adminExtraPanel").style.display = "block";
-                actualizarCampoNombre();
-                actualizarStats();
-            } else alert("Clave incorrecta");
+            if (pass === null) return;
+            try {
+                const snap = await dbGet(dbRef(db, 'bingo/pass'));
+                const passFirebase = snap.exists() ? String(snap.val()) : null;
+                if (passFirebase !== null && pass.trim() === passFirebase) {
+                    config.admin = true;
+                    document.getElementById("adminPanel").style.display = "flex";
+                    document.getElementById("adminExtraPanel").style.display = "block";
+                    actualizarCampoNombre();
+                    actualizarStats();
+                } else {
+                    alert("Clave incorrecta");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error de conexión. Intenta de nuevo.");
+            }
         } else {
             config.admin = false;
             document.getElementById("adminPanel").style.display = "none";
@@ -2689,37 +2765,42 @@
     // =========================================
     // ONSNAPSHOT
     // =========================================
-    onSnapshot(docRef, (snap) => {
-        if (snap.exists()) {
-            const d = snap.data();
-            datos = (d.cartones || []).slice(0, 15);
-            config.bloqueado = d.bloqueado || false;
-            const btnB = document.getElementById("btnBloqueo");
-            btnB.innerText = config.bloqueado ? "🔒 CERRADO" : "🔓 ABIERTO";
-            btnB.style.background = config.bloqueado ? "#dc3545" : "#00ff88";
-            if (d.notas_caja !== undefined) document.getElementById('notas-caja').value = d.notas_caja.toUpperCase();
-            numeroRonda = d.numero_ronda || 1;
-            acumulado = d.acumulado || 0;
-            acumuladoReserva = d.acumuladoReserva || 0;
-            rondasPorJugador = d.rondasPorJugador || {};
-            puntosPorTramo = d.puntosPorTramo || {};
-            historialGanadores = d.historialGanadores || [];
-            numerosSalidos = d.numerosSalidos || { bingos: [], ruletas: [] };
-            
-            // ===== CARGAR SEGUNDOS GUARDADOS =====
-            if (d.segundosCronometro !== undefined) {
-                segundosCronometro = d.segundosCronometro;
-                document.getElementById("cronometroSegundos").value = segundosCronometro;
-            }
-            
-            // ===== RESTAURAR CRONÓMETRO =====
-            restaurarCronometro(d);
-            
-            actualizarCampoNombre();
-            actualizarUIAcumulado();
-            dibujar();
-            actualizarStats();
+    onValue(tableroRef, (snap) => {
+        const d = decodificarDeRTDB(snap.val() || {});
+        datos = normalizarCartones(d.cartones, 15);
+        config.bloqueado = d.bloqueado === true;
+        const btnB = document.getElementById("btnBloqueo");
+        btnB.innerText = config.bloqueado ? "🔒 CERRADO" : "🔓 ABIERTO";
+        btnB.style.background = config.bloqueado ? "#dc3545" : "#00ff88";
+        const cajaEl = document.getElementById('notas-caja');
+        if (d.notas_caja !== undefined && cajaEl && document.activeElement !== cajaEl) {
+            cajaEl.value = String(d.notas_caja).toUpperCase();
         }
+        numeroRonda = d.numero_ronda || 1;
+        acumulado = d.acumulado || 0;
+        acumuladoReserva = d.acumuladoReserva || 0;
+        rondasPorJugador = d.rondasPorJugador || {};
+        puntosPorTramo = d.puntosPorTramo || {};
+        historialGanadores = aArray(d.historialGanadores);
+        const ns = d.numerosSalidos || {};
+        numerosSalidos = { bingos: aArray(ns.bingos), ruletas: aArray(ns.ruletas) };
+
+        // ===== CARGAR SEGUNDOS GUARDADOS =====
+        if (d.segundosCronometro !== undefined) {
+            segundosCronometro = d.segundosCronometro;
+            const inpSeg = document.getElementById("cronometroSegundos");
+            if (inpSeg && document.activeElement !== inpSeg) inpSeg.value = segundosCronometro;
+        }
+
+        // ===== RESTAURAR CRONÓMETRO =====
+        restaurarCronometro(d);
+
+        actualizarCampoNombre();
+        actualizarUIAcumulado();
+        dibujar();
+        actualizarStats();
+    }, (error) => {
+        console.error("Error al escuchar Firebase:", error);
     });
 </script>
 </body>
