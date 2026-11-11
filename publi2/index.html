@@ -74,14 +74,14 @@
         .btn {
             display: flex; align-items: center; justify-content: center; gap: 10px;
             width: 100%; background: var(--wa-btn); color: #fff; text-decoration: none;
-            font-weight: 700; font-size: 1.1rem; padding: 15px 20px; border-radius: 999px;
+            font-weight: 800; font-size: clamp(1.25rem, 5.2vw, 1.45rem); padding: 21px 24px; border-radius: 999px;
             box-shadow: 0 2px 6px rgba(31,168,85,.45);
             transition: background .15s ease, transform .1s ease;
         }
         .btn:hover { background: #178f48; }
         .btn:active { transform: scale(.98); }
         .btn:focus-visible { outline: 3px solid #0b141a; outline-offset: 3px; }
-        .btn svg { width: 24px; height: 24px; fill: #fff; }
+        .btn svg { width: 32px; height: 32px; fill: #fff; }
         .hint { color: var(--wa-muted); font-size: .82rem; margin-top: 12px; }
 
         /* Chat de ejemplo */
@@ -155,18 +155,20 @@
             <h1>BINGO GER</h1>
             <div class="meta">Invitación a grupo de WhatsApp</div>
 
-            <a class="btn" href="https://chat.whatsapp.com/H641sN88krPL8TF787ekZe?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
+            <a class="btn js-wa" href="https://wa.me/573182071208?text=Quiero%20Jugar%20Bingo%2075" rel="noopener">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.8 14.15c-.25.69-1.45 1.32-2 1.37-.51.05-1.15.07-1.86-.12-.43-.13-.98-.32-1.69-.62-2.97-1.28-4.9-4.27-5.05-4.47-.15-.2-1.21-1.61-1.21-3.07 0-1.46.77-2.18 1.04-2.48.27-.3.59-.37.79-.37h.57c.18 0 .43-.07.67.51.25.6.84 2.06.92 2.21.07.15.12.32.02.52-.1.2-.15.32-.3.49-.15.18-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.64-.07.18-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.41z"/></svg>
                 Unirme al grupo
             </a>
-            <div class="hint">Se abrirá WhatsApp para que te unas</div>
+            <div class="hint">Se abre un chat de WhatsApp con el mensaje listo</div>
         </section>
 
-        <section class="chat" aria-label="Ejemplo de conversación del grupo">
-            <div class="day">HOY</div>
-            <div class="msg in"><span class="who">Bingo Ger</span>🎱 Bingo 75 automático: ¡la partida está por empezar!<span class="time">7:58 p. m.</span></div>
-            <div class="msg out">¡Ya tengo mi cartón! 🙌<span class="time">7:59 p. m.</span></div>
-            <div class="msg in"><span class="who">Bingo Ger</span>🏆 ¡Cartón lleno! Felicitaciones al ganador.<span class="time">8:12 p. m.</span></div>
+        <section class="chat" aria-label="Así funciona: ejemplo de conversación">
+            <div class="day">ASÍ ES JUGAR</div>
+            <div class="msg out">Quiero Jugar Bingo 75<span class="time">7:41 p. m.</span></div>
+            <div class="msg in"><span class="who">Bingo Ger</span>¡Bienvenido! 🎟️ Ya tienes tu cartón asignado. Esta ronda se juega por <strong>Figura</strong>.<span class="time">7:41 p. m.</span></div>
+            <div class="msg in"><span class="who">Bingo Ger</span>🎱 Sale la <strong>N-42</strong>... luego la <strong>G-56</strong>... y la <strong>B-7</strong>. Los números se cantan solos, tú solo marcas.<span class="time">7:50 p. m.</span></div>
+            <div class="msg out">¡Me falta una para la figura! 😬<span class="time">7:52 p. m.</span></div>
+            <div class="msg in"><span class="who">Bingo Ger</span>🏆 <strong>¡BINGO!</strong> Figura completa y confirmada. El <strong>Acumulado</strong> sigue creciendo para la próxima.<span class="time">7:53 p. m.</span></div>
         </section>
 
         <section class="bingo">
@@ -182,7 +184,7 @@
 
         <section class="cta2">
             <p>¡Únete y juega hoy!</p>
-            <a class="btn" href="https://chat.whatsapp.com/H641sN88krPL8TF787ekZe?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
+            <a class="btn js-wa" href="https://wa.me/573182071208?text=Quiero%20Jugar%20Bingo%2075" rel="noopener">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm5.8 14.15c-.25.69-1.45 1.32-2 1.37-.51.05-1.15.07-1.86-.12-.43-.13-.98-.32-1.69-.62-2.97-1.28-4.9-4.27-5.05-4.47-.15-.2-1.21-1.61-1.21-3.07 0-1.46.77-2.18 1.04-2.48.27-.3.59-.37.79-.37h.57c.18 0 .43-.07.67.51.25.6.84 2.06.92 2.21.07.15.12.32.02.52-.1.2-.15.32-.3.49-.15.18-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.64-.07.18-.2.74-.86.94-1.16.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.41z"/></svg>
                 Unirme al grupo
             </a>
@@ -194,5 +196,21 @@
         </footer>
     </main>
 
+<script>
+        (function () {
+            var WA_URL = 'https://wa.me/573182071208?text=' + encodeURIComponent('Quiero Jugar Bingo 75');
+            var enviando = false;
+            document.querySelectorAll('.js-wa').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (enviando) return;          // evita dobles clics
+                    enviando = true;
+                    try { fbq('track', 'Contact'); } catch (err) {}
+                    setTimeout(function () { window.location.href = WA_URL; }, 200);
+                    setTimeout(function () { enviando = false; }, 3000);
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
