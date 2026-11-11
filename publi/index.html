@@ -18,7 +18,7 @@
     /></noscript>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bingo Locutando - Grupo Exclusivo</title>
+    <title>Bingo Ger 75 - Grupo Exclusivo</title>
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
@@ -139,6 +139,35 @@
         .rule-number { color: #d4af37; font-weight: 900; margin-right: 12px; font-size: 1.2rem; }
 
         .legal-footer { margin-top: 40px; padding: 30px 20px; width: 100%; max-width: 700px; font-size: 0.7rem; color: rgba(241, 229, 172, 0.4); line-height: 1.5; border-top: 1px solid rgba(212, 175, 55, 0.1); }
+
+        /* Bingo 75 */
+        .bingo { --wa-dark: #075e54; --wa-green: #25d366; --wa-text: #111b21; --wa-muted: #667781;
+            width: 90%; max-width: 980px; box-sizing: border-box; margin: 10px 0 20px; background: var(--wa-dark); border-radius: 18px; padding: 24px 16px 20px; color: #fff; box-shadow: 0 1px 3px rgba(11,20,26,.25); }
+        .balls { display: flex; justify-content: center; gap: clamp(6px, 2vw, 12px); margin-bottom: 14px; }
+        .ball { width: clamp(38px, 11vw, 56px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: clamp(1.1rem, 4vw, 1.6rem); color: #fff; box-shadow: inset -4px -5px 8px rgba(0,0,0,.25), inset 3px 3px 6px rgba(255,255,255,.35); }
+        .ball.b { background: #2f7ee8; } .ball.i { background: #e5483c; } .ball.n { background: #f4f4f4; color: #333; } .ball.g { background: #2fb85a; } .ball.o { background: #f2b01e; color: #3a2a00; }
+        .bingo h2 { margin: 0; text-align: center; font-size: clamp(1.35rem, 5vw, 1.9rem); font-weight: 800; color: #fff; }
+        .chips { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+        .chip { background: rgba(255,255,255,.14); border-radius: 999px; padding: 6px 14px; font-size: .88rem; font-weight: 600; }
+        .chip.hot { background: var(--wa-green); color: #053b1b; }
+        .modes { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .mode { background: #fff; color: var(--wa-text); border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 14px; text-align: left; }
+        .mode h3 { margin: 0 0 4px; font-size: 1.15rem; color: var(--wa-dark); }
+        .mode p { margin: 0; font-size: .9rem; line-height: 1.4; color: var(--wa-muted); }
+        .mini { flex: 0 0 auto; width: clamp(92px, 26vw, 118px); display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
+        .mini b { font-size: .62rem; text-align: center; color: var(--wa-dark); font-weight: 800; }
+        .mini .c { aspect-ratio: 1; border-radius: 4px; background: #e4e9ea; display: block; }
+        .mini .c.on { background: var(--wa-green); }
+        .mini .c.free { background: #f2b01e; }
+        .pot { flex: 0 0 auto; width: clamp(92px, 26vw, 118px); aspect-ratio: 1; display: grid; place-items: center; }
+        .pot span { width: 78%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #ffe27a, #e0a722 70%); border: 3px solid #b8830f; display: grid; place-items: center; font-size: 2.2rem; font-weight: 900; color: #7a5300; box-shadow: 0 3px 8px rgba(0,0,0,.25); }
+        @media (min-width: 760px) {
+            .bingo { padding: 34px 28px 28px; }
+            .modes { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+            .mode { flex-direction: column; text-align: center; padding: 20px 16px; }
+            .mini, .pot { width: 130px; }
+        }
+        @media (max-width: 360px) { .mode { flex-direction: column; text-align: center; } }
     </style>
 </head>
 <body>
@@ -154,10 +183,10 @@
     <div class="main-wrapper">
         <div class="brand-section">
             <h1 class="bingo-title">BINGO</h1>
-            <div class="locutando-subtitle">LOCUTANDO</div>
+            <div class="locutando-subtitle">GER 75</div>
         </div>
 
-        <a href="https://chat.whatsapp.com/H641sN88krPL8TF787ekZe?s=cl&p=a&iam=2" class="btn-custom" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
+        <a href="https://chat.whatsapp.com/JeK1hQ6ExYNFeMMtmKV7z1" class="btn-custom" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
             UNIRME AL GRUPO
         </a>
 
@@ -167,25 +196,36 @@
             <div class="feature-item">DINÁMICAS DIARIAS</div>
         </div>
 
+        <section class="bingo">
+            <div class="balls" aria-hidden="true"><span class="ball b">B</span><span class="ball i">I</span><span class="ball n">N</span><span class="ball g">G</span><span class="ball o">O</span></div>
+            <h2>Bingo 75 tradicional</h2>
+            <div class="chips"><span class="chip hot">Sorteo automático</span><span class="chip">75 bolas</span><span class="chip">3 formas de ganar</span></div>
+            <div class="modes">
+                <article class="mode"><div class="mini" aria-hidden="true"><b>B</b><b>I</b><b>N</b><b>G</b><b>O</b><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on free"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i><i class="c on"></i></div><div><h3>Cartón lleno</h3><p>Marca todos los números de tu cartón.</p></div></article>
+                <article class="mode"><div class="mini" aria-hidden="true"><b>B</b><b>I</b><b>N</b><b>G</b><b>O</b><i class="c on"></i><i class="c"></i><i class="c"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c"></i><i class="c"></i><i class="c on free"></i><i class="c"></i><i class="c"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c on"></i><i class="c"></i><i class="c"></i><i class="c"></i><i class="c on"></i></div><div><h3>Figura</h3><p>Completa la figura que se anuncie en el cartón.</p></div></article>
+                <article class="mode"><div class="pot" aria-hidden="true"><span>$</span></div><div><h3>Acumulado</h3><p>El premio sigue creciendo hasta que alguien lo gane.</p></div></article>
+            </div>
+        </section>
+
         <div class="rules-container">
-            <div class="rules-title">REGLAS BINGO LINEAL</div>
-            <div class="rule-step"><span class="rule-number">1.</span><div>Reserva una de las 15 posiciones por juego.</div></div>
-            <div class="rule-step"><span class="rule-number">2.</span><div>Completa una línea horizontal de 5 números.</div></div>
-            <div class="rule-step"><span class="rule-number">3.</span><div>El sorteo se transmite en vivo en tiempo real.</div></div>
-            <div class="rule-step"><span class="rule-number">4.</span><div>El primero en reportar la línea gana.</div></div>
+            <div class="rules-title">REGLAS BINGO 75</div>
+            <div class="rule-step"><span class="rule-number">1.</span><div>Cada juego tiene solo 15 cartones disponibles.</div></div>
+            <div class="rule-step"><span class="rule-number">2.</span><div>Con solo 15 cartones, se gana Figura y Cartón Lleno.</div></div>
+            <div class="rule-step"><span class="rule-number">3.</span><div>Incluso puede ganarse el Acumulado.</div></div>
+            <div class="rule-step"><span class="rule-number">4.</span><div>El sorteo es automático y se transmite en vivo.</div></div>
         </div>
 
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
             <div style="font-size: 0.9rem; color: #f1e5ac; text-transform: uppercase; margin-bottom: 0px;">¡Cupos limitados!</div>
             
-            <a href="https://chat.whatsapp.com/H641sN88krPL8TF787ekZe?s=cl&p=a&iam=2" class="btn-custom" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
+            <a href="https://chat.whatsapp.com/JeK1hQ6ExYNFeMMtmKV7z1" class="btn-custom" target="_blank" rel="noopener noreferrer" onclick="fbq('track', 'Contact');">
                 UNIRME AL GRUPO
             </a>
         </div>
 
         <footer class="legal-footer">
             <p><strong>AVISO LEGAL:</strong> Participación para mayores de 18 años. Soporte: gersondavidgarcia@gmail.com.</p>
-            <div style="opacity: 0.6;">© 2026 Bingo Locutando Ando | Santander.</div>
+            <div style="opacity: 0.6;">© 2026 Bingo Ger 75 | Santander.</div>
         </footer>
     </div>
 
