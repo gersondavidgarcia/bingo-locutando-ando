@@ -541,7 +541,8 @@
     <button class="btn" style="background:#007bff; color:white" onclick="mostrarModalModificar()">✏️ MODIFICAR NOMBRE(S)</button>
     <button class="btn" style="background:#28a745; color:white" onclick="marcarAccion('pagado')">💰 PAGAR</button>
     <button class="btn" style="background:#d9d7d7; color:black" onclick="marcarAccion('libre')">❌ LIBERAR</button>
-    <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 CAPTURA</button>
+    <button class="btn" style="background:var(--oro); color:#000" onclick="activarCaptura()">📸 C</button>
+    <button class="btn" style="background:#25d366; color:#000" onclick="copiarMensajeBienvenida()">💬 MENSAJE</button>
 </div>
 
 <div class="contenedor-tablero" id="contenedorTablero">
@@ -2354,6 +2355,41 @@
         }
     };
     
+    window.copiarMensajeBienvenida = () => {
+        const txt = `¡Hola! 👋 Gracias por escribirnos, qué bueno que te interesó el *BINGO GER 75* 🎱
+
+Te cuento rápido cómo funciona, porque *es DIFERENTE a un bingo normal* 👇
+
+Es bingo tradicional de *75 BOLAS*, pero con una aplicación que *MARCA los números AUTOMÁTICAMENTE*. 
+
+* Se juega por *VIDEOLLAMADA* y tú ves en vivo cómo se van marcando tus cartones 📲
+
+🏆 *3 PREMIOS por partida:*
+* *CARTÓN LLENO*
+* *FIGURA*
+* *ACUMULADO* (sigue creciendo hasta que alguien lo gane 💰)
+
+⚠️ Solo hay *15 CARTONES por partida*, así que los cupos vuelan.
+
+¿Te gustaría entrar al *GRUPO*? 🙌`;
+        const ok = () => alert("✅ Mensaje de bienvenida copiado");
+        const fallback = () => {
+            const ta = document.createElement('textarea');
+            ta.value = txt;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); ok(); } catch (e) { alert("❌ No se pudo copiar"); }
+            document.body.removeChild(ta);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(txt).then(ok).catch(fallback);
+        } else {
+            fallback();
+        }
+    };
+
     window.copiarLinkPromocion = () => {
         let txt = "";
         txt += "PIDAN SUS NÚMEROS AQUÍ\n⬇️⬇️⬇️⬇️⬇️\n\n";
